@@ -1,0 +1,152 @@
+﻿<Page x:Class="BQC_Q48.Views.TechManagePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:BQC_Q48.Views"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      d:DesignHeight="450"
+      d:DesignWidth="800"
+      DataContext="{Binding Source={StaticResource Locator}, Path=TechManagePageViewModel}"
+      Unloaded="Page_Unloaded"
+      mc:Ignorable="d">
+
+    <Border>
+        <Grid Margin="20,20">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1.8*" />
+                <RowDefinition Height="Auto" />
+
+            </Grid.RowDefinitions>
+
+            <Border Padding="10,20" BorderBrush="Gray" BorderThickness="0">
+                <StackPanel Orientation="Horizontal">
+
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeLarge}" Text="名称：" />
+                    <TextBox Style="{StaticResource hintTextBox}" Tag="输入工艺名称" Text="{Binding SearchName}" />
+
+                    <DatePicker Style="{StaticResource datePicker}" Text="{Binding SearchStartTime, Mode=TwoWay, StringFormat=yyyy-MM-dd}" />
+                    <DatePicker Style="{StaticResource datePicker}" Text="{Binding SearchEndTime, Mode=TwoWay, StringFormat=yyyy-MM-dd}" />
+                    <Button Command="{Binding SearchCommand}" Style="{StaticResource searchBtnStyle}" Tag="搜索" />
+                    <Button Command="{Binding AddTechCommand}" Content="&#xf067;" Style="{StaticResource searchBtnStyle}" Tag="新建" />
+                </StackPanel>
+            </Border>
+
+            <DataGrid x:Name="datagrid"
+                      Grid.Row="1"
+                      Margin="0,10,30,0"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="False"
+                      FontSize="20"
+                      HorizontalScrollBarVisibility="Auto"
+                      IsReadOnly="True"
+                      ItemsSource="{Binding TechList}"
+                      TextBlock.FontSize="16">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="序号" />
+                    <DataGridTextColumn Width="1*" Binding="{Binding TechName}" Header="工艺名称" />
+                    <DataGridTextColumn Width="1*" Binding="{Binding Createtime, StringFormat={}{0:yyyy-MM-dd}}" Header="创建时间" />
+
+                    <DataGridTemplateColumn Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button Margin="8,0"
+                                            Padding="5,2"
+                                            Command="{Binding DataContext.DetailCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Content="详细" />
+                                    <Button Grid.Column="1"
+                                            Margin="8,0"
+                                            Padding="5,2"
+                                            Command="{Binding DataContext.DeleteTechCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Content="删除" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="2" Margin="0,0,30,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Command="{Binding ForwardPageCommand}" Style="{StaticResource pageBtnStyle}" />
+                        <TextBlock Width="50"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeRegular}"
+                                   Foreground="{StaticResource WordBlueBrush}"
+                                   Text="{Binding PageIndex}"
+                                   TextAlignment="Center" />
+                        <Button Command="{Binding NextPageCommand}" Content="&#xf054;" Style="{StaticResource pageBtnStyle}" />
+
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Margin="0,10,30,0" Visibility="{Binding DetailVisibility}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
+                        <Grid>
+                            <TextBlock Margin="5,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="{StaticResource FontLable}"
+                                       Text="详细工艺参数" />
+                            <Button HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DetailCloseCommand}"
+                                    CommandParameter="{Binding ElementName=window1}"
+                                    Content="✕"
+                                    Style="{StaticResource MainButtonStyle}"
+                                    Tag="Red" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+                    <ScrollViewer Grid.Row="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!--<local:SelectTechUC DataContext="{Binding SelectedTechInfo.Tech}" IsEnabled="False" />-->
+
+                            <!--<local:TechParamUC Grid.Row="1"
+                                               Margin="10,0"
+                                               HorizontalAlignment="Left"
+                                               DataContext="{Binding SelectedTechInfo}"
+                                               IsEnabled="False" />-->
+                        </Grid>
+
+                    </ScrollViewer>
+
+
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</Page>

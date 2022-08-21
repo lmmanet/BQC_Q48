@@ -1,0 +1,292 @@
+﻿<Page x:Class="BQC_Q48.Views.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:cv="clr-namespace:BQJX.Converts"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:BQC_Q48.Views"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      d:DesignHeight="1000"
+      d:DesignWidth="800"
+      DataContext="{Binding Source={StaticResource Locator}, Path=MainPageViewModel}"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <ControlTemplate x:Key="MenuItemControlTemplate1" TargetType="{x:Type MenuItem}">
+            <Border x:Name="templateRoot"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    SnapsToDevicePixels="True">
+                <Grid Margin="-1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="22" SharedSizeGroup="MenuItemIconColumnGroup" />
+                        <ColumnDefinition Width="13" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="30" />
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemIGTColumnGroup" />
+                        <ColumnDefinition Width="20" />
+                    </Grid.ColumnDefinitions>
+                    <ContentPresenter x:Name="Icon"
+                                      Width="16"
+                                      Height="16"
+                                      Margin="3"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Content="{TemplateBinding Icon}"
+                                      ContentSource="Icon"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    <Border x:Name="GlyphPanel"
+                            Width="22"
+                            Height="22"
+                            Margin="-1,0,0,0"
+                            VerticalAlignment="Center"
+                            Background="#3D26A0DA"
+                            BorderBrush="#FF26A0DA"
+                            BorderThickness="1"
+                            Visibility="Hidden">
+                        <Path x:Name="Glyph"
+                              Width="9"
+                              Height="11"
+                              Data="F1M10,1.2L4.7,9.1 4.5,9.1 0,5.2 1.3,3.5 4.3,6.1 8.3,0 10,1.2z"
+                              Fill="#FF212121"
+                              FlowDirection="LeftToRight" />
+                    </Border>
+                    <ContentPresenter Grid.Column="2"
+                                      Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      Content="{TemplateBinding Header}"
+                                      ContentSource="Header"
+                                      ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                      ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                      RecognizesAccessKey="True"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    <TextBlock Grid.Column="4"
+                               Margin="{TemplateBinding Padding}"
+                               VerticalAlignment="Center"
+                               Opacity="0.7"
+                               Text="{TemplateBinding InputGestureText}" />
+                    <Path x:Name="RightArrow"
+                          Grid.Column="5"
+                          Margin="10,0,0,0"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          Data="M0,0L4,3.5 0,7z"
+                          Fill="#FF212121" />
+                    <Popup x:Name="PART_Popup"
+                           AllowsTransparency="True"
+                           Focusable="False"
+                           HorizontalOffset="-2"
+                           IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                           Placement="Left"
+                           PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}"
+                           VerticalOffset="-3">
+                        <Border x:Name="SubMenuBorder"
+                                Padding="2"
+                                Background="#FFF0F0F0"
+                                BorderBrush="#FF999999"
+                                BorderThickness="1">
+                            <ScrollViewer x:Name="SubMenuScrollViewer" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                                <Grid RenderOptions.ClearTypeHint="Enabled">
+                                    <Canvas Width="0" Height="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                        <Rectangle x:Name="OpaqueRect" Width="{Binding ActualWidth, ElementName=SubMenuBorder}" Height="{Binding ActualHeight, ElementName=SubMenuBorder}" Fill="{Binding Background, ElementName=SubMenuBorder}" />
+                                    </Canvas>
+                                    <Rectangle Width="1" Margin="29,2,0,2" HorizontalAlignment="Left" Fill="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" />
+                                    <ItemsPresenter x:Name="ItemsPresenter"
+                                                    Grid.IsSharedSizeScope="True"
+                                                    KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                    KeyboardNavigation.TabNavigation="Cycle"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Grid>
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSuspendingPopupAnimation" Value="True">
+                    <Setter TargetName="PART_Popup" Property="PopupAnimation" Value="None" />
+                </Trigger>
+                <Trigger Property="Icon" Value="{x:Null}">
+                    <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="GlyphPanel" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter TargetName="templateRoot" Property="Background" Value="Transparent" />
+                    <Setter TargetName="templateRoot" Property="BorderBrush" Value="#FF26A0DA" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="templateRoot" Property="TextElement.Foreground" Value="#FF707070" />
+                    <Setter TargetName="Glyph" Property="Fill" Value="#FF707070" />
+                    <Setter TargetName="RightArrow" Property="Fill" Value="#FF707070" />
+                </Trigger>
+                <Trigger SourceName="SubMenuScrollViewer" Property="CanContentScroll" Value="False">
+                    <Setter TargetName="OpaqueRect" Property="Canvas.Top" Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}" />
+                    <Setter TargetName="OpaqueRect" Property="Canvas.Left" Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="1.3*" />
+            <RowDefinition Height="0.2*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border>
+
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
+                    <Grid>
+                        <TextBlock Margin="5,0,0,0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource FontLable}"
+                                   Text="样品处理状态" />
+                        <Button Padding="20,5" HorizontalAlignment="Right" Command="{Binding LightSwichCommand}" Content="照明开关" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+
+                <DataGrid x:Name="dg"
+                          Grid.Row="1"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          CanUserSortColumns="False"
+                          ItemsSource="{Binding SampleList}"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Binding="{Binding Id, Converter={cv:SampleIdToPosString}}" Header="样品位置" />
+                        <DataGridTextColumn Width="*" Binding="{Binding SnNum}" Header="样品编号" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="样品名称" />
+                        <DataGridTextColumn Width="*" Binding="{Binding CurrentProcess}" Header="当前进度" />
+                        <DataGridTextColumn Width="*" Binding="{Binding TechName}" Header="处理工艺" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Status}" Header="当前状态" />
+                        <DataGridTemplateColumn Width="2*" Header="操作">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Margin="5,0"
+                                                Padding="10,5"
+                                                Command="{Binding DataContext.UpCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="置顶" />
+                                        <Button Margin="5,0"
+                                                Padding="10,5"
+                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="编辑"
+                                                Visibility="Collapsed" />
+                                        <Button Margin="5,0"
+                                                Padding="10,5"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="删除" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+
+
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Border>
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
+                        <Grid>
+                            <TextBlock Margin="5,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="{StaticResource FontLable}"
+                                       Text="样品位置" />
+
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+                    <ContentControl Grid.Row="1"
+                                    Width="300"
+                                    Height="600"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch">
+                        <!--<local:TubePos SampleCount="{Binding SampleCount}" />-->
+                    </ContentControl>
+
+
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="0">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
+                        <Grid>
+                            <TextBlock Margin="5,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="{StaticResource FontLable}"
+                                       Text="运行记录" />
+
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding WorkLogList}" Style="{StaticResource ItemsControlStyle}" />
+                    </ScrollViewer>
+
+
+
+
+
+
+
+                </Grid>
+            </Border>
+
+        </Grid>
+
+
+        <!--<local:MainControl Grid.Row="2" />-->
+
+
+
+
+
+    </Grid>
+
+</Page>

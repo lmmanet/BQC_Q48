@@ -1,0 +1,247 @@
+﻿<UserControl x:Class="Q_Platform.Views.UC.AxisTestUC1"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:uc="clr-namespace:Q_Platform.Views.UC.Base"
+             d:DesignHeight="750"
+             d:DesignWidth="800"
+             DataContext="{Binding Source={StaticResource Locator}, Path=AxisTestUCViewModel}"
+             Unloaded="UserControl_Unloaded"
+             mc:Ignorable="d">
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Button.Click" SourceName="btnCloseTechPos">
+            <BeginStoryboard>
+                <Storyboard >
+                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="Button.Click" SourceName="btnOpenTechPos">
+            <BeginStoryboard>
+                <Storyboard >
+                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" To="-5" Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+    
+    
+    <Grid Background="White">
+        <StackPanel>
+            <uc:AxisStatusUC CurrentPos="{Binding CurrentPos,Mode=OneWay}" CurrentVel="{Binding CurrentVel,Mode=OneWay}" IoStatus="{Binding MotionStatus,Mode=OneWay}" />
+            <!--  轴操作  -->
+            <Border Grid.Row="1"
+                    Margin="10"
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    CornerRadius="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Margin="10" FontSize="20" FontWeight="Bold" Text="轴操作" />
+
+                        <!--  选择轴  -->
+                        <WrapPanel Height="40" Margin="5">
+                            <TextBlock Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="选择轴:" />
+                            <ComboBox x:Name="combSelect"
+                                      MinWidth="400"
+                                      Margin="5"
+                                      DisplayMemberPath="AxisName"
+                                      ItemsSource="{Binding ListAxisInfo}"
+                                      SelectedIndex="0"
+                                      SelectedValuePath="AxisNo">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.ComboxSelectChangedCommand, Mode=TwoWay}" CommandParameter="{Binding ElementName=combSelect, Path=SelectedItem}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
+                        </WrapPanel>
+                        
+                        <!-- 选择点位 -->
+                        <WrapPanel Height="40" Margin="5">
+                            <TextBlock Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="选择点位:" />
+                            <ComboBox x:Name="combSelect1"
+                                      MinWidth="400"
+                                      Margin="5"
+                                      DisplayMemberPath="PosName"
+                                      ItemsSource="{Binding AxisPosInfos}"
+                                      SelectedIndex="0" 
+                                      SelectedValuePath="AxisNo">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.AxisPosInfoChangedCommand, Mode=TwoWay}" CommandParameter="{Binding ElementName=combSelect1, Path=SelectedItem}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
+                        </WrapPanel>
+
+                        <!--  位置/速度设置  -->
+                        <Border Margin="5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="5" VerticalAlignment="Center" Text="速度设置:" />
+                                <TextBox Grid.Column="1" MinWidth="80" Margin="5">
+                                    <TextBox.Text>
+                                        <Binding NotifyOnValidationError="True" Path="TargetVel">
+                                            <!--<Binding.ValidationRules>
+                                        <local:NumberRangeRule Min="1" Max="5000" xmlns:local="clr-namespace:WPF.ViewModel">
+
+                                        </local:NumberRangeRule>
+                                    </Binding.ValidationRules>-->
+                                        </Binding>
+                                    </TextBox.Text>
+                                    <TextBox.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Text="速度：0-5000r/min" />
+                                        </ToolTip>
+                                    </TextBox.ToolTip>
+                                </TextBox>
+                                <TextBlock Grid.Column="2" Margin="30,5,5,5" VerticalAlignment="Center" Text="目标位置:" />
+                                <TextBox Grid.Column="3" MinWidth="80" Margin="5" Text="{Binding TargetPos}" />
+
+                            </Grid>
+                        </Border>
+
+                        <!--  按钮  -->
+                        <Grid Margin="0,20">
+                            <Grid.Resources>
+                                <Style TargetType="Button">
+                                    <Setter Property="Margin" Value="5,8" />
+                                    <Setter Property="Padding" Value="15,8" />
+                                    <Setter Property="Height" Value="50" />
+                                    <Setter Property="Width" Value="120" />
+                                </Style>
+                            </Grid.Resources>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.RowSpan="2">
+                                <UniformGrid Rows="3">
+                                    <Button Command="{Binding AbsMoveCommand}" Content="绝对定位" />
+                                    <Button Command="{Binding RelativeMoveCommand}" Content="相对定位" />
+                                    <Button Command="{Binding VelocityMoveCommand}" Content="定速运动" IsEnabled="{Binding EnableVelMove}"/>
+                                    <Button Command="{Binding ResetAxisAmlCommand}" Content="轴报警复位" />
+                                    <Button Command="{Binding StopMoveCommand}" Content="停止" />
+                                    <Button Command="{Binding EmgStopMoveCommand}" Content="急停" />
+                                </UniformGrid>
+                            </Border>
+
+                            <Border Grid.Column="1">
+                                <UniformGrid>
+                                    <Button Content="JOG+">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                                <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.JogFCommand, Mode=TwoWay}" />
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                                <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.StopJogCommand, Mode=TwoWay}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Button>
+                                    <Button Content="JOG-">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                                <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.JogRCommand, Mode=TwoWay}" />
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                                <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.StopJogCommand, Mode=TwoWay}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Button>
+
+                                    <Button Command="{Binding EnableMotionCommand}" Content="使能" />
+                                    <Button Command="{Binding DisableMotionCommand}" Content="失能" />
+                                </UniformGrid>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="1">
+                                <UniformGrid>
+                                    <Button Command="{Binding ResetFieldBusCommand}" Content="总线复位" />
+                                    <Button Command="{Binding HomeMoveCommand}" Content="回零" IsEnabled="{Binding Homing}" Visibility="{Binding HomeMoveVisibility}"/>
+                                    <Button Command="{Binding ClearPosOffsetCommand}" Content="编码器偏移清零" Visibility="Visible"/>
+                                    <Button Command="{Binding ConfiguraLimitCommand}" Content="配置限位" Visibility="Hidden"/>
+                                </UniformGrid>
+                            </Border>
+
+                        </Grid>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
+            <Button x:Name="btnOpenTechPos" HorizontalAlignment="Right" Height="40" Background="Gray" Width="100"/>
+        </StackPanel>
+        
+        <!-- 点位数据示教 -->
+        <Border HorizontalAlignment="Right" Background="{StaticResource BackgroundLightBrush}" CornerRadius="0 5 5 0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" Direction="0" Opacity="0.3" ShadowDepth="0" Color="Gray"/>
+            </Border.Effect>
+
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="tt" X="700"/>
+            </Border.RenderTransform>
+
+            <Grid>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button x:Name="btnCloseTechPos" Style="{StaticResource CloseBtnStyle}" />
+
+                <Border Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border DataContext="{Binding TechPosInfos}">
+                            <uc:TechPosUC TechCommand="{Binding TechCommand}"/>
+                        </Border>
+
+                        <Button Grid.Row="1" Background="{StaticResource WordBlueBrush}" Command="{Binding SavePosDataCommand}" Style="{StaticResource SaveBtnStyle}"/>
+
+
+                    </Grid>
+                </Border>
+
+            </Grid>
+            
+        </Border>
+        
+        
+        
+        
+        
+    </Grid>
+
+
+
+
+
+</UserControl>

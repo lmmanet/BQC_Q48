@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="Q_Platform.Views.UC.Base.TechPosUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Q_Platform.Views.UC.Base"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Border Padding="10" BorderThickness="1" CornerRadius="10" BorderBrush="Black">
+            <ItemsControl ItemsSource="{Binding}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="5,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock FontSize="16" VerticalAlignment="Center" Text="{Binding PosName}"/>
+                            <TextBox FontSize="16" Grid.Column="1" VerticalAlignment="Center" Margin="5 0" Text="{Binding PosData[0]}"/>
+                            <TextBox FontSize="16" Grid.Column="2" VerticalAlignment="Center" Margin="5 0" Text="{Binding PosData[1]}"/>
+                            <TextBox FontSize="16" Grid.Column="3" VerticalAlignment="Center" Margin="5 0" Text="{Binding PosData[2]}"/>
+                            <Button FontSize="16" Grid.Column="4" VerticalAlignment="Center" Margin="5 0" Content="示教" Command="{Binding Path = DataContext.TechCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"/>
+
+
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </Grid>
+</UserControl>

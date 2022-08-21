@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AC2455B6-7457-447F-A4F1-C5F9BAE58A11}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BQJX.Common</RootNamespace>
+    <AssemblyName>BQJX.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\AddSolidPosData.cs" />
+    <Compile Include="Common\AxisEleGear.cs" />
+    <Compile Include="Common\AxisParam.cs" />
+    <Compile Include="Common\CapperPosData.cs" />
+    <Compile Include="Common\CarrierOnePosData.cs" />
+    <Compile Include="Common\CarrierTwoPosData.cs" />
+    <Compile Include="Common\CentrifugalCarrierPosData.cs" />
+    <Compile Include="Common\ClawInfo.cs" />
+    <Compile Include="Common\ConcentrationPosData.cs" />
+    <Compile Include="Common\EPG_ClawStatus.cs" />
+    <Compile Include="Common\ExpressionHelpers.cs" />
+    <Compile Include="Common\GlobalStatus.cs" />
+    <Compile Include="Common\PosNameAttribute.cs" />
+    <Compile Include="Common\StepAxisEleGear.cs" />
+    <Compile Include="Common\VortexPosData.cs" />
+    <Compile Include="Interface\IWeight.cs" />
+    <Compile Include="Interface\IGlobalStatus.cs" />
+    <Compile Include="Interface\IEPG26.cs" />
+    <Compile Include="Interface\ILS_Motion.cs" />
+    <Compile Include="Interface\IEtherCATMotion.cs" />
+    <Compile Include="Interface\ICardBase.cs" />
+    <Compile Include="Interface\ILogger.cs" />
+    <Compile Include="Interface\IIoDevice.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

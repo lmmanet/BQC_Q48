@@ -1,0 +1,512 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:cv="clr-namespace:BQJX.Converts"
+                    xmlns:att ="clr-namespace:BQJX.AttachedProperties">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml" />
+        <ResourceDictionary Source="Fonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+
+
+
+    <!--  主窗体 右上角按钮  -->
+    <Style x:Key="MainButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="45" />
+        <Setter Property="Height" Value="45" />
+        <Setter Property="Tag" Value="{StaticResource Button.MouseOver.Background}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="true" />
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                        <ContentPresenter x:Name="contentPresenter"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Focusable="False"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefaulted" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="border" Property="Background" Value="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=Button, Mode=FindAncestor}}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.MouseOver.Border}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource Button.Pressed.Background}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Pressed.Border}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource Button.Disabled.Background}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Disabled.Border}" />
+                            <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="{StaticResource Button.Disabled.Foreground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  画面切换按钮  -->
+    <Style x:Key="SwichPageRadioButtonStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="#11FFFFFF" />
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Height" Value="50" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid x:Name="templateRoot" Background="Transparent" SnapsToDevicePixels="True">
+                        <Border x:Name="radioButtonBorder"
+                                Height="{TemplateBinding Height}"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5" />
+                        <ContentPresenter x:Name="contentPresenter"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Focusable="False"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="radioButtonBorder" Property="Background" Value="#FF2C628B" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="radioButtonBorder" Property="Background" Value="#FFE6E6E6" />
+                            <Setter TargetName="radioButtonBorder" Property="BorderBrush" Value="#FFBCBCBC" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter TargetName="radioButtonBorder" Property="Background" Value="#FFD9ECFF" />
+                            <Setter TargetName="radioButtonBorder" Property="BorderBrush" Value="#FF3C77DD" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="radioButtonBorder" Property="Background" Value="green" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}" />
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!--  搜索按钮  -->
+    <Style x:Key="searchBtnStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource FontAwesome}" />
+        <Setter Property="Content" Value="{StaticResource FontAwesomeSearchIcon}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundMainBrush}" />
+        <Setter Property="Width" Value="100" />
+        <Setter Property="Margin" Value="10,0,0,0" />
+        <Setter Property="Padding" Value="5" />
+
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <StackPanel Margin="{TemplateBinding Margin}" Orientation="Horizontal">
+
+                        <TextBlock x:Name="textblock"
+                                   Margin="0"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   Focusable="False"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   Opacity="1"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   Text="{TemplateBinding Content}" />
+
+                        <TextBlock Margin="5,0,0,0"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   Focusable="False"
+                                   FontFamily="YaHei"
+                                   FontSize="{StaticResource FontSizeRegular}"
+                                   Opacity="1"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                   Text="{TemplateBinding Tag}" />
+
+                    </StackPanel>
+
+
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="textblock" Storyboard.TargetProperty="Foreground.Color" To="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="textblock" Storyboard.TargetProperty="Foreground.Color" From="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="textblock" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  分页按钮  -->
+    <Style x:Key="pageBtnStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource FontAwesome}" />
+        <Setter Property="Content" Value="&#xf053;" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
+        <Setter Property="Foreground" Value="{StaticResource WordBlueBrush}" />
+        <Setter Property="Width" Value="50" />
+        <Setter Property="Margin" Value="10,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Padding" Value="5" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+
+                    <TextBlock x:Name="textblock"
+                               Margin="{TemplateBinding Padding}"
+                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                               Focusable="False"
+                               FontFamily="{TemplateBinding FontFamily}"
+                               FontSize="{TemplateBinding FontSize}"
+                               Opacity="1"
+                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                               Text="{TemplateBinding Content}" />
+
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="textblock" Storyboard.TargetProperty="Foreground.Color" To="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="textblock" Storyboard.TargetProperty="Foreground.Color" From="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="textblock" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!--  运行记录  -->
+    <Style x:Key="ItemsControlStyle" TargetType="ItemsControl">
+        <Setter Property="AlternationCount" Value="2" />
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Border Margin="0,1">
+                        <Grid x:Name="grid" Margin="5,0,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="5,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="10"
+                                       Text="*"
+                                       TextAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock VerticalAlignment="Center" FontSize="10" Text="{Binding Content}" />
+                                <Border Margin="10,0,0,0"
+                                        Padding="2,0"
+                                        VerticalAlignment="Center"
+                                        Background="Red"
+                                        Visibility="{Binding Flag, Converter={cv:IntToVisibilityConverter}, ConverterParameter=1}">
+                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="hot" />
+                                </Border>
+                                <Border Margin="10,0,0,0"
+                                        Padding="2,0"
+                                        VerticalAlignment="Center"
+                                        Background="Blue"
+                                        Visibility="{Binding Flag, Converter={cv:IntToVisibilityConverter}, ConverterParameter=2}">
+                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="new" />
+                                </Border>
+                                <Border Margin="10,0,0,0"
+                                        Padding="2,0"
+                                        VerticalAlignment="Center"
+                                        Background="Purple"
+                                        Visibility="{Binding Flag, Converter={cv:IntToVisibilityConverter}, ConverterParameter=3}">
+                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="rec" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Date, StringFormat={}{0:HH:MM:ss}}" />
+                        </Grid>
+                    </Border>
+
+                    <DataTemplate.Triggers>
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                            <Setter TargetName="grid" Property="Background" Value="#99ffff" />
+                        </Trigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+
+    <!--  试管  -->
+    <Style x:Key="TubeCheckBox" TargetType="{x:Type CheckBox}">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="FontSize" Value="8" />
+        <Setter Property="IsEnabled" Value="False" />
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid x:Name="templateRoot"
+                          Width="{TemplateBinding Width}"
+                          Height="{Binding Width, RelativeSource={RelativeSource Mode=Self}}"
+                          Background="Transparent"
+                          SnapsToDevicePixels="True">
+                        <Border x:Name="checkBoxBorder"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="100">
+                            <Border Padding="5">
+                                <Ellipse x:Name="optionMark" Height="{Binding Width, RelativeSource={RelativeSource Mode=Self}}" Fill="#23999B" Opacity="0" />
+                            </Border>
+                        </Border>
+                        <ContentPresenter x:Name="contentPresenter"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Focusable="False"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="optionMark" Property="Opacity" Value="1" />
+
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="optionMark" Property="Opacity" Value="0" />
+
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!--  带提示输入框  -->
+    <Style x:Key="hintTextBox" TargetType="TextBox">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Padding" Value="5,0" />
+        <Setter Property="Width" Value="100" />
+        <Setter Property="BorderBrush" Value="{StaticResource WordBlueBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+
+        <Setter Property="Background" Value="{StaticResource ForegroundLightBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundVeryDarkBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                        </Border>
+
+                        <TextBlock x:Name="placeholder"
+                                   Padding="{TemplateBinding Padding}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                   VerticalAlignment="Center"
+                                   FontFamily="YaHei"
+                                   Foreground="#999"
+                                   IsHitTestVisible="False"
+                                   Text="{TemplateBinding Tag}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+
+                        </TextBlock>
+
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.56" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#FF7EB4EA" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#FF569DE5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style x:Key="datePicker" TargetType="DatePicker">
+        <Setter Property="Margin" Value="20,0,0,0" />
+        <Setter Property="Width" Value="100" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="DisplayDateStart" Value="2022-01-01" />
+        <Setter Property="DisplayDateEnd" Value="2042-12-31" />
+        <Setter Property="FirstDayOfWeek" Value="Monday" />
+        <Setter Property="IsTodayHighlighted" Value="True" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="SelectedDateFormat" Value="Long" />
+
+
+    </Style>
+
+    <Style x:Key="SpinningText" TargetType="{x:Type TextBlock}">
+
+        <Setter Property="FontFamily" Value="{StaticResource FontAwesome}" />
+        <Setter Property="Text" Value="&#xf110;" />
+        <Setter Property="RenderTransformOrigin" Value="0.5, 0.5" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <RotateTransform />
+            </Setter.Value>
+        </Setter>
+
+        <Style.Resources>
+            <Storyboard x:Key="Spin">
+                <DoubleAnimation RepeatBehavior="Forever"
+                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                 From="0" To="360"
+                                 Duration="0:0:2" />
+            </Storyboard>
+        </Style.Resources>
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=IsVisible}" Value="True">
+                <DataTrigger.EnterActions>
+                    <BeginStoryboard Name="SpinStoryboard" Storyboard="{StaticResource Spin}" />
+                </DataTrigger.EnterActions>
+                <DataTrigger.ExitActions>
+                    <RemoveStoryboard BeginStoryboardName="SpinStoryboard" />
+                </DataTrigger.ExitActions>
+            </DataTrigger>
+        </Style.Triggers>
+
+    </Style>
+
+    <!-- 关闭按钮样式 -->
+    <Style x:Key="CloseBtnStyle" TargetType="Button">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Content" Value="✕"/>
+
+    </Style>
+
+
+    <Style x:Key="SaveBtnStyle" TargetType="Button">
+        <Setter Property="Padding" Value="50 10"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Content" Value="保存"/>
+        <Setter Property="Background" Value="{StaticResource WordTransparentBlueBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXXLarge}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontAwesome}"/>
+        <Setter Property="Margin" Value="0 10"/>
+        <Setter Property="att:IsBusyProperty.Value" Value="False"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ButtonBase">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10" SnapsToDevicePixels="True">
+                        <Grid>
+                            <TextBlock Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                       Focusable="False" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                       Text="{TemplateBinding Content}" Visibility="{TemplateBinding att:IsBusyProperty.Value,Converter={cv:BooleanToVisiblityConverter}}"/>
+                            <TextBlock HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" FontSize="{TemplateBinding FontSize}"
+                                       Style="{StaticResource SpinningText}" Visibility="{TemplateBinding att:IsBusyProperty.Value,Converter={cv:BooleanToVisiblityConverter},ConverterParameter=true}"/>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" To="{StaticResource WordBlue}" Duration="0:0:0.3"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="{StaticResource WordBlue}" Duration="0:0:0.3"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background"  Value = "{StaticResource ForegroundDarkBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+
+    </Style>
+
+
+
+
+</ResourceDictionary>
