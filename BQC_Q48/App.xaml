@@ -12,7 +12,7 @@
             <vm1:ViewModelLocator xmlns:vm="clr-namespace:BQC_Q48.ViewModels" x:Key="Locator" d:IsDataSource="True" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Buttons.xaml" />
-                <ResourceDictionary Source="Resources/Styles/CheckBox.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/CheckBox.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

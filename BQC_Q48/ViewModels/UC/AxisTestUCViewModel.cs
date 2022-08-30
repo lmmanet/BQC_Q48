@@ -331,7 +331,7 @@ namespace Q_Platform.ViewModels.UC
                 EnableVelMove = false;
             }
 
-            if (axis.AxisName == "离心机" || axis.AxisName == "提取移液器" || axis.AxisName == "净化移液器" || axis.AxisName == "净化注射器" ||axis.AxisName == "提取振荡" ||axis.AxisName == "净化振荡")
+            if (axis.AxisName == "离心机" || axis.AxisName == "提取移液器" || axis.AxisName == "净化移液器" || axis.AxisName == "净化注射器" || axis.AxisName == "提取振荡" || axis.AxisName == "净化振荡")
             {
                 HomeMoveVisibility = Visibility.Visible;
             }
@@ -341,6 +341,17 @@ namespace Q_Platform.ViewModels.UC
             }
 
             //更新轴点位信息
+            GetAxisPosInfos(axis);
+
+        }
+
+
+        /// <summary>
+        /// 获取轴点位信息
+        /// </summary>
+        /// <param name="axis"></param>
+        private void GetAxisPosInfos(AxisEleGear axis)
+        {
             AxisPosInfos = new ObservableCollection<AxisPosInfo>();
             if (axis.AxisName == "提取搬运X轴" || axis.AxisName == "提取搬运Y轴" || axis.AxisName == "提取搬运Z1轴")
             {
@@ -359,10 +370,16 @@ namespace Q_Platform.ViewModels.UC
                 foreach (var item in propertyInfos)
                 {
                     var values = (double[])item.GetValue(data);
-                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = item.Name, PosData = values[index] });
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
                 }
             }
-
         }
 
         private void AxisPosInfoChanged(object obj)

@@ -26,8 +26,8 @@
     <Color x:Key="LayoutGray">#6e757f</Color>
     <SolidColorBrush x:Key="LayoutGrayBrush" Color="{StaticResource LayoutGray}" />
 
-    <Color x:Key="WordTransparentBlue" >#3099c5</Color>
-    <SolidColorBrush x:Key="WordTransparentBlueBrush" Color="{StaticResource WordTransparentBlue}"/>
+    <Color x:Key="WordTransparentBlue">#3099c5</Color>
+    <SolidColorBrush x:Key="WordTransparentBlueBrush" Color="{StaticResource WordTransparentBlue}" />
 
 
     <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD" />
