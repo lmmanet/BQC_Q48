@@ -12,6 +12,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using PropertyChanged;
+using System.Collections.ObjectModel;
+using Q_Platform.Models;
+using Q_Platform.DAL;
+using System.Reflection;
 
 namespace Q_Platform.ViewModels.UC
 {
@@ -54,6 +58,12 @@ namespace Q_Platform.ViewModels.UC
 
         [DoNotNotify]
         public ushort AxisNo { get; set; }
+
+
+        /// <summary>
+        /// 轴点位数据信息
+        /// </summary>
+        public ObservableCollection<AxisPosInfo> AxisPosInfos { get; set; }
 
 
         #endregion
@@ -139,7 +149,23 @@ namespace Q_Platform.ViewModels.UC
         /// <summary>
         /// 轴号变化
         /// </summary>
-        public ICommand ComboxSelectChangedCommand { get; set; }
+        public ICommand ComboxSelectChangedCommand { get; set; }  
+        
+        /// <summary>
+        /// 选择点位变化
+        /// </summary>
+        public ICommand AxisPosInfoChangedCommand { get; set; }
+
+        /// <summary>
+        /// 示教保存按钮
+        /// </summary>
+        public ICommand SavePosDataCommand { get; set; }
+
+        /// <summary>
+        /// 示教更新
+        /// </summary>
+        public ICommand TechCommand { get; set; }
+
 
         #endregion
 
@@ -203,6 +229,103 @@ namespace Q_Platform.ViewModels.UC
             PutCapperOffCommand = new RelayCommand(PutCapperOff);
 
             ComboxSelectChangedCommand = new RelayCommand<object>(ComboxSelectChanged);
+            AxisPosInfoChangedCommand = new RelayCommand<object>(AxisPosInfoChanged);
+
+
+            TechCommand = new RelayCommand<object>(UpdateAxisPos);
+            SavePosDataCommand = new RelayCommand(SaveAxisPos);
+        }
+
+    
+        /// <summary>
+        /// 保存点位数据
+        /// </summary>
+        private void SaveAxisPos()
+        {
+            var list = AxisPosInfos.ToList();
+            bool result = false;
+
+            if (AxisNo == 1) //加盐Y轴  1
+            {
+                ushort id = 1;
+                result = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+
+            #endregion
+
+            //拧盖Y Z轴
+            if (AxisNo == 5 || AxisNo == 9 || AxisNo == 16 || AxisNo == 19 || AxisNo == 22 //Y 轴
+                || AxisNo == 12 || AxisNo == 13 || AxisNo == 29 || AxisNo == 28 || AxisNo == 27)  //拧盖Z轴
+            {
+                ushort id = 1;
+                if (AxisNo == 9 || AxisNo == 13)
+                {
+                    id = 2;
+                }
+                if (AxisNo == 16 || AxisNo == 29)
+                {
+                    id = 3;
+                }
+                if (AxisNo == 19 || AxisNo == 28)
+                {
+                    id = 4;
+                }
+                if (AxisNo == 22 || AxisNo == 27)
+                {
+                    id = 5;
+                }
+                result = SimpleIoc.Default.GetInstance<ICapperPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+
+            }
+
+            //涡旋 Y轴  8
+            if (AxisNo == 8)
+            {
+                ushort id = 1;
+                result = SimpleIoc.Default.GetInstance<IVortexPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+
+            }
+
+            //浓缩Y轴 25
+            if (AxisNo == 25)
+            {
+                ushort id = 1;
+                result = SimpleIoc.Default.GetInstance<IConcentrationPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+
+            //离心X轴 14
+            if (AxisNo == 14)
+            {
+                ushort id = 1;
+                result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+
+
+        }
+
+        /// <summary>
+        /// 更新点位数据
+        /// </summary>
+        /// <returns></returns>
+        private void UpdateAxisPos(object obj)
+        {
+            var posInfo = obj as AxisPosInfo;
+            if (posInfo == null)
+            {
+                //return false;
+                return;
+            }
+        
+        
+        }
+
+        private void AxisPosInfoChanged(object obj)
+        {
+            var axisPosInfo = obj as AxisPosInfo;
+            if (axisPosInfo != null)
+            {
+                TargetPos = axisPosInfo.PosData;
+            }
         }
 
         private void PutCapperOff()
@@ -236,8 +359,152 @@ namespace Q_Platform.ViewModels.UC
             StepAxisEleGear stepAxisEleGear = obj as StepAxisEleGear;
             if (stepAxisEleGear!=null)
             {
-               AxisNo = stepAxisEleGear.SlaveId;
+                AxisNo = stepAxisEleGear.SlaveId;
+ 
+                //更新轴点位信息
+                AxisPosInfos = new ObservableCollection<AxisPosInfo>();
+                GetAxisPosInfo(stepAxisEleGear);
             }
+
+            
+
+        
+        }
+
+        /// <summary>
+        /// 获取轴点位信息
+        /// </summary>
+        /// <param name="axis"></param>
+        private void GetAxisPosInfo(StepAxisEleGear axis)
+        {
+            #region 获取CarrierOnePosData
+
+            if (axis.SlaveId == 1) //加盐Y轴  1
+            {
+                AddSolidPosData data = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().GetPosData();
+                Type type = typeof(AddSolidPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double[])item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values[1] });
+                }
+            }
+
+            #endregion
+
+            //拧盖Y Z轴
+            if (axis.SlaveId == 5 || axis.SlaveId == 9 || axis.SlaveId == 16 || axis.SlaveId == 19 || axis.SlaveId == 22 //Y 轴
+                || axis.SlaveId == 12 || axis.SlaveId == 13 || axis.SlaveId == 29 || axis.SlaveId == 28 || axis.SlaveId == 27)  //拧盖Z轴
+            {
+                int slave = 0;
+                if (axis.SlaveId == 9 || axis.SlaveId == 13)
+                {
+                    slave = 1;
+                }
+                if (axis.SlaveId == 16 || axis.SlaveId == 29)
+                {
+                    slave = 2;
+                }
+                if (axis.SlaveId == 19 || axis.SlaveId == 28)
+                {
+                    slave = 3;
+                }
+                if (axis.SlaveId == 22 || axis.SlaveId == 27)
+                {
+                    slave = 4;
+                }
+                CapperPosData data = SimpleIoc.Default.GetInstance<ICapperPosDataAccess>().GetCapperPosData(slave);
+                Type type = typeof(CapperPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values });
+                }
+
+            }
+
+            //涡旋 Y轴  8
+            if (axis.SlaveId == 8)
+            {
+                VortexPosData data = SimpleIoc.Default.GetInstance<IVortexPosDataAccess>().GetPosData();
+                Type type = typeof(VortexPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values });
+                }
+
+            }
+
+            //浓缩Y轴 25
+            if (axis.SlaveId ==25)
+            {
+                ConcentrationPosData data = SimpleIoc.Default.GetInstance<IConcentrationPosDataAccess>().GetPosData();
+                Type type = typeof(ConcentrationPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+             
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values});
+                }
+            }
+
+            //离心X轴 14
+            if (axis.SlaveId == 14)
+            {
+                CentrifugalCarrierPosData data = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().GetPosData();
+                Type type = typeof(CentrifugalCarrierPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values });
+                }
+            }
+
+
         }
 
         private void StopMove()
@@ -325,8 +592,6 @@ namespace Q_Platform.ViewModels.UC
            iLS_Motion.GoHomeWithCheckDone(AxisNo,32,null);
         }
 
-
-        #endregion
 
         public override void Cleanup()
         {

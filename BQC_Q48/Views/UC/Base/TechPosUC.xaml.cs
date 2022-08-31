@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Q_Platform.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,21 +24,34 @@ namespace Q_Platform.Views.UC.Base
         public TechPosUC()
         {
             InitializeComponent();
+            
         }
 
 
-
-        public ICommand TechCommand
+        public IEnumerable<AxisPosInfo> AxisPosInfosList
         {
-            get { return (ICommand)GetValue(TechCommandProperty); }
-            set { SetValue(TechCommandProperty, value); }
+            get { return (IEnumerable<AxisPosInfo>)GetValue(AxisPosInfosListProperty); }
+            set { SetValue(AxisPosInfosListProperty, value); }
+            
         }
 
-        public static readonly DependencyProperty TechCommandProperty =
-            DependencyProperty.Register("TechCommand", typeof(ICommand), typeof(TechPosUC), new PropertyMetadata(default(ICommand)));
+        public static readonly DependencyProperty AxisPosInfosListProperty =
+            DependencyProperty.Register("AxisPosInfosList", typeof(IEnumerable<AxisPosInfo>), typeof(TechPosUC), new FrameworkPropertyMetadata(default(IEnumerable<AxisPosInfo>),new PropertyChangedCallback(OnListChanged)));
 
-
-
-
+        private static void OnListChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var instance = d as TechPosUC;
+            if (d == null)
+            {
+                return;
+            }
+            var itemsCtr = instance.FindName("itemsControl") as ItemsControl;
+            if (itemsCtr == null)
+            {
+                return;
+            }
+            itemsCtr.ItemsSource = null;
+            itemsCtr.ItemsSource = instance.AxisPosInfosList;
+        }
     }
 }

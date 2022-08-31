@@ -36,7 +36,7 @@ namespace BQJX.Common.Common
         public double[] CapperTwoPos { get; set; } = new double[3];
 
         [PosName("振荡接驳位")]
-        public double[] VibratioOnePos { get; set; } = new double[3];
+        public double[] VibrationOnePos { get; set; } = new double[3];
 
         [PosName("移栽接驳位")]
         public double[] TransferLeftPos { get; set; } = new double[3];
