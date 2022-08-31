@@ -15,24 +15,24 @@
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="Button.Click" SourceName="btnCloseTechPos">
             <BeginStoryboard>
-                <Storyboard >
-                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" Duration="0:0:0.2"/>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" Duration="0:0:0.2" />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
         <EventTrigger RoutedEvent="Button.Click" SourceName="btnOpenTechPos">
             <BeginStoryboard>
-                <Storyboard >
-                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" To="-5" Duration="0:0:0.2"/>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="tt" Storyboard.TargetProperty="X" To="-5" Duration="0:0:0.2" />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
     </UserControl.Triggers>
-    
-    
+
+
     <Grid Background="White">
         <StackPanel>
-            <uc:AxisStatusUC CurrentPos="{Binding CurrentPos,Mode=OneWay}" CurrentVel="{Binding CurrentVel,Mode=OneWay}" IoStatus="{Binding MotionStatus,Mode=OneWay}" />
+            <uc:AxisStatusUC CurrentPos="{Binding CurrentPos, Mode=OneWay}" CurrentVel="{Binding CurrentVel, Mode=OneWay}" IoStatus="{Binding MotionStatus, Mode=OneWay}" />
             <!--  轴操作  -->
             <Border Grid.Row="1"
                     Margin="10"
@@ -64,8 +64,8 @@
                                 </i:Interaction.Triggers>
                             </ComboBox>
                         </WrapPanel>
-                        
-                        <!-- 选择点位 -->
+
+                        <!--  选择点位  -->
                         <WrapPanel Height="40" Margin="5">
                             <TextBlock Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="选择点位:" />
                             <ComboBox x:Name="combSelect1"
@@ -73,7 +73,7 @@
                                       Margin="5"
                                       DisplayMemberPath="PosName"
                                       ItemsSource="{Binding AxisPosInfos}"
-                                      SelectedIndex="0" 
+                                      SelectedIndex="0"
                                       SelectedValuePath="AxisNo">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="SelectionChanged">
@@ -140,7 +140,7 @@
                                 <UniformGrid Rows="3">
                                     <Button Command="{Binding AbsMoveCommand}" Content="绝对定位" />
                                     <Button Command="{Binding RelativeMoveCommand}" Content="相对定位" />
-                                    <Button Command="{Binding VelocityMoveCommand}" Content="定速运动" IsEnabled="{Binding EnableVelMove}"/>
+                                    <Button Command="{Binding VelocityMoveCommand}" Content="定速运动" IsEnabled="{Binding EnableVelMove}" />
                                     <Button Command="{Binding ResetAxisAmlCommand}" Content="轴报警复位" />
                                     <Button Command="{Binding StopMoveCommand}" Content="停止" />
                                     <Button Command="{Binding EmgStopMoveCommand}" Content="急停" />
@@ -178,9 +178,9 @@
                             <Border Grid.Row="1" Grid.Column="1">
                                 <UniformGrid>
                                     <Button Command="{Binding ResetFieldBusCommand}" Content="总线复位" />
-                                    <Button Command="{Binding HomeMoveCommand}" Content="回零" IsEnabled="{Binding Homing}" Visibility="{Binding HomeMoveVisibility}"/>
-                                    <Button Command="{Binding ClearPosOffsetCommand}" Content="编码器偏移清零" Visibility="Visible"/>
-                                    <Button Command="{Binding ConfiguraLimitCommand}" Content="配置限位" Visibility="Hidden"/>
+                                    <Button Command="{Binding HomeMoveCommand}" Content="回零" IsEnabled="{Binding Homing}" Visibility="{Binding HomeMoveVisibility}" />
+                                    <Button Command="{Binding ClearPosOffsetCommand}" Content="编码器偏移清零" Visibility="Visible" />
+                                    <Button Command="{Binding ConfiguraLimitCommand}" Content="配置限位" Visibility="Hidden" />
                                 </UniformGrid>
                             </Border>
 
@@ -192,52 +192,63 @@
 
             </Border>
 
-            <Button x:Name="btnOpenTechPos" HorizontalAlignment="Right" Height="40" Background="Gray" Width="100"/>
+            <Button x:Name="btnOpenTechPos"
+                    Width="100"
+                    Height="40"
+                    HorizontalAlignment="Right"
+                    Background="Gray" />
         </StackPanel>
-        
-        <!-- 点位数据示教 -->
+
+        <!--  点位数据示教  -->
         <Border HorizontalAlignment="Right" Background="{StaticResource BackgroundLightBrush}" CornerRadius="0 5 5 0">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="5" Direction="0" Opacity="0.3" ShadowDepth="0" Color="Gray"/>
+                <DropShadowEffect BlurRadius="5"
+                                  Direction="0"
+                                  Opacity="0.3"
+                                  ShadowDepth="0"
+                                  Color="Gray" />
             </Border.Effect>
 
             <Border.RenderTransform>
-                <TranslateTransform x:Name="tt" X="700"/>
+                <TranslateTransform x:Name="tt" X="700" />
             </Border.RenderTransform>
 
-            <Grid>
-                <Grid.RowDefinitions >
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <Button x:Name="btnCloseTechPos" Style="{StaticResource CloseBtnStyle}" />
+                    <Button x:Name="btnCloseTechPos" Style="{StaticResource CloseBtnStyle}" />
 
-                <Border Grid.Row="1">
-                    <Grid>
-                        <Grid.RowDefinitions >
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                    <Border Grid.Row="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                        <Border DataContext="{Binding TechPosInfos}">
-                            <uc:TechPosUC TechCommand="{Binding TechCommand}"/>
-                        </Border>
+                            <Border>
+                                <uc:TechPosUC AxisPosInfosList="{Binding AxisPosInfos}" />
+                            </Border>
 
-                        <Button Grid.Row="1" Background="{StaticResource WordBlueBrush}" Command="{Binding SavePosDataCommand}" Style="{StaticResource SaveBtnStyle}"/>
+                            <Button Grid.Row="1" Background="{StaticResource WordBlueBrush}" Command="{Binding SavePosDataCommand}" Style="{StaticResource SaveBtnStyle}" />
 
 
-                    </Grid>
-                </Border>
+                        </Grid>
+                    </Border>
 
-            </Grid>
-            
+                </Grid>
+
+            </ScrollViewer>
+
         </Border>
-        
-        
-        
-        
-        
+
+
+
+
+
     </Grid>
 
 

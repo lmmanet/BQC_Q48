@@ -87,70 +87,6 @@ namespace Q_Platform.ViewModels.UC
 
 
 
-        /////////////////////////////////////////点位设置/////////////////////////////////////////////////
-
-
-        public List<TechPosModel> TechPosInfos { get; set; }
-
-        public ICommand SavePosDataCommand { get; set; }
-
-        public ICommand TechCommand { get; set; }
-
-        private void InitTechPosInfos()
-        {
-            TechPosInfos = new List<TechPosModel>()
-            { 
-                new TechPosModel{ PosName="SamplePos1"},
-                new TechPosModel{ PosName="SamplePos2"},
-                new TechPosModel{ PosName="SamplePos3"},
-                new TechPosModel{ PosName="SamplePos4"},
-                new TechPosModel{ PosName="ColdPos"},
-                new TechPosModel{ PosName="AddSolidPos"},
-                new TechPosModel{ PosName="CapperOnePos"},
-                new TechPosModel{ PosName="VortexPos"},
-                new TechPosModel{ PosName="CapperTwoPos"},
-                new TechPosModel{ PosName="VibratioOnePos"},
-                new TechPosModel{ PosName="TransferLeftPos"},
-                new TechPosModel{ PosName="NeedlePos"},
-                new TechPosModel{ PosName="PipettingSourcePos"},
-                new TechPosModel{ PosName="PipettingTargetPos"}
-
-            };
-            SavePosDataCommand = new RelayCommand(SavePosData);
-            TechCommand = new RelayCommand<object>(TechPos);
-        }
-
-        private void SavePosData()
-        {
-            CarrierOnePosData data = new CarrierOnePosData();
-
-            //Type type = typeof(CarrierOnePosData);
-            //PropertyInfo[] propInfos = type.GetProperties();
-            //foreach (var prop in propInfos)
-            //{
-            //    prop.SetValue(data, new double[] { 100,100,100});
-            //}
-
-
-            data.SamplePos1[0] = TechPosInfos[0].PosData[0];
-
-           // SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosData(data);
-        }
-
-        private void TechPos(object obj)
-        {
-            var posModel = obj as TechPosModel;
-            if (posModel!=null)
-            {
-                posModel.PosData[0] = CurrentPos;
-            }
-        }
-
-
-
-
-
-
         #endregion
 
         #region Commands
@@ -240,6 +176,17 @@ namespace Q_Platform.ViewModels.UC
         /// </summary>
         public ICommand AxisPosInfoChangedCommand { get; set; }
 
+        /// <summary>
+        /// 示教保存按钮
+        /// </summary>
+        public ICommand SavePosDataCommand { get; set; }
+
+        /// <summary>
+        /// 示教更新
+        /// </summary>
+        public ICommand TechCommand { get; set; }
+
+
         #endregion
 
         #region Constructors
@@ -252,8 +199,6 @@ namespace Q_Platform.ViewModels.UC
             
             RegisterCommand();
             ListAxisInfo = _motion?.GetAxisInfos();
-
-            InitTechPosInfos();
 
             _refreshTask = Task.Run(() =>
             {
@@ -311,6 +256,57 @@ namespace Q_Platform.ViewModels.UC
             ClearPosOffsetCommand = new RelayCommand(ClearPosOffset);
             ComboxSelectChangedCommand = new RelayCommand<object>(ComboxSelectChanged);
             AxisPosInfoChangedCommand = new RelayCommand<object>(AxisPosInfoChanged);
+
+            TechCommand = new RelayCommand<object>(UpdateAxisPos);
+            SavePosDataCommand = new RelayCommand(SaveAxisPos);
+        }
+
+        /// <summary>
+        /// 保存点位数据
+        /// </summary>
+        private void SaveAxisPos()
+        {
+            var list = AxisPosInfos.ToList();
+            bool result = false;
+
+            if (AxisNo <= 3)
+            {
+                ushort id = AxisNo;
+                if (AxisNo == 3)
+                {
+                    id = 2;
+                }
+                result = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+
+            }
+            if (AxisNo == 5)
+            {
+                ushort id = 0;
+                result = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+            if (AxisNo == 7)
+            {
+                ushort id = 0;
+                result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+            if (AxisNo >= 9 && AxisNo <= 12)
+            {
+                ushort id = 0;
+                if (AxisNo == 10)
+                {
+                    id = 1;
+                }
+                if (AxisNo == 11)
+                {
+                    id = 2;
+                }
+                if (AxisNo == 12)
+                {
+                    id = 2;
+                }
+                result = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
+            }
+
         }
 
         private void ComboxSelectChanged(object obj)
@@ -394,7 +390,7 @@ namespace Q_Platform.ViewModels.UC
                         posName = posNameAtt.PosName;
 
                     }
-                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName,MemberName = item.Name, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
                 }
             }
 
@@ -417,7 +413,7 @@ namespace Q_Platform.ViewModels.UC
                         posName = posNameAtt.PosName;
 
                     }
-                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[0] });
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.AxisNo, PosName = posName, PosData = values[0] });
                 }
 
             }
@@ -443,7 +439,7 @@ namespace Q_Platform.ViewModels.UC
                         posName = posNameAtt.PosName;
 
                     }
-                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values });
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.AxisNo, PosName = posName, PosData = values });
                 }
 
             }
@@ -487,7 +483,7 @@ namespace Q_Platform.ViewModels.UC
                         posName = posNameAtt.PosName;
 
                     }
-                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
                 }
             }
 
@@ -497,29 +493,50 @@ namespace Q_Platform.ViewModels.UC
         /// 更新点位数据
         /// </summary>
         /// <returns></returns>
-        private bool SaveAxisPos()
+        private void UpdateAxisPos(object obj)
         {
-            var posInfo = new AxisPosInfo();
-            ushort axisNo = posInfo.AxisNo;
-            if (axisNo <= 3)
+            var posInfo = obj as AxisPosInfo;
+            if (posInfo == null)
             {
-                ushort id = axisNo;
-                bool result = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo); 
+                //return false;
+                return;
+            }
+            bool result = false;
+
+            if (AxisNo <= 3)
+            {
+                ushort id = AxisNo;
+                result = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo); 
 
             }
-            if (axisNo == 5)
+            if (AxisNo == 5)
             {
-                AddSolidPosData data = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().GetPosData();
+                ushort id = 0;
+                result = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
             }
-            if (axisNo == 7)
+            if (AxisNo == 7)
             {
-                CentrifugalCarrierPosData data = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().GetPosData();
+                ushort id = 0;
+                result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
             }
-            if (axisNo >=9 && axisNo <= 12)
+            if (AxisNo >= 9 && AxisNo <= 12)
             {
-                CarrierTwoPosData data = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().GetPosData();
+                ushort id = 0;
+                if (AxisNo == 10)
+                {
+                    id = 1;
+                }
+                if (AxisNo == 11)
+                {
+                    id = 2;
+                }
+                if (AxisNo == 12)
+                {
+                    id = 3;
+                }
+                result = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
             }
-            return false;
+           // return result;
         }
 
 

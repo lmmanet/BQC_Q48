@@ -1,6 +1,7 @@
 ﻿using BQJX.Common.Common;
 using BQJX.Core.Interface;
 using BQJX.DAL.Base;
+using Q_Platform.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -48,7 +49,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"GetPosData err:{ex.Message}");
-                return null;
+                throw ex;
             }
             return data;
         }
@@ -73,11 +74,47 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"UpdatePosData err:{ex.Message}");
-                return false;
+                throw ex;
             }
         }
 
+        public bool UpdatePosDataByAxisPosInfo(ushort id, AxisPosInfo posInfo)
+        {
+            try
+            {
+                string sql = $"update VortexPosData set {posInfo.MemberName} = '{posInfo.PosData}' where id = {id};";
 
+                return _dataAccess.ExecuteNonQuery(sql) == 1;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 更新一行数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public bool UpdatePosDataByAxisPosInfo(ushort id, List<AxisPosInfo> list)
+        {
+            try
+            {
+                string header = "update VortexPosData set ";
+                string body = string.Join(",", list.Select(info => $"{info.MemberName} = '{info.PosData}'"));
+                string sql = header + body + $" where id = {id};";
+
+                return _dataAccess.ExecuteNonQuery(sql) == 1;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
+                throw ex;
+            }
+        }
 
 
         #endregion

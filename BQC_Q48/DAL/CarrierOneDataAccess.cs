@@ -1,10 +1,12 @@
 ﻿using BQJX.Common.Common;
 using BQJX.Core.Interface;
 using BQJX.DAL.Base;
+using Q_Platform.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,7 +54,7 @@ namespace Q_Platform.DAL
                     data.CapperOnePos[i] = item.Field<double>("CapperOnePos");
                     data.VortexPos[i] = item.Field<double>("VortexPos");
                     data.CapperTwoPos[i] = item.Field<double>("CapperTwoPos");
-                    data.VibratioOnePos[i] = item.Field<double>("VibrationOnePos");
+                    data.VibrationOnePos[i] = item.Field<double>("VibrationOnePos");
                     data.TransferLeftPos[i] = item.Field<double>("TransferLeftPos");
                     data.NeedlePos[i] = item.Field<double>("NeedlePos");
                     data.PipettingSourcePos[i] = item.Field<double>("PipettingSourcePos");
@@ -63,7 +65,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"GetPosData err:{ex.Message}");
-                return null;
+                throw ex;
             }
             return data;
         }
@@ -86,7 +88,7 @@ namespace Q_Platform.DAL
                    $"CapperOnePos = '{data.CapperOnePos[i]}'," +
                    $"VortexPos = '{data.VortexPos[i]}'," +
                    $"CapperTwoPos = '{data.CapperTwoPos[i]}'," +
-                   $"VibrationOnePos ='{data.VibratioOnePos[i]}'," +
+                   $"VibrationOnePos ='{data.VibrationOnePos[i]}'," +
                    $"TransferLeftPos ='{data.TransferLeftPos[i]}'," +
                    $"NeedlePos ='{data.NeedlePos[i]}'," +
                    $"PipettingSourcePos='{data.PipettingSourcePos[i]}'," +
@@ -100,9 +102,101 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"UpdatePosData err:{ex.Message}");
-                return false;
+                throw ex;
             }
         }
+
+
+        public List<AxisPosInfo> GetAxisPosInfo(ushort id)
+        {
+            var result = new List<AxisPosInfo>();
+            Type type = typeof(CarrierOnePosData);
+            foreach (var item in type.GetProperties())
+            {
+                string name = item.Name;
+                if (item.IsDefined(typeof(PosNameAttribute)))
+                {
+                    var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                    name = posNameAtt.PosName;
+                }
+
+                result.Add(new AxisPosInfo()
+                {
+                    MemberName = item.Name,
+                    PosName = name,
+                    AxisNo = 0,
+                    AxisName = ""
+
+                }) ;
+            }
+
+            try
+            {
+                string sql = $"Select * from carrieroneposdata where id = {id} ";
+                DataTable dt = _dataAccess.Query(sql);
+                foreach (var item in dt.AsEnumerable())
+                {
+                    foreach (var axisInfo in result)
+                    {
+                        axisInfo.PosData = item.Field<double>($"{axisInfo.MemberName}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"GetAxisPosInfo err:{ex.Message}");
+                throw ex;
+            }
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// 更新单个数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="posInfo"></param>
+        /// <returns></returns>
+        public bool UpdatePosDataByAxisPosInfo(ushort id, AxisPosInfo posInfo)
+        {
+            try
+            {
+                string sql = $"update carrieroneposdata set {posInfo.MemberName} = '{posInfo.PosData}' where id = {id};";
+                
+                return _dataAccess.ExecuteNonQuery(sql) == 1;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
+                throw ex;
+            }
+        }
+        
+
+        /// <summary>
+        /// 更新一行数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public bool UpdatePosDataByAxisPosInfo(ushort id, List<AxisPosInfo> list)
+        {
+            try
+            {
+                string header = "update carrieroneposdata set ";
+                string body = string.Join(",",list.Select(info => $"{info.MemberName} = '{info.PosData}'"));
+                string sql = header + body + $" where id = {id};";
+
+                return _dataAccess.ExecuteNonQuery(sql) == 1;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
+                throw ex;
+            }
+        }
+
 
         #endregion
     }

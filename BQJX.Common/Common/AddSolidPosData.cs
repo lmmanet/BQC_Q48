@@ -10,22 +10,22 @@ namespace BQJX.Common.Common
     {
         //上下两层Y1 Y2
         [PosName("加固A位")]
-        public double[] Solid_A { get; set; }
+        public double[] Solid_A { get; set; } = new double[2];
 
         [PosName("加固B位")]
-        public double[] Solid_B { get; set; }
+        public double[] Solid_B { get; set; } = new double[2];
 
         [PosName("加固C位")]
-        public double[] Solid_C { get; set; }
+        public double[] Solid_C { get; set; } = new double[2];
 
         [PosName("加固D位")]
-        public double[] Solid_D { get; set; }
+        public double[] Solid_D { get; set; } = new double[2];
 
         [PosName("加固E位")]
-        public double[] Solid_E { get; set; }
+        public double[] Solid_E { get; set; } = new double[2];
 
         [PosName("加固F位")]
-        public double[] Solid_F { get; set; }
+        public double[] Solid_F { get; set; } = new double[2];
 
     }
 }

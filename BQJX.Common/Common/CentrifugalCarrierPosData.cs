@@ -14,10 +14,10 @@ namespace BQJX.Common.Common
         [PosName("X右侧接驳位")]
         public double RightPos { get; set; }
 
-        [PosName("Z取料位")]
+        [PosName("Z取料位",Is_Z2_Axis = true)]
         public double ZGetPos { get; set; }
 
-        [PosName("Z放料位")]
+        [PosName("Z放料位", Is_Z2_Axis = true)]
         public double ZPutPos { get; set; }
 
         [PosName("C左侧接驳位1")]

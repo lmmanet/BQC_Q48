@@ -42,6 +42,11 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IDataAccessBase>(() => new MySqlDataAccessBase(connString));
             SimpleIoc.Default.Register<ICarrierOneDataAccess, CarrierOneDataAccess>();
             SimpleIoc.Default.Register<ICarrierTwoDataAccess, CarrierTwoDataAccess>();
+            SimpleIoc.Default.Register<IAddSolidPosDataAccess, AddSolidPosDataAccess>();
+            SimpleIoc.Default.Register<ICentrifugalCarrierPosDataAccess, CentrifugalCarrierPosDataAccess>();
+            SimpleIoc.Default.Register<IVortexPosDataAccess, VortexPosDataAccess>();
+            SimpleIoc.Default.Register<IConcentrationPosDataAccess, ConcentrationPosDataAccess>();
+            SimpleIoc.Default.Register<ICapperPosDataAccess, CapperPosDataAccess>();
 
             SimpleIoc.Default.Register<ILogger, LoggerHelper>();
             var logger = SimpleIoc.Default.GetInstance<ILogger>();
