@@ -341,7 +341,8 @@ namespace Q_Platform.ViewModels.UC
             }
 
             //更新轴点位信息
-            GetAxisPosInfos(axis);
+            AxisPosInfos = new ObservableCollection<AxisPosInfo>();
+            GetAxisPosInfo(axis);
 
         }
 
@@ -350,20 +351,22 @@ namespace Q_Platform.ViewModels.UC
         /// 获取轴点位信息
         /// </summary>
         /// <param name="axis"></param>
-        private void GetAxisPosInfos(AxisEleGear axis)
+        private void GetAxisPosInfo(AxisEleGear axis)
         {
-            AxisPosInfos = new ObservableCollection<AxisPosInfo>();
-            if (axis.AxisName == "提取搬运X轴" || axis.AxisName == "提取搬运Y轴" || axis.AxisName == "提取搬运Z1轴")
+
+            #region 获取CarrierOnePosData
+
+            if (axis.AxisNo <= 3)//提取搬运X轴 ,提取搬运Y轴,提取搬运Z1轴,提取搬运Z2轴
             {
                 CarrierOnePosData data = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().GetPosData();
                 Type type = typeof(CarrierOnePosData);
                 PropertyInfo[] propertyInfos = type.GetProperties();
                 int index = 0;
-                if (axis.AxisName == "提取搬运Y轴")
+                if (axis.AxisNo == 1)//提取搬运Y轴
                 {
                     index = 1;
                 }
-                if (axis.AxisName == "提取搬运Z1轴")
+                if (axis.AxisNo == 2 || axis.AxisNo == 3)//提取搬运Z1轴
                 {
                     index = 2;
                 }
@@ -374,13 +377,151 @@ namespace Q_Platform.ViewModels.UC
                     if (item.IsDefined(typeof(PosNameAttribute)))
                     {
                         var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        if (axis.AxisNo == 2)//提取搬运Z1轴
+                        {
+                            if (posNameAtt.Is_Z2_Axis)
+                            {
+                                continue;
+                            }
+                        }
+                        if (axis.AxisNo == 3)//提取搬运Z2轴
+                        {
+                            if (!posNameAtt.Is_Z2_Axis)
+                            {
+                                continue;
+                            }
+                        }
                         posName = posNameAtt.PosName;
 
                     }
                     AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
                 }
             }
+
+            #endregion
+
+            //加盐Y轴  5
+            if (axis.AxisNo == 5)
+            {
+                AddSolidPosData data = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().GetPosData();
+                Type type = typeof(AddSolidPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double[])item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[0] });
+                }
+
+            }
+
+            //离心Z轴  7
+            if (axis.AxisNo == 7)
+            {
+                CentrifugalCarrierPosData  data = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().GetPosData();
+                Type type = typeof(CentrifugalCarrierPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        if (!posNameAtt.Is_Z2_Axis)
+                        {
+                            continue;
+                        }
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values });
+                }
+
+            }
+
+            //净化搬运X轴  9-12
+            if (axis.AxisNo >= 9 && axis.AxisNo <= 12)
+            {
+                CarrierTwoPosData data = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().GetPosData();
+                Type type = typeof(CarrierTwoPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+                int index = 0;
+                if (axis.AxisNo == 10)//Y轴
+                {
+                    index = 1;
+                }
+                if (axis.AxisNo == 11 || axis.AxisNo == 12)//Z1轴 Z2轴
+                {
+                    index = 2;
+                }
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double[])item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        if (axis.AxisNo == 11)//Z1轴
+                        {
+                            if (posNameAtt.Is_Z2_Axis || posNameAtt.HaveNoneZ_Axis)
+                            {
+                                continue;
+                            }
+                        }
+                        if (axis.AxisNo == 12)//Z2轴
+                        {
+                            if (!posNameAtt.Is_Z2_Axis || posNameAtt.HaveNoneZ_Axis)
+                            {
+                                continue;
+                            }
+                        }
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, AxisNo = axis.AxisNo, PosName = posName, PosData = values[index] });
+                }
+            }
+
         }
+
+        /// <summary>
+        /// 更新点位数据
+        /// </summary>
+        /// <returns></returns>
+        private bool SaveAxisPos()
+        {
+            var posInfo = new AxisPosInfo();
+            ushort axisNo = posInfo.AxisNo;
+            if (axisNo <= 3)
+            {
+                ushort id = axisNo;
+                bool result = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo); 
+
+            }
+            if (axisNo == 5)
+            {
+                AddSolidPosData data = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().GetPosData();
+            }
+            if (axisNo == 7)
+            {
+                CentrifugalCarrierPosData data = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().GetPosData();
+            }
+            if (axisNo >=9 && axisNo <= 12)
+            {
+                CarrierTwoPosData data = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().GetPosData();
+            }
+            return false;
+        }
+
 
         private void AxisPosInfoChanged(object obj)
         {

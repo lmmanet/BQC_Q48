@@ -12,6 +12,10 @@ namespace BQJX.Common.Common
     {
         public string PosName { get; set; }
 
+        public bool Is_Z2_Axis { get; set; } = false;
+
+        public bool HaveNoneZ_Axis { get; set; }
+
         public PosNameAttribute(string name)
         {
             PosName = name;

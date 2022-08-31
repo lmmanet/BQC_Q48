@@ -41,13 +41,15 @@ namespace BQJX.Common.Common
         [PosName("移栽接驳位")]
         public double[] TransferLeftPos { get; set; } = new double[3];
 
-        [PosName("枪头位")]
+
+
+        [PosName("枪头位",Is_Z2_Axis = true)]
         public double[] NeedlePos { get; set; } = new double[3];
 
-        [PosName("移液取液位")]
+        [PosName("移液取液位", Is_Z2_Axis = true)]
         public double[] PipettingSourcePos { get; set; } = new double[3];
 
-        [PosName("移液吐液位")]
+        [PosName("移液吐液位", Is_Z2_Axis = true)]
         public double[] PipettingTargetPos { get; set; } = new double[3];
 
         
