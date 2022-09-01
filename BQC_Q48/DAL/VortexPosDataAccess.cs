@@ -37,7 +37,7 @@ namespace Q_Platform.DAL
             VortexPosData data = new VortexPosData();
             try
             {
-                string sql = "Select * from VortexPosData where id = 0 ";
+                string sql = "Select * from VortexPosData where id = 1 ";
                 DataTable dt = _dataAccess.Query(sql);
                 foreach (var item in dt.AsEnumerable())
                 {
@@ -65,7 +65,7 @@ namespace Q_Platform.DAL
                     string header = "update VortexPosData set ";
                     string param = $"PutGetPos = '{data.PutGetPos}'," +
                    $"VortexPos='{data.VortexPos}'";
-                    sql += header + param + " where id = 0;";
+                    sql += header + param + " where id = 1;";
                 }
 
                 return _dataAccess.ExecuteNonQuery(sql) == 1;

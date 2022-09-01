@@ -37,7 +37,7 @@ namespace Q_Platform.DAL
             ConcentrationPosData data = new ConcentrationPosData();
             try
             {
-                string sql = "Select * from ConcentrationPosData where id = 0 ";
+                string sql = "Select * from ConcentrationPosData where id = 1 ";
                 DataTable dt = _dataAccess.Query(sql);
 
                 foreach (var item in dt.AsEnumerable())
@@ -64,7 +64,7 @@ namespace Q_Platform.DAL
                 string header = "update ConcentrationPosData set ";
                 string param = $"PutGetPos = '{data.PutGetPos}'," +
                 $"ConcPos='{data.ConcPos}'";
-                sql += header + param + " where id = 0;";
+                sql += header + param + " where id = 1;";
 
                 return _dataAccess.ExecuteNonQuery(sql) == 1;
 
