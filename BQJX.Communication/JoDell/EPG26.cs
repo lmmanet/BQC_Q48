@@ -41,7 +41,7 @@ namespace BQJX.Communication.JoDell
             if (!result.IsSuccess)
             {
                 _logger?.Error($"GetClawStatus err:{result.Data}");
-                return null;
+                throw new CommunicationException($"{result.Message}");
             }
             return AnalysisData(result.Data);
         }
@@ -54,7 +54,7 @@ namespace BQJX.Communication.JoDell
             if (!result.IsSuccess)
             {
                 _logger?.Error($"Enable err:{result.Message}");
-                return false;
+                throw new CommunicationException($"{result.Message}");
             }
             return true;
         }
@@ -67,7 +67,7 @@ namespace BQJX.Communication.JoDell
             if (!result.IsSuccess)
             {
                 _logger?.Error($"Disable err:{result.Message}");
-                return false;
+                throw new CommunicationException($"{result.Message}");
             }
             return true;
         }
@@ -89,7 +89,7 @@ namespace BQJX.Communication.JoDell
             if (!result.IsSuccess)
             {
                 _logger?.Error($"SendCommand err:{result.Message}");
-                return false;
+                throw new CommunicationException($"{result.Message}");
             }
             return true;
         }
@@ -197,7 +197,7 @@ namespace BQJX.Communication.JoDell
             catch (Exception ex)
             {
                 _logger?.Error($"AnalysisData Err:{ex.Message}");
-                return null;
+                throw new InvalidOperationException(ex.Message);
             }
             return status;
         }

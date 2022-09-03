@@ -17,6 +17,7 @@ namespace BQJX.Core
         private ushort _CardID = 0;
 
         private List<AxisEleGear> _eleGearList; 
+
         #endregion
 
         #region Construtors
@@ -48,13 +49,13 @@ namespace BQJX.Core
             if (result != 0)
             {
                 _logger.Error($"set_home_profile err:{result}");
-                return false;
+                throw new EtherCATMotionException($"set_home_profile err:{result}");
             }
             result = LTDMC.nmc_home_move(_CardID, axisNo);//执行回原点运动
             if (result != 0)
             {
                 _logger.Error($"home_move err:{result}");
-                return false;
+                throw new EtherCATMotionException($"home_move err:{result}");
             }
             return await CheckDone(axisNo, cts);
         }
@@ -75,7 +76,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"InterPolation_2D_lineWithCheckDone err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"InterPolation_2D_lineWithCheckDone err:{ret}");
             }
 
             double[] targetPos = new double[2]
@@ -88,7 +89,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"InterPolation_2D_lineWithCheckDone err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"InterPolation_2D_lineWithCheckDone err:{ret}");
             }
 
             return await CheckDoneMulti(_CardID, Crd, cts).ConfigureAwait(false);
@@ -110,18 +111,19 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_profile err:{ret}");
-                return;
+                throw new EtherCATMotionException($"dmc_set_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_s_profile(_CardID, axis, 0, dS_para);//设置S段速度参数
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_s_profile err:{ret}");
-                return;
+                throw new EtherCATMotionException($"dmc_set_s_profile err:{ret}");
             }
             ret = LTDMC.dmc_vmove(_CardID, axis, direction);//连续运动
             if (ret != 0)
             {
                 _logger?.Error($"dmc_vmove err:{ret}");
+                throw new EtherCATMotionException($"dmc_vmove err:{ret}");
             }
         }
 
@@ -134,6 +136,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"StopMove axisNo{axisNo} err!");
+                throw new EtherCATMotionException($"StopMove axisNo{axisNo} err!");
             }
         }
 
@@ -160,25 +163,25 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_s_profile(_CardID, axis, 0, dS_para);//设置S段速度参数
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_s_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_s_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_dec_stop_time(_CardID, axis, dTdec); //设置减速停止时间
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_dec_stop_time err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_dec_stop_time err:{ret}");
             }
             ret = LTDMC.dmc_pmove_unit(_CardID, axis, dDist, sPosi_mode);//定长运动
             if (ret != 0)
             {
                 _logger?.Error($"dmc_pmove err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_pmove err:{ret}");
             }
             return true;
         }
@@ -216,25 +219,25 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_s_profile(_CardID, axis, 0, dS_para);//设置S段速度参数
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_s_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_s_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_dec_stop_time(_CardID, axis, dTdec); //设置减速停止时间
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_dec_stop_time err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_dec_stop_time err:{ret}");
             }
             ret = LTDMC.dmc_pmove_unit(_CardID, axis, dDist, sPosi_mode);//定长运动
             if (ret != 0)
             {
                 _logger?.Error($"dmc_pmove err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_pmove err:{ret}");
             }
             return true;
         }
@@ -271,25 +274,25 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_s_profile(_CardID, axis, 0, dS_para);//设置S段速度参数
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_s_profile err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_s_profile err:{ret}");
             }
             ret = LTDMC.dmc_set_dec_stop_time(_CardID, axis, dTdec); //设置减速停止时间
             if (ret != 0)
             {
                 _logger?.Error($"dmc_set_dec_stop_time err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_set_dec_stop_time err:{ret}");
             }
             ret = LTDMC.dmc_vmove(_CardID, axis, sDir);//连续运动
             if (ret != 0)
             {
                 _logger?.Error($"dmc_vmove err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"dmc_vmove err:{ret}");
             }
             return true;
         }
@@ -303,7 +306,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"StopMove axisNo{axisNo} err!");
-                return false;
+                throw new EtherCATMotionException($"StopMove axisNo{axisNo} err!");
             }
 
             return true;
@@ -318,7 +321,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"Emg_stop axisNo{axisNo} err!");
-                return false;
+                throw new EtherCATMotionException($"Emg_stop axisNo{axisNo} err!");
             }
 
             return true;
@@ -330,7 +333,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ServoOn err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"ServoOn err:{ret}");
             }
             return true;
         }
@@ -341,7 +344,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ServeOff err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"ServeOff err:{ret}");
             }
             return true;
         }
@@ -352,7 +355,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ResetAxisAlm err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"ResetAxisAlm err:{ret}");
             }
             return true;
         }
@@ -370,7 +373,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ConfigSoftLimit err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"ConfigSoftLimit err:{ret}");
             }
             return true;
         }
@@ -388,7 +391,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ConfigSoftLimitWithOutValue err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"ConfigSoftLimitWithOutValue err:{ret}");
             }
             return true;
         }
@@ -401,7 +404,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"Get_stop_code err:{ret}");
-                return -1;
+                throw new EtherCATMotionException($"Get_stop_code err:{ret}");
             }
             return stopCode;
         }
@@ -416,6 +419,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"GetCurrentPos err:{ret}");
+                throw new EtherCATMotionException($"GetCurrentPos err:{ret}");
             }
             double currentPos = Math.Round(pos / ele.EleGear, 3);
             return currentPos;
@@ -430,6 +434,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"GetCurrentVel err:{ret}");
+                throw new EtherCATMotionException($"GetCurrentVel err:{ret}");
             }
             double currentPos = Math.Round(speed / ele.EleGear, 3);
             return currentPos;
@@ -450,6 +455,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"GetMotionStatus err:{ret}");
+                throw new EtherCATMotionException($"GetMotionStatus err:{ret}");
             }
 
             return status;
@@ -467,13 +473,13 @@ namespace BQJX.Core
             if (result != 0)
             {
                 _logger.Error($"set_home_profile err:{result}");
-                return false;
+                throw new EtherCATMotionException($"set_home_profile err:{result}");
             }
             result = LTDMC.nmc_home_move(_CardID, axisNo);//执行回原点运动
             if (result != 0)
             {
                 _logger.Error($"home_move err:{result}");
-                return false;
+                throw new EtherCATMotionException($"home_move err:{result}");
             }
             return true;
         }
@@ -538,6 +544,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"SetOffset err:{ret}");
+                throw new EtherCATMotionException($"SetOffset err:{ret}");
             }
         }
 
@@ -551,7 +558,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"SetPositonToSystem err:{ret}!");
-                return false;
+                throw new EtherCATMotionException($"SetPositonToSystem err:{ret}!");
             }
             return true;
         }
@@ -563,6 +570,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"WriteDebugLog err:{ret}");
+                throw new EtherCATMotionException($"WriteDebugLog err:{ret}");
             }
         }
 
@@ -573,6 +581,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"GetAxisAlmCode err:{ret}");
+                throw new EtherCATMotionException($"GetAxisAlmCode err:{ret}");
             }
             return errCode;
         }
@@ -583,7 +592,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"SetAxisIoMap err:{ret}");
-                return false;
+                throw new EtherCATMotionException($"SetAxisIoMap err:{ret}");
             }
             return true;
         }

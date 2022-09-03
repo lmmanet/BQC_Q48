@@ -1,5 +1,6 @@
 ﻿using BQJX.Core.Base;
 using BQJX.Core.Interface;
+using System;
 
 namespace BQJX.Core
 {
@@ -55,7 +56,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"WriteByte_DO err:{ret}");
-                return false;
+                throw new Exception($"WriteByte_DO err:{ret}");
             }
             return true;
         }
@@ -71,7 +72,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"WriteBit_DO err:{ret}");
-                return false;
+                throw new Exception($"WriteBit_DO err:{ret}");
             }
             return true;
         }
@@ -84,7 +85,7 @@ namespace BQJX.Core
             if (ret != 0 )
             {
                 _logger?.Error($"WriteBit_DO_Delay_Reverse err:{ret}");
-                return false;
+                throw new Exception($"WriteBit_DO_Delay_Reverse err:{ret}");
             }
             return true;
 
@@ -96,7 +97,7 @@ namespace BQJX.Core
             if (ret!=0)
             {
                 _logger?.Error($"SetBit_DI_Count_Mode err:{ret}");
-                return false;
+                throw new Exception($"SetBit_DI_Count_Mode err:{ret}");
             }
             return true;
         }
@@ -107,7 +108,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"SetBit_DI_Count_Value err:{ret}");
-                return false;
+                throw new Exception($"SetBit_DI_Count_Value err:{ret}");
             }
             return true;
         }
@@ -119,7 +120,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"GetBit_DI_Count_Value err:{ret}");
-                return 0;
+                throw new Exception($"GetBit_DI_Count_Value err:{ret}");
             }
             return result;
         }
@@ -133,7 +134,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ReadByte_AD err:{ret}");
-                return -1;
+                throw new Exception($"ReadByte_AD err:{ret}");
             }
 
             return result;
@@ -145,7 +146,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"WriteByte_DA err:{ret}");
-                return false;
+                throw new Exception($"WriteByte_DA err:{ret}");
             }
             return true;
         }
@@ -157,7 +158,7 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"ReadDoubleDA err:{ret}");
-                return -1;
+                throw new Exception($"ReadDoubleDA err:{ret}");
             }
 
             return result;
@@ -173,14 +174,14 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"Config_AD err{ret}");
-                return false;
+                throw new Exception($"Config_AD err:{ret}");
             }
 
             ret = LTDMC.nmc_set_node_od(_cardNo, portNum, slaveId, index_filter, channel, ad_len, filterTime);
             if (ret != 0)
             {
                 _logger?.Error($"Config_AD err{ret}");
-                return false;
+                throw new Exception($"Config_AD err:{ret}");
             }
 
             return true;
@@ -196,14 +197,14 @@ namespace BQJX.Core
             if (ret != 0)
             {
                 _logger?.Error($"Config_DA err{ret}");
-                return false;
+                throw new Exception($"Config_DA err:{ret}");
             }
 
             ret = LTDMC.nmc_set_node_od(_cardNo, portNum, slaveId, index_filter, channel, ad_len, enable);
             if (ret != 0)
             {
                 _logger?.Error($"Config_DA err{ret}");
-                return false;
+                throw new Exception($"Config_DA err:{ret}");
             }
 
             return true;
@@ -251,6 +252,7 @@ namespace BQJX.Core
             if (ioString.Length < 4)
             {
                 _logger?.Error($"IO格式错误:{ioString } ");
+                throw new InvalidOperationException($"IO格式错误:{ioString } ");
             }
             ushort main = ushort.Parse(ioString.Substring(1, ioString.Length - 3));
             ushort sub = ushort.Parse(ioString.Substring(ioString.Length - 1, 1));

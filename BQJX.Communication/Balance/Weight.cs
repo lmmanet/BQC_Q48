@@ -1,4 +1,5 @@
-﻿using BQJX.Common.Interface;
+﻿using BQJX.Common.Common;
+using BQJX.Common.Interface;
 using BQJX.Communication.Modbus;
 using BQJX.Core.Interface;
 using System;
@@ -24,6 +25,15 @@ namespace BQJX.Communication.Balance
         private IModbusBase _modbus;
 
         private ILogger _logger;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// 通讯失败尝试次数
+        /// </summary>
+        public int AttemptTimes { get; set; } = 3;
 
         #endregion
 
@@ -98,15 +108,34 @@ namespace BQJX.Communication.Balance
         /// <returns></returns>
         private async Task<List<short>> GetStatus(ushort id)
         {
-            var result = await _modbus.ReadMultiKeepRegister<short>((byte)id, 0,4).ConfigureAwait(false);
-
-            if (!result.IsSuccess)
+            int attempt = 0;
+        func: try
             {
-                _logger?.Error($"GetStatus err!");
-                return new List<short>() { -1,-1,-1,-1};
+                var result = await _modbus.ReadMultiKeepRegister<short>((byte)id, 0, 4).ConfigureAwait(false);
+
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"GetStatus err!");
+                    throw new CommunicationException(result.Message);
+                }
+
+                return result.Data;
             }
-            
-            return result.Data;
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+           
         }
 
         /// <summary>
@@ -117,13 +146,32 @@ namespace BQJX.Communication.Balance
         /// <returns></returns>
         private async Task<bool> SendCommand(ushort id,short cmd)
         {
-            var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 40002, cmd).ConfigureAwait(false);
-            if (!result.IsSuccess)
+            int attempt = 0;
+        func: try
             {
-                _logger?.Error($"SendCommand Err!");
-                return false;
+                var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 40002, cmd).ConfigureAwait(false);
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"SendCommand Err!");
+                    throw new CommunicationException(result.Message);
+                }
+                return true;
             }
-            return true;
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+         
         }
 
         #endregion

@@ -46,6 +46,7 @@
     <Compile Include="Base\MotionIoStatus.cs" />
     <Compile Include="Base\MotionStatus.cs" />
     <Compile Include="CardBase.cs" />
+    <Compile Include="EtherCATMotionException.cs" />
     <Compile Include="IoDevice.cs" />
     <Compile Include="EtherCATMotion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

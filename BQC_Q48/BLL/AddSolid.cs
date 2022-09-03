@@ -23,7 +23,6 @@ namespace Q_Platform.BLL
         private readonly IAddSolidPosDataAccess _dataAccess;
         private readonly IWeight _weight;
 
-
         #endregion
 
         #region Private Variant

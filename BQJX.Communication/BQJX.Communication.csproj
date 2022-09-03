@@ -44,6 +44,7 @@
     <Compile Include="Balance\Weight.cs" />
     <Compile Include="CL2C\LS_Motion.cs" />
     <Compile Include="CL2C\MotionIoEnum.cs" />
+    <Compile Include="CommunicationException.cs" />
     <Compile Include="Common\Result.cs" />
     <Compile Include="Common\SerialPortBase.cs" />
     <Compile Include="DataConvert\BoolArray.cs" />

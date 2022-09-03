@@ -577,6 +577,95 @@ namespace Q_Platform.BLL
             return true;
         }
 
+
+
+
+
+
+
+
+        /// <summary>
+        /// 移液器移动到指定位置
+        /// </summary>
+        /// <param name="coordinate"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> PipettorMoveTo(double[] coordinate, CancellationTokenSource cts)
+        {
+            double x = coordinate[0];
+            double y = coordinate[1];
+            double z = coordinate[2];
+            ushort[] axisXY = new ushort[2] { _axisX, _axisY };
+            double[] targetArr = new double[2] { x,y};
+
+            //判断Z轴是否在原点
+            if (await CheckAxisZInSafePos(cts))
+            {
+                return false;
+            }
+
+            //XY轴移动到取料位置
+            var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY,targetArr,_moveVel,cts).ConfigureAwait(false);
+            if (!ret)
+            {
+                return false;
+            }
+
+            //Z轴下降到取料位置
+            var result = await _motion.P2pMoveWithCheckDone(_axisZ2, z, _moveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                throw new Exception("Z2轴下降到指定位置失败");
+            }
+            return true;
+
+        }
+
+
+        /// <summary>
+        /// 搬运XYZ移动到坐标点
+        /// </summary>
+        /// <param name="coordinate"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> CarrierMoveTo(double[] coordinate, CancellationTokenSource cts)
+        {
+            double x = coordinate[0];
+            double y = coordinate[1];
+            double z = coordinate[2];
+            ushort[] axisXY = new ushort[2] { _axisX, _axisY };
+            double[] targetArr = new double[2] { x, y };
+
+            //判断Z轴是否在原点
+            if (await CheckAxisZInSafePos(cts))
+            {
+                return false;
+            }
+
+            //XY轴移动到取料位置
+            var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, cts).ConfigureAwait(false);
+            if (!ret)
+            {
+                return false;
+            }
+
+            //Z轴下降到取料位置
+            var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                throw new Exception("Z1轴下降到指定位置失败");
+            }
+
+            return true;
+        }
+
+
+
+
+
+
+
+
         //=======================================================//
 
         /// <summary>
