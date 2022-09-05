@@ -8,6 +8,37 @@ namespace BQJX.Common
 {
     public class TechParams
     { 
+       
+        /// <summary>
+        /// 加固A
+        /// </summary>
+        public double Solid_A { get; set; }
+
+        /// <summary>
+        /// 加固B
+        /// </summary>
+        public double Solid_B { get; set; }
+
+        /// <summary>
+        /// 加固C
+        /// </summary>
+        public double Solid_C { get; set; }
+
+        /// <summary>
+        /// 加固D
+        /// </summary>
+        public double Solid_D { get; set; }
+
+        /// <summary>
+        /// 加固E
+        /// </summary>
+        public double Solid_E { get; set; }
+
+        /// <summary>
+        /// 加固F
+        /// </summary>
+        public double Solid_F { get; set; }
+
         /// <summary>
         /// 溶剂A添加量
         /// </summary>
@@ -29,44 +60,105 @@ namespace BQJX.Common
         public double Solvent_D { get; set; }
 
         /// <summary>
+        /// 回湿时间
+        /// </summary>
+        public int WetTime { get; set; }
+
+
+
+        /// <summary>
         /// 涡旋时间
         /// </summary>
         public int VortexTime { get; set; }
 
         /// <summary>
-        /// 均质子添加量
+        /// 涡旋速度
         /// </summary>
-        public int Junzhizi { get; set; }
+        public int VortexVel { get; set; }
 
         /// <summary>
-        /// 超声时间
+        /// 提取振荡时间
         /// </summary>
-        public int UltrasoundTime { get; set; }
+        public int VibrationOneTime { get; set; }
 
         /// <summary>
-        /// 均质时间
+        /// 提取振荡速度
         /// </summary>
-        public int HomoTime { get; set; }
-
-        /// <summary>
-        /// 均质速度
-        /// </summary>
-        public int HomoVelocity { get; set; }
+        public int VibrationOneVel { get; set; }
 
         /// <summary>
         /// 离心速度
         /// </summary>
-        public int CentrifugalVelocity { get; set; }
+        public int CentrifugalOneVelocity { get; set; }
 
         /// <summary>
         /// 离心时间
         /// </summary>
-        public int CentrifugalTime { get; set; }
+        public int CentrifugalOneTime { get; set; }
 
         /// <summary>
         /// 上清液提取量
         /// </summary>
         public double ExtractVolume { get; set; }
+
+        /// <summary>
+        /// 净化振荡时间
+        /// </summary>
+        public int VibrationTwoTime { get; set; }
+
+        /// <summary>
+        /// 净化振荡速度
+        /// </summary>
+        public int VibrationTwoVel { get; set; }
+
+        /// <summary>
+        /// 净化离心速度
+        /// </summary>
+        public int CentrifugalTwoVelocity { get; set; }
+
+        /// <summary>
+        /// 净化离心时间
+        /// </summary>
+        public int CentrifugalTwoTime { get; set; }
+
+
+        /// <summary>
+        /// 浓缩量
+        /// </summary>
+        public double ConcentrationVolume { get; set; }
+
+        /// <summary>
+        /// 浓缩速度
+        /// </summary>
+        public int ConcentrationVel { get; set; }
+
+        /// <summary>
+        /// 浓缩时间
+        /// </summary>
+        public int ConcentrationTime { get; set; }
+
+        /// <summary>
+        /// 定容复溶
+        /// </summary>
+        public double MyProperty { get; set; }
+
+        /// <summary>
+        /// 加标A
+        /// </summary>
+        public double Add_A { get; set; }
+        
+        /// <summary>
+        /// 加标B
+        /// </summary>
+        public double Add_B { get; set; }
+
+
+
+        /// <summary>
+        /// 提取样品量
+        /// </summary>
+        public double ExtractSampleVolume { get; set; }
+
 
         /// <summary>
         /// 处理工艺（处理方法）

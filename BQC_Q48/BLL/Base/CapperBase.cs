@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
-    public class Vortex : IVortex
+    public class CapperBase
     {
 
 
@@ -30,17 +30,21 @@ namespace Q_Platform.BLL
 
 
         protected ushort _axisY;
+        protected ushort _axisZ;
+        protected ushort _axisC1;
+        protected ushort _axisC2;
+
 
         protected ushort _claw1;
         protected ushort _claw2;
 
-
+        
 
         #endregion
 
         #region Constructors
 
-        public Vortex(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ILogger logger)
+        public CapperBase(IIoDevice io,ILS_Motion motion, IGlobalStatus globalStatus, ILogger logger)
         {
             this._io = io;
             this._motion = motion;
@@ -54,23 +58,10 @@ namespace Q_Platform.BLL
 
 
 
-        public async Task<bool> StartVortex()
-        {
-            throw new NotImplementedException();
-        }
-
-
-
-
-
-
-
 
 
 
 
 
     }
-
 }
-

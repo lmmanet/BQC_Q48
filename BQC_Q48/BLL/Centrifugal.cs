@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
-    public class Centrifugal
+    public class Centrifugal : ICentrifugal
     {
 
         #region Private Members
@@ -32,7 +32,7 @@ namespace Q_Platform.BLL
         private ushort _homeMode = 33; //离心机回零模式
 
         private ushort _shadowOpen = 0; //离心机门打开控制
-        private ushort  _shadowClose = 1; //离心机门关闭控制
+        private ushort _shadowClose = 1; //离心机门关闭控制
         private ushort _shadowOpenSensor = 0; //离心机门打开感应
         private ushort _shadowCloseSensor = 1; //离心机门关闭感应
 
@@ -117,8 +117,8 @@ namespace Q_Platform.BLL
         /// </summary>
         public void OpenShadow()
         {
-            _io.WriteBit_DO(_shadowClose,false);
-            _io.WriteBit_DO(_shadowOpen,true);
+            _io.WriteBit_DO(_shadowClose, false);
+            _io.WriteBit_DO(_shadowOpen, true);
             bool result = false;
             int temp = 0;
             do
@@ -138,8 +138,8 @@ namespace Q_Platform.BLL
         /// </summary>
         public void CloseShadow()
         {
-            _io.WriteBit_DO(_shadowOpen,false);
-            _io.WriteBit_DO(_shadowClose,true);
+            _io.WriteBit_DO(_shadowOpen, false);
+            _io.WriteBit_DO(_shadowClose, true);
             bool result = false;
             int temp = 0;
             do
@@ -173,7 +173,7 @@ namespace Q_Platform.BLL
                 }
             } while (!result);
         }
-           
+
         /// <summary>
         /// Y气缸离心机位
         /// </summary>
@@ -271,7 +271,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> C_GoHome()
         {
-            return await _stepMotion.GoHomeWithCheckDone(_axisC,null).ConfigureAwait(false);
+            return await _stepMotion.GoHomeWithCheckDone(_axisC, null).ConfigureAwait(false);
         }
 
         /// <summary>

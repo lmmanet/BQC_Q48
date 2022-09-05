@@ -1,8 +1,11 @@
-﻿using BQJX.Common.Common;
+﻿using BQJX.Common;
+using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using Q_Platform.DAL;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
@@ -58,6 +61,18 @@ namespace Q_Platform.BLL
 
         #endregion
 
+
+        /// <summary>
+        /// 开始移液
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="volume"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> DoPipettingAsync(Sample sample, CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
 
 
 

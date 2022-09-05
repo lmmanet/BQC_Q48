@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
-    public class AddSolid
+    public class AddSolid : IAddSolid
     {
 
         #region Private Members
@@ -57,7 +57,7 @@ namespace Q_Platform.BLL
 
         #region Construtors
 
-        public AddSolid(IEtherCATMotion motion, IIoDevice io, ILS_Motion stepMotion, IAddSolidPosDataAccess dataAccess,IWeight weight,IGlobalStatus globalStatus, ILogger logger)
+        public AddSolid(IEtherCATMotion motion, IIoDevice io, ILS_Motion stepMotion, IAddSolidPosDataAccess dataAccess, IWeight weight, IGlobalStatus globalStatus, ILogger logger)
         {
             this._motion = motion;
             this._io = io;
@@ -78,17 +78,17 @@ namespace Q_Platform.BLL
         /// <param name="solid">种类</param>
         /// <param name="weight">数量</param>
         /// <returns></returns>
-        public async Task<bool> AddSolidAsync(int solid,double weight,CancellationTokenSource cts)
+        public async Task<bool> AddSolidAsync(int solid, double weight, CancellationTokenSource cts)
         {
             //伺服Y轴移动到指定位置
-            var result1 = _motion.P2pMoveWithCheckDone(_axisY1, _posData.Solid_A[0], _sevorMoveVel,cts); 
+            var result1 = _motion.P2pMoveWithCheckDone(_axisY1, _posData.Solid_A[0], _sevorMoveVel, cts);
             var result = await X_Left().ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
             //步进Y轴移动到指定位置
-            result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, _posData.Solid_A[1], _stepMoveVel,cts).ConfigureAwait(false);
+            result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, _posData.Solid_A[1], _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -99,7 +99,7 @@ namespace Q_Platform.BLL
             _stepMotion.VelocityMove(_axisC1, 10);
             _stepMotion.VelocityMove(_axisC2, 10);
 
-            result =  result1.GetAwaiter().GetResult();
+            result = result1.GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -136,7 +136,7 @@ namespace Q_Platform.BLL
                 _logger?.Error($"AddSolid 点位输出失败");
                 return false;
             }
-            return await Task.Run(() => 
+            return await Task.Run(() =>
             {
                 while (true)
                 {

@@ -10,6 +10,7 @@ using BQJX.Core.Common;
 using BQJX.Core.Interface;
 using BQJX.DAL.Base;
 using GalaSoft.MvvmLight.Ioc;
+using Q_Platform.BLL;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
@@ -62,6 +63,33 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IEPG26>(() => new EPG26(SimpleIoc.Default.GetInstance<IModbusBase>("Claw"), logger));
             SimpleIoc.Default.Register<IWeight>(() => new Weight(SimpleIoc.Default.GetInstance<IModbusBase>("Balance"), logger));
 
+            //注册业务
+
+            //SimpleIoc.Default.Register<CapperBase, CapperOne>();
+            //SimpleIoc.Default.Register<CapperBase, CapperTwo>();
+            //SimpleIoc.Default.Register<CapperBase, CapperThree>();
+            //SimpleIoc.Default.Register<CapperBase, CapperFour>();
+            //SimpleIoc.Default.Register<CapperBase, CapperFive>();
+
+            //SimpleIoc.Default.Register<CarrierBase, CarrierOne>();
+            //SimpleIoc.Default.Register<CarrierBase, CarrierTwo>();
+
+
+            //SimpleIoc.Default.Register<VibrationBase, VibrationOne>();
+            //SimpleIoc.Default.Register<VibrationBase, VibrationTwo>();
+
+            SimpleIoc.Default.Register<IAddSolid, AddSolid>();
+            SimpleIoc.Default.Register<ICentrifugal, Centrifugal>();
+            SimpleIoc.Default.Register<IConcentration, Concentration>();
+            SimpleIoc.Default.Register<IVortex, Vortex>();
+
+
+
+
+
+
+
+
 
 
         }
@@ -79,6 +107,8 @@ namespace BQC_Q48
             new MainWindow().ShowDialog();
             // }
             Application.Current.Shutdown(0);
+
+
 
            
         }

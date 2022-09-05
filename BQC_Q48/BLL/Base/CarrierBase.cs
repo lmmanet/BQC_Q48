@@ -1,4 +1,5 @@
-﻿using BQJX.Common.Interface;
+﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using System;
 using System.Collections.Generic;
@@ -89,18 +90,6 @@ namespace Q_Platform.BLL
 
         public abstract bool UpdatePosData();
 
-        /// <summary>
-        /// 开始移液
-        /// </summary>
-        /// <param name="num"></param>
-        /// <param name="volume"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public async Task<bool> DoPipettingAsync(int num, double volume, CancellationTokenSource cts)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         #region Protected Methods
@@ -113,7 +102,7 @@ namespace Q_Platform.BLL
         /// <param name="z"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> GetTubeAsync(double x,double y,double z,CancellationTokenSource cts)
+        protected async Task<bool> GetTubeAsync(double[] pos,CancellationTokenSource cts)
         {
 
             //判断手爪是否抓取物件 在指定打开位置
@@ -132,7 +121,7 @@ namespace Q_Platform.BLL
 
             //XY轴移动到目标位置
             ushort[] axes = new ushort[2] {_axisX,_axisY };
-            double[] posArray = new double[2] { x, y };
+            double[] posArray = new double[2] { pos[0], pos[1] };
             result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
@@ -149,7 +138,7 @@ namespace Q_Platform.BLL
 
 
             //Z1轴下降到指定位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ1, pos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"GetTubeAsync Z1轴移动到指定位置失败");
@@ -178,7 +167,7 @@ namespace Q_Platform.BLL
         /// <param name="z"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> PutTubeAsync(double x,double y,double z, CancellationTokenSource cts)
+        protected async Task<bool> PutTubeAsync(double[] pos, CancellationTokenSource cts)
         {
             //判断手爪上是否有物件
             if (!await ClawIsGetchPiece())
@@ -196,7 +185,7 @@ namespace Q_Platform.BLL
 
             //XY轴移动到目标位置
             ushort[] axes = new ushort[2] { _axisX, _axisY };
-            double[] posArray = new double[2] { x, y };
+            double[] posArray = new double[2] { pos[0], pos[1] };
             result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
@@ -212,7 +201,7 @@ namespace Q_Platform.BLL
             }
 
             //Z1轴下降到指定位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ1, pos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"PutTubeAsync Z1轴移动到指定位置失败");
@@ -240,7 +229,7 @@ namespace Q_Platform.BLL
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        protected async Task<bool> GetNeedleAsync(double x,double y,double z, CancellationTokenSource cts)
+        protected async Task<bool> GetNeedleAsync(double[] pos, CancellationTokenSource cts)
         {
             //判断移液器是否有枪头
             if (_isGotNeedle)
@@ -258,7 +247,7 @@ namespace Q_Platform.BLL
 
             //XY轴移动到目标位置
             ushort[] axes = new ushort[2] { _axisX, _axisY };
-            double[] posArray = new double[2] { x, y };
+            double[] posArray = new double[2] { pos[0], pos[1] };
             result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
@@ -275,7 +264,7 @@ namespace Q_Platform.BLL
             }
 
             //Z2轴下降到指定位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ2, z, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"GetNeedleAsync Z2轴移动到指定位置失败");
@@ -305,7 +294,7 @@ namespace Q_Platform.BLL
         /// <param name="z"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> PutNeedleAsync(double x,double y,double z, CancellationTokenSource cts)
+        protected async Task<bool> PutNeedleAsync(double[] pos, CancellationTokenSource cts)
         {
             //判断移液器是否有枪头
             if (!_isGotNeedle)
@@ -323,7 +312,7 @@ namespace Q_Platform.BLL
 
             //XY轴移动到目标位置
             ushort[] axes = new ushort[2] { _axisX, _axisY };
-            double[] posArray = new double[2] { x, y };
+            double[] posArray = new double[2] { pos[0], pos[1] };
             result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
@@ -332,7 +321,7 @@ namespace Q_Platform.BLL
             }
 
             //Z2轴下降到指定位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ2, z, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"PutNeedleAsync Z2轴移动到指定位置失败");
@@ -371,11 +360,11 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> DoPipettingAsync(double sourceX,double sourceY,double sourceZ,double targetX,double targetY,double targetZ,double volume, CancellationTokenSource cts)
+        protected async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume, CancellationTokenSource cts)
         {
             ushort[] axes = new ushort[2] { _axisX, _axisY };
-            double[] sourcePosArray = new double[2] { sourceX, sourceY };
-            double[] targetPosArray = new double[2] { targetX, targetY };
+            double[] sourcePosArray = new double[2] { sourcePos[0], sourcePos[1] };
+            double[] targetPosArray = new double[2] { targetPos[0], targetPos[1] };
 
             //判断Z1 Z2是否在原位
             var result = await CheckAxisZInSafePos(cts).ConfigureAwait(false);
@@ -402,7 +391,7 @@ namespace Q_Platform.BLL
             }
 
             //Z2轴下降到取位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourceZ, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourcePos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"DoPipettingAsync Z2轴移动到取液位置失败");
@@ -445,7 +434,7 @@ namespace Q_Platform.BLL
             }
 
             //Z2轴下降到取位置
-            result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourceZ, _moveVel, cts).ConfigureAwait(false);
+            result = await _motion.P2pMoveWithCheckDone(_axisZ2, targetPos[2], _moveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Warn($"DoPipettingAsync Z2轴移动到吐液位置失败");

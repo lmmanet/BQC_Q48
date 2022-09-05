@@ -9,7 +9,7 @@ namespace BQJX.Common
     public class Sample
     {
         /// <summary>
-        /// 样品位置编号1-16
+        /// 样品位置编号1-48
         /// </summary>
         public ushort Id { get; set; }
 
@@ -36,7 +36,7 @@ namespace BQJX.Common
 
         /// <summary>
         /// 试管状态
-        /// 对应0-2
+        /// 对应0-1
         /// </summary>
         public int TubeStatus { get; set; }
 

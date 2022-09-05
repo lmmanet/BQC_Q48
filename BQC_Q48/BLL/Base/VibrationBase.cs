@@ -1,4 +1,5 @@
 ﻿using BQJX.Common.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,14 @@ namespace Q_Platform.BLL
 {
     public class VibrationBase
     {
-        protected ILogger _logger;
-        protected GlobalStatus _proStatus;
 
         #region Fields
-        protected static IEtherCATMotion _motion;
-        protected static IIoDevice _io;
-        protected CancellationTokenSource cts = new CancellationTokenSource();
+
+        protected readonly IEtherCATMotion _motion;
+        protected readonly IIoDevice _io;
+        protected readonly IGlobalStatus _globalStauts;
+        protected readonly ILogger _logger;
+
         #endregion
 
         #region Member
@@ -27,34 +29,22 @@ namespace Q_Platform.BLL
         protected string _clawOpenSensor;
         protected string _clawCloseSensor;
 
-        /// <summary>
-        /// 正在振荡中
-        /// </summary>
-        /// 
-        private bool _isRunning;
-
-        /// <summary>
-        /// 是否在原点
-        /// </summary>
-        private bool _isAtHome;
-
-        /// <summary>
-        /// 正在回零中
-        /// </summary>
-        private bool _isHoming;
 
         #endregion
 
 
-        public void Initial(ushort axisNo, string output, string open,string close)
+        #region Constructors
+
+        public VibrationBase(IEtherCATMotion motion, IIoDevice io, IGlobalStatus globalStauts, ILogger logger)
         {
-            this._axisNo = axisNo;
-            this._clawOutput = output;
-            this._clawOpenSensor = open;
-            this._clawCloseSensor = close;
-            //_motion = Global.GlobalCache.GetInstance().GetMotionInstance();
-            //_io = Global.GlobalCache.GetInstance().GetIoDeviceInstance();
+            this._motion = motion;
+            this._io = io;
+            this._globalStauts = globalStauts;
+            this._logger = logger;
         }
+
+        #endregion
+
 
         /// <summary>
         /// 启动振荡
@@ -63,18 +53,13 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> StartVibration(double vel)
         {
-            _isAtHome = false; 
-            //判断是否在振荡
-            if (_isRunning)
-            {
-                return true;
-            }
+
             //判断抱夹气缸是否夹紧
             if (!_io.ReadBit_DI(_clawCloseSensor))
             {
                 if (!await SetHolding().ConfigureAwait(false))
                 {
-                    _logger?.Error("启动涡旋失败！");
+                    _logger?.Error("启动振荡失败！");
                     return false;
                 }
             }
@@ -87,7 +72,6 @@ namespace Q_Platform.BLL
                 return false;
             }
 
-            _isRunning = true;
             return true;
         }
 
@@ -96,46 +80,29 @@ namespace Q_Platform.BLL
         /// </summary>
         public void StopVibration()
         {
-            _isAtHome = false;
-            //判断是否为停止状态
-            if (!_isRunning)
+            var result = _motion.StopMove(_axisNo);
+            if (!result)
             {
-                return;
+                throw new Exception("振荡停止失败！");
             }
-
-            //判断在回零中，停止回零
-            if (_isHoming)
-            {
-                cts.Cancel();
-            }
-
-            _isRunning = false;
         }
 
         /// <summary>
         /// 振荡回零位
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> HomeVibration()
+        public async Task<bool> HomeVibration(CancellationTokenSource cts)
         {
-            //判断是否在原位
-            if (_isAtHome)
-            {
-                return true;
-            }
+           
             //开始回零  Z相回零
             bool ret = await _motion.GohomeWithCheckDone(_axisNo,33, cts);
-            _isHoming = true;
             if (!ret)
             {
                 _logger?.Error("振荡回零失败！");
                 cts = new CancellationTokenSource();
-                _isHoming = false;
                 return false;
             }
 
-            _isHoming = false;
-            _isAtHome = true;
             return true;
         }
 
