@@ -1,4 +1,5 @@
-﻿using BQJX.Common.Common;
+﻿using BQJX.Common;
+using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using System;
@@ -25,9 +26,9 @@ namespace Q_Platform.BLL
         #region Member
 
         protected ushort _axisNo;
-        protected string _clawOutput;
-        protected string _clawOpenSensor;
-        protected string _clawCloseSensor;
+        protected string _holding;
+        protected string _holdingOpenSensor; //原位
+        protected string _holdingCloseSensor; //到位
 
 
         #endregion
@@ -45,100 +46,161 @@ namespace Q_Platform.BLL
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// 振荡回零位
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task<bool> GoHome(CancellationTokenSource cts)
+        {
+
+            //释放抱夹气缸
+            ResetHolding();
+            //开始回零  Z相回零
+            bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
+            if (!ret)
+            {
+                _logger?.Error("振荡回零失败！");
+                return false;
+            }
+
+            //抱夹气缸伸出
+            SetHolding();
+
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public virtual async Task<bool> StartVibrationAsync(Sample sample,CancellationTokenSource cts)
+        {
+            try
+            {
+                double vel = 300 / 60;
+                var result = await StartVibration(30, vel, cts).ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+
+
+
+        #endregion
+
+        #region Protected Methods
 
         /// <summary>
         /// 启动振荡
         /// </summary>
         /// <param name="vel"></param>
         /// <returns></returns>
-        public async Task<bool> StartVibration(double vel)
+        protected async Task<bool> StartVibration(int time, double vel, CancellationTokenSource cts)
         {
 
-            //判断抱夹气缸是否夹紧
-            if (!_io.ReadBit_DI(_clawCloseSensor))
-            {
-                if (!await SetHolding().ConfigureAwait(false))
-                {
-                    _logger?.Error("启动振荡失败！");
-                    return false;
-                }
-            }
+            //释放抱夹气缸
+            ResetHolding();
 
             //开始振荡
             bool ret = _motion.VelocityMove(_axisNo, vel, 1);
             if (!ret)
             {
-                _logger?.Error("启动振荡失败！");
-                return false;
+                throw new Exception("启动振荡失败！");
             }
 
-            return true;
-        }
-
-        /// <summary>
-        /// 停止振荡
-        /// </summary>
-        public void StopVibration()
-        {
-            var result = _motion.StopMove(_axisNo);
-            if (!result)
+            //开始定时
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
+            do
             {
-                throw new Exception("振荡停止失败！");
-            }
-        }
+                Thread.Sleep(1000);
+                if (DateTime.Now > end)
+                {
+                    break;
+                }
+                if (cts.IsCancellationRequested)
+                {
+                    _motion.StopMove(_axisNo);
+                    return false;
+                }
+            } while (true);
 
-        /// <summary>
-        /// 振荡回零位
-        /// </summary>
-        /// <returns></returns>
-        public async Task<bool> HomeVibration(CancellationTokenSource cts)
-        {
-           
-            //开始回零  Z相回零
-            bool ret = await _motion.GohomeWithCheckDone(_axisNo,33, cts);
+            //停止电机
+            ret = _motion.StopMove(_axisNo);
             if (!ret)
             {
-                _logger?.Error("振荡回零失败！");
-                cts = new CancellationTokenSource();
-                return false;
+                throw new Exception("停止振荡失败！");
             }
+            await Task.Delay(500).ConfigureAwait(false);
 
-            return true;
+            return await GoHome(cts).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// 抱夹夹紧
+        /// 抱夹气缸伸出
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> SetHolding()
+        protected virtual void SetHolding(bool checkSensor = true)
         {
-            _io.SetBit_DO(_clawOutput);
-            await Task.Delay(2000).ConfigureAwait(false);
-            bool result = _io.ReadBit_DI(_clawCloseSensor);
+            var result = _io.SetBit_DO(_holding);
             if (!result)
             {
-                _logger?.Error("振荡气缸关闭未到位！");
-                return false;
+                throw new Exception("SetHolding Err!");
             }
-            return true;
+            if (!checkSensor)
+            {
+                return;
+            }
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_holdingCloseSensor);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new Exception("SetHolding超时");
+                }
+            } while (!result);
         }
 
         /// <summary>
-        /// 抱夹松开
+        /// 抱夹气缸释放
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> ResetHolding()
+        protected virtual void ResetHolding(bool checkSensor = true)
         {
-            _io.ResetBit_DO(_clawOutput);
-            await Task.Delay(2000).ConfigureAwait(false);
-            bool result = _io.ReadBit_DI(_clawOpenSensor);
+            var result = _io.ResetBit_DO(_holding);
             if (!result)
             {
-                _logger?.Error("振荡气缸打开未到位！");
-                return false;
+                throw new Exception("ResetHolding Err!");
             }
-            return true;
+            if (!checkSensor)
+            {
+                return;
+            }
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_holdingOpenSensor);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new Exception("ResetHolding 超时");
+                }
+            } while (!result);
         }
 
+        #endregion
     }
 }

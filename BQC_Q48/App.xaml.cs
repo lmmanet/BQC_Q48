@@ -36,9 +36,6 @@ namespace BQC_Q48
             string connString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
             //加载Log配置
 
-            //注册业务
-            //SimpleIoc.Default.Register<ILoginBLL, LoginBLL>();
-
             //注册数据业务
             SimpleIoc.Default.Register<IDataAccessBase>(() => new MySqlDataAccessBase(connString));
             SimpleIoc.Default.Register<ICarrierOneDataAccess, CarrierOneDataAccess>();
@@ -51,6 +48,7 @@ namespace BQC_Q48
 
             SimpleIoc.Default.Register<ILogger, LoggerHelper>();
             var logger = SimpleIoc.Default.GetInstance<ILogger>();
+
             SimpleIoc.Default.Register<ICardBase, CardBase>();
             SimpleIoc.Default.Register<IEtherCATMotion>(()=>new EtherCATMotion(GetSevorAxisInfos(), logger));
             SimpleIoc.Default.Register<IIoDevice, IoDevice>();
@@ -64,8 +62,9 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IWeight>(() => new Weight(SimpleIoc.Default.GetInstance<IModbusBase>("Balance"), logger));
 
             //注册业务
+            SimpleIoc.Default.Register<IGlobalStatus, GlobalStatus>();
 
-            //SimpleIoc.Default.Register<CapperBase, CapperOne>();
+            SimpleIoc.Default.Register<CapperBase, CapperOne>();
             //SimpleIoc.Default.Register<CapperBase, CapperTwo>();
             //SimpleIoc.Default.Register<CapperBase, CapperThree>();
             //SimpleIoc.Default.Register<CapperBase, CapperFour>();
@@ -82,13 +81,6 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<ICentrifugal, Centrifugal>();
             SimpleIoc.Default.Register<IConcentration, Concentration>();
             SimpleIoc.Default.Register<IVortex, Vortex>();
-
-
-
-
-
-
-
 
 
 
@@ -127,7 +119,7 @@ namespace BQC_Q48
                 new AxisEleGear{ AxisName="提取搬运Y轴",AxisNo=1,EleGear = 0.1},
                 new AxisEleGear{ AxisName="提取搬运Z1轴",AxisNo=2,EleGear = 0.0787},
                 new AxisEleGear{ AxisName="提取搬运Z2轴",AxisNo=3,EleGear = 0.0787},
-                new AxisEleGear{ AxisName="提取振荡",AxisNo=4,EleGear = 1},
+                new AxisEleGear{ AxisName="提取振荡",AxisNo=4,EleGear = 1,HomeOffset = 0.35},
                 new AxisEleGear{ AxisName="加盐Y轴",AxisNo=5,EleGear = 0.1},
                 new AxisEleGear{ AxisName="提取移液器",AxisNo=6,EleGear = 2},          //1r == 0.5ml   5000p/r
                 new AxisEleGear{ AxisName="离心Z轴",AxisNo=7,EleGear = 0.0787},
@@ -136,7 +128,7 @@ namespace BQC_Q48
                 new AxisEleGear{ AxisName="搬运Y轴 ",AxisNo=10,EleGear = 0.1},
                 new AxisEleGear{ AxisName="搬运Z1轴",AxisNo=11,EleGear = 0.0787},
                 new AxisEleGear{ AxisName="搬运Z2轴",AxisNo=12,EleGear = 0.0787},
-                new AxisEleGear{ AxisName="净化振荡",AxisNo=13,EleGear = 1},
+                new AxisEleGear{ AxisName="净化振荡",AxisNo=13,EleGear = 1,HomeOffset = 0.75},
                 new AxisEleGear{ AxisName="净化移液器",AxisNo=14,EleGear = 9.45},         //1r  == 0.1058ml   1058p/r
                 new AxisEleGear{ AxisName="净化注射器",AxisNo=15,EleGear = 1}
             

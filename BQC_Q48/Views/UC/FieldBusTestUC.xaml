@@ -24,6 +24,15 @@
             <TextBox Text="{Binding DataValue}"/>
             <Button Content="读取" Command="{Binding ReadCommand}"/>
             <Button Content="写入" Command="{Binding WriteCommand}"/>
+
+
+            <Button Content="测试1" Command="{Binding Command1}"/>
+            <Button Content="测试2" Command="{Binding Command2}"/>
+            <Button Content="测试3" Command="{Binding Command3}"/>
+            <Button Content="测试4" Command="{Binding Command4}"/>
+            <Button Content="测试5" Command="{Binding Command5}"/>
+            <Button Content="测试6" Command="{Binding Command6}"/>
+
         </StackPanel>
         
     </Grid>

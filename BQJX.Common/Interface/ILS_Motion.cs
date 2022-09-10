@@ -198,7 +198,7 @@ namespace BQJX.Core.Interface
         /// <param name="torque"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque, CancellationTokenSource cts);
+        Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque, int timeout, CancellationTokenSource cts);
 
         /// <summary>
         /// 速度运动

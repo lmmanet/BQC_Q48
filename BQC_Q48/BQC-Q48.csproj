@@ -73,6 +73,7 @@
     <Compile Include="BLL\AddSolid.cs" />
     <Compile Include="BLL\Base\CapperBase.cs" />
     <Compile Include="BLL\Base\CarrierBase.cs" />
+    <Compile Include="BLL\Base\SyringBase.cs" />
     <Compile Include="BLL\CapperFive.cs" />
     <Compile Include="BLL\CapperFour.cs" />
     <Compile Include="BLL\CapperOne.cs" />
@@ -87,6 +88,8 @@
     <Compile Include="BLL\Interface\IAddSolid.cs" />
     <Compile Include="BLL\Interface\ICentrifugal.cs" />
     <Compile Include="BLL\Interface\IVortex.cs" />
+    <Compile Include="BLL\SyringOne.cs" />
+    <Compile Include="BLL\SyringTwo.cs" />
     <Compile Include="BLL\VibrationOne.cs" />
     <Compile Include="BLL\VibrationTwo.cs" />
     <Compile Include="BLL\Vortex.cs" />

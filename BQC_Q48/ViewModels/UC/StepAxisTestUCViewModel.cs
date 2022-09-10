@@ -337,19 +337,19 @@ namespace Q_Platform.ViewModels.UC
         {
             if (AxisNo == 17 || AxisNo == 18 )  //拧盖3
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, null);
+                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null);
             }
             else if(AxisNo == 20 || AxisNo == 21 ) //拧盖4
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, null);
+                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null);
             }
             else if(AxisNo == 23 || AxisNo == 24 ) //拧盖5
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, null); 
+                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null); 
             }
             else
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50, null);
+                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50,0, null);
             }
             
         }
@@ -405,22 +405,22 @@ namespace Q_Platform.ViewModels.UC
             if (axis.SlaveId == 5 || axis.SlaveId == 9 || axis.SlaveId == 16 || axis.SlaveId == 19 || axis.SlaveId == 22 //Y 轴
                 || axis.SlaveId == 12 || axis.SlaveId == 13 || axis.SlaveId == 29 || axis.SlaveId == 28 || axis.SlaveId == 27)  //拧盖Z轴
             {
-                int slave = 0;
+                int slave = 1;
                 if (axis.SlaveId == 9 || axis.SlaveId == 13)
-                {
-                    slave = 1;
-                }
-                if (axis.SlaveId == 16 || axis.SlaveId == 29)
                 {
                     slave = 2;
                 }
-                if (axis.SlaveId == 19 || axis.SlaveId == 28)
+                if (axis.SlaveId == 16 || axis.SlaveId == 29)
                 {
                     slave = 3;
                 }
-                if (axis.SlaveId == 22 || axis.SlaveId == 27)
+                if (axis.SlaveId == 19 || axis.SlaveId == 28)
                 {
                     slave = 4;
+                }
+                if (axis.SlaveId == 22 || axis.SlaveId == 27)
+                {
+                    slave = 5;
                 }
                 CapperPosData data = SimpleIoc.Default.GetInstance<ICapperPosDataAccess>().GetCapperPosData(slave);
                 Type type = typeof(CapperPosData);

@@ -1,5 +1,7 @@
-﻿using BQJX.Common.Interface;
+﻿using BQJX.Common.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.DAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +13,53 @@ namespace Q_Platform.BLL
     public class CapperThree : CapperBase
     {
 
-        public CapperThree(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ILogger logger) : base(io, motion, globalStatus, logger)
-        {
 
+        #region Construtors
+
+        public CapperThree(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ILogger logger) : base(io, motion, globalStatus, dataAccess, logger)
+        {
+            _yMoveVel = 10;
+            _axisY = 16;
+            _axisC1 = 17;
+            _axisC2 = 18;
+            _axisZ = 29;
+            _holding = 41;
+            _claw = 42;
+        }
+
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        protected CapperPosData GetPosData()
+        {
+            return _dataAccess.GetCapperPosData(3);
         }
     }
 }

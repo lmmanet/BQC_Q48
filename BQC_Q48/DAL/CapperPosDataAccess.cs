@@ -46,6 +46,7 @@ namespace Q_Platform.DAL
                     data.PutGetPos = item.Field<double>("PutGetPos");
                     data.AddLiquidPos = item.Field<double>("AddLiquidPos");
                     data.CapperPos = item.Field<double>("CapperPos");
+                    data.CapperPos_Z = item.Field<double>("CapperPos_Z");
                 }
             }
             catch (Exception ex)

@@ -790,7 +790,7 @@ namespace BQJX.Communication.CL2C
             return await this.Emg_stop(axisNo).ConfigureAwait(false);
         }
 
-        public async Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque, CancellationTokenSource cts)
+        public async Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque,int timeout, CancellationTokenSource cts)
         {
             int attempt = 0;
         func: try
@@ -836,6 +836,7 @@ namespace BQJX.Communication.CL2C
                 await Task.Delay(500).ConfigureAwait(false);
                 //电机在使能状态
                 var status = 0;
+                DateTime endTime = DateTime.Now + TimeSpan.FromSeconds(timeout);
                 do
                 {
                     status = await GetMotionIoStatus(axisNo).ConfigureAwait(false);
@@ -851,6 +852,11 @@ namespace BQJX.Communication.CL2C
 
                     //电机停止运动   触发停止
                     if ((status & 0x04) != 0x04)
+                    {
+                        return false;
+                    }
+                    //力矩超时
+                    if (DateTime.Now > endTime && timeout > 0)
                     {
                         return false;
                     }
