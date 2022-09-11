@@ -64,7 +64,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         #region Public Methods
 
         /// <summary>
@@ -77,19 +76,29 @@ namespace Q_Platform.BLL
             //手爪打开
             _io.WriteBit_DO(_claw, true);
 
+            //使能Z轴
+            await _motion.ServoOn(_axisZ).ConfigureAwait(false);
             //Z轴回零
-            var result = await _motion.GoHomeWithCheckDone(_axisZ, cts).ConfigureAwait(false);
+            var result = await _motion.DM2C_GoHomeWithCheckDone(_axisZ, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
 
+            //使能Y轴
+            await _motion.ServoOn(_axisY).ConfigureAwait(false);
             //Y轴回零
             result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
+
+            //使能C1轴
+            await _motion.ServoOn(_axisC1).ConfigureAwait(false);
+            //使能C2轴
+            await _motion.ServoOn(_axisC2).ConfigureAwait(false);
+
 
             //复位抱夹
             OpenHolding();
@@ -140,8 +149,6 @@ namespace Q_Platform.BLL
 
 
         #endregion
-
-
 
         #region Protected Methods
 
@@ -343,7 +350,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new Exception("CloseHolding 超时");
+                    throw new ActionTimeoutException("CloseHolding 超时");
                 }
             } while (!result);
 
@@ -376,7 +383,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new Exception("OpenHolding超时");
+                    throw new ActionTimeoutException("OpenHolding超时");
                 }
             } while (!result);
 
@@ -389,6 +396,7 @@ namespace Q_Platform.BLL
         {
             //手爪夹紧
             var result = _io.WriteBit_DO(_claw, false);
+            Thread.Sleep(500);
             if (!result)
             {
                 throw new Exception("CloseClaw Err!");
@@ -402,6 +410,7 @@ namespace Q_Platform.BLL
         {
             //手爪松开
             var result = _io.WriteBit_DO(_claw, true);
+            Thread.Sleep(500);
             if (!result)
             {
                 throw new Exception("OpenClaw Err!");
@@ -411,9 +420,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         
-
-
     }
 }

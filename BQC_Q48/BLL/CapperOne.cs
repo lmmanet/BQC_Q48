@@ -27,6 +27,8 @@ namespace Q_Platform.BLL
             _axisZ = 12;
             _holding = 16;
             _claw = 17;
+            _holdingCloseSensor = 19;  //I1.3
+            _holdingOpenSensor = 20;   //I1.4
 
             _posData = GetPosData();
             _syring = new SyringOne(io,motion);
@@ -50,7 +52,7 @@ namespace Q_Platform.BLL
                 //注射器回零
                 var result1 = _syring.GoHome(cts).ConfigureAwait(false);
                 //拧盖回零
-                var result2 =  base.GoHome(cts).ConfigureAwait(false);
+                var result2 = base.GoHome(cts).ConfigureAwait(false);
                 if (!await result1 || !await result2)
                 {
                     throw new Exception($"回零出错result1:{result1.GetAwaiter().GetResult()}，result2:{result2.GetAwaiter().GetResult()}");

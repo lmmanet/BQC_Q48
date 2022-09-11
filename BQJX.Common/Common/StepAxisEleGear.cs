@@ -53,5 +53,22 @@ namespace BQJX.Common.Common
         /// 回零力矩百分比
         /// </summary>
         public ushort HomeTorque { get; set; } = 50;
+
+        /// <summary>
+        /// 点动转速rpm
+        /// </summary>
+        public int JogVel { get; set; } = 5;
+
+        /// <summary>
+        /// 点动加减速
+        /// </summary>
+        public int JogAccDec { get; set; } = 100;
+
+        /// <summary>
+        /// 是否需要更新数据
+        /// </summary>
+        public bool UpdateParams { get; set; } = false;
+
+
     }
 }

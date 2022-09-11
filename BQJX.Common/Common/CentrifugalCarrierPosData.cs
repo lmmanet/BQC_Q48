@@ -26,10 +26,10 @@ namespace BQJX.Common.Common
         [PosName("C左侧接驳位2")]
         public double CLeftPutPos2 { get; set; }
 
-        [PosName("C左侧接驳位3")]
+        [PosName("C左侧接驳位3")]  //弃用
         public double CLeftPutPos3 { get; set; }
 
-        [PosName("C左侧接驳位4")]
+        [PosName("C左侧接驳位4")]  //弃用
         public double CLeftPutPos4 { get; set; }
 
         [PosName("C中间接驳位1")]
@@ -38,10 +38,10 @@ namespace BQJX.Common.Common
         [PosName("C中间接驳位2")]
         public double CCentPos2 { get; set; }
 
-        [PosName("C中间接驳位3")]
+        [PosName("C中间接驳位3")] //修改为 X1
         public double CCentPos3 { get; set; }
 
-        [PosName("C中间接驳位4")]
+        [PosName("C中间接驳位4")] //修改为 X2
         public double CCentPos4 { get; set; }
 
         [PosName("C右侧接驳位1")]
@@ -50,10 +50,10 @@ namespace BQJX.Common.Common
         [PosName("C右侧接驳位2")]
         public double CRightPos2 { get; set; }
 
-        [PosName("C右侧接驳位3")]
+        [PosName("C右侧接驳位3")]  //弃用
         public double CRightPos3 { get; set; }
 
-        [PosName("C右侧接驳位4")]
+        [PosName("C右侧接驳位4")]  //弃用
         public double CRightPos4 { get; set; }
 
     }

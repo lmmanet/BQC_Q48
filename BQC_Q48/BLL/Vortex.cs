@@ -33,15 +33,15 @@ namespace Q_Platform.BLL
 
         protected double _yMoveVel = 500;
 
-        protected ushort _axisY;  //Y轴
-        protected ushort _vortexMotion1;
-        protected ushort _vortexMotion2;
-        protected ushort _vortexMotionVel1;
-        protected ushort _vortexMotionVel2;
+        protected ushort _axisY = 8;  //Y轴
+        protected ushort _vortexMotion1 =32;
+        protected ushort _vortexMotion2 =33;
+        protected ushort _vortexMotionVel1 = 0;
+        protected ushort _vortexMotionVel2 = 1;
 
-        protected ushort _press;  //下压气缸
-        protected ushort _pressUpSensor;    //下压气缸上感应
-        protected ushort _pressDownSensor;  //下压气缸下感应
+        protected ushort _press = 15;  //下压气缸
+        protected ushort _pressUpSensor = 17;    //下压气缸上感应
+        protected ushort _pressDownSensor =18;  //下压气缸下感应
 
         protected VortexPosData _posData;
 
@@ -76,6 +76,8 @@ namespace Q_Platform.BLL
                 //下压气缸上升
                 PressUp();
 
+                //使能Y轴
+                await _motion.ServoOn(_axisY).ConfigureAwait(false);
                 //Y轴回零
                 var result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
                 if (!result)
@@ -157,7 +159,7 @@ namespace Q_Platform.BLL
                 {
                     break;
                 }
-                if (cts.IsCancellationRequested)
+                if (cts?.IsCancellationRequested == true)
                 {
                     _io.WriteBit_DO(_vortexMotion1, false);
                     _io.WriteBit_DO(_vortexMotion2, false);

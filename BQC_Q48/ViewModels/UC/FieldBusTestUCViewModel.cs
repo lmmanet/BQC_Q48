@@ -106,20 +106,33 @@ namespace Q_Platform.ViewModels.UC
 
         private void DoFuc1()
         {
+            //SimpleIoc.Default.GetInstance<IVortex>().GoHome(null);  //涡旋回零
+            //SimpleIoc.Default.GetInstance<VibrationBase>().GoHome(null);  //振荡回零
+            SimpleIoc.Default.GetInstance<IAddSolid>().AddSolidAsync(new BQJX.Common.Sample(),null);
+
 
 
         }
         private void DoFuc2()
         {
-          
+            //SimpleIoc.Default.GetInstance<IVortex>().StartVortexAsync(new BQJX.Common.Sample(),null);  //开始涡旋
+            //SimpleIoc.Default.GetInstance<VibrationBase>().StartVibrationAsync(new BQJX.Common.Sample(), null);  //振荡开始
+
+
+
+
+
+
+
         }
         private void DoFuc3()
         {
-
-        }
+       
+        }  
         private void DoFuc4()
         {
-
+            
+            
         }
         private void DoFuc5()
         {

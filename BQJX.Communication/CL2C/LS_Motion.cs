@@ -60,7 +60,7 @@ namespace BQJX.Communication.CL2C
         public async Task<bool> CheckDone(int axisNo, CancellationTokenSource cts)
         {
             await Task.Delay(500).ConfigureAwait(false);
-            //电机在使能状态
+        
             var status = 0;
             do
             {
@@ -69,6 +69,16 @@ namespace BQJX.Communication.CL2C
                 if (cts != null && cts.IsCancellationRequested)
                 {
                     return false;
+                }
+                //电机在报警状态
+                if ((status & 0x01) == 0x01)
+                {
+                    throw new Exception("电机报警");
+                }
+                //电机未在使能状态
+                if ((status & 0x02) != 0x02)
+                {
+                    throw new Exception("电机未使能");
                 }
 
                 //电机不在运行状态
@@ -537,6 +547,13 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> JogF(int axisNo)
         {
+            //是否更新点动速度
+            var ele = _eleGearList.Find(a => a.SlaveId == axisNo);
+            if (ele.UpdateParams)
+            {
+                ele.UpdateParams = false;
+                await SetJogVel(axisNo, ele.JogAccDec, ele.JogVel).ConfigureAwait(false);
+            }
             //对 0x1801 写 0x4001，正向 JOG
             var result = await _modbus.WriteKeepRegister<short>((byte)axisNo, 0x1801, 0x4001).ConfigureAwait(false);
             if (!result.IsSuccess)
@@ -549,6 +566,13 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> JogR(int axisNo)
         {
+            //是否更新点动速度
+            var ele = _eleGearList.Find(a => a.SlaveId == axisNo);
+            if (ele.UpdateParams)
+            {
+                ele.UpdateParams = false;
+                await SetJogVel(axisNo, ele.JogAccDec, ele.JogVel).ConfigureAwait(false);
+            }
             //对 0x1801 写 0x4002，反向 JOG；
             var result = await _modbus.WriteKeepRegister<short>((byte)axisNo, 0x1801, 0x4002).ConfigureAwait(false);
             if (!result.IsSuccess)

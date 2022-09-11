@@ -17,6 +17,15 @@ namespace BQJX.Communication.JoDell
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// 通讯失败尝试次数
+        /// </summary>
+        public int AttemptTimes { get; set; } = 3;
+
+        #endregion
+
         #region Constructors
 
         public EPG26(IModbusBase modbus, ILogger logger)
@@ -37,39 +46,97 @@ namespace BQJX.Communication.JoDell
             // 0x07d1 位置状态        故障错误状态
             // 0x07d2 力状态          速度状态
             // 0x07d3 环境温度        母线电压
-            var result = await _modbus.ReadMultiInputRegister<ushort>((byte)id, 0x07d0, 4).ConfigureAwait(false);
-            if (!result.IsSuccess)
+            int attempt = 0;
+            func: try
             {
-                _logger?.Error($"GetClawStatus err:{result.Data}");
-                throw new CommunicationException($"{result.Message}");
+                var result = await _modbus.ReadMultiInputRegister<ushort>((byte)id, 0x07d0, 4).ConfigureAwait(false);
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"GetClawStatus err:{result.Data}");
+                    throw new CommunicationException($"{result.Message}");
+                }
+                return AnalysisData(result.Data);
             }
-            return AnalysisData(result.Data);
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
 
        
         public async Task<bool> Enable(int id)
         {
             //0x03e8  无参控制指令寄存器    控制寄存器
-            var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 0x03e8, 1).ConfigureAwait(false);
-            if (!result.IsSuccess)
+            int attempt = 0;
+        func: try
             {
-                _logger?.Error($"Enable err:{result.Message}");
-                throw new CommunicationException($"{result.Message}");
+                var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 0x03e8, 1).ConfigureAwait(false);
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"Enable err:{result.Message}");
+                    throw new CommunicationException($"{result.Message}");
+                }
+                return true;
             }
-            return true;
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+           
         }
 
     
         public async Task<bool> Disable(int id)
         {
             //0x03e8  无参控制指令寄存器    控制寄存器
-            var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 0x03e8, 0).ConfigureAwait(false);
-            if (!result.IsSuccess)
+            int attempt = 0;
+        func: try
             {
-                _logger?.Error($"Disable err:{result.Message}");
-                throw new CommunicationException($"{result.Message}");
+                var result = await _modbus.WriteKeepRegisterMulti<short>((byte)id, 0x03e8, 0).ConfigureAwait(false);
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"Disable err:{result.Message}");
+                    throw new CommunicationException($"{result.Message}");
+                }
+                return true;
             }
-            return true;
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+          
         }
 
        
@@ -78,20 +145,40 @@ namespace BQJX.Communication.JoDell
             //0x03e8  无参控制指令寄存器    控制寄存器
             //0x03e9  位置寄存器            保留
             //0x03ea  力设置                速度设置
-            ushort[] values = new ushort[3]
+            int attempt = 0;
+        func: try
             {
+                ushort[] values = new ushort[3]
+             {
                 0x0009,                         //执行指令
                 (ushort)(pos<<8),                            //位置设置
                 (ushort)((torque<<8)+vel)        //力和速度
-            };
+             };
 
-            var result = await _modbus.WriteKeepRegister<ushort>((byte)id, 0x03e8, values).ConfigureAwait(false);
-            if (!result.IsSuccess)
-            {
-                _logger?.Error($"SendCommand err:{result.Message}");
-                throw new CommunicationException($"{result.Message}");
+                var result = await _modbus.WriteKeepRegister<ushort>((byte)id, 0x03e8, values).ConfigureAwait(false);
+                if (!result.IsSuccess)
+                {
+                    _logger?.Error($"SendCommand err:{result.Message}");
+                    throw new CommunicationException($"{result.Message}");
+                }
+                return true;
             }
-            return true;
+            catch (CommunicationException cmex)
+            {
+                attempt++;
+                if (attempt > AttemptTimes)
+                {
+                    throw cmex;
+                }
+                goto func;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            
         }
 
       
@@ -146,9 +233,9 @@ namespace BQJX.Communication.JoDell
         public async Task<int> ClawGetchStatus(int id)
         {
             var status = await GetClawStatus(id);
-            if (status == null)
+            if (status.Falt != 0)
             {
-                return -1;
+                throw new Exception($"手爪{id}报错：{status.Falt}");
             }
 
             int value = status.ClawStatus & 0xc0;
@@ -169,6 +256,22 @@ namespace BQJX.Communication.JoDell
                 return 0;
             }
             return -1;
+        }
+
+        public async Task<bool> CheckDone(int id,int timeout)
+        {
+            bool busy = true;
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
+            do
+            {
+                await Task.Delay(1000).ConfigureAwait(false);
+                busy = await ClawIsBusy(id).ConfigureAwait(false);
+                if (DateTime.Now>end)
+                {
+                    throw new ActionTimeoutException("CheckDone 手爪动作超时");
+                }
+            } while (busy);
+            return true;
         }
 
 

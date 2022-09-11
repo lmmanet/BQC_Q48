@@ -509,7 +509,7 @@ namespace BQJX.Core
                         return true;
                     }
                     Thread.Sleep(1000);
-                } while (cts?.IsCancellationRequested == false);
+                } while (cts?.IsCancellationRequested != true);
 
                 return false;
             }).ConfigureAwait(false);
@@ -625,10 +625,7 @@ namespace BQJX.Core
             throw new NotImplementedException();
         }
 
-
-        #region Private Methods
-
-        private bool IsServeOn(ushort axisNo)
+        public bool IsServeOn(ushort axisNo)
         {
             var status = GetMotionIoStatus(axisNo);
             if ((status & 4) == 4)
@@ -637,6 +634,9 @@ namespace BQJX.Core
             }
             return false;
         }
+
+        #region Private Methods
+
 
         private void change_speed(ushort axisNo, double velocity)
         {

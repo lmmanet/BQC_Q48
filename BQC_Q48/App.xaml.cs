@@ -74,7 +74,7 @@ namespace BQC_Q48
             //SimpleIoc.Default.Register<CarrierBase, CarrierTwo>();
 
 
-            //SimpleIoc.Default.Register<VibrationBase, VibrationOne>();
+            SimpleIoc.Default.Register<VibrationBase, VibrationOne>();
             //SimpleIoc.Default.Register<VibrationBase, VibrationTwo>();
 
             SimpleIoc.Default.Register<IAddSolid, AddSolid>();
@@ -123,7 +123,7 @@ namespace BQC_Q48
                 new AxisEleGear{ AxisName="加盐Y轴",AxisNo=5,EleGear = 0.1},
                 new AxisEleGear{ AxisName="提取移液器",AxisNo=6,EleGear = 2},          //1r == 0.5ml   5000p/r
                 new AxisEleGear{ AxisName="离心Z轴",AxisNo=7,EleGear = 0.0787},
-                new AxisEleGear{ AxisName="离心机",AxisNo=8,EleGear = 1,Tacc = 2, Tdec = 2,HomeOffset = 0.05},
+                new AxisEleGear{ AxisName="离心机",AxisNo=8,EleGear = 1,Tacc = 5, Tdec = 5,HomeOffset = 0.05},
                 new AxisEleGear{ AxisName="净化搬运X轴",AxisNo=9,EleGear = 0.1},
                 new AxisEleGear{ AxisName="搬运Y轴 ",AxisNo=10,EleGear = 0.1},
                 new AxisEleGear{ AxisName="搬运Z1轴",AxisNo=11,EleGear = 0.0787},
@@ -144,9 +144,9 @@ namespace BQC_Q48
         {
             return new List<StepAxisEleGear>()
             {
-                new StepAxisEleGear{ AxisName="加盐Y轴",SlaveId=1,EleGear = 1},
-                new StepAxisEleGear{ AxisName="加盐C1轴",SlaveId=2,EleGear = 10000},
-                new StepAxisEleGear{ AxisName="加盐C2轴",SlaveId=3,EleGear = 10000},
+                new StepAxisEleGear{ AxisName="加盐Y轴",SlaveId=1,EleGear = 88.2,HomeHigh = 10 ,UpdateParams = true,JogVel =10,JogAccDec =50},   //1r ==113.097 //88.42
+                new StepAxisEleGear{ AxisName="加盐C1轴",SlaveId=3,EleGear = 10000},
+                new StepAxisEleGear{ AxisName="加盐C2轴",SlaveId=2,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="提取加液轴",SlaveId=4,EleGear = 12000,HomeOffset =-3000,HomeMode = 2},         //1r =5/6ml    10000p/r
                 new StepAxisEleGear{ AxisName="拧盖1 Y轴",SlaveId=5,EleGear = 787.40},         //1r == 12.7mm   10000p/r
                 new StepAxisEleGear{ AxisName="拧盖1 C1轴",SlaveId=6,EleGear = 10000},

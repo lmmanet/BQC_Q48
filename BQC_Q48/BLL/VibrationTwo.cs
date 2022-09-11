@@ -16,7 +16,10 @@ namespace Q_Platform.BLL
 
         public VibrationTwo(IEtherCATMotion motion, IIoDevice io, IGlobalStatus globalStauts, ILogger logger) : base(motion, io, globalStauts, logger)
         {
-
+            _axisNo = 13;
+            _holding = 40;
+            _holdingOpenSensor = 41; //原位
+            _holdingCloseSensor = 40; //到位
         } 
 
 

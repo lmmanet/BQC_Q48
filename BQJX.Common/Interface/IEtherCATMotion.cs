@@ -110,6 +110,13 @@ namespace BQJX.Core.Interface
         /// <returns></returns>
         bool SetAxisIoMap(ushort axisNo, ushort ioType, ushort mapIoIndex, int filterTime);
 
+        /// <summary>
+        /// 判断是否使能
+        /// </summary>
+        /// <param name="axisNo"></param>
+        /// <returns></returns>
+        bool IsServeOn(ushort axisNo);
+
 
         int Get_actual_torque(ushort axisNo);
         bool SetPositonToSystem(ushort axisNo, double pos);

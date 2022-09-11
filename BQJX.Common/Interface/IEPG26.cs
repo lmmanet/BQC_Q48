@@ -72,5 +72,14 @@ namespace BQJX.Core.Interface
         /// <param name="torque"></param>
         /// <returns></returns>
         Task<bool> SendCommand(int id, byte pos, byte vel, byte torque);
+
+        /// <summary>
+        /// 检查手爪动作完成
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        Task<bool> CheckDone(int id, int timeout);
+
     }
 }

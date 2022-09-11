@@ -10,12 +10,17 @@ namespace Q_Platform.BLL
 {
     public abstract class SyringBase
     {
+        #region Protected Members
 
         protected readonly IIoDevice _io;
         protected readonly ILS_Motion _motion;
 
+        #endregion
+
+        #region Protected Variants
 
         protected bool _isAddSolve; //是否已经加液
+        protected bool _isAbsorb;   //是否已经完成吸液
         protected ushort _axisAddLiquid; //加液注射器
         protected ushort _port1; //加液口1
         protected ushort _port2; //加液口2
@@ -27,9 +32,10 @@ namespace Q_Platform.BLL
         protected ushort _port8; //加液口8
         protected double _syringHomePos = 0; //注射器原点位置
 
-        protected double _syringVel = 20;
+        protected double _syringVel = 50;
         protected double _obsortVel = 10;
 
+        #endregion
 
         #region Construtors
 
@@ -37,12 +43,10 @@ namespace Q_Platform.BLL
         {
             this._motion = motion;
             this._io = io;
-        
         }
 
 
         #endregion
-
 
         #region Public Methods
 
@@ -63,6 +67,9 @@ namespace Q_Platform.BLL
             _io.WriteBit_DO(_port7, false);
             _io.WriteBit_DO(_port8, false);
 
+            //使能轴
+            await _motion.ServoOn(_axisAddLiquid).ConfigureAwait(false);
+
             var result = await _motion.GoHomeWithCheckDone(_axisAddLiquid, cts);
             return result;
 
@@ -77,10 +84,15 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
         {
-            //判断是否完成加液
+            //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)
             {
-                return true;
+                goto air;
+            }
+            //是否完成吸液
+            if (_isAbsorb)
+            {
+                goto inject;
             }
 
             //关闭全部阀口
@@ -121,18 +133,21 @@ namespace Q_Platform.BLL
                 _io.WriteBit_DO(_port4, true);
                 _io.WriteBit_DO(_port8, true);
             }
+            //完成吸液
+            _isAbsorb = true;
 
             //开始吐液
-            result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
+            inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
             _isAddSolve = true;  //完成加液
+            _isAbsorb = false;   //复位完成吸液
 
             //开始回吸空气柱
             await Task.Delay(1000).ConfigureAwait(false);
-            result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _syringVel, cts).ConfigureAwait(false);
+            air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -153,7 +168,6 @@ namespace Q_Platform.BLL
 
 
         }
-
 
 
         #endregion

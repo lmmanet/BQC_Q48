@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ActionTimeoutException.cs" />
     <Compile Include="Common\AddSolidPosData.cs" />
     <Compile Include="Common\AxisEleGear.cs" />
     <Compile Include="Common\AxisParam.cs" />

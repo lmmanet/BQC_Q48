@@ -26,13 +26,12 @@ namespace Q_Platform.BLL
         #region Member
 
         protected ushort _axisNo;
-        protected string _holding;
-        protected string _holdingOpenSensor; //原位
-        protected string _holdingCloseSensor; //到位
+        protected ushort _holding;
+        protected ushort _holdingOpenSensor; //原位
+        protected ushort _holdingCloseSensor; //到位
 
 
         #endregion
-
 
         #region Constructors
 
@@ -57,6 +56,13 @@ namespace Q_Platform.BLL
 
             //释放抱夹气缸
             ResetHolding();
+
+            //判断是否使能
+            if (!_motion.IsServeOn(_axisNo))
+            {
+                _motion.ServoOn(_axisNo);
+            }
+
             //开始回零  Z相回零
             bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
             if (!ret)
@@ -81,8 +87,8 @@ namespace Q_Platform.BLL
         {
             try
             {
-                double vel = 300 / 60;
-                var result = await StartVibration(30, vel, cts).ConfigureAwait(false);
+                double vel = 500 / 60;
+                var result = await StartVibration(300, vel, cts).ConfigureAwait(false);
                 return true;
             }
             catch (Exception ex)
@@ -127,9 +133,10 @@ namespace Q_Platform.BLL
                 {
                     break;
                 }
-                if (cts.IsCancellationRequested)
+                if (cts?.IsCancellationRequested == true)
                 {
-                    _motion.StopMove(_axisNo);
+                    _motion.StopMove(_axisNo); 
+                    await GoHome(cts).ConfigureAwait(false);
                     return false;
                 }
             } while (true);
@@ -151,13 +158,14 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual void SetHolding(bool checkSensor = true)
         {
-            var result = _io.SetBit_DO(_holding);
+            var result = _io.WriteBit_DO(_holding,true);
             if (!result)
             {
                 throw new Exception("SetHolding Err!");
             }
             if (!checkSensor)
             {
+                Thread.Sleep(500);
                 return;
             }
             int temp = 0;
@@ -168,7 +176,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new Exception("SetHolding超时");
+                    throw new ActionTimeoutException("SetHolding超时");
                 }
             } while (!result);
         }
@@ -177,17 +185,19 @@ namespace Q_Platform.BLL
         /// 抱夹气缸释放
         /// </summary>
         /// <returns></returns>
-        protected virtual void ResetHolding(bool checkSensor = true)
+        protected virtual void ResetHolding(bool checkSensor = false)
         {
-            var result = _io.ResetBit_DO(_holding);
+            var result = _io.WriteBit_DO(_holding,false);
             if (!result)
             {
                 throw new Exception("ResetHolding Err!");
             }
             if (!checkSensor)
             {
+                Thread.Sleep(500);
                 return;
             }
+            
             int temp = 0;
             do
             {
@@ -196,7 +206,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new Exception("ResetHolding 超时");
+                    throw new ActionTimeoutException("ResetHolding 超时");
                 }
             } while (!result);
         }

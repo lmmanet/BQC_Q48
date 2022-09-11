@@ -1,4 +1,5 @@
-﻿using BQJX.Common.Common;
+﻿using BQJX.Common;
+using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using Q_Platform.DAL;
@@ -27,29 +28,29 @@ namespace Q_Platform.BLL
 
         #region Private Variant
 
-        private ushort _axisY1 = 0;    //伺服Y轴
-        private ushort _axisY2 = 0;    //步进Y轴
-        private ushort _axisC1 = 0;    //步进旋转轴
-        private ushort _axisC2 = 0;    //步进旋转轴
-        private string _XCylinderControl = "Q0.1";
-        private string _Z1CylinderControl = "Q0.3";
-        private string _Z2CylinderControl = "Q0.5";
+        private readonly ushort _axisY1 = 5;    //伺服Y轴
+        private readonly ushort _axisY2 = 1;    //步进Y轴
+        private readonly ushort _axisC1 = 3;    //步进旋转轴
+        private readonly ushort _axisC2 = 2;    //步进旋转轴
+        private readonly ushort _XCylinderControl = 9; //X气缸控制
+        private readonly ushort _Z1CylinderControl = 11; //Z1气缸控制
+        private readonly ushort _Z2CylinderControl = 13; //Z2气缸控制
+        private readonly ushort _XCylinderRight = 12;    //X气缸右感应
+        private readonly ushort _XCylinderLeft = 13;     //X气缸左感应
+        private readonly ushort _Z1CylinderUp;           //Z1气缸上感应（无）
+        private readonly ushort _Z1CylinderDown = 9;     //Z1气缸下感应
+        private readonly ushort _Z2CylinderUp;           //Z2气缸上感应（无）
+        private readonly ushort _Z2CylinderDown = 11;    //Z2气缸下感应
+        private double _stepMoveVel = 30;                //步进电机移动速度
+        private double _sevorMoveVel = 60;               //伺服电机移动速度
+        private double _rotateVel = 10;                  //旋转加固旋转速度
+        private ushort _weightId1 = 1;                   //称台1
+        private ushort _weightId2 = 2;                   //称台2
 
-        private string _XCylinderHP = "I0.5";
-        private string _XCylinderWP = "I0.4";
-        private string _Z1CylinderWP = "I0.1";
-        private string _Z2CylinderWP = "I0.3";
-
-        private double _stepMoveVel = 30;
-        private double _sevorMoveVel = 40;
+        private AddSolidPosData _posData;                //位置数据
+        private IGlobalStatus _globalStatus;
 
         #endregion
-
-        private AddSolidPosData _posData;
-        private ushort _weightId1 = 1;
-        private ushort _weightId2 = 2;
-
-        private IGlobalStatus _globalStatus;
 
         #region Properties
 
@@ -66,6 +67,8 @@ namespace Q_Platform.BLL
             this._dataAccess = dataAccess;
             this._weight = weight;
             this._globalStatus = globalStatus;
+
+            _posData = _dataAccess.GetPosData();
         }
 
         #endregion
@@ -73,241 +76,362 @@ namespace Q_Platform.BLL
         #region Public Methods
 
         /// <summary>
+        /// 模块回零
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> GoHome(CancellationTokenSource cts)
+        {
+            Z1_Cylinder_Up();
+            Z2_Cylinder_Up();
+
+            //使能Y步进轴
+            await _stepMotion.ServoOn(_axisY2).ConfigureAwait(false);
+            var result = await _stepMotion.GoHomeWithCheckDone(_axisY2,cts).ConfigureAwait(false);
+            if (!result )
+            {
+                return false;
+            }
+
+            //使能Y伺服轴
+            if (!_motion.IsServeOn(_axisY1))
+            {
+                _motion.ServoOn(_axisY1);
+            }
+
+            //使能旋转轴
+            await _stepMotion.ServoOn(_axisC1).ConfigureAwait(false);
+            await _stepMotion.ServoOn(_axisC2).ConfigureAwait(false);
+
+            X_Cylinder_Right();
+
+            return true;
+        }
+
+        /// <summary>
         /// 加固
         /// </summary>
-        /// <param name="solid">种类</param>
-        /// <param name="weight">数量</param>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolidAsync(int solid, double weight, CancellationTokenSource cts)
+        public async Task<bool> AddSolidAsync(Sample sample,CancellationTokenSource cts)
         {
+            var result = await Add_Solid(3,4, cts).ConfigureAwait(false);
+
+            return true;
+        }
+
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        /// 加固
+        /// </summary>
+        /// <param name="solid">添加种类1~6</param>
+        /// <param name="weight">加固重量</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> Add_Solid(int solid,double weight, CancellationTokenSource cts)
+        {
+            double[] pos = GetSolidCoordinate(solid);
+            await Task.Delay(1000).ConfigureAwait(false);
+            //获取毛重
+            var gross1 = await _weight.ReadWeight(_weightId1).ConfigureAwait(false);
+            var gross2 = await _weight.ReadWeight(_weightId2).ConfigureAwait(false);
+            //X气缸移动到加固位
+            X_Cylinder_Left();
             //伺服Y轴移动到指定位置
-            var result1 = _motion.P2pMoveWithCheckDone(_axisY1, _posData.Solid_A[0], _sevorMoveVel, cts);
-            var result = await X_Left().ConfigureAwait(false);
+            var result = await _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
             //步进Y轴移动到指定位置
-            result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, _posData.Solid_A[1], _stepMoveVel, cts).ConfigureAwait(false);
+            result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
-
 
             //C1 C2低速旋转
-            _stepMotion.VelocityMove(_axisC1, 10);
-            _stepMotion.VelocityMove(_axisC2, 10);
+            _stepMotion.VelocityMove(_axisC1, _rotateVel);
+            _stepMotion.VelocityMove(_axisC2, _rotateVel);
 
-            result = result1.GetAwaiter().GetResult();
+            //Z1 Z2气缸下降 
+            Z1_Cylinder_Down();
+            Z2_Cylinder_Down();
+
+            //检测称台数据判断是否完成
+            var result1 = CheckDone1(weight + gross1).ConfigureAwait(false);
+            var result2 = CheckDone2(weight + gross2).ConfigureAwait(false);
+            await result1;
+            await result2;
+
+            //Z1 Z2气缸上升
+            Z1_Cylinder_Up();
+            Z2_Cylinder_Up();
+
+            //步进Y轴移动到原点位置
+            result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
             }
-            //Z1 Z2气缸下降 
+            X_Cylinder_Right();
 
-
-            //C1 C2转相对定位
-
-
-            //检测称台数据判断是否完成
-
-
-
-            throw new NotImplementedException();
+            return true;
         }
 
-
-
-
-
-
-        /////////////////////////////////////////////////////////////////////
-        public async Task<bool> Z1_Low()
+        /// <summary>
+        /// 检测称台1重量数据
+        /// </summary>
+        /// <param name="weight"></param>
+        /// <param name="timeout">加固超时时间</param>
+        /// <returns></returns>
+        protected async Task<bool> CheckDone1(double weight,int timeout = 300)
         {
-            if (_io.ReadBit_DI(_Z1CylinderWP))
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
+            while (true)
             {
-                return true;
+                await Task.Delay(500).ConfigureAwait(false);
+                var value = await _weight.ReadWeight(_weightId1).ConfigureAwait(false);
+                if (value >= weight)
+                {
+                    await _stepMotion.StopMove(_axisC1).ConfigureAwait(false);
+                    break;
+                }
+                if (DateTime.Now>end)
+                {
+                    throw new ActionTimeoutException($"CheckDone1 加固超时");
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 检测称台2重量数据
+        /// </summary>
+        /// <param name="weight"></param>
+        /// <param name="timeout">加固超时时间</param>
+        /// <returns></returns>
+        protected async Task<bool> CheckDone2(double weight, int timeout = 300)
+        {
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
+            while (true)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+                var value = await _weight.ReadWeight(_weightId2).ConfigureAwait(false);
+                if (value >= weight)
+                {
+                    await _stepMotion.StopMove(_axisC2).ConfigureAwait(false);
+                    break;
+                }
+                if (DateTime.Now > end)
+                {
+                    throw new ActionTimeoutException($"CheckDone1 加固超时");
+                }
+            }
+            return true;
+        }
+
+        protected void Z1_Cylinder_Up(bool checkSensor = false)
+        {
+            var result = _io.WriteBit_DO(_Z1CylinderControl, false);
+            if (!result)
+            {
+                throw new Exception("Z1_Cylinder_Up Err!");
             }
 
-            var ret = _io.SetBit_DO(_Z1CylinderControl);
-            if (!ret)
+            if (!checkSensor)
             {
-                _logger?.Error($"AddSolid 点位输出失败");
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    ret = _io.ReadBit_DI(_Z1CylinderWP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }).ConfigureAwait(false);
-        }
-        public async Task<bool> Z1_High()
-        {
-            var ret = _io.ResetBit_DO(_Z1CylinderControl);
-            if (!ret)
-            {
-                _logger?.Error($"AddSolid 点位输出失败");
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(2000);
-                    ret = !_io.ReadBit_DI(_Z1CylinderWP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }).ConfigureAwait(false);
-        }
-        public async Task<bool> Z2_Low()
-        {
-            if (_io.ReadBit_DI(_Z2CylinderWP))
-            {
-                return true;
+                Thread.Sleep(500);
+                return;
             }
 
-            var ret = _io.SetBit_DO(_Z2CylinderControl);
-            if (!ret)
+            int temp = 0;
+            do
             {
-                _logger?.Error($"AddSolid 点位输出失败");
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
+                result = _io.ReadBit_DI(_Z1CylinderUp);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
                 {
-                    Thread.Sleep(1000);
-                    ret = _io.ReadBit_DI(_Z2CylinderWP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
+                    throw new ActionTimeoutException("Z1_Cylinder_Up 超时");
                 }
-                return true;
-            }).ConfigureAwait(false);
+            } while (!result);
         }
-        public async Task<bool> Z2_High()
+
+        protected void Z1_Cylinder_Down(bool checkSensor = true)
         {
-            var ret = _io.ResetBit_DO(_Z2CylinderControl);
-            if (!ret)
+            var result = _io.WriteBit_DO(_Z1CylinderControl, true);
+            if (!result)
             {
-                _logger?.Error($"AddSolid 点位输出失败");
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    ret = !_io.ReadBit_DI(_Z2CylinderWP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }).ConfigureAwait(false);
-        }
-        public async Task<bool> X_Right()
-        {
-            if (_io.ReadBit_DI(_XCylinderWP))
-            {
-                return true;
+                throw new Exception("Z1_Cylinder_Down Err!");
             }
 
-            var ret = _io.SetBit_DO(_XCylinderControl);
-            if (!ret)
+            if (!checkSensor)
             {
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    ret = _io.ReadBit_DI(_XCylinderWP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }).ConfigureAwait(false);
-        }
-        public async Task<bool> X_Left()
-        {
-            if (_io.ReadBit_DI(_XCylinderHP))
-            {
-                return true;
+                Thread.Sleep(500);
+                return;
             }
 
-            var ret = _io.ResetBit_DO(_XCylinderControl);
-            if (!ret)
+            int temp = 0;
+            do
             {
-                _logger?.Error($"AddSolid 点位输出失败");
-                return false;
-            }
-            return await Task.Run(() =>
-            {
-                while (true)
+                result = _io.ReadBit_DI(_Z1CylinderDown);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
                 {
-                    Thread.Sleep(1000);
-                    ret = _io.ReadBit_DI(_XCylinderHP);
-                    if (ret)
-                    {
-                        break;
-                    }
-                    if (_globalStatus.IsStopped)
-                    {
-                        return false;
-                    }
+                    throw new ActionTimeoutException("Z1_Cylinder_Down 超时");
                 }
-                return true;
-            }).ConfigureAwait(false);
+            } while (!result);
         }
+
+        protected void Z2_Cylinder_Up(bool checkSensor = false)
+        {
+            var result = _io.WriteBit_DO(_Z2CylinderControl, false);
+            if (!result)
+            {
+                throw new Exception("Z2_Cylinder_Up Err!");
+            }
+
+            if (!checkSensor)
+            {
+                Thread.Sleep(500);
+                return;
+            }
+
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_Z2CylinderUp);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new ActionTimeoutException("Z2_Cylinder_Up 超时");
+                }
+            } while (!result);
+        }
+
+        protected void Z2_Cylinder_Down(bool checkSensor = true)
+        {
+            var result = _io.WriteBit_DO(_Z2CylinderControl, true);
+            if (!result)
+            {
+                throw new Exception("Z2_Cylinder_Down Err!");
+            }
+
+            if (!checkSensor)
+            {
+                Thread.Sleep(500);
+                return;
+            }
+
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_Z2CylinderDown);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new ActionTimeoutException("Z2_Cylinder_Down 超时");
+                }
+            } while (!result);
+        }
+
+        protected void X_Cylinder_Left(bool checkSensor = true)
+        {
+            var result = _io.WriteBit_DO(_XCylinderControl, false);
+            if (!result)
+            {
+                throw new Exception("X_Cylinder_Left Err!");
+            }
+
+            if (!checkSensor)
+            {
+                Thread.Sleep(500);
+                return;
+            }
+
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_XCylinderLeft);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new ActionTimeoutException("X_Cylinder_Left 超时");
+                }
+            } while (!result);
+        }
+
+        protected void X_Cylinder_Right(bool checkSensor = true)
+        {
+            var result = _io.WriteBit_DO(_XCylinderControl, true);
+            if (!result)
+            {
+                throw new Exception("X_Cylinder_Right Err!");
+            }
+
+            if (!checkSensor)
+            {
+                Thread.Sleep(500);
+                return;
+            }
+
+            int temp = 0;
+            do
+            {
+                result = _io.ReadBit_DI(_XCylinderRight);
+                Thread.Sleep(500);
+                temp++;
+                if (temp > 6)
+                {
+                    throw new ActionTimeoutException("X_Cylinder_Right 超时");
+                }
+            } while (!result);
+        }
+
 
         #endregion
 
+        #region Private Methods
 
-        protected void IntialPosData()
+        /// <summary>
+        /// 获取加固坐标A~F 对应 1~6
+        /// </summary>
+        /// <param name="solid"></param>
+        /// <returns></returns>
+        private double[] GetSolidCoordinate(int solid)
         {
-            _posData = _dataAccess.GetPosData();
+            switch (solid)
+            {
+                case 1:
+                    return _posData.Solid_A;
+                case 2:
+                    return _posData.Solid_B;
+                case 3:
+                    return _posData.Solid_C;
+                case 4:
+                    return _posData.Solid_D;
+                case 5:
+                    return _posData.Solid_E;
+                case 6:
+                    return _posData.Solid_F;
+                default:
+                    throw new Exception($"参数错误：{solid}");
+            }
+
         }
 
 
+        #endregion
 
 
     }
