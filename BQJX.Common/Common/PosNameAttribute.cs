@@ -16,6 +16,8 @@ namespace BQJX.Common.Common
 
         public bool HaveNoneZ_Axis { get; set; }
 
+        public bool Is_RotateAxis { get; set; } = false;
+
         public PosNameAttribute(string name)
         {
             PosName = name;

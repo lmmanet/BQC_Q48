@@ -52,8 +52,8 @@ namespace Q_Platform.DAL
                     data.CLeftPutPos4 = item.Field<double>("CLeftPutPos4");
                     data.CCentPos1 = item.Field<double>("CCentPos1");
                     data.CCentPos2 = item.Field<double>("CCentPos2");
-                    data.CCentPos3 = item.Field<double>("CCentPos3");
-                    data.CCentPos4 = item.Field<double>("CCentPos4");
+                    data.XCentPos1 = item.Field<double>("XCentPos1");
+                    data.XCentPos2 = item.Field<double>("XCentPos2");
                     data.CRightPos1 = item.Field<double>("CRightPos1");
                     data.CRightPos2 = item.Field<double>("CRightPos2");
                     data.CRightPos3 = item.Field<double>("CRightPos3");
@@ -87,8 +87,8 @@ namespace Q_Platform.DAL
                $"CLeftPutPos4 = '{data.CLeftPutPos4}'," +
                $"CCentPos1 = '{data.CCentPos1}'," +
                $"CCentPos2 = '{data.CCentPos2}'," +
-               $"CCentPos3 = '{data.CCentPos3}'," +
-               $"CCentPos4 = '{data.CCentPos4}'," +
+               $"XCentPos1 = '{data.XCentPos1}'," +
+               $"XCentPos2 = '{data.XCentPos2}'," +
                $"CRightPos1 = '{data.CRightPos1}'," +
                $"CRightPos2 = '{data.CRightPos2}'," +
                $"CRightPos3 = '{data.CRightPos3}'," +
@@ -149,12 +149,6 @@ namespace Q_Platform.DAL
 
 
         #endregion
-
-
-
-
-
-
 
 
 

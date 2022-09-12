@@ -91,7 +91,6 @@ namespace BQC_Q48
             base.OnStartup(e);
 
             ///初始化卡
-
             SimpleIoc.Default.GetInstance<ICardBase>().Initialize(_axisDataFilePath);
 
             // if (new LoginWindow().ShowDialog() == true)
@@ -100,9 +99,6 @@ namespace BQC_Q48
             // }
             Application.Current.Shutdown(0);
 
-
-
-           
         }
 
 
@@ -226,7 +222,7 @@ namespace BQC_Q48
         }
 
 
-    
+
     }
 
 }

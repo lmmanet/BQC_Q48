@@ -43,6 +43,8 @@ namespace Q_Platform.BLL
         protected ushort _pressUpSensor = 17;    //下压气缸上感应
         protected ushort _pressDownSensor =18;  //下压气缸下感应
 
+        protected double _xOffset = 50;    //涡旋X偏移量
+
         protected VortexPosData _posData;
 
         #endregion

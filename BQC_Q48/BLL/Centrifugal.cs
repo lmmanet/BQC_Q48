@@ -127,21 +127,53 @@ namespace Q_Platform.BLL
 
         #region Protected Methods
 
-        protected async Task<bool> Centrifugal(int time,int vel, CancellationTokenSource cts)
+        protected async Task<bool> DoCentrifugal(int time,int vel, CancellationTokenSource cts)
         {
-           
             //关闭门
+            CloseShadow();
 
             //开始离心
-
+            double velocity = vel / 60;
+            var result = _motion.VelocityMove(_axisCentrigugal, velocity, 1);
+            if (!result)
+            {
+                return false;
+            }
             //延时
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
+            bool isDone = false;
+            while (true)
+            {
+                Thread.Sleep(1000);
+                if (DateTime.Now >= end)
+                {
+                    isDone = true;
+                    break;
+                }
+                if (cts?.IsCancellationRequested == true)
+                {
+                    isDone = false;
+                    break;
+                }
+            }
+            //停止电机
+            _motion.StopMove(_axisCentrigugal);
 
             //等待停止  
+            await Task.Delay(10000).ConfigureAwait(false);
+
 
             //离心机回零
+            result = await Centri_GoHome().ConfigureAwait(false);
+            if (!result)
+            {
+                return false;
+            }
 
             //打开门
+            OpenShadow();
 
+            return isDone;
         }
 
         protected async Task<bool> GetTubeIn(int tube,CancellationTokenSource cts)
@@ -276,6 +308,12 @@ namespace Q_Platform.BLL
             //手爪打开
 
             //Z轴上升到0位
+            result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                return false;
+            }
+            return true;
         }
 
 
@@ -486,8 +524,8 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> Centri_GoHome()
         {
-            var status = _motion.GetMotionStatus(_axisCentrigugal);
-            if ((status & 4) != 4)
+            //检查是否使能
+            if (!_motion.IsServeOn(_axisCentrigugal))
             {
                 _motion.ServoOn(_axisCentrigugal);
             }

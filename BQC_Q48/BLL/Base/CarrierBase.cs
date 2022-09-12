@@ -569,10 +569,6 @@ namespace Q_Platform.BLL
 
 
 
-
-
-
-
         /// <summary>
         /// 移液器移动到指定位置
         /// </summary>
@@ -609,7 +605,6 @@ namespace Q_Platform.BLL
             return true;
 
         }
-
 
         /// <summary>
         /// 搬运XYZ移动到坐标点
@@ -648,11 +643,32 @@ namespace Q_Platform.BLL
             return true;
         }
 
+        /// <summary>
+        /// 计算坐标
+        /// </summary>
+        /// <param name="tubeId">试管Id 从1开始</param>
+        /// <param name="rows">总行数</param>
+        /// <param name="columns">总列数</param>
+        /// <param name="xOffset">X偏移量（正负）</param>
+        /// <param name="yOffset">Y偏移量（正负）</param>
+        /// <param name="refCoordinate">初始坐标</param>
+        /// <returns></returns>
+        protected double[] GetCoordinate(int tubeId,int rows,int columns,double xOffset,double yOffset,double[] refCoordinate)
+        {
+            double[] resultDouble = new double[refCoordinate.Length];
+            //获取参考点坐标
+            Array.Copy(refCoordinate, resultDouble, refCoordinate.Length);
+          
+            //计算偏移
+            int id = (tubeId - 1) % (rows * columns);
+            int xIndex = id / rows;
+            int yIndex = id % rows;
+            //计算结果
+            resultDouble[0] += xOffset * xIndex;      //X计算偏移
+            resultDouble[1] += yOffset * yIndex;   //Y计算偏移
 
-
-
-
-
+            return resultDouble;
+        }
 
 
         //=======================================================//

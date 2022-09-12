@@ -23,6 +23,9 @@ namespace Q_Platform.BLL
             _axisZ = 28;
             _holding = 44;
             _claw = 45;
+
+            _xOffset = 60;    //拧盖X偏移量
+
         }
 
         #endregion

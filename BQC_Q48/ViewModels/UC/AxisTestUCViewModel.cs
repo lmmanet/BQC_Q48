@@ -157,11 +157,6 @@ namespace Q_Platform.ViewModels.UC
         public ICommand StopJogCommand { get; set; }
 
         /// <summary>
-        /// 配置限位
-        /// </summary>
-        public ICommand ConfiguraLimitCommand { get; set; }
-
-        /// <summary>
         /// 编码器回读数据偏移清零
         /// </summary>
         public ICommand ClearPosOffsetCommand { get; set; }
@@ -199,6 +194,7 @@ namespace Q_Platform.ViewModels.UC
             
             RegisterCommand();
             ListAxisInfo = _motion?.GetAxisInfos();
+            GetAxisPosInfo(ListAxisInfo[0]);
 
             _refreshTask = Task.Run(() =>
             {
@@ -252,12 +248,11 @@ namespace Q_Platform.ViewModels.UC
             JogFCommand = new RelayCommand(JogF);
             JogRCommand = new RelayCommand(JogR);
             StopJogCommand = new RelayCommand(StopJog);
-            ConfiguraLimitCommand = new RelayCommand(ConfiguraLimit);
             ClearPosOffsetCommand = new RelayCommand(ClearPosOffset);
             ComboxSelectChangedCommand = new RelayCommand<object>(ComboxSelectChanged);
             AxisPosInfoChangedCommand = new RelayCommand<object>(AxisPosInfoChanged);
 
-            TechCommand = new RelayCommand<object>(UpdateAxisPos);
+            TechCommand = new RelayCommand<object>(TechAxisPos);
             SavePosDataCommand = new RelayCommand(SaveAxisPos);
         }
 
@@ -286,7 +281,7 @@ namespace Q_Platform.ViewModels.UC
             }
             if (AxisNo == 7)
             {
-                ushort id = 0;
+                ushort id = 1;
                 result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
             }
             if (AxisNo >= 9 && AxisNo <= 12)
@@ -309,6 +304,10 @@ namespace Q_Platform.ViewModels.UC
 
         }
 
+        /// <summary>
+        /// 选择轴
+        /// </summary>
+        /// <param name="obj"></param>
         private void ComboxSelectChanged(object obj)
         {
             var axis = obj as AxisEleGear;
@@ -337,11 +336,10 @@ namespace Q_Platform.ViewModels.UC
             }
 
             //更新轴点位信息
-            AxisPosInfos = new ObservableCollection<AxisPosInfo>();
+          
             GetAxisPosInfo(axis);
 
         }
-
 
         /// <summary>
         /// 获取轴点位信息
@@ -349,6 +347,7 @@ namespace Q_Platform.ViewModels.UC
         /// <param name="axis"></param>
         private void GetAxisPosInfo(AxisEleGear axis)
         {
+            AxisPosInfos = new ObservableCollection<AxisPosInfo>();
 
             #region 获取CarrierOnePosData
 
@@ -490,10 +489,10 @@ namespace Q_Platform.ViewModels.UC
         }
 
         /// <summary>
-        /// 更新点位数据
+        /// 示教当前位置
         /// </summary>
-        /// <returns></returns>
-        private void UpdateAxisPos(object obj)
+        /// <param name="obj"></param>
+        private void TechAxisPos(object obj)
         {
             var posInfo = obj as AxisPosInfo;
             if (posInfo == null)
@@ -501,45 +500,13 @@ namespace Q_Platform.ViewModels.UC
                 //return false;
                 return;
             }
-            bool result = false;
-
-            if (AxisNo <= 3)
-            {
-                ushort id = AxisNo;
-                result = SimpleIoc.Default.GetInstance<ICarrierOneDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo); 
-
-            }
-            if (AxisNo == 5)
-            {
-                ushort id = 0;
-                result = SimpleIoc.Default.GetInstance<IAddSolidPosDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
-            }
-            if (AxisNo == 7)
-            {
-                ushort id = 0;
-                result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
-            }
-            if (AxisNo >= 9 && AxisNo <= 12)
-            {
-                ushort id = 0;
-                if (AxisNo == 10)
-                {
-                    id = 1;
-                }
-                if (AxisNo == 11)
-                {
-                    id = 2;
-                }
-                if (AxisNo == 12)
-                {
-                    id = 3;
-                }
-                result = SimpleIoc.Default.GetInstance<ICarrierTwoDataAccess>().UpdatePosDataByAxisPosInfo(id, posInfo);
-            }
-           // return result;
+            posInfo.PosData = CurrentPos;
         }
 
-
+        /// <summary>
+        /// 选择位置数
+        /// </summary>
+        /// <param name="obj"></param>
         private void AxisPosInfoChanged(object obj)
         {
             var axisPosInfo = obj as AxisPosInfo;
@@ -549,123 +516,239 @@ namespace Q_Platform.ViewModels.UC
             }
         }
 
+
+
+        #region Fuction EtherCat
+
+        /// <summary>
+        /// 复位总线
+        /// </summary>
         private async void ResetFieldBus()
         {
             //停止状态刷新
             _refresh = true;
             Thread.Sleep(500);
             //开始复位
-            await RunCommandAsync(() => RelativeMoveBusy, async () =>
+            try
             {
-                ResetFieldBusDone = await _card.ResetFieldBus(0);
-            });
+                await RunCommandAsync(() => RelativeMoveBusy, async () =>
+                {
+                    ResetFieldBusDone = await _card.ResetFieldBus(0);
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
             //弹出窗口提示正在复位...
 
             //启动刷新
             _refresh = false;
         }
 
+        /// <summary>
+        /// 停止运动
+        /// </summary>
         private void StopMove()
         {
-            _motion.StopMove(AxisNo);
+            try
+            {
+                _motion.StopMove(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void EmgStopMove()
         {
-            _motion.Emg_stop(AxisNo);
+            try
+            {
+                _motion.Emg_stop(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void ResetAxisAml()
         {
-            _motion.ResetAxisAlm(AxisNo);
+            try
+            {
+                _motion.ResetAxisAlm(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private async void AbsMove()
         {
-            await RunCommandAsync(()=> AbsMoveBusy, async()=>
+            try
             {
-                AbsMoveDone = await _motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
-            });
+                await RunCommandAsync(() => AbsMoveBusy, async () =>
+                 {
+                     AbsMoveDone = await _motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                 });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private async void RelativeMove()
         {
-            await RunCommandAsync(() => RelativeMoveBusy, async () =>
+            try
             {
-                RelativeMoveDone = await _motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
-            });
+                await RunCommandAsync(() => RelativeMoveBusy, async () =>
+                {
+                    RelativeMoveDone = await _motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
         }
 
         private void VelocityMove()
         {
-            _motion.VelocityMove(AxisNo, TargetVel, 1);
+            try
+            {
+                _motion.VelocityMove(AxisNo, TargetVel, 1);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private async void HomeMove()
         {
-            switch (AxisNo)
+            try
             {
-                case 4:
-                case 8:
-                case 13: //Z相回零
-                    await RunCommandOpAsync(()=>Homing,()=>
-                    {
-                        return _motion.GohomeWithCheckDone(AxisNo, 33, null);
-                    });
-                    break;
-                case 6:
-                case 14:
-                case 15://原点回零
-                    await RunCommandOpAsync(() => Homing, () =>
-                    {
-                        return _motion.GohomeWithCheckDone(AxisNo, 21, null);
-                    });
-                    break;
-                default:
-                    break;
+                switch (AxisNo)
+                {
+                    case 4:
+                    case 8:
+                    case 13: //Z相回零
+                        await RunCommandOpAsync(() => Homing, () =>
+                           {
+                               return _motion.GohomeWithCheckDone(AxisNo, 33, null);
+                           });
+                        break;
+                    case 6:
+                    case 14:
+                    case 15://原点回零
+                        await RunCommandOpAsync(() => Homing, () =>
+                        {
+                            return _motion.GohomeWithCheckDone(AxisNo, 21, null);
+                        });
+                        break;
+                    default:
+                        break;
+                }
+
             }
-          
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         private void EnableMotion()
         {
-            _motion.ServoOn(AxisNo);
+            try
+            {
+                _motion.ServoOn(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void DisableMotion()
         {
-            _motion.ServoOff(AxisNo);
+            try
+            {
+                _motion.ServoOff(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void JogF()
         {
-            double jogVel = TargetVel > 100 ? 100: TargetVel;
-            _motion.JogMove(AxisNo, jogVel,1);
+            try
+            {
+                double jogVel = TargetVel > 100 ? 100 : TargetVel;
+                _motion.JogMove(AxisNo, jogVel, 1);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void JogR()
         {
-            double jogVel = TargetVel > 100 ? 100 : TargetVel;
-            _motion.JogMove(AxisNo, jogVel, 0);
+            try
+            {
+                double jogVel = TargetVel > 100 ? 100 : TargetVel;
+                _motion.JogMove(AxisNo, jogVel, 0);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void StopJog()
         {
-            _motion.JogStop(AxisNo);
-        }
+            try
+            {
+                _motion.JogStop(AxisNo);
 
-        private void ConfiguraLimit()
-        {
-            //_motion.ConfigSoftLimit(AxisNo, 1, 0, 50);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void ClearPosOffset()
         {
-            _motion.AbsSysClear(AxisNo);
-            
+            try
+            {
+                _motion.AbsSysClear(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
+        #endregion
 
         #endregion
 
@@ -673,7 +756,6 @@ namespace Q_Platform.ViewModels.UC
         {
             base.Cleanup();
             _stopRefresh = true;
-
         }
 
 

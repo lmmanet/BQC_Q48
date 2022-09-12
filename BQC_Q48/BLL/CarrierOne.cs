@@ -77,7 +77,63 @@ namespace Q_Platform.BLL
 
 
 
+        #region Private Methods
 
+        /// <summary>
+        /// 获取50ml试管位置
+        /// </summary>
+        /// <param name="tubeId">1-96</param>
+        /// <returns></returns>
+        private double[] GetSampleTubeCoordinate(int tubeId)
+        {
+            //获取参考点坐标
+            double[] xyz = _posData.SamplePos1;
+            if (tubeId > 24 && tubeId <= 48)
+            {
+                xyz = _posData.SamplePos2;
+            }
+            if (tubeId > 48 && tubeId <= 72)
+            {
+                xyz = _posData.SamplePos3;
+            }
+            if (tubeId > 72 && tubeId <= 96)
+            {
+                xyz = _posData.SamplePos4;
+            }
+            //计算偏移
+            int id = (tubeId - 1) % 24;
+
+            //计算结果
+
+            return base.GetCoordinate(id + 1, 8, 3, -45, 45, xyz);
+
+        }
+
+        /// <summary>
+        /// 获取冷却缓存坐标
+        /// </summary>
+        /// <param name="tubeId">1-16</param>
+        /// <returns></returns>
+        private double[] GetColdCoordinate(int tubeId)
+        {
+            //获取参考点坐标
+            double[] xyz = _posData.ColdPos;
+            return base.GetCoordinate(tubeId, 8, 2, -45, 45, xyz);
+        }
+
+        /// <summary>
+        /// 获取Tip头坐标
+        /// </summary>
+        /// <param name="tubeId">1-96</param>
+        /// <returns></returns>
+        private double[] GetTipCoordinate(int tubeId)
+        {
+            //获取参考点坐标
+            double[] xyz = _posData.NeedlePos;
+            return base.GetCoordinate(tubeId, 16, 6, -1.5, 1.5, xyz);
+        }
+
+        #endregion
 
 
 

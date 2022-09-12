@@ -12,7 +12,7 @@ using BQJX.Common.Common;
 
 namespace Q_Platform.BLL
 {
-    public class CapperOne:CapperBase
+    public class CapperOne : CapperBase
     {
 
         private readonly SyringBase _syring;
@@ -30,14 +30,14 @@ namespace Q_Platform.BLL
             _holdingCloseSensor = 19;  //I1.3
             _holdingOpenSensor = 20;   //I1.4
 
+            _xOffset = 68;    //加液X偏移量
+
             _posData = GetPosData();
             _syring = new SyringOne(io,motion);
         }
 
         #endregion
-
-
-
+                
         #region Public Methods
 
         /// <summary>
@@ -187,6 +187,7 @@ namespace Q_Platform.BLL
         {
            return  _dataAccess.GetCapperPosData(1);
         }
+
 
 
 

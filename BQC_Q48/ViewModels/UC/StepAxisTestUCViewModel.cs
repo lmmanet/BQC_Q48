@@ -43,7 +43,7 @@ namespace Q_Platform.ViewModels.UC
 
         public double TargetPos { get; set; }
 
-        public double TargetVel { get; set; }
+        public double TargetVel { get; set; } = 10;
 
         public bool AbsMoveBusy { get; set; }
 
@@ -176,6 +176,7 @@ namespace Q_Platform.ViewModels.UC
             iLS_Motion = SimpleIoc.Default.GetInstance<ILS_Motion>();
             AxisNo = 1;
             ListAxisInfo = iLS_Motion?.GetAxisInfos();
+            GetAxisPosInfo(ListAxisInfo[0]);
             _refreshTask = Task.Run(() =>
             {
                 while (true)
@@ -232,7 +233,7 @@ namespace Q_Platform.ViewModels.UC
             AxisPosInfoChangedCommand = new RelayCommand<object>(AxisPosInfoChanged);
 
 
-            TechCommand = new RelayCommand<object>(UpdateAxisPos);
+            TechCommand = new RelayCommand<object>(TechAxisPos);
             SavePosDataCommand = new RelayCommand(SaveAxisPos);
         }
 
@@ -294,7 +295,7 @@ namespace Q_Platform.ViewModels.UC
             }
 
             //离心X轴 14
-            if (AxisNo == 14)
+            if (AxisNo == 14|| AxisNo == 15)
             {
                 ushort id = 1;
                 result = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().UpdatePosDataByAxisPosInfo(id, list);
@@ -304,10 +305,10 @@ namespace Q_Platform.ViewModels.UC
         }
 
         /// <summary>
-        /// 更新点位数据
+        /// 示教点位数据
         /// </summary>
         /// <returns></returns>
-        private void UpdateAxisPos(object obj)
+        private void TechAxisPos(object obj)
         {
             var posInfo = obj as AxisPosInfo;
             if (posInfo == null)
@@ -315,10 +316,14 @@ namespace Q_Platform.ViewModels.UC
                 //return false;
                 return;
             }
-        
+            posInfo.PosData = CurrentPos;
         
         }
 
+        /// <summary>
+        /// 选择点位数据
+        /// </summary>
+        /// <param name="obj"></param>
         private void AxisPosInfoChanged(object obj)
         {
             var axisPosInfo = obj as AxisPosInfo;
@@ -354,6 +359,10 @@ namespace Q_Platform.ViewModels.UC
             
         }
 
+        /// <summary>
+        /// 选择轴
+        /// </summary>
+        /// <param name="obj"></param>
         private void ComboxSelectChanged(object obj)
         {
             StepAxisEleGear stepAxisEleGear = obj as StepAxisEleGear;
@@ -362,7 +371,7 @@ namespace Q_Platform.ViewModels.UC
                 AxisNo = stepAxisEleGear.SlaveId;
  
                 //更新轴点位信息
-                AxisPosInfos = new ObservableCollection<AxisPosInfo>();
+               
                 GetAxisPosInfo(stepAxisEleGear);
             }
 
@@ -377,6 +386,8 @@ namespace Q_Platform.ViewModels.UC
         /// <param name="axis"></param>
         private void GetAxisPosInfo(StepAxisEleGear axis)
         {
+            AxisPosInfos = new ObservableCollection<AxisPosInfo>();
+
             #region 获取CarrierOnePosData
 
             if (axis.SlaveId == 1) //加盐Y轴  1
@@ -497,6 +508,35 @@ namespace Q_Platform.ViewModels.UC
                     if (item.IsDefined(typeof(PosNameAttribute)))
                     {
                         var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        if (posNameAtt.Is_RotateAxis || posNameAtt.Is_Z2_Axis)
+                        {
+                            continue;
+                        }
+                        posName = posNameAtt.PosName;
+
+                    }
+                    AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values });
+                }
+            }
+
+            //离心C轴
+            if (axis.SlaveId == 15)
+            {
+                CentrifugalCarrierPosData data = SimpleIoc.Default.GetInstance<ICentrifugalCarrierPosDataAccess>().GetPosData();
+                Type type = typeof(CentrifugalCarrierPosData);
+                PropertyInfo[] propertyInfos = type.GetProperties();
+
+                foreach (var item in propertyInfos)
+                {
+                    var values = (double)item.GetValue(data);
+                    string posName = item.Name;
+                    if (item.IsDefined(typeof(PosNameAttribute)))
+                    {
+                        var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
+                        if (!posNameAtt.Is_RotateAxis )
+                        {
+                            continue;
+                        }
                         posName = posNameAtt.PosName;
 
                     }

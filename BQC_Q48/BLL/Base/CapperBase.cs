@@ -43,6 +43,7 @@ namespace Q_Platform.BLL
         protected ushort _holdingOpenSensor;
         protected ushort _holdingCloseSensor;
 
+        protected double _xOffset;
 
         protected bool _haveCapper = false;  //手爪上有盖
 

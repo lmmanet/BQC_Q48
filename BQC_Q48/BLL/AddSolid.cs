@@ -47,6 +47,8 @@ namespace Q_Platform.BLL
         private ushort _weightId1 = 1;                   //称台1
         private ushort _weightId2 = 2;                   //称台2
 
+        private double _xOffset = 50;                    //工位1 2 X方向坐标偏移
+
         private AddSolidPosData _posData;                //位置数据
         private IGlobalStatus _globalStatus;
 

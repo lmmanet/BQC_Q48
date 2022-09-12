@@ -30,6 +30,7 @@ namespace Q_Platform.BLL
         protected ushort _holdingOpenSensor; //原位
         protected ushort _holdingCloseSensor; //到位
 
+        protected double _xOffset = 60;    //振荡X偏移量
 
         #endregion
 

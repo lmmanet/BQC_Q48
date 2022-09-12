@@ -36,7 +36,7 @@ namespace Q_Platform.BLL
         protected ushort _claw1;
         protected ushort _claw2;
 
-
+        protected double _xOffset = 50;    //浓缩X偏移量
 
         #endregion
 

@@ -20,40 +20,40 @@ namespace BQJX.Common.Common
         [PosName("Z放料位", Is_Z2_Axis = true)]
         public double ZPutPos { get; set; }
 
-        [PosName("C左侧接驳位1")]
+        [PosName("C左侧接驳位1",Is_RotateAxis = true)]
         public double CLeftPutPos1 { get; set; }
 
-        [PosName("C左侧接驳位2")]
+        [PosName("C左侧接驳位2", Is_RotateAxis = true)]
         public double CLeftPutPos2 { get; set; }
 
-        [PosName("C左侧接驳位3")]  //弃用
+        [PosName("C左侧接驳位3", Is_RotateAxis = true)]  
         public double CLeftPutPos3 { get; set; }
 
-        [PosName("C左侧接驳位4")]  //弃用
+        [PosName("C左侧接驳位4", Is_RotateAxis = true)]  
         public double CLeftPutPos4 { get; set; }
 
-        [PosName("C中间接驳位1")]
+        [PosName("C中间大管接驳位", Is_RotateAxis = true)]
         public double CCentPos1 { get; set; }
 
-        [PosName("C中间接驳位2")]
+        [PosName("C中间小管接驳位", Is_RotateAxis = true)]
         public double CCentPos2 { get; set; }
 
-        [PosName("C中间接驳位3")] //修改为 X1
-        public double CCentPos3 { get; set; }
+        [PosName("X中间接驳位1")] 
+        public double XCentPos1{ get; set; }
 
-        [PosName("C中间接驳位4")] //修改为 X2
-        public double CCentPos4 { get; set; }
+        [PosName("X中间接驳位2")]
+        public double XCentPos2 { get; set; }
 
-        [PosName("C右侧接驳位1")]
+        [PosName("C右侧接驳位1", Is_RotateAxis = true)]
         public double CRightPos1 { get; set; }
 
-        [PosName("C右侧接驳位2")]
+        [PosName("C右侧接驳位2", Is_RotateAxis = true)]
         public double CRightPos2 { get; set; }
 
-        [PosName("C右侧接驳位3")]  //弃用
+        [PosName("C右侧接驳位3", Is_RotateAxis = true)] 
         public double CRightPos3 { get; set; }
 
-        [PosName("C右侧接驳位4")]  //弃用
+        [PosName("C右侧接驳位4", Is_RotateAxis = true)] 
         public double CRightPos4 { get; set; }
 
     }

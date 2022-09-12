@@ -32,7 +32,6 @@ namespace Q_Platform.DAL
 
         #endregion
 
-
         #region Public Methods
 
         public CarrierOnePosData GetPosData()
