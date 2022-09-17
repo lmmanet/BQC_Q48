@@ -1,5 +1,4 @@
 ﻿using BQJX.Common;
-using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using System;
@@ -54,28 +53,40 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> GoHome(CancellationTokenSource cts)
         {
-
-            //释放抱夹气缸
-            ResetHolding();
-
-            //判断是否使能
-            if (!_motion.IsServeOn(_axisNo))
+            try
             {
-                _motion.ServoOn(_axisNo);
+                //释放抱夹气缸
+                ResetHolding();
+
+                //判断是否使能
+                if (!_motion.IsServeOn(_axisNo))
+                {
+                    _motion.ServoOn(_axisNo);
+                }
+
+                //开始回零  Z相回零
+                bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
+                if (!ret)
+                {
+                    _logger?.Error("振荡回零失败！");
+                    return false;
+                }
+
+                //抱夹气缸伸出
+                SetHolding();
+
+                return true;
             }
-
-            //开始回零  Z相回零
-            bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
-            if (!ret)
+            catch (Exception ex)
             {
-                _logger?.Error("振荡回零失败！");
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
+                _logger?.Error($"GoHome err:{ex.Message}");
                 return false;
             }
-
-            //抱夹气缸伸出
-            SetHolding();
-
-            return true;
+        
         }
 
         /// <summary>
@@ -177,7 +188,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new ActionTimeoutException("SetHolding超时");
+                    throw new TimeoutException("SetHolding超时");
                 }
             } while (!result);
         }
@@ -207,9 +218,20 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new ActionTimeoutException("ResetHolding 超时");
+                    throw new TimeoutException("ResetHolding 超时");
                 }
             } while (!result);
+        }
+
+
+        protected bool CloseHold(ushort num)
+        {
+            return _io.WriteBit_DO(_holding, false);
+        }
+
+        protected bool OpenHold(ushort num)
+        {
+            return _io.WriteBit_DO(_holding, true);
         }
 
         #endregion

@@ -162,6 +162,7 @@ namespace BQJX.Common
 
         /// <summary>
         /// 处理工艺（处理方法）
+        /// <see cref="TechStatus"/>
         /// </summary>
         public int Tech { get; set; }
 

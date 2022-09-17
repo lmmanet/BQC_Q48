@@ -41,7 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ActionTimeoutException.cs" />
     <Compile Include="Common\AddSolidPosData.cs" />
     <Compile Include="Common\AxisEleGear.cs" />
     <Compile Include="Common\AxisParam.cs" />
@@ -56,6 +55,7 @@
     <Compile Include="Common\GlobalStatus.cs" />
     <Compile Include="Common\PosNameAttribute.cs" />
     <Compile Include="Common\StepAxisEleGear.cs" />
+    <Compile Include="Common\TestThroughAttribute.cs" />
     <Compile Include="Common\VortexPosData.cs" />
     <Compile Include="Interface\IWeight.cs" />
     <Compile Include="Interface\IGlobalStatus.cs" />

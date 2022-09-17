@@ -64,17 +64,25 @@ namespace BQJX.Common.Common
         [PosName("枪头位2", Is_Z2_Axis = true)]
         public double[] NeedlePos2 { get; set; } = new double[3];
 
-        [PosName("移液取液位", Is_Z2_Axis = true)]
+
+        [PosName("移液取液位(净化管)", Is_Z2_Axis = true)]
         public double[] PipettingSourcePos { get; set; } = new double[3];
 
-        [PosName("移液吐液位1", Is_Z2_Axis = true)]
+        [PosName("移液取液位(浓缩西林瓶)", Is_Z2_Axis = true)]
+        public double[] PipettingSourcePos1 { get; set; } = new double[3];
+
+        [PosName("移液取液位(移栽大管)", Is_Z2_Axis = true)]
+        public double[] PipettingSourcePos2 { get; set; } = new double[3];
+
+
+        [PosName("移液吐液位（样品小瓶）", Is_Z2_Axis = true)]
         public double[] PipettingTargetPos1 { get; set; } = new double[3];
 
-        [PosName("移液吐液位2", Is_Z2_Axis = true)]
+        [PosName("移液吐液位2（西林瓶）", Is_Z2_Axis = true)]
         public double[] PipettingTargetPos2 { get; set; } = new double[3];
 
-        [PosName("移液吐液位3", Is_Z2_Axis = true)]
-        public double[] PipettingTargetPos3 { get; set; } = new double[3];
+        //[PosName("移液吐液位3", Is_Z2_Axis = true)]   //不用
+        //public double[] PipettingTargetPos3 { get; set; } = new double[3];
 
 
         //加标

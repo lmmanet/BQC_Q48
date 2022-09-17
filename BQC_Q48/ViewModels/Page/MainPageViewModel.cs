@@ -1,5 +1,6 @@
 ﻿using BQJX.Models;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using Q_Platform.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Q_Platform.ViewModels.Page
@@ -18,7 +20,7 @@ namespace Q_Platform.ViewModels.Page
 
         public ObservableCollection<SampleModel> SampleList { get; set; }
 
-        public ObservableCollection<WorkLog> WorkLogList { get; set; }
+        public ObservableCollection<WorkLog> WorkLogList { get; set; } = new ObservableCollection<WorkLog>();
 
         #endregion
 
@@ -39,7 +41,24 @@ namespace Q_Platform.ViewModels.Page
 
         public MainPageViewModel()
         {
+            Messenger.Default.Register<WorkLog>(this, "logWorkLog", LoggingWorkLog);
+
+
             RegisterCommnand();
+
+
+        }
+
+        private void LoggingWorkLog(WorkLog obj)
+        {
+            Application.Current.Dispatcher.Invoke(()=> 
+            {
+                if (obj == null)
+                {
+                    return;
+                }
+                WorkLogList.Add(obj);
+            });
         }
 
 

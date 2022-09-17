@@ -1,4 +1,5 @@
 ﻿using BQJX.Core.Interface;
+using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,11 @@ namespace Q_Platform.BLL
 {
     public class SyringOne : SyringBase
     {
+        private static ILogger logger = new MyLogger(typeof(SyringOne));
 
         #region Construtors
 
-        public SyringOne(IIoDevice io, ILS_Motion motion) : base(io, motion)
+        public SyringOne(IIoDevice io, ILS_Motion motion) : base(io, motion,logger)
         {
             _axisAddLiquid = 4;
             _port1 = 24;

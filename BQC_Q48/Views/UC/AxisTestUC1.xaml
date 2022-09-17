@@ -180,7 +180,7 @@
                                     <Button Command="{Binding ResetFieldBusCommand}" Content="总线复位" />
                                     <Button Command="{Binding HomeMoveCommand}" Content="回零" IsEnabled="{Binding Homing}" Visibility="{Binding HomeMoveVisibility}" />
                                     <Button Command="{Binding ClearPosOffsetCommand}" Content="编码器偏移清零" Visibility="Hidden" />
-                                    <Button Command="{Binding ConfiguraLimitCommand}" Content="配置限位" Visibility="Hidden" />
+                                   
                                 </UniformGrid>
                             </Border>
 

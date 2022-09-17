@@ -1,6 +1,7 @@
 ﻿using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using Q_Platform.DAL;
+using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,15 @@ using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
-    public class CapperFour : CapperBase
+    public class CapperFour : CapperBase, ICapperFour
     {
+
+        private static ILogger logger = new MyLogger(typeof(CapperFour));
 
         #region Construtors
 
-        public CapperFour(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ILogger logger) : base(io, motion, globalStatus, dataAccess, logger)
+        public CapperFour(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess) : base(io, motion, globalStatus, dataAccess, logger)
         {
-            _yMoveVel = 10;
             _axisY = 19;
             _axisC1 = 20;
             _axisC2 = 21;

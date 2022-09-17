@@ -6,6 +6,10 @@ using BQJX.Core.Interface;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Ioc;
 using Q_Platform.BLL;
+using System.Threading.Tasks;
+using System.Threading;
+using BQJX.Common;
+using System.Collections.Generic;
 
 namespace Q_Platform.ViewModels.UC
 {
@@ -75,14 +79,12 @@ namespace Q_Platform.ViewModels.UC
             ReadCommand = new RelayCommand(ReadSlave);
             WriteCommand = new RelayCommand(WriteSlave);
 
-
-            Command1 = new RelayCommand(DoFuc1);
-            Command2 = new RelayCommand(DoFuc2);
-            Command3 = new RelayCommand(DoFuc3);
-            Command4 = new RelayCommand(DoFuc4);
-            Command5 = new RelayCommand(DoFuc5);
-            Command6 = new RelayCommand(DoFuc6);
-
+            Command1 = new RelayCommand(async()=> await DoFuc1() );
+            Command2 = new RelayCommand(async()=> await DoFuc2());
+            Command3 = new RelayCommand(async()=> await DoFuc3());
+            Command4 = new RelayCommand(async()=> await DoFuc4());
+            Command5 = new RelayCommand(async()=> await DoFuc5());
+            Command6 = new RelayCommand(async() => await DoFuc6());
 
         }
 
@@ -102,45 +104,87 @@ namespace Q_Platform.ViewModels.UC
             return (ushort)result;
         }
 
-
-
-        private void DoFuc1()
+    
+        /// <summary>
+        /// 回零测试
+        /// </summary>
+        /// <returns></returns>
+        private async Task DoFuc1()
         {
-            //SimpleIoc.Default.GetInstance<IVortex>().GoHome(null);  //涡旋回零
-            //SimpleIoc.Default.GetInstance<VibrationBase>().GoHome(null);  //振荡回零
-            SimpleIoc.Default.GetInstance<IAddSolid>().AddSolidAsync(new BQJX.Common.Sample(),null);
-
-
+            SimpleIoc.Default.GetInstance<IMainPro>().GoHome();
+           
 
         }
-        private void DoFuc2()
+
+        private async Task DoFuc2()
         {
             //SimpleIoc.Default.GetInstance<IVortex>().StartVortexAsync(new BQJX.Common.Sample(),null);  //开始涡旋
             //SimpleIoc.Default.GetInstance<VibrationBase>().StartVibrationAsync(new BQJX.Common.Sample(), null);  //振荡开始
 
+            SimpleIoc.Default.GetInstance<IMainPro>().StartPro();
 
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromCapperOneToMaterial(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromCapperOneToMaterial(id2, null).ConfigureAwait(false);          
 
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromVortexToMaterial(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromVortexToMaterial(id2, null).ConfigureAwait(false);
 
-
-
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromVibrationToCold(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromVibrationToCold(id2, null).ConfigureAwait(false);
 
         }
-        private void DoFuc3()
+        private async Task DoFuc3()
         {
-       
+        
         }  
-        private void DoFuc4()
+        private async Task DoFuc4()
         {
-            
-            
-        }
-        private void DoFuc5()
-        {
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromTransferToMaterial(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromTransferToMaterial(id2, null).ConfigureAwait(false);
 
         }
-        private void DoFuc6()
+        private async Task DoFuc5()
         {
+            SimpleIoc.Default.GetInstance<IMainPro>().ContinuePro();
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromTransferToCapperTwo(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromTransferToCapperTwo(id2, null).ConfigureAwait(false);
 
+            //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;
+            //var ret = await intance.GetSampleFromMaterialToTransfer(id1, null).ConfigureAwait(false);
+            //if (!ret)
+            //{
+            //    return;
+            //}
+            //await intance.GetSampleFromMaterialToTransfer(id2, null).ConfigureAwait(false);
+        }
+        private async Task DoFuc6()
+        {
+            SimpleIoc.Default.GetInstance<IMainPro>().StopPro();
         }
 
 

@@ -43,6 +43,9 @@ namespace Q_Platform.BLL
         protected ushort _holdingOpenSensor;
         protected ushort _holdingCloseSensor;
 
+        protected int _capperTorque;
+        protected int _capperTimeout;
+
         protected double _xOffset;
 
         protected bool _haveCapper = false;  //手爪上有盖
@@ -74,44 +77,56 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> GoHome(CancellationTokenSource cts)
         {
-            //手爪打开
-            _io.WriteBit_DO(_claw, true);
-
-            //使能Z轴
-            await _motion.ServoOn(_axisZ).ConfigureAwait(false);
-            //Z轴回零
-            var result = await _motion.DM2C_GoHomeWithCheckDone(_axisZ, cts).ConfigureAwait(false);
-            if (!result)
+            try
             {
+                //手爪打开
+                _io.WriteBit_DO(_claw, true);
+
+                //使能Z轴
+                await _motion.ServoOn(_axisZ).ConfigureAwait(false);
+                //Z轴回零
+                var result = await _motion.DM2C_GoHomeWithCheckDone(_axisZ, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //使能Y轴
+                await _motion.ServoOn(_axisY).ConfigureAwait(false);
+                //Y轴回零
+                result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //使能C1轴
+                await _motion.ServoOn(_axisC1).ConfigureAwait(false);
+                //使能C2轴
+                await _motion.ServoOn(_axisC2).ConfigureAwait(false);
+
+
+                //复位抱夹
+                OpenHolding();
+
+                //Y轴移动到上下料位置
+                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+                //回零完成
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
+                _logger?.Error($"GoHome err:{ex.Message}");
                 return false;
             }
-
-            //使能Y轴
-            await _motion.ServoOn(_axisY).ConfigureAwait(false);
-            //Y轴回零
-            result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                return false;
-            }
-
-            //使能C1轴
-            await _motion.ServoOn(_axisC1).ConfigureAwait(false);
-            //使能C2轴
-            await _motion.ServoOn(_axisC2).ConfigureAwait(false);
-
-
-            //复位抱夹
-            OpenHolding();
-
-            //Y轴移动到上下料位置
-            result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                return false;
-            }
-            //回零完成
-            return true;
 
         }
 
@@ -146,7 +161,16 @@ namespace Q_Platform.BLL
             return result;
         }
 
+        
+        public bool CloseHold(ushort num)
+        {
+            return _io.WriteBit_DO(_holding, true);
+        }
 
+        public bool OpenHold(ushort num)
+        {
+            return _io.WriteBit_DO(_holding, false);
+        }
 
 
         #endregion
@@ -176,16 +200,14 @@ namespace Q_Platform.BLL
                 var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Y轴运动出错！");
                 }
 
                 //Z轴下降到位
                 result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Z轴运动出错！");
                 }
                 //开始拧紧
                 var result1 =  _motion.TorqueMoveWithCheckDone(_axisC1, _cMoveVel, torque, timeout,cts).ConfigureAwait(false);
@@ -193,7 +215,7 @@ namespace Q_Platform.BLL
                 if (!await result1 || !await result2)
                 {
                     //拧盖失败异常
-                    return false;
+                    throw new Exception("拧盖失败！");
                 }
 
                 //手爪松开
@@ -202,15 +224,13 @@ namespace Q_Platform.BLL
                 result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Z轴运动出错！");
                 }
                 //Y轴移动到上下料位
                 result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Y轴运动出错！");
                 }
                 //抱夹松开
                 OpenHolding();
@@ -220,7 +240,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-
+                if (cts?.IsCancellationRequested !=false)
+                {
+                    return false;
+                }
                 throw ex;
             }
         }
@@ -247,8 +270,7 @@ namespace Q_Platform.BLL
                 var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Y轴运动出错！");
                 }
                 //手爪打开
                 OpenClaw();
@@ -256,8 +278,7 @@ namespace Q_Platform.BLL
                 result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Z轴运动出错！");
                 }
                 //手爪夹紧
                 CloseClaw();
@@ -267,23 +288,20 @@ namespace Q_Platform.BLL
 
                 if (!await result1 || !await result2)
                 {
-                    //拆失败异常
-                    return false;
+                    throw new Exception("拆盖失败！");
                 }
 
                 //Z轴上升到位
                 result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Z轴运动出错！");
                 }
                 //Y轴移动到上下料位
                 result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Y轴运动出错！");
                 }
                 //抱夹松开
                 OpenHolding();
@@ -293,7 +311,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-
+                if (cts?.IsCancellationRequested != false)
+                {
+                    return false;
+                }
                 throw ex;
             }
         }
@@ -311,19 +332,22 @@ namespace Q_Platform.BLL
                 var result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-
-                    return false;
+                    throw new Exception("Z轴运动0位出错");
                 }
                  result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("Y轴运动到上下料位出错");
                 }
+                OpenHolding();
                 return true;
             }
             catch (Exception ex)
             {
-
+                if (cts?.IsCancellationRequested != false)
+                {
+                    return false;
+                }
                 throw ex;
             }
         }
@@ -351,7 +375,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new ActionTimeoutException("CloseHolding 超时");
+                    throw new TimeoutException("CloseHolding 超时");
                 }
             } while (!result);
 
@@ -384,7 +408,7 @@ namespace Q_Platform.BLL
                 temp++;
                 if (temp > 6)
                 {
-                    throw new ActionTimeoutException("OpenHolding超时");
+                    throw new TimeoutException("OpenHolding超时");
                 }
             } while (!result);
 

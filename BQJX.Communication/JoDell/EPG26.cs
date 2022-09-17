@@ -233,10 +233,10 @@ namespace BQJX.Communication.JoDell
         public async Task<int> ClawGetchStatus(int id)
         {
             var status = await GetClawStatus(id);
-            if (status.Falt != 0)
-            {
-                throw new Exception($"手爪{id}报错：{status.Falt}");
-            }
+            //if (status.Falt != 4)
+            //{
+            //    throw new Exception($"手爪{id}报错：{status.Falt}");
+            //}
 
             int value = status.ClawStatus & 0xc0;
             if (value == 0xc0) //到达指定位置
@@ -268,7 +268,7 @@ namespace BQJX.Communication.JoDell
                 busy = await ClawIsBusy(id).ConfigureAwait(false);
                 if (DateTime.Now>end)
                 {
-                    throw new ActionTimeoutException("CheckDone 手爪动作超时");
+                    throw new TimeoutException("CheckDone 手爪动作超时");
                 }
             } while (busy);
             return true;

@@ -29,11 +29,11 @@ namespace BQJX.Common
         public DateTime CreateTime { get; set; }
 
         /// <summary>
-        /// 样品状态 
+        /// 样品位置状态 
         /// <see cref="SampleStatus"/>
         /// </summary>
         public int Status { get; set; }
-
+        
         /// <summary>
         /// 试管状态
         /// 对应0-1

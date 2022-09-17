@@ -1,9 +1,11 @@
 ﻿using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
@@ -42,12 +44,12 @@ namespace Q_Platform.BLL
 
         #region Constructors
 
-        public Concentration(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IWeight weight, ILogger logger)
+        public Concentration(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IWeight weight)
         {
             this._io = io;
             this._motion = motion;
             this._weight = weight;
-            this._logger = logger;
+            this._logger = new MyLogger(typeof(Concentration));
             this._globalStauts = globalStatus;
 
             //IntialPosData();
@@ -55,16 +57,28 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
-
-
-        public void Dond()
+        /// <summary>
+        /// 回零
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> GoHome(CancellationTokenSource cts)
         {
-
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                return false;
+            }
+           
         }
-
-
-
 
 
 

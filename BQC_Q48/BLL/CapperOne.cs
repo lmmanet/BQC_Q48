@@ -9,18 +9,27 @@ using System.Threading;
 using BQJX.Common;
 using Q_Platform.DAL;
 using BQJX.Common.Common;
+using Q_Platform.Logger;
+using Q_Platform.Common;
 
 namespace Q_Platform.BLL
 {
-    public class CapperOne : CapperBase
+    public class CapperOne : CapperBase, ICapperOne
     {
+
+        private static ILogger logger = new MyLogger(typeof(CapperOne));
 
         private readonly SyringBase _syring;
 
+        private readonly ICarrierOne _carrier;
+
         #region Constructors
 
-        public CapperOne(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ILogger logger) : base(io, motion, globalStatus,dataAccess, logger)
+        public CapperOne(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ICarrierOne carrier, IAddSolid addSolid) : base(io, motion, globalStatus,dataAccess, logger)
         {
+            this._carrier = carrier;
+
+
             _axisY = 5;
             _axisC1 = 6;
             _axisC2 = 7;
@@ -31,9 +40,14 @@ namespace Q_Platform.BLL
             _holdingOpenSensor = 20;   //I1.4
 
             _xOffset = 68;    //加液X偏移量
+            _capperTorque = 80;  //拧盖力度
+            _capperTimeout = 40;  //拧盖超时时间 S 
 
-            _posData = GetPosData();
+            _posData = _dataAccess.GetCapperPosData(1);
             _syring = new SyringOne(io,motion);
+
+
+
         }
 
         #endregion
@@ -53,14 +67,20 @@ namespace Q_Platform.BLL
                 var result1 = _syring.GoHome(cts).ConfigureAwait(false);
                 //拧盖回零
                 var result2 = base.GoHome(cts).ConfigureAwait(false);
+
                 if (!await result1 || !await result2)
                 {
                     throw new Exception($"回零出错result1:{result1.GetAwaiter().GetResult()}，result2:{result2.GetAwaiter().GetResult()}");
                 }
+            
                 return true;
             }
             catch (Exception ex)
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
                 _logger?.Error($"{ex.Message}");
                 return false;
             }
@@ -74,48 +94,124 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
         {
+            ushort sampleId = sample.Id;
             try
             {
-                //判断样品是否需要加液
+                //拧盖移动到上下料位
+                var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
 
-                //判断样品是否完成加液
+                //搬运试管到拧盖1  内部判断试管位置
+                result = _carrier.GetSampleToCapperOne(sample,cts);
+                if (!result)
+                {
+                    return false;
+                }
 
-                //判断样品是否有盖
+                //判断试管是否有盖 拆盖
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                {
+                    result = await CapperOff(cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                }
 
-                //加溶剂A
+                //加溶剂A   内部判断是否有盖  需要修改
                 if (sample.TechParams.Solvent_A != 0)
                 {
                     double volume = sample.TechParams.Solvent_A;
-                    var result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂B
                 if (sample.TechParams.Solvent_B != 0)
                 {
                     double volume = sample.TechParams.Solvent_B;
-                    var result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂C
                 if (sample.TechParams.Solvent_C != 0)
                 {
                     double volume = sample.TechParams.Solvent_C;
-                    var result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂D
                 if (sample.TechParams.Solvent_D != 0)
                 {
                     double volume = sample.TechParams.Solvent_D;
-                    var result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
                 }
-
-
+                //完成
                 return true;
             }
             catch (Exception ex)
             {
-
+                if (cts?.IsCancellationRequested != false)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
                 throw ex;
             }
           
+        }
+
+        /// <summary>
+        /// 装盖及下料
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="getToMaterial"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> MoveOut(Sample sample,CancellationTokenSource cts)
+        {
+            try
+            {
+                bool result;
+
+                //判断是否在拧盖1
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
+                {
+                    return true;
+                }
+
+                //判断试管是否有盖 装盖
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                {
+                    result = await CapperOn(_capperTorque, 40, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
+                }
+
+                ////判断是否要  下料到试管架
+                //if (getToMaterial)
+                //{
+                //    // 下料到试管架
+                //    result = _carrier.GetSampleFromCapperOneToMaterial(sample, CloseHold, OpenHold, cts);
+                //    if (!result)
+                //    {
+                //        return false;
+                //    }
+                //}
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
         }
 
 
@@ -123,6 +219,20 @@ namespace Q_Platform.BLL
 
 
         #region Protected Methods
+
+        public async Task<bool> MovePutGetPos(CancellationTokenSource cts)
+        {
+            //复位抱夹
+            OpenHolding();
+
+            //Y轴移动到上下料位置
+            var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// 加液
@@ -135,17 +245,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                //判断试管是否有盖子
-                if (!_haveCapper)
-                {
-                    //试管有盖   先拆盖
-                    if (!await base.CapperOff(cts).ConfigureAwait(false))
-                    {
-                        //试管有盖拆盖出错
-                        return false;
-                    }
-                }
-
+              
                 //抱夹夹紧
                 _io.WriteBit_DO(_holding, true);
 
@@ -168,7 +268,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-
+                _logger?.Error(ex.Message);
                 throw ex;
             }
         }
@@ -178,18 +278,48 @@ namespace Q_Platform.BLL
 
         #region Private Methods
 
-
+        
 
         #endregion
 
 
-        protected CapperPosData GetPosData()
+        /// <summary>
+        /// 定时器
+        /// </summary>
+        /// <param name="time">分钟</param>
+        /// <param name="taskCallBack"></param>
+        public void Delay(int time,Func<Sample, CancellationTokenSource,Task<bool>> func,Sample sample ,CancellationTokenSource cts)
         {
-           return  _dataAccess.GetCapperPosData(1);
+            DateTime end = DateTime.Now + TimeSpan.FromMinutes(time);
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(5000);
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        return;
+                    }
+                    //时间到
+                    if (DateTime.Now > end)
+                    {
+                        if (cts?.IsCancellationRequested == true)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        func?.Invoke(sample,cts);
+                        return;
+                    }
+
+                    return;
+                }
+            });
         }
 
 
 
+     
 
     }
 }

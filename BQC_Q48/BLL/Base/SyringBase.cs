@@ -14,7 +14,7 @@ namespace Q_Platform.BLL
 
         protected readonly IIoDevice _io;
         protected readonly ILS_Motion _motion;
-
+        protected readonly ILogger _logger;
         #endregion
 
         #region Protected Variants
@@ -35,14 +35,17 @@ namespace Q_Platform.BLL
         protected double _syringVel = 50;
         protected double _obsortVel = 10;
 
+        protected int _step;
+
         #endregion
 
         #region Construtors
 
-        public SyringBase(IIoDevice io, ILS_Motion motion)
+        public SyringBase(IIoDevice io, ILS_Motion motion,ILogger logger)
         {
             this._motion = motion;
             this._io = io;
+            this._logger = logger;
         }
 
 
@@ -57,32 +60,159 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> GoHome(CancellationTokenSource cts)
         {
-            //关闭全部阀口
-            _io.WriteBit_DO(_port1, false);
-            _io.WriteBit_DO(_port2, false);
-            _io.WriteBit_DO(_port3, false);
-            _io.WriteBit_DO(_port4, false);
-            _io.WriteBit_DO(_port5, false);
-            _io.WriteBit_DO(_port6, false);
-            _io.WriteBit_DO(_port7, false);
-            _io.WriteBit_DO(_port8, false);
+            try
+            {
+                //关闭全部阀口
+                _io.WriteBit_DO(_port1, false);
+                _io.WriteBit_DO(_port2, false);
+                _io.WriteBit_DO(_port3, false);
+                _io.WriteBit_DO(_port4, false);
+                _io.WriteBit_DO(_port5, false);
+                _io.WriteBit_DO(_port6, false);
+                _io.WriteBit_DO(_port7, false);
+                _io.WriteBit_DO(_port8, false);
 
-            //使能轴
-            await _motion.ServoOn(_axisAddLiquid).ConfigureAwait(false);
+                //使能轴
+                await _motion.ServoOn(_axisAddLiquid).ConfigureAwait(false);
 
-            var result = await _motion.GoHomeWithCheckDone(_axisAddLiquid, cts);
-            return result;
-
+                var result = await _motion.GoHomeWithCheckDone(_axisAddLiquid, cts);
+                _step = 1;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                return false;
+            }
+            
         }
 
         /// <summary>
         /// 注射器加液，Solve表示种类 用位表示
         /// </summary>
         /// <param name="solve">加液种类</param>
-        /// <param name="volume">需要加液量</param>
+        /// <param name="volume">需要加液量0~40ml</param>
         /// <param name="cts"></param>
         /// <returns></returns>
         public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
+        {
+            if (volume <= 10)
+            {
+                return await AddSolveSub(solve, volume, cts).ConfigureAwait(false);
+            }
+            if (volume >10 && volume <= 20)
+            {
+                if (_step == 1)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 2)
+                {
+                    var ret1 = await AddSolveSub(solve, volume -10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step = 1;
+                    return true;
+                }
+            }
+            if (volume > 20 && volume <= 30)
+            {
+                if (_step == 1)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 2)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 3)
+                {
+                    var ret1 = await AddSolveSub(solve, volume - 20, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step = 1;
+                    return true;
+                }
+            }
+            if (volume >30 && volume <= 40)
+            {
+                if (_step == 1)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 2)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 3)
+                {
+                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step++;
+                }
+                if (_step == 4)
+                {
+                    var ret1 = await AddSolveSub(solve, volume - 30, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        return false;
+                    }
+                    _step = 1;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        /// 加液
+        /// </summary>
+        /// <param name="solve">溶剂种类</param>
+        /// <param name="volume"> 1- 10ml</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> AddSolveSub(byte solve, double volume, CancellationTokenSource cts)
         {
             //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)
@@ -136,8 +266,8 @@ namespace Q_Platform.BLL
             //完成吸液
             _isAbsorb = true;
 
-            //开始吐液
-            inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
+        //开始吐液
+        inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -147,7 +277,7 @@ namespace Q_Platform.BLL
 
             //开始回吸空气柱
             await Task.Delay(1000).ConfigureAwait(false);
-            air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, cts).ConfigureAwait(false);
+        air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -169,9 +299,6 @@ namespace Q_Platform.BLL
 
         }
 
-
         #endregion
-
-
     }
 }

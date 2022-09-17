@@ -3,6 +3,7 @@ using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using Q_Platform.DAL;
+using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,9 @@ namespace Q_Platform.BLL
 
         private readonly ILogger _logger;
 
-        private readonly ILS_Motion _motion;
+        private readonly ILS_Motion _stepMotion;
+
+        private readonly ICarrierOne _carrier;
 
         private readonly IGlobalStatus _globalStauts;
 
@@ -31,7 +34,7 @@ namespace Q_Platform.BLL
 
         #region Variable
 
-        protected double _yMoveVel = 500;
+        protected double _stepMoveVel = 500;
 
         protected ushort _axisY = 8;  //Y轴
         protected ushort _vortexMotion1 =32;
@@ -51,13 +54,16 @@ namespace Q_Platform.BLL
 
         #region Constructors
 
-        public Vortex(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IVortexPosDataAccess dataAccess, ILogger logger)
+        public Vortex(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IVortexPosDataAccess dataAccess,ICarrierOne carrier)
         {
             this._io = io;
-            this._motion = motion;
-            this._logger = logger;
+            this._stepMotion = motion;
+            this._logger = new MyLogger(typeof(Vortex));
             this._globalStauts = globalStatus;
             this._dataAccess = dataAccess;
+
+            this._carrier = carrier;
+
             _posData = dataAccess.GetPosData();
         }
 
@@ -79,16 +85,16 @@ namespace Q_Platform.BLL
                 PressUp();
 
                 //使能Y轴
-                await _motion.ServoOn(_axisY).ConfigureAwait(false);
+                await _stepMotion.ServoOn(_axisY).ConfigureAwait(false);
                 //Y轴回零
-                var result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
+                var result = await _stepMotion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
                 }
 
                 //Y轴移动到上下料位
-                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+                result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -97,6 +103,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    return false;
+                }
                 _logger?.Error($"{ex.Message}");
                 return false;
             }
@@ -110,9 +120,42 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> StartVortexAsync(Sample sample, CancellationTokenSource cts)
         {
+            int time = 30;
+            int vel = 2000;
             try
             {
-                var result = await StartVortex(30, 2000, cts).ConfigureAwait(false);
+                //到上下料位
+                var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //搬运
+                result = _carrier.GetSampleToVortex(sample,cts);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //开始涡旋
+
+                result = await StartVortex(time, vel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //搬运到试管架
+                result = _carrier.GetSampleToMaterial(sample, cts);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //完成
+
+
                 return true;
             }
             catch (Exception ex)
@@ -128,6 +171,27 @@ namespace Q_Platform.BLL
         #region Protected Methods
 
         /// <summary>
+        /// 移动到上下料位
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
+        {
+            PressUp();
+
+            //步进Y轴移动到原点位置
+            var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                return false;
+            }
+          
+            return true;
+
+        }
+
+
+        /// <summary>
         /// 开始涡旋
         /// </summary>
         /// <param name="time"></param>
@@ -137,7 +201,7 @@ namespace Q_Platform.BLL
         protected async Task<bool> StartVortex(int time,int vel,CancellationTokenSource cts)
         {
             //Y轴移动到涡旋位置
-            var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _yMoveVel, cts).ConfigureAwait(false);
+            var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -180,7 +244,7 @@ namespace Q_Platform.BLL
             //下压气缸上升
             PressUp();
             //Y轴移动到上下料位置
-            result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+            result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
             {
                 return false;

@@ -85,14 +85,14 @@ namespace BQJX.Core
                 PositionArray[1]*ele.EleGear
             };
 
-            ret = LTDMC.dmc_line_unit(_CardID, Crd, AxisNum, axisNo, targetPos, 0);
+            ret = LTDMC.dmc_line_unit(_CardID, Crd, AxisNum, axisNo, targetPos, 1);
             if (ret != 0)
             {
                 _logger?.Error($"InterPolation_2D_lineWithCheckDone err:{ret}");
                 throw new EtherCATMotionException($"InterPolation_2D_lineWithCheckDone err:{ret}");
             }
 
-            return await CheckDoneMulti(_CardID, Crd, cts).ConfigureAwait(false);
+            return await CheckDone(axisNo[0], cts).ConfigureAwait(false);
 
         }
 

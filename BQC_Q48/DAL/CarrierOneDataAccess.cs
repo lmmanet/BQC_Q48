@@ -57,7 +57,8 @@ namespace Q_Platform.DAL
                     data.TransferLeftPos[i] = item.Field<double>("TransferLeftPos");
                     data.NeedlePos[i] = item.Field<double>("NeedlePos");
                     data.PipettingSourcePos[i] = item.Field<double>("PipettingSourcePos");
-                    data.PipettingTargetPos[i] = item.Field<double>("PipettingTargetPos");
+                    data.PipettingTargetPos[i] = item.Field<double>("PipettingTargetPos");     
+                    data.PipettingSourcePos2[i] = item.Field<double>("PipettingSourcePos2");
                     i++;
                 }
             }
@@ -90,8 +91,9 @@ namespace Q_Platform.DAL
                    $"VibrationOnePos ='{data.VibrationOnePos[i]}'," +
                    $"TransferLeftPos ='{data.TransferLeftPos[i]}'," +
                    $"NeedlePos ='{data.NeedlePos[i]}'," +
-                   $"PipettingSourcePos='{data.PipettingSourcePos[i]}'," +
-                   $"PipettingTargetPos='{data.PipettingTargetPos[i]}'";
+                   $"PipettingSourcePos='{data.PipettingSourcePos[i]}'," + 
+                   $"PipettingTargetPos='{data.PipettingTargetPos[i]}'," +
+                   $"PipettingSourcePos2='{data.PipettingSourcePos2[i]}'";
                     sql += header + param + $" where id = {i};";
                 }
 

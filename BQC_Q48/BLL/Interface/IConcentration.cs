@@ -1,7 +1,14 @@
-﻿namespace Q_Platform.BLL
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Q_Platform.BLL
 {
     public interface IConcentration
     {
-        void Dond();
+        Task<bool> GoHome(CancellationTokenSource cts);
+
+
+
+
     }
 }

@@ -59,9 +59,11 @@ namespace Q_Platform.DAL
                     data.NeedlePos1[i] = item.Field<double>("NeedlePos1");
                     data.NeedlePos2[i] = item.Field<double>("NeedlePos2");
                     data.PipettingSourcePos[i] = item.Field<double>("PipettingSourcePos");
+                    data.PipettingSourcePos1[i] = item.Field<double>("PipettingSourcePos1");
+                    data.PipettingSourcePos2[i] = item.Field<double>("PipettingSourcePos2");
                     data.PipettingTargetPos1[i] = item.Field<double>("PipettingTargetPos1");
                     data.PipettingTargetPos2[i] = item.Field<double>("PipettingTargetPos2");
-                    data.PipettingTargetPos3[i] = item.Field<double>("PipettingTargetPos3");
+                    //data.PipettingTargetPos3[i] = item.Field<double>("PipettingTargetPos3");
                     data.SyringSourcePos[i] = item.Field<double>("SyringSourcePos");
                     data.SyringTargePos[i] = item.Field<double>("SyringTargePos");
                     data.SyringWashPos[i] = item.Field<double>("SyringWashPos");
@@ -103,9 +105,11 @@ namespace Q_Platform.DAL
                    $"NeedlePos1 ='{data.NeedlePos1[i]}'," +
                    $"NeedlePos2 ='{data.NeedlePos2[i]}'," +
                    $"PipettingSourcePos ='{data.PipettingSourcePos[i]}'," +
+                   $"PipettingSourcePos1 ='{data.PipettingSourcePos1[i]}'," +
+                   $"PipettingSourcePos2 ='{data.PipettingSourcePos2[i]}'," +
                    $"PipettingTargetPos1='{data.PipettingTargetPos1[i]}'," +
                    $"PipettingTargetPos2='{data.PipettingTargetPos2[i]}'," +
-                   $"PipettingTargetPos3='{data.PipettingTargetPos3[i]}'," +
+                   //$"PipettingTargetPos3='{data.PipettingTargetPos3[i]}'," +
                    $"SyringSourcePos='{data.SyringSourcePos[i]}'," +
                    $"SyringTargePos='{data.SyringTargePos[i]}'," +
                    $"SyringWashPos='{data.SyringWashPos[i]}'";

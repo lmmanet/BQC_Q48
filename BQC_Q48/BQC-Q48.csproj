@@ -84,18 +84,35 @@
     <Compile Include="BLL\Centrifugal.cs" />
     <Compile Include="BLL\Concentration.cs" />
     <Compile Include="BLL\Base\VibrationBase.cs" />
+    <Compile Include="BLL\IMainPro.cs" />
+    <Compile Include="BLL\Interface\ICapperFive.cs" />
+    <Compile Include="BLL\Interface\ICapperFour.cs" />
+    <Compile Include="BLL\Interface\ICapperThree.cs" />
+    <Compile Include="BLL\Interface\ICapperTwo.cs" />
+    <Compile Include="BLL\Interface\ICapperOne.cs" />
+    <Compile Include="BLL\Interface\ICarrierTwo.cs" />
+    <Compile Include="BLL\Interface\ICarrierOne.cs" />
     <Compile Include="BLL\Interface\IConcentration.cs" />
     <Compile Include="BLL\Interface\IAddSolid.cs" />
     <Compile Include="BLL\Interface\ICentrifugal.cs" />
     <Compile Include="BLL\Interface\IVortex.cs" />
+    <Compile Include="BLL\Interface\IVibrationOne.cs" />
+    <Compile Include="BLL\Interface\IVibrationTwo.cs" />
+    <Compile Include="BLL\MainPro.cs" />
+    <Compile Include="BLL\Supernate.cs" />
     <Compile Include="BLL\SyringOne.cs" />
     <Compile Include="BLL\SyringTwo.cs" />
     <Compile Include="BLL\VibrationOne.cs" />
     <Compile Include="BLL\VibrationTwo.cs" />
     <Compile Include="BLL\Vortex.cs" />
+    <Compile Include="Common\TechStatusHelper.cs" />
+    <Compile Include="Common\SampleStatusHelper.cs" />
+    <Compile Include="Common\SampleStatus.cs" />
     <Compile Include="Common\PasswordBoxHelper.cs" />
     <Compile Include="Common\Sample.cs" />
+    <Compile Include="Common\TechAttribute.cs" />
     <Compile Include="Common\TechParams.cs" />
+    <Compile Include="Common\TechStatus.cs" />
     <Compile Include="Common\UserModel.cs" />
     <Compile Include="Common\Validation\ValueLimitAttribute.cs" />
     <Compile Include="Converts\Base\BaseValueConverter.cs" />
@@ -127,11 +144,15 @@
     <Compile Include="DAL\Interface\ICarrierOneDataAccess.cs" />
     <Compile Include="DAL\Interface\ICarrierTwoDataAccess.cs" />
     <Compile Include="Logger\LoggerHelper.cs" />
+    <Compile Include="Logger\MyLogger.cs" />
     <Compile Include="Models\AlarmMessage.cs" />
     <Compile Include="Models\AxisPosInfo.cs" />
+    <Compile Include="Models\Tech\FruitTechParamsModel.cs" />
+    <Compile Include="Models\Tech\NutTechParamsModel.cs" />
     <Compile Include="Models\SampleModel.cs" />
     <Compile Include="Models\TechParamsModel.cs" />
     <Compile Include="Models\TechPosModel.cs" />
+    <Compile Include="Models\Tech\VeterinaryTechParamsModel.cs" />
     <Compile Include="Models\WorkLog.cs" />
     <Compile Include="ViewModels\Base\MyViewModelBase.cs" />
     <Compile Include="ViewModels\Base\ViewModelLocator.cs" />
@@ -342,11 +363,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="BouncyCastle">
+      <Version>1.8.5</Version>
+    </PackageReference>
+    <PackageReference Include="Fody">
+      <Version>6.6.2</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="MvvmLight">
       <Version>5.4.1.1</Version>
     </PackageReference>
     <PackageReference Include="MySql.Data">
-      <Version>8.0.29</Version>
+      <Version>8.0.28</Version>
     </PackageReference>
     <PackageReference Include="NLog">
       <Version>5.0.0</Version>
