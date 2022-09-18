@@ -10,10 +10,13 @@ namespace Q_Platform.BLL
 
         private static ILogger logger = new MyLogger(typeof(CapperFive));
 
+        private readonly ICarrierTwo _carrier;
+
         #region Construtors
 
-        public CapperFive(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess) : base(io, motion, globalStatus, dataAccess, logger)
+        public CapperFive(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess,ICarrierTwo carrier) : base(io, motion, globalStatus, dataAccess, logger)
         {
+            this._carrier = carrier;
             _axisY = 22;
             _axisC1 = 23;
             _axisC2 = 24;
@@ -22,8 +25,6 @@ namespace Q_Platform.BLL
             _claw = 48;
 
             _xOffset = 60;    //拧盖X偏移量
-
-            
 
         }
 

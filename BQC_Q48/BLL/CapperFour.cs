@@ -15,6 +15,8 @@ namespace Q_Platform.BLL
 
         private static ILogger logger = new MyLogger(typeof(CapperFour));
 
+        private readonly ICarrierTwo _carrier;
+
         #region Construtors
 
         public CapperFour(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess) : base(io, motion, globalStatus, dataAccess, logger)

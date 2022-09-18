@@ -82,8 +82,10 @@
     <Compile Include="BLL\CarrierOne.cs" />
     <Compile Include="BLL\CarrierTwo.cs" />
     <Compile Include="BLL\Centrifugal.cs" />
+    <Compile Include="BLL\CentrifugalCarrier.cs" />
     <Compile Include="BLL\Concentration.cs" />
     <Compile Include="BLL\Base\VibrationBase.cs" />
+    <Compile Include="BLL\Interface\ICentrifugalCarrier.cs" />
     <Compile Include="BLL\IMainPro.cs" />
     <Compile Include="BLL\Interface\ICapperFive.cs" />
     <Compile Include="BLL\Interface\ICapperFour.cs" />

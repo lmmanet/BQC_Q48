@@ -29,9 +29,6 @@ namespace Q_Platform.BLL
 
         bool GetSampleToAddSolid(Sample sample, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts);
 
-        bool GetSampleFromCapperOneToMaterial(Sample sample, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts);
-
-
         bool GetSampleToMaterial(Sample sample, CancellationTokenSource cts);
 
 

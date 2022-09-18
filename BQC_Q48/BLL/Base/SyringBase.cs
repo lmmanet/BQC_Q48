@@ -62,6 +62,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger.Debug("Syring GoHome");
                 //关闭全部阀口
                 _io.WriteBit_DO(_port1, false);
                 _io.WriteBit_DO(_port2, false);
@@ -81,12 +82,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("GoHome 停止");
                     return false;
                 }
-                _logger?.Error(ex.Message);
-                return false;
+                throw ex;
             }
             
         }
@@ -100,104 +101,105 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
         {
-            if (volume <= 10)
+            _logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
+            if (volume <= 10 && cts?.IsCancellationRequested !=false)
             {
-                return await AddSolveSub(solve, volume, cts).ConfigureAwait(false);
+                return await AddSolveSub(solve, volume, null).ConfigureAwait(false);
             }
-            if (volume >10 && volume <= 20)
+            if (volume >10 && volume <= 20 &&cts?.IsCancellationRequested != false)
             {
-                if (_step == 1)
+                if (_step == 1 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 2)
+                if (_step == 2 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, volume -10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, volume -10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step = 1;
                     return true;
                 }
             }
-            if (volume > 20 && volume <= 30)
+            if (volume > 20 && volume <= 30 && cts?.IsCancellationRequested != false)
             {
-                if (_step == 1)
+                if (_step == 1 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 2)
+                if (_step == 2 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 3)
+                if (_step == 3 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, volume - 20, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, volume - 20, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step = 1;
                     return true;
                 }
             }
-            if (volume >30 && volume <= 40)
+            if (volume >30 && volume <= 40 && cts?.IsCancellationRequested != false)
             {
-                if (_step == 1)
+                if (_step == 1 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 2)
+                if (_step == 2 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 3)
+                if (_step == 3 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, 10, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step++;
                 }
-                if (_step == 4)
+                if (_step == 4 && cts?.IsCancellationRequested != false)
                 {
-                    var ret1 = await AddSolveSub(solve, volume - 30, cts).ConfigureAwait(false);
+                    var ret1 = await AddSolveSub(solve, volume - 30, null).ConfigureAwait(false);
                     if (!ret1)
                     {
-                        return false;
+                        throw new Exception("加液失败!");
                     }
                     _step = 1;
                     return true;
                 }
             }
-            return false;
+            throw new Exception("加液失败!");
         }
 
 
@@ -212,8 +214,9 @@ namespace Q_Platform.BLL
         /// <param name="volume"> 1- 10ml</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolveSub(byte solve, double volume, CancellationTokenSource cts)
+        protected async Task<bool> AddSolveSub(byte solve, double volume, CancellationTokenSource cts = null)
         {
+            _logger?.Debug($"AddSolveSub-{solve}-{volume},isAddSolve{_isAddSolve},isAbsorb{_isAbsorb}");
             //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)
             {
@@ -239,7 +242,7 @@ namespace Q_Platform.BLL
             var result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, volume, _obsortVel, cts).ConfigureAwait(false);
             if (!result)
             {
-                return false;
+                throw new Exception("吸液失败");
             }
 
             //切换阀口
@@ -270,7 +273,7 @@ namespace Q_Platform.BLL
         inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
             if (!result)
             {
-                return false;
+                throw new Exception("吐液失败");
             }
             _isAddSolve = true;  //完成加液
             _isAbsorb = false;   //复位完成吸液
@@ -280,7 +283,7 @@ namespace Q_Platform.BLL
         air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, cts).ConfigureAwait(false);
             if (!result)
             {
-                return false;
+                throw new Exception("回吸空气柱失败");
             }
 
             //关闭全部阀口

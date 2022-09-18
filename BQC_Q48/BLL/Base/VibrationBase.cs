@@ -53,6 +53,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> GoHome(CancellationTokenSource cts)
         {
+            _logger?.Info("振荡回零");
             try
             {
                 //释放抱夹气缸
@@ -68,8 +69,7 @@ namespace Q_Platform.BLL
                 bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
                 if (!ret)
                 {
-                    _logger?.Error("振荡回零失败！");
-                    return false;
+                    throw new Exception("振荡回零失败！");
                 }
 
                 //抱夹气缸伸出
@@ -81,22 +81,24 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Info("振荡回零 停止");
                     return false;
                 }
-                _logger?.Error($"GoHome err:{ex.Message}");
+                _logger?.Warn($"振荡回零 err:{ex.Message}");
                 return false;
             }
         
         }
 
         /// <summary>
-        /// 
+        /// 启动振荡
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
         public virtual async Task<bool> StartVibrationAsync(Sample sample,CancellationTokenSource cts)
         {
+            _logger?.Info($"样品{sample.Id}开始振荡");
             try
             {
                 double vel = 500 / 60;
@@ -105,14 +107,15 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-
-                throw;
+                if (cts?.IsCancellationRequested == true)
+                {
+                    _logger?.Info($"样品{sample.Id}振荡 停止");
+                    return false;
+                }
+                _logger?.Warn($"样品{sample.Id}振荡 err:{ex.Message}");
+                throw ex;
             }
         }
-
-
-
-
 
         #endregion
 
@@ -125,7 +128,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> StartVibration(int time, double vel, CancellationTokenSource cts)
         {
-
+            _logger?.Debug($"StartVibration-{time}-{vel}");
             //释放抱夹气缸
             ResetHolding();
 
@@ -147,6 +150,7 @@ namespace Q_Platform.BLL
                 }
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Debug($"StartVibration-{time}-{vel} 停止");
                     _motion.StopMove(_axisNo); 
                     await GoHome(cts).ConfigureAwait(false);
                     return false;
@@ -170,6 +174,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual void SetHolding(bool checkSensor = true)
         {
+            _logger?.Debug($"SetHolding-{checkSensor},气缸伸出");
             var result = _io.WriteBit_DO(_holding,true);
             if (!result)
             {
@@ -199,6 +204,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual void ResetHolding(bool checkSensor = false)
         {
+            _logger?.Debug($"ResetHolding-{checkSensor},气缸收回");
             var result = _io.WriteBit_DO(_holding,false);
             if (!result)
             {

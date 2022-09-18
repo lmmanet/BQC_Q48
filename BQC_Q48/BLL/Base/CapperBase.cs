@@ -79,6 +79,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Info("拧盖回零");
                 //手爪打开
                 _io.WriteBit_DO(_claw, true);
 
@@ -122,9 +123,10 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Info("拧盖回零 停止");
                     return false;
                 }
-                _logger?.Error($"GoHome err:{ex.Message}");
+                _logger?.Warn($"拧盖回零 err:{ex.Message}");
                 return false;
             }
 
@@ -140,9 +142,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-
             var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
-
 
             return result;
         }
@@ -187,6 +187,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"CapperOn-{torque}-{timeout} haveCapper{_haveCapper}");
                 //判断手爪是否有盖
                 if (!_haveCapper)
                 {
@@ -242,6 +243,7 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested !=false)
                 {
+                    _logger?.Debug($"CapperOn 停止");
                     return false;
                 }
                 throw ex;
@@ -257,6 +259,7 @@ namespace Q_Platform.BLL
 
             try
             {
+                _logger?.Debug($"CapperOff haveCapper{_haveCapper}");
                 //判断手爪是否有盖
                 if (_haveCapper)
                 {
@@ -313,6 +316,7 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug($"CapperOff 停止");
                     return false;
                 }
                 throw ex;
@@ -327,7 +331,8 @@ namespace Q_Platform.BLL
         protected async Task<bool> Y_MoveToPutGet(CancellationTokenSource cts)
         {
             try
-            {  
+            {
+                _logger?.Debug($"Y_MoveToPutGet");
                 //Z轴上升到位
                 var result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
@@ -346,6 +351,7 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("Y_MoveToPutGet 停止");
                     return false;
                 }
                 throw ex;
@@ -357,6 +363,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void CloseHolding(bool checkSensor = true)
         {
+            _logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹夹紧
             var result =  _io.WriteBit_DO(_holding, true);
             if (!result)
@@ -388,6 +395,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void OpenHolding(bool checkSensor = true)
         {
+            _logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹释放
             var result = _io.WriteBit_DO(_holding, false);
             if (!result)
@@ -419,6 +427,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void CloseClaw()
         {
+            _logger?.Debug($"CloseClaw");
             //手爪夹紧
             var result = _io.WriteBit_DO(_claw, false);
             Thread.Sleep(500);
@@ -433,6 +442,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void OpenClaw()
         {
+            _logger?.Debug($"CloseClaw");
             //手爪松开
             var result = _io.WriteBit_DO(_claw, true);
             Thread.Sleep(500);

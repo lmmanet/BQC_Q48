@@ -93,6 +93,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Info("加盐模块回零");
                 Z1_Cylinder_Up();
                 Z2_Cylinder_Up();
 
@@ -122,9 +123,10 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Info("加盐模块回零,停止");
                     return false;
                 }
-                _logger?.Error($"GoHome err:{ex.Message}");
+                _logger?.Warn($"GoHome err:{ex.Message}");
                 return false;
             }
         }
@@ -139,6 +141,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Info($"样品{sample.Id}加固");
                 //加固到接驳位
                 var result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
@@ -181,9 +184,10 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Info($"样品{sample.Id}加固,暂停");
                     return false;
                 }
-                _logger?.Error(ex.Message);
+                _logger?.Warn(ex.Message);
                 throw ex;
             }
         }
@@ -192,8 +196,14 @@ namespace Q_Platform.BLL
 
         #region Protected Methods
 
+        /// <summary>
+        /// 移动到上下料位
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
         {
+            _logger?.Debug($"MovePutGetPos");
             //步进Y轴移动到原点位置
             var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
             if (!result)
@@ -206,7 +216,6 @@ namespace Q_Platform.BLL
 
         }
 
-
         /// <summary>
         /// 加固
         /// </summary>
@@ -216,6 +225,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> Add_Solid(int[] solids,double[] weights, CancellationTokenSource cts)
         {
+            solids.ToList().ForEach(s=>_logger.Debug($"Add_Solid {s}"));
             int count = weights.Length;
             while (_step < count)
             {
@@ -246,6 +256,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"Add_SolidSub-{solid}-{weight} ");
                 double[] pos = GetSolidCoordinate(solid);
                 await Task.Delay(1000).ConfigureAwait(false);
                 //获取毛重
@@ -300,7 +311,7 @@ namespace Q_Platform.BLL
                 {
                     return false;
                 }
-                _logger?.Debug($"Add_SolidSub err:{ex.Message}");
+                _logger?.Error($"Add_SolidSub err:{ex.Message}");
                 throw ex;
             }
         }
@@ -314,6 +325,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CheckDone1(double weight,int timeout = 300)
         {
+            _logger?.Debug($"CheckDone1-{weight}-{timeout}" );
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
             while (true)
             {
@@ -340,6 +352,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CheckDone2(double weight, int timeout = 300)
         {
+            _logger?.Debug($"CheckDone2-{weight}-{timeout}");
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
             while (true)
             {
@@ -360,6 +373,7 @@ namespace Q_Platform.BLL
 
         protected void Z1_Cylinder_Up(bool checkSensor = false)
         {
+            _logger?.Debug($"Z1_Cylinder_Up-{checkSensor}");
             var result = _io.WriteBit_DO(_Z1CylinderControl, false);
             if (!result)
             {
@@ -387,6 +401,7 @@ namespace Q_Platform.BLL
 
         protected void Z1_Cylinder_Down(bool checkSensor = true)
         {
+            _logger?.Debug($"Z1_Cylinder_Down-{checkSensor}");
             var result = _io.WriteBit_DO(_Z1CylinderControl, true);
             if (!result)
             {
@@ -414,6 +429,7 @@ namespace Q_Platform.BLL
 
         protected void Z2_Cylinder_Up(bool checkSensor = false)
         {
+            _logger?.Debug($"Z2_Cylinder_Up-{checkSensor}");
             var result = _io.WriteBit_DO(_Z2CylinderControl, false);
             if (!result)
             {
@@ -441,6 +457,7 @@ namespace Q_Platform.BLL
 
         protected void Z2_Cylinder_Down(bool checkSensor = true)
         {
+            _logger?.Debug($"Z2_Cylinder_Down-{checkSensor}");
             var result = _io.WriteBit_DO(_Z2CylinderControl, true);
             if (!result)
             {
@@ -468,6 +485,7 @@ namespace Q_Platform.BLL
 
         protected void X_Cylinder_Left(bool checkSensor = true)
         {
+            _logger?.Debug($"X_Cylinder_Left-{checkSensor}");
             var result = _io.WriteBit_DO(_XCylinderControl, false);
             if (!result)
             {
@@ -495,6 +513,7 @@ namespace Q_Platform.BLL
 
         protected void X_Cylinder_Right(bool checkSensor = true)
         {
+            _logger?.Debug($"X_Cylinder_Right-{checkSensor}");
             var result = _io.WriteBit_DO(_XCylinderControl, true);
             if (!result)
             {

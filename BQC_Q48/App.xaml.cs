@@ -72,6 +72,7 @@ namespace BQC_Q48
             //搬运
             SimpleIoc.Default.Register<ICarrierOne, CarrierOne>();  //搬运1
             SimpleIoc.Default.Register<ICarrierTwo, CarrierTwo>();  //搬运2
+            SimpleIoc.Default.Register<ICentrifugalCarrier, CentrifugalCarrier>();  //离心搬运
             //加固
             SimpleIoc.Default.Register<IAddSolid, AddSolid>();     //加固
             //拧盖

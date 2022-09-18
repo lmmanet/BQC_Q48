@@ -82,6 +82,12 @@ namespace Q_Platform.BLL
         }
 
 
+        public bool GetSampleToCapperThree(Sample sample,CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
 
         #region Protected Methods  搬运部分

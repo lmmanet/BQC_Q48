@@ -166,6 +166,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
                 //判断手爪是否抓取物件 在指定打开位置
                 if (!await ClawIsGetchPiece())
                 {
@@ -203,6 +204,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug($"GetTubeAsync 停止");
                     return false;
                 }
                 throw ex;
@@ -220,6 +222,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"PutTubeAsync-{clawOpenByte}");
                 //如果手爪打开 判定放料完成
                 if (await _claw.ClawGetchStatus(_clawSlaveId) == 1)
                 {
@@ -258,6 +261,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("PutTubeAsync 停止");
                     return false;
                 }
                 throw ex;
@@ -277,6 +281,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"GetNeedleAsync");
                 //判断移液器是否有枪头
                 if (_isGotNeedle)
                 {
@@ -326,6 +331,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("GetNeedleAsync 停止");
                     return false;
                 }
                 throw ex;
@@ -344,6 +350,7 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Debug($"PutNeedleAsync");
                 //判断移液器是否有枪头
                 if (!_isGotNeedle)
                 {
@@ -396,6 +403,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug($"PutNeedleAsync 停止");
                     return false;
                 }
                 throw ex;
@@ -412,8 +420,9 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume, CancellationTokenSource cts)
         {
-            try   
+            try
             {
+                _logger?.Debug($"DoPipettingAsync-{volume}");
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] sourcePosArray = new double[2] { sourcePos[0], sourcePos[1] };
                 double[] targetPosArray = new double[2] { targetPos[0], targetPos[1] };
@@ -529,6 +538,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("DoPipettingAsync 停止");
                     return false;
                 }
                 throw ex;
@@ -543,6 +553,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CheckAxisZInSafePos(CancellationTokenSource cts)
         {
+            _logger?.Debug($"CheckAxisZInSafePos");
             if (!AxisIsInSafePos(_axisZ1))
             {
                 var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, cts).ConfigureAwait(false);
@@ -569,6 +580,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> OpenClaw(byte openPos)
         {
+            _logger?.Debug($"OpenClaw-{openPos}");
             var result = await _claw.SendCommand(_clawSlaveId, openPos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -604,6 +616,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CloseClaw(byte closePos)
         {
+            _logger?.Debug($"CloseClaw-{closePos}");
             var result = await _claw.SendCommand(_clawSlaveId, closePos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -639,6 +652,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> SyringHome(CancellationTokenSource cts)
         {
+            _logger?.Debug($"SyringHome");
             var result = await _motion.GohomeWithCheckDone(_axisP, 21, cts).ConfigureAwait(false);
             if (!result)
             {
@@ -655,6 +669,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> PipettorMoveTo(double[] coordinate, CancellationTokenSource cts)
         {
+            _logger?.Debug($"PipettorMoveTo");
             try
             {
                 double x = coordinate[0];
@@ -686,6 +701,7 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("PipettorMoveTo 停止");
                     return false;
                 }
                 throw ex;
@@ -701,6 +717,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CarrierMoveTo(double[] coordinate, CancellationTokenSource cts)
         {
+            _logger?.Debug($"CarrierMoveTo");
             try
             {
                 double x = coordinate[0];
@@ -733,14 +750,13 @@ namespace Q_Platform.BLL
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Debug("CarrierMoveTo 停止");
                     return false;
                 }
                 throw ex;
             }
           
         }
-
-
 
         /// <summary>
         /// 搬运移动到安全位
@@ -749,6 +765,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CarrierMoveToSafePos(double[] coordinate, CancellationTokenSource cts)
         {
+            _logger?.Debug($"CarrierMoveToSafePos");
             double x = coordinate[0];
             double y = coordinate[1];
             ushort[] axisXY = new ushort[2] { _axisX, _axisY };

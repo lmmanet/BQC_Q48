@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BQJX.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ namespace Q_Platform.BLL
 {
     public interface ICarrierTwo
     {
+
+        bool GetSampleToCapperThree(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
         /// 回零

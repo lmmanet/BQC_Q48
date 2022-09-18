@@ -8,20 +8,22 @@ using System.Threading.Tasks;
 using System.Threading;
 using BQJX.Common;
 using Q_Platform.DAL;
-using BQJX.Common.Common;
 using Q_Platform.Logger;
-using Q_Platform.Common;
 
 namespace Q_Platform.BLL
 {
     public class CapperOne : CapperBase, ICapperOne
     {
 
+        #region Private Members
+
         private static ILogger logger = new MyLogger(typeof(CapperOne));
 
         private readonly SyringBase _syring;
 
-        private readonly ICarrierOne _carrier;
+        private readonly ICarrierOne _carrier; 
+
+        #endregion
 
         #region Constructors
 
@@ -61,6 +63,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public override async Task<bool> GoHome(CancellationTokenSource cts)
         {
+            _logger?.Info($"拧盖模块1回零");
             try
             {
                 //注射器回零
@@ -79,9 +82,10 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Info($"拧盖模块1回零 暂停");
                     return false;
                 }
-                _logger?.Error($"{ex.Message}");
+                _logger?.Warn($"{ex.Message}");
                 return false;
             }
         }
@@ -95,20 +99,21 @@ namespace Q_Platform.BLL
         public async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
+            _logger?.Info($"样品{sampleId}加液");
             try
             {
                 //拧盖移动到上下料位
                 var result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("拧盖移动到上下料位 出错") ;
                 }
 
                 //搬运试管到拧盖1  内部判断试管位置
                 result = _carrier.GetSampleToCapperOne(sample,cts);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("搬运试管到拧盖1 出错");
                 }
 
                 //判断试管是否有盖 拆盖
@@ -117,7 +122,7 @@ namespace Q_Platform.BLL
                     result = await CapperOff(cts).ConfigureAwait(false);
                     if (!result)
                     {
-                        return false;
+                        throw new Exception("拆盖 出错");
                     }
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                 }
@@ -153,10 +158,11 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested != false)
                 {
+                    _logger?.Info($"样品{sample.Id}加液,暂停");
                     return false;
                 }
-                _logger?.Error(ex.Message);
-                throw ex;
+                _logger?.Warn(ex.Message);
+                return false;
             }
           
         }
@@ -217,7 +223,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         #region Protected Methods
 
         public async Task<bool> MovePutGetPos(CancellationTokenSource cts)
@@ -243,9 +248,9 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> AddSolve(byte solve,double volume, CancellationTokenSource cts)
         {
+            _logger?.Debug($"AddSolve-{solve}-{volume}");
             try
             {
-              
                 //抱夹夹紧
                 _io.WriteBit_DO(_holding, true);
 
@@ -274,7 +279,6 @@ namespace Q_Platform.BLL
         }
 
         #endregion
-
 
         #region Private Methods
 

@@ -13,6 +13,21 @@ namespace Q_Platform.BLL
         CancellationTokenSource cts = new CancellationTokenSource();
         Task _taskHome;
 
+        //任务线程
+        Task _addWaterExtTask;        //加水提取
+        Task _wetBackTask;            //回湿
+        Task _addSolveExtTask;        //加液提取
+        Task _addSolidExtTask;        //加固提取
+        Task _centrifugalTask;        //离心   （离心搬运分离出来）
+        Task _pipttorTask;            //移液提取 （包括离心搬运 拧盖2 拧盖3）
+        Task _vibrationTwo;           //振荡2
+        Task _;                       //
+        Task _;                       //
+        Task _;                       //
+       //任务列表
+
+
+
         #region Private Members
 
         private ICapperOne _capperOne;
