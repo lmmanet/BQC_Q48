@@ -60,7 +60,10 @@ namespace BQJX.Communication.CL2C
         public async Task<bool> CheckDone(int axisNo, CancellationTokenSource cts)
         {
             await Task.Delay(500).ConfigureAwait(false);
-        
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             var status = 0;
             do
             {
@@ -86,7 +89,10 @@ namespace BQJX.Communication.CL2C
                 {
                     return true;
                 }
-
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
             } while ((status & 0x02) == 0x02);
 
             return false;
@@ -214,7 +220,11 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> GoHomeWithCheckDone(int axisNo,ushort mode,CancellationTokenSource cts)
         {
-            int attempt = 0;
+            int attempt = 0; 
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
         func: try
             {
 
@@ -272,7 +282,10 @@ namespace BQJX.Communication.CL2C
                     {
                         return false;
                     }
-
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
                 } while ((status & 0x02) == 0x02);
 
                 return false;
@@ -296,6 +309,10 @@ namespace BQJX.Communication.CL2C
         public async Task<bool> GoHomeWithCheckDone(int axisNo, CancellationTokenSource cts)
         {
             int attempt = 0;
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
         func: try
             {
                 //01 06 60 02 00 20 37 D2   回零   触发
@@ -355,7 +372,10 @@ namespace BQJX.Communication.CL2C
                     {
                         return false;
                     }
-
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
                 } while ((status & 0x02) == 0x02);
 
                 return false;
@@ -379,7 +399,11 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> GoHomeTorqueWithCheckDone(int axisNo, short torque,int direction, CancellationTokenSource cts)
         {
-            int attempt = 0;
+            int attempt = 0; 
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
         func: try
             {
                 //01 06 60 02 00 20 37 D2   回零   触发
@@ -440,7 +464,10 @@ namespace BQJX.Communication.CL2C
                     {
                         return false;
                     }
-
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
                 } while ((status & 0x02) == 0x02);
 
                 return false;
@@ -464,6 +491,10 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> DM2C_GoHomeWithCheckDone(int axisNo, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             int attempt = 0;
         func: try
             {
@@ -523,7 +554,10 @@ namespace BQJX.Communication.CL2C
                     {
                         return false;
                     }
-
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
                 } while ((status & 0x02) == 0x02);
 
                 return false;
@@ -666,6 +700,10 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> P2pMoveWithCheckDone(int axisNo, double offset, double velocity, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             if (Math.Round(await GetCurrentPos(axisNo).ConfigureAwait(false), 1) == Math.Round(offset, 1))
             {
                 return true;
@@ -741,6 +779,10 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> RelativeMoveWithCheckDone(int axisNo, double offset, double velocity, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             var result = await RelativeMove(axisNo, offset, velocity, 50, 50).ConfigureAwait(false);
             if (!result)
             {
@@ -816,6 +858,10 @@ namespace BQJX.Communication.CL2C
 
         public async Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque,int timeout, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             int attempt = 0;
         func: try
             {
@@ -884,7 +930,10 @@ namespace BQJX.Communication.CL2C
                     {
                         return false;
                     }
-
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
                 } while ((status & 0x02) == 0x02);
 
                 return false;

@@ -15,6 +15,8 @@ namespace Q_Platform.BLL
     {
         private static ILogger logger = new MyLogger(typeof(VibrationTwo));
 
+        private readonly static object _lockObj = new object();
+
         #region Construtors
 
 

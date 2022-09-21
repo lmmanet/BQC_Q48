@@ -17,6 +17,7 @@ namespace BQJX.Common
         IsInVibrationOne = 6,         //样品在振荡1
         IsInCold = 7,                 //样品在冰浴
         IsInTransfer = 8,             //样品在移栽
+
         IsInCentrifugal = 9,          //样品在离心
         IsInShelf2 = 10,              //样品在净化试管架
         IsInCapperThree = 11,         //样品在拧盖3

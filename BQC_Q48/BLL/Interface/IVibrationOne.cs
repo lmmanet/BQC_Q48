@@ -13,7 +13,7 @@ namespace Q_Platform.BLL
 
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task<bool> StartVibrationAsync(Sample sample, CancellationTokenSource cts);
+        bool StartVibration(Sample sample, bool carryToCold ,CancellationTokenSource cts);
 
 
 

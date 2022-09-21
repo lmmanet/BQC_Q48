@@ -79,8 +79,8 @@
     <Compile Include="BLL\CapperOne.cs" />
     <Compile Include="BLL\CapperThree.cs" />
     <Compile Include="BLL\CapperTwo.cs" />
-    <Compile Include="BLL\CarrierOne.cs" />
-    <Compile Include="BLL\CarrierTwo.cs" />
+    <Compile Include="BLL\Low\CarrierOne.cs" />
+    <Compile Include="BLL\Low\CarrierTwo.cs" />
     <Compile Include="BLL\Centrifugal.cs" />
     <Compile Include="BLL\CentrifugalCarrier.cs" />
     <Compile Include="BLL\Concentration.cs" />

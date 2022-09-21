@@ -32,8 +32,8 @@ namespace Q_Platform.BLL
         protected ushort _port8; //加液口8
         protected double _syringHomePos = 0; //注射器原点位置
 
-        protected double _syringVel = 50;
-        protected double _obsortVel = 10;
+        protected double _syringVel = 80;
+        protected double _obsortVel = 50;
 
         protected int _step;
 
@@ -62,6 +62,10 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 _logger.Debug("Syring GoHome");
                 //关闭全部阀口
                 _io.WriteBit_DO(_port1, false);
@@ -82,11 +86,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("GoHome 停止");
-                    return false;
-                }
                 throw ex;
             }
             
@@ -102,13 +101,13 @@ namespace Q_Platform.BLL
         public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
         {
             _logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
-            if (volume <= 10 && cts?.IsCancellationRequested !=false)
+            if (volume <= 10 && cts?.IsCancellationRequested != true)
             {
                 return await AddSolveSub(solve, volume, null).ConfigureAwait(false);
             }
-            if (volume >10 && volume <= 20 &&cts?.IsCancellationRequested != false)
+            if (volume >10 && volume <= 20 &&cts?.IsCancellationRequested != true)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != false)
+                if (_step == 1 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -117,7 +116,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != false)
+                if (_step == 2 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, volume -10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -128,9 +127,9 @@ namespace Q_Platform.BLL
                     return true;
                 }
             }
-            if (volume > 20 && volume <= 30 && cts?.IsCancellationRequested != false)
+            if (volume > 20 && volume <= 30 && cts?.IsCancellationRequested != true)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != false)
+                if (_step == 1 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -139,7 +138,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != false)
+                if (_step == 2 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -148,7 +147,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 3 && cts?.IsCancellationRequested != false)
+                if (_step == 3 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, volume - 20, null).ConfigureAwait(false);
                     if (!ret1)
@@ -159,9 +158,9 @@ namespace Q_Platform.BLL
                     return true;
                 }
             }
-            if (volume >30 && volume <= 40 && cts?.IsCancellationRequested != false)
+            if (volume >30 && volume <= 40 && cts?.IsCancellationRequested != true)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != false)
+                if (_step == 1 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -170,7 +169,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != false)
+                if (_step == 2 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -179,7 +178,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 3 && cts?.IsCancellationRequested != false)
+                if (_step == 3 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -188,7 +187,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 4 && cts?.IsCancellationRequested != false)
+                if (_step == 4 && cts?.IsCancellationRequested != true)
                 {
                     var ret1 = await AddSolveSub(solve, volume - 30, null).ConfigureAwait(false);
                     if (!ret1)
@@ -216,6 +215,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> AddSolveSub(byte solve, double volume, CancellationTokenSource cts = null)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             _logger?.Debug($"AddSolveSub-{solve}-{volume},isAddSolve{_isAddSolve},isAbsorb{_isAbsorb}");
             //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)

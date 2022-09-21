@@ -55,6 +55,7 @@ namespace Q_Platform.BLL
         private AddSolidPosData _posData;                //位置数据
         private IGlobalStatus _globalStatus;
         private int _step = -1;
+        private bool _isAddSolidDone;
          
         #endregion
 
@@ -132,6 +133,60 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
+        /// 加盐提取
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, CancellationTokenSource cts)
+        {
+            //判断是否有加盐工艺
+            if ((sample.TechParams.Tech & 0x1e00) == 0)
+            {
+                return true;
+            }
+
+            try
+            {
+                bool result;
+
+                //加溶剂 
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
+                {
+                    result = await addSolveFunc(sample, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
+                }
+
+                //加盐
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
+                {
+                    result = await AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt2);
+                }
+
+                //完成
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                
+                Console.WriteLine(ex.Message);
+                throw ex;
+            }
+
+
+        }
+
+        /// <summary>
         /// 加固
         /// </summary>
         /// <param name="sample"></param>
@@ -141,7 +196,15 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 _logger?.Info($"样品{sample.Id}加固");
+                if (_isAddSolidDone)
+                {
+                    goto Done;
+                }
                 //加固到接驳位
                 var result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
@@ -162,9 +225,10 @@ namespace Q_Platform.BLL
                 {
                     return false;
                 }
+                _isAddSolidDone = true;
 
                 //完成后加固到接驳位
-                result = await MovePutGetPos(cts).ConfigureAwait(false);
+            Done: result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -178,19 +242,16 @@ namespace Q_Platform.BLL
                 }
 
                 //完成
+                _isAddSolidDone = false;
                 return true;
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"样品{sample.Id}加固,暂停");
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
                 throw ex;
             }
         }
+
+
 
         #endregion
 
@@ -203,6 +264,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             _logger?.Debug($"MovePutGetPos");
             //步进Y轴移动到原点位置
             var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
@@ -225,6 +290,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> Add_Solid(int[] solids,double[] weights, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             solids.ToList().ForEach(s=>_logger.Debug($"Add_Solid {s}"));
             int count = weights.Length;
             while (_step < count)
@@ -237,7 +306,7 @@ namespace Q_Platform.BLL
                 var result = await Add_SolidSub(solids[_step], weights[_step], cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("加固失败!");
                 }
                 _step++;
             }
@@ -256,6 +325,10 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 _logger?.Debug($"Add_SolidSub-{solid}-{weight} ");
                 double[] pos = GetSolidCoordinate(solid);
                 await Task.Delay(1000).ConfigureAwait(false);
@@ -307,11 +380,6 @@ namespace Q_Platform.BLL
                 await _stepMotion.StopMove(_axisC1).ConfigureAwait(false);
                 await _stepMotion.StopMove(_axisC2).ConfigureAwait(false);
 
-                if (cts?.IsCancellationRequested != false)
-                {
-                    return false;
-                }
-                _logger?.Error($"Add_SolidSub err:{ex.Message}");
                 throw ex;
             }
         }
@@ -392,7 +460,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_Z1CylinderUp);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12)
                 {
                     throw new TimeoutException("Z1_Cylinder_Up 超时");
                 }
@@ -420,7 +488,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_Z1CylinderDown);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12)
                 {
                     throw new TimeoutException("Z1_Cylinder_Down 超时");
                 }
@@ -448,7 +516,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_Z2CylinderUp);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12)
                 {
                     throw new TimeoutException("Z2_Cylinder_Up 超时");
                 }
@@ -476,7 +544,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_Z2CylinderDown);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12)
                 {
                     throw new TimeoutException("Z2_Cylinder_Down 超时");
                 }
@@ -504,7 +572,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_XCylinderLeft);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12)
                 {
                     throw new TimeoutException("X_Cylinder_Left 超时");
                 }
@@ -532,7 +600,7 @@ namespace Q_Platform.BLL
                 result = _io.ReadBit_DI(_XCylinderRight);
                 Thread.Sleep(500);
                 temp++;
-                if (temp > 6)
+                if (temp > 12000)
                 {
                     throw new TimeoutException("X_Cylinder_Right 超时");
                 }

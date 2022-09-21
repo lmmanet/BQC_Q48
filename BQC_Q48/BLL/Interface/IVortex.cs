@@ -20,6 +20,6 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> StartVortexAsync(Sample sample, CancellationTokenSource cts);
+        bool StartVortex(Sample sample, CancellationTokenSource cts);
     }
 }

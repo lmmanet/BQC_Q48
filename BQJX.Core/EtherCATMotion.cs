@@ -38,6 +38,10 @@ namespace BQJX.Core
 
         public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
             ushort mode = homeMode;
             double lowVel = 1;
@@ -62,6 +66,10 @@ namespace BQJX.Core
 
         public async Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             ushort AxisNum = 2; //插补轴数     
             ushort Crd = 0;//坐标系号
 
@@ -188,6 +196,10 @@ namespace BQJX.Core
 
         public async Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             var result = P2pMove(axisNo, offset, velocity);
             if (!result)
             {
@@ -244,6 +256,10 @@ namespace BQJX.Core
 
         public async Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             var result = RelativeMove(axisNo, offset, velocity);
             if (!result)
             {
@@ -489,7 +505,7 @@ namespace BQJX.Core
             //double factor = 1; //编码器系数
             //int error = 1000;  //位置误差带 Pulse
             //LTDMC.dmc_set_factor_error(_CardID,axisNo, factor,error);
-
+      
             ushort axis = axisNo; //轴号
             return await Task.Run(() =>
             {
@@ -510,7 +526,10 @@ namespace BQJX.Core
                     }
                     Thread.Sleep(1000);
                 } while (cts?.IsCancellationRequested != true);
-
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 return false;
             }).ConfigureAwait(false);
 
@@ -530,9 +549,12 @@ namespace BQJX.Core
                     }
                     Thread.Sleep(1000);
                 } while (cts?.IsCancellationRequested == false);
-
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 return false;
-
+              
             }).ConfigureAwait(false);
         }
 
@@ -612,6 +634,10 @@ namespace BQJX.Core
         }
         public async Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             throw new NotImplementedException();
         }
 

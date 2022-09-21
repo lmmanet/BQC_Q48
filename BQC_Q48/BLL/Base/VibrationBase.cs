@@ -53,9 +53,13 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> GoHome(CancellationTokenSource cts)
         {
-            _logger?.Info("振荡回零");
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Info("振荡回零");
                 //释放抱夹气缸
                 ResetHolding();
 
@@ -98,21 +102,19 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> StartVibrationAsync(Sample sample,CancellationTokenSource cts)
         {
-            _logger?.Info($"样品{sample.Id}开始振荡");
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Info($"样品{sample.Id}开始振荡");
                 double vel = 500 / 60;
                 var result = await StartVibration(300, vel, cts).ConfigureAwait(false);
                 return true;
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Info($"样品{sample.Id}振荡 停止");
-                    return false;
-                }
-                _logger?.Warn($"样品{sample.Id}振荡 err:{ex.Message}");
                 throw ex;
             }
         }
@@ -128,6 +130,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> StartVibration(int time, double vel, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             _logger?.Debug($"StartVibration-{time}-{vel}");
             //释放抱夹气缸
             ResetHolding();

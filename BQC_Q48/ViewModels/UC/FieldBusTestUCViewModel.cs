@@ -150,8 +150,33 @@ namespace Q_Platform.ViewModels.UC
         }
         private async Task DoFuc3()
         {
+            Sample sample1 = new Sample() { Id = 1, Status = 1, TechParams = new TechParams() { Solvent_A = 10, Solid_B = 10, Solvent_C = 10 } };
+            Sample sample3 = new Sample() { Id = 1, Status = 0x80, TechParams = new TechParams() { Solvent_A = 10, Solid_B = 10, Solvent_C = 10 } };
+            //Sample sample4 = new Sample() { Id = 1, Status = 256, TechParams = new TechParams() { Solvent_A = 10, Solid_B = 10, Solvent_C = 10 } };
+
+
+            Task.Run(() =>
+            {
+                SimpleIoc.Default.GetInstance<ICentrifugalCarrier>().GetSampleFromCapperTwoToTransfer(sample1, null);
+                SimpleIoc.Default.GetInstance<ICentrifugalCarrier>().GetSampleFromTransferToCapperTwo(sample1, null);
+
+                SimpleIoc.Default.GetInstance<ICentrifugalCarrier>().GetSampleFromColdToTransfer(sample3, null);
+
+            });
         
-        }  
+
+            //SimpleIoc.Default.GetInstance<ICentrifugalCarrier>().GetSampleFromMarterialToTransfer(sample4, null);
+            //SimpleIoc.Default.GetInstance<ICentrifugalCarrier>().GetSampleFromTransferToMarterial(sample4,true, null);
+           
+
+
+
+
+
+
+
+
+         }  
         private async Task DoFuc4()
         {
             //var intance = SimpleIoc.Default.GetInstance<CarrierBase>() as CarrierOne;

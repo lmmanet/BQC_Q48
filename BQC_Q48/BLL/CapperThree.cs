@@ -22,6 +22,7 @@ namespace Q_Platform.BLL
 
         private readonly ICarrierTwo _carrier;
 
+
         #region Construtors
 
         public CapperThree(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess,ICarrierTwo carrier) : base(io, motion, globalStatus, dataAccess, logger)
@@ -158,6 +159,51 @@ namespace Q_Platform.BLL
 
         }
 
+
+
+        public bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            //搬运试管到拧盖3
+            _carrier.GetSampleToCapperThree( sample,cts);
+
+
+            //拆盖  + 加液 + 振荡
+
+            //搬运试管到移栽
+            _carrier.GetSampleToTransfer(sample, func, cts);
+
+            return false;
+        }
+
+
+
+
+
+
+        public bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
         #endregion
 
 
@@ -218,26 +264,10 @@ namespace Q_Platform.BLL
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         protected CapperPosData GetPosData()
         {
             return _dataAccess.GetCapperPosData(3);
         }
+
     }
 }

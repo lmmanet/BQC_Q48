@@ -9,6 +9,8 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, CancellationTokenSource cts);
+
         /// <summary>
         /// 加固
         /// </summary>

@@ -30,6 +30,8 @@ namespace Q_Platform.BLL
 
         private readonly IVortexPosDataAccess _dataAccess;
 
+        private readonly static object _lockObj = new object();
+
         #endregion
 
         #region Variable
@@ -79,6 +81,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> GoHome(CancellationTokenSource cts)
         {
+            _logger.Info("涡旋回零");
             try
             {
                 //下压气缸上升
@@ -90,14 +93,14 @@ namespace Q_Platform.BLL
                 var result = await _stepMotion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("Y轴回零失败");
                 }
 
                 //Y轴移动到上下料位
                 result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    throw new Exception("Y轴到上下料位失败");
                 }
                 return true;
             }
@@ -107,7 +110,7 @@ namespace Q_Platform.BLL
                 {
                     return false;
                 }
-                _logger?.Error($"{ex.Message}");
+                _logger?.Warn($"{ex.Message}");
                 return false;
             }
         }
@@ -118,50 +121,59 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> StartVortexAsync(Sample sample, CancellationTokenSource cts)
+        public bool StartVortex(Sample sample, CancellationTokenSource cts)
         {
             int time = 30;
-            int vel = 2000;
+            int vel = 1000;
+         
             try
             {
-                //到上下料位
-                var result = await MovePutGetPos(cts).ConfigureAwait(false);
-                if (!result)
+                lock (_lockObj)
                 {
-                    return false;
+                    _logger?.Info($"{sample.Id}样品涡旋-{time}s-{vel}rpm");
+                    //到上下料位
+                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("涡旋到上下料位失败");
+                    }
+
+                    //搬运
+                    result = _carrier.GetSampleToVortex(sample, cts);
+                    if (!result)
+                    {
+                        throw new Exception("搬运样品到涡旋失败");
+                    }
+
+                    //开始涡旋
+
+                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("涡旋失败");
+                    }
+
+                    //搬运到试管架
+                    result = _carrier.GetSampleToMaterial(sample, cts);
+                    if (!result)
+                    {
+                        throw new Exception("搬运样品到试管架失败");
+                    }
+
+                    //完成
+
+                    return true;
                 }
-
-                //搬运
-                result = _carrier.GetSampleToVortex(sample,cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //开始涡旋
-
-                result = await StartVortex(time, vel, cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //搬运到试管架
-                result = _carrier.GetSampleToMaterial(sample, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //完成
-
-
-                return true;
             }
             catch (Exception ex)
             {
-
-                throw;
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"{sample.Id}样品涡旋-{time}s-{vel}rpm 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
             }
         }
 
@@ -198,7 +210,7 @@ namespace Q_Platform.BLL
         /// <param name="vel">30~3000</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> StartVortex(int time,int vel,CancellationTokenSource cts)
+        protected async Task<bool> StartVortexAsync(int time,int vel,CancellationTokenSource cts)
         {
             //Y轴移动到涡旋位置
             var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);

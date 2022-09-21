@@ -13,7 +13,9 @@ using System.Threading.Tasks;
 namespace Q_Platform.BLL
 {
     public class CentrifugalCarrier : ICentrifugalCarrier
-    {
+    {    
+        
+        //把提取放此处？？
 
         #region Private Members
         private readonly static object _lockObj = new object();
@@ -24,13 +26,15 @@ namespace Q_Platform.BLL
         private readonly IEPG26 _claw;
         private readonly ILogger _logger;
         private readonly ICentrifugalCarrierPosDataAccess _dataAccess;
+        private readonly ICapperTwo _capperTwo;
+        private readonly ICapperThree _capperThree;
+
         private CentrifugalCarrierPosData _posData;
 
         #endregion
 
         #region Variants
 
-        private ushort _axisCentrigugal = 8;     //离心机轴
         private ushort _axisZ = 7;               //搬运Z轴
         private ushort _axisX = 14;              //搬运X轴
         private ushort _axisC = 15;              //搬运旋转轴
@@ -40,15 +44,13 @@ namespace Q_Platform.BLL
         private ushort _y_WP = 2;                //Y气缸伸出感应
 
         private ushort _clawId = 2;              //电爪485地址
-        private byte _clawOpen = 0;              //电爪打开位置
-        private byte _clawClose = 255;           //电爪关闭位置
         private double _stepMoveVel = 30;        //步进电机移动速度
         private double _sevorMoveVel = 50;       //伺服电机移动速度
         #endregion
 
         #region Construtors
 
-        public CentrifugalCarrier(IEtherCATMotion motion, IIoDevice io, ILS_Motion stepMotion, IEPG26 claw, ICarrierOne carrierOne, ICarrierTwo carrierTwo, ICentrifugalCarrierPosDataAccess dataAccess)
+        public CentrifugalCarrier(IEtherCATMotion motion, IIoDevice io, ILS_Motion stepMotion, IEPG26 claw, ICentrifugalCarrierPosDataAccess dataAccess, ICarrierOne carrierOne, ICapperTwo capperTwo)
         {
             this._motion = motion;
             this._io = io;
@@ -56,6 +58,7 @@ namespace Q_Platform.BLL
             this._dataAccess = dataAccess;
             this._claw = claw;
 
+            this._capperTwo = capperTwo;
 
             this._logger = new MyLogger(typeof(CentrifugalCarrier));
 
@@ -144,12 +147,13 @@ namespace Q_Platform.BLL
                 pos1 = 1;
                 pos2 = 3;
             }
-            _logger?.Info($"搬运{sampleId}样品到离心机");
+          
             try
             {
                 lock (_lockObj)
                 {
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
+                    _logger?.Info($"搬运{sampleId}样品到离心机");
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -231,57 +235,62 @@ namespace Q_Platform.BLL
                 pos1 = 1;
                 pos2 = 3;
             }
-            _logger?.Info($"从离心机搬运{sampleId}样品到移栽");
+          
             try
             {
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
+                lock (_lockObj)
                 {
-                    if (sample.TubeStatus == 0)
+                    _logger?.Info($"从离心机搬运{sampleId}样品到移栽");
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                     {
-                        //离心机取料
-                        var result = GetTubeAtCentrifugal(pos1, func, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (sample.TubeStatus == 0)
                         {
-                            throw new Exception($"从离心机取{sampleId}样品失败！ TubeStatus-{sample.TubeStatus}");
+                            //离心机取料
+                            var result = GetTubeAtCentrifugal(pos1, func, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"从离心机取{sampleId}样品失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+
+                            //移栽放料
+                            result = PutTubeAtTransfer(GetCenterCoordinate((ushort)(2 * sampleId - 1), isBig), clawOpen, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"放{sampleId}样品到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
                         }
 
-                        //移栽放料
-                        result = PutTubeAtTransfer(GetCenterCoordinate((ushort)(2 * sampleId - 1), isBig), clawOpen, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (sample.TubeStatus == 1)
                         {
-                            throw new Exception($"放{sampleId}样品到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            //离心机取料
+                            var result = GetTubeAtCentrifugal(pos2, func, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"从离心机取{sampleId}样品失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+
+                            //移栽放料
+                            result = PutTubeAtTransfer(GetCenterCoordinate((ushort)(2 * sampleId), isBig), clawOpen, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"放{sampleId}样品到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
                         }
-                        sample.TubeStatus = 1;
+
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCentrifugal);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
                     }
 
-                    if (sample.TubeStatus == 1)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        //离心机取料
-                        var result = GetTubeAtCentrifugal(pos2, func, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"从离心机取{sampleId}样品失败！ TubeStatus-{sample.TubeStatus}");
-                        }
-
-                        //移栽放料
-                        result = PutTubeAtTransfer(GetCenterCoordinate((ushort)(2 * sampleId), isBig), clawOpen, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"放{sampleId}样品到移栽失败！ TubeStatus-{sample.TubeStatus}");
-                        }
-                        sample.TubeStatus = 0;
+                        return true;
                     }
 
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCentrifugal);
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                }
+                    throw new Exception($"从离心机搬运{sampleId}样品到移栽失败,SampleStatus-{sample.Status}");
 
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
-                {
-                    return true;
                 }
-
-                throw new Exception($"从离心机搬运{sampleId}样品到移栽失败,SampleStatus-{sample.Status}");
             }
             catch (Exception ex)
             {
@@ -300,16 +309,540 @@ namespace Q_Platform.BLL
 
         }
 
+
+
+        public bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"取{sample.Id}样品到移栽");
+
+                    var result = _capperTwo.GetSampleFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{ sample.Id }样品到移栽 失败");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"取{sample.Id}样品到移栽 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+            
+        }
+
+        public bool GetSampleFromMarterialToTransfer(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"取{sample.Id}样品净化管到移栽");
+
+                    var result = _capperThree.GetSampleFromMarterialToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{ sample.Id }样品净化管到移栽 失败");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"取{sample.Id}样品净化管到移栽 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleFromTransferToMarterial(Sample sample,bool isBig, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (isBig)
+                    {
+                        _logger?.Info($"从移栽取出{sample.Id}样品管");
+
+                        //取出大管
+                        var result = _capperTwo.GetSampleFromTransferToMaterial(sample, TransferMoveLeftPutGetPos, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从移栽取出{sample.Id}样品管 失败");
+                        }
+
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
+                        return true;
+                    }
+                    else
+                    {
+                        _logger?.Info($"从移栽取出{sample.Id}样品净化管");
+
+                        //取出小管
+                        var result = _capperThree.GetSampleFromTransferToMarterial(sample, TransferMoveRightPutGetPos, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从移栽取出{sample.Id}样品净化管 失败");
+                        }
+
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
+                        return true;
+                    }
+
+                  
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品管 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"取{sample.Id}样品净化管到移栽");
+
+                    //取净化管到移栽
+                    var result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{sample.Id}样品净化管到移栽 失败");
+                    }
+
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"取{sample.Id}样品净化管到移栽 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品净化管");
+
+                    //取出大管
+                    var result = _capperThree.GetSampleFromTransferToMarterialPiperttor(sample, TransferMoveRightPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"从移栽取出{sample.Id}样品净化管 失败");
+                    }
+
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品净化管 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleFromCapperTwoToTransfer(Sample sample,  CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"取{sample.Id}样品（50ml）到移栽");
+
+                    //从拧盖2取无盖试管到移栽
+                    var result = _capperTwo.GetSampleFromCapperTwoToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{sample.Id}样品到移栽（50ml 失败");
+                    }
+
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"取{sample.Id}样品到移栽（50ml 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleFromTransferToCapperTwo(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管");
+
+                    //从移栽取无盖试管到拧盖2
+                    var result = _capperTwo.GetSampleFromTransferToCapperTwo(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"从移栽取出{sample.Id}样品（50ml）空管 失败");
+                    }
+
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+
+
+        public bool Pipetting(Sample sample,CancellationTokenSource cts)
+        {
+            //_capperTwo.CapperOffAsync(sample, cts);
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    //搬运2试管到拧盖3  包括拧盖3拆盖 加液？ 振荡
+                    //_capperThree.GetSampleToTransfer(sample, TransferMoveRightPutGetPos, cts);
+
+                    //搬运1试管到拧盖2  包括拆盖
+                    //_capperTwo.GetSampleToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+
+                    //移液  通过拧盖2调用
+
+
+                    throw new Exception();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+
+
+
         //旋转到指定位置取料  与搬运配合
+        public bool GetSampleOut(Sample sample, bool isBig, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            _logger?.Info($"从移栽移动{sample.Id }样品到拧盖2位");
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (sample.TubeStatus == 0)
+                    {
+                        double[] poss1 = GetLeftCoordinate(2 * sample.Id - 1, isBig);
+                        //X C轴回零
+                        var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+                        if (!result1)
+                        {
+                            throw new Exception("移栽X轴移动到目标位失败!");
+                        }
+
+                        var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+                        if (!result2)
+                        {
+                            throw new Exception("移栽旋转轴移动到目标位失败!");
+                        }
+
+                        var result3 = func.Invoke((ushort)(2 * sample.Id - 1), cts);
+                        if (!result3)
+                        {
+                            throw new Exception("机械手取料失败!");
+                        }
+                        sample.TubeStatus = 1;
+                    }
+
+                    if (sample.TubeStatus == 1)
+                    {
+                        double[] poss2 = GetLeftCoordinate(2 * sample.Id, isBig);
+                        //X C轴回零
+                        var result4 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss2[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+                        if (!result4)
+                        {
+                            throw new Exception("移栽X轴移动到目标位失败!");
+                        }
+
+                        var result5 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss2[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+                        if (!result5)
+                        {
+                            throw new Exception("移栽旋转轴移动到目标位失败!");
+                        }
+
+                        var result6 = func.Invoke((ushort)(2 * sample.Id), cts);
+                        if (!result6)
+                        {
+                            throw new Exception("机械手取料失败!");
+                        }
+
+                        sample.TubeStatus = 0;
+
+                        return true;
+                    }
+
+                    throw new Exception($"从移栽移动{sample.Id }样品到拧盖2位失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽移动{sample.Id }样品到拧盖2位 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        public bool GetSampleToCapperThree(Sample sample, bool isBig, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            _logger?.Info($"从移栽移动{sample.Id }样品到拧盖3位");
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            double[] poss1 = GetRightCoordinate(2 * sample.Id - 1, isBig);
+                            //X C轴回零
+                            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+                            if (!result1)
+                            {
+                                throw new Exception("移栽X轴移动到目标位失败!");
+                            }
+
+                            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+                            if (!result2)
+                            {
+                                throw new Exception("移栽旋转轴移动到目标位失败!");
+                            }
+
+                            var result3 = func.Invoke((ushort)(2 * sample.Id - 1), cts);
+                            if (!result3)
+                            {
+                                throw new Exception("机械手取料失败!");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+
+                        if (sample.TubeStatus == 1)
+                        {
+                            double[] poss2 = GetRightCoordinate(2 * sample.Id, isBig);
+                            //X C轴回零
+                            var result4 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss2[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+                            if (!result4)
+                            {
+                                throw new Exception("移栽X轴移动到目标位失败!");
+                            }
+
+                            var result5 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss2[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+                            if (!result5)
+                            {
+                                throw new Exception("移栽旋转轴移动到目标位失败!");
+                            }
+
+                            var result6 = func.Invoke((ushort)(2 * sample.Id), cts);
+                            if (!result6)
+                            {
+                                throw new Exception("机械手取料失败!");
+                            }
+
+                            sample.TubeStatus = 0;
+
+                            return true;
+                        }
+
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                    }
 
 
-        //把提取放此处？？
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    {
+                        return true;
+                    }
 
-        //注入到搬运1 2 ？？？
+                    throw new Exception($"从移栽移动{sample.Id }样品到拧盖3位失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽移动{sample.Id }样品到拧盖3位 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+        }
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// 离心移栽移动到左侧上下料位(传入到搬运1)
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="isBig"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected bool TransferMoveLeftPutGetPos(ushort num, CancellationTokenSource cts)
+        {
+            double[] poss1 = GetLeftCoordinate(num, true);
+            //X C轴回零
+            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result1)
+            {
+                throw new Exception("移栽X轴移动到目标位失败!");
+            }
+
+            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result2)
+            {
+                throw new Exception("移栽旋转轴移动到目标位失败!");
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 离心移栽移动左侧移液位，旋转角度固定
+        /// </summary>
+        /// <returns></returns>
+        protected bool TransferMoveLeftPipettorPos(CancellationTokenSource cts)
+        {
+            double[] poss1 = GetLeftCoordinate(1, false);
+            //X C轴回零
+            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result1)
+            {
+                throw new Exception("移栽X轴移动到目标位失败!");
+            }
+
+            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result2)
+            {
+                throw new Exception("移栽旋转轴移动到目标位失败!");
+            }
+            return true;
+        }
+
+
+        /// <summary>
+        /// 离心移栽移动到右侧上下料位（传入到搬运2）
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected bool TransferMoveRightPutGetPos(ushort num, CancellationTokenSource cts)
+        {
+            double[] poss1 = GetRightCoordinate(num, false);
+            //X C轴回零
+            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result1)
+            {
+                throw new Exception("移栽X轴移动到目标位失败!");
+            }
+
+            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result2)
+            {
+                throw new Exception("移栽旋转轴移动到目标位失败!");
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 离心移栽移动右侧侧移液位，旋转角度固定
+        /// </summary>
+        /// <returns></returns>
+        protected bool TransferMoveRightPipettorPos(CancellationTokenSource cts)
+        {
+            double[] poss1 = GetRightCoordinate(1, true);
+            //X C轴回零
+            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result1)
+            {
+                throw new Exception("移栽X轴移动到目标位失败!");
+            }
+
+            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).GetAwaiter().GetResult();
+            if (!result2)
+            {
+                throw new Exception("移栽旋转轴移动到目标位失败!");
+            }
+            return true;
+        }
 
 
         #endregion
-
 
         #region Protected Methods
 
@@ -779,7 +1312,7 @@ namespace Q_Platform.BLL
         /// <param name="num">试管编号</param>
         /// <param name="isBig">是否是大管</param>
         /// <returns></returns>
-        private double[] GetRightCoordinate(ushort num, bool isBig)
+        private double[] GetRightCoordinate(int num, bool isBig)
         {
             bool b = num % 2 == 0;
             if (isBig)
@@ -806,12 +1339,12 @@ namespace Q_Platform.BLL
         /// <param name="num">试管编号</param>
         /// <param name="isBig">是否是大管</param>
         /// <returns></returns>
-        private double[] GetLeftCoordinate(ushort num, bool isBig)
+        private double[] GetLeftCoordinate(int num, bool isBig)
         {
             bool b = num % 2 == 0;
             if (isBig)
             {
-                if (b)
+                if (!b)
                 {
                     return new double[] { _posData.LeftPos, _posData.CLeftPutPos1 };
                 }
@@ -819,7 +1352,7 @@ namespace Q_Platform.BLL
             }
             else
             {
-                if (b)
+                if (!b)
                 {
                     return new double[] { _posData.LeftPos, _posData.CLeftPutPos3 };
                 }

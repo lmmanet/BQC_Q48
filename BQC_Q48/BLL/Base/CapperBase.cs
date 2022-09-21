@@ -32,6 +32,7 @@ namespace Q_Platform.BLL
         #region Variable
 
         protected double _yMoveVel = 500;
+        protected double _zMoveVel = 300;
         protected double _cMoveVel = 80;
 
         protected ushort _axisY;
@@ -79,6 +80,10 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
                 _logger?.Info("拧盖回零");
                 //手爪打开
                 _io.WriteBit_DO(_claw, true);
@@ -140,6 +145,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             //判断样品是否有盖
 
             var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
@@ -155,6 +164,10 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public virtual async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
             //判断样品是否有盖
             var result = await CapperOff(cts).ConfigureAwait(false);
 
@@ -177,6 +190,28 @@ namespace Q_Platform.BLL
 
         #region Protected Methods
 
+        /// <summary>
+        /// 移动到上下料位
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
+        {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
+            //复位抱夹
+            OpenHolding();
+
+            //Y轴移动到上下料位置
+            var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// 装盖
@@ -222,7 +257,7 @@ namespace Q_Platform.BLL
                 //手爪松开
                 OpenClaw();
                 //Z轴上升到位
-                result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
+                result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _zMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("Z轴运动出错！");
@@ -241,11 +276,13 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested !=false)
-                {
-                    _logger?.Debug($"CapperOn 停止");
-                    return false;
-                }
+                await _motion.StopMove(_axisC1).ConfigureAwait(false);
+                await _motion.StopMove(_axisC2).ConfigureAwait(false);
+                //手爪松开
+                OpenClaw();
+                await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
+
+
                 throw ex;
             }
         }
@@ -314,11 +351,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug($"CapperOff 停止");
-                    return false;
-                }
+                
                 throw ex;
             }
         }
@@ -349,11 +382,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("Y_MoveToPutGet 停止");
-                    return false;
-                }
                 throw ex;
             }
         }

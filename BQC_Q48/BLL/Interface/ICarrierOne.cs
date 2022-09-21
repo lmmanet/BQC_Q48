@@ -31,6 +31,28 @@ namespace Q_Platform.BLL
 
         bool GetSampleToMaterial(Sample sample, CancellationTokenSource cts);
 
+        bool GetSampleToCold(Sample sample,ushort posNum, CancellationTokenSource cts);
+
+        //===================================离心移栽=======================================//
+        bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromTransferToCarrierTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+
+        bool GetSampleFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
+
+
+        bool GetSampleFromColdToTransfer(Sample sample,ushort posNum, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+
+        bool GetSampleFromVibrationOneToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
 
         //===================================移液部分=======================================//

@@ -36,14 +36,6 @@ namespace Q_Platform.Logger
         public void Debug(object msg)
         {
             _logger.Debug(msg);
-            WorkLog log = new WorkLog()
-            {
-                Content = msg.ToString(),
-                Date = DateTime.Now,
-                Flag = 0
-            };
-
-            Messenger.Default.Send<WorkLog>(log, "logWorkLog");
         }
 
         public void Info(object msg)
@@ -80,27 +72,12 @@ namespace Q_Platform.Logger
         public void Error(object msg)
         {
             _logger.Error(msg);
-            WorkLog log = new WorkLog()
-            {
-                Content = msg.ToString(),
-                Date = DateTime.Now,
-                Flag = 2
-            };
-
-            Messenger.Default.Send<WorkLog>(log, "logWorkLog");
         }
+
 
         public void Fatal(object msg)
         {
             _logger.Fatal(msg);
-            WorkLog log = new WorkLog()
-            {
-                Content = msg.ToString(),
-                Date = DateTime.Now,
-                Flag = 3
-            };
-
-            Messenger.Default.Send<WorkLog>(log, "logWorkLog");
         }
 
         #endregion

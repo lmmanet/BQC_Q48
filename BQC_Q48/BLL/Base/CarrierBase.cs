@@ -46,7 +46,7 @@ namespace Q_Platform.BLL
 
         #region Variable
 
-        protected double _moveVel = 50;
+        protected double _moveVel = 80;
         protected double _absorbVel = 2;
         protected double _syringVel = 5;
 
@@ -61,7 +61,7 @@ namespace Q_Platform.BLL
 
         #region Constructors
 
-        public CarrierBase(IEtherCATMotion motion, IEPG26 claw,IGlobalStatus globalStatus, ILogger logger)
+        public CarrierBase(IEtherCATMotion motion, IEPG26 claw,IGlobalStatus globalStatus,ILogger logger)
         {
             this._motion = motion;
             this._claw = claw;
@@ -82,18 +82,23 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                //禁用夹爪
+                var result = await _claw.Disable(_clawSlaveId).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("禁用手爪失败！");
+                }
                 //使能夹爪
-                var result = await _claw.Enable(_clawSlaveId).ConfigureAwait(false);
+                result = await _claw.Enable(_clawSlaveId).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception("手爪打开失败！");
+                    throw new Exception("使能手爪失败！");
                 }
-                //手爪打开
-                result = await OpenClaw(80).ConfigureAwait(false);
-                if (!result)
-                {
-                    throw new Exception("手爪打开失败！");
-                }
+             
 
                 //判断Z轴是否在原点  Z轴回零
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
@@ -132,7 +137,12 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception("X轴回零失败!");
                 }
-
+                //手爪打开
+                result = await OpenClaw(80).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("手爪打开失败！");
+                }
                 return true;
             }
             catch (Exception ex)
@@ -190,10 +200,26 @@ namespace Q_Platform.BLL
                 }
 
                 //手爪夹紧
-                result = await CloseClaw(clawCloseByte).ConfigureAwait(false);
-                if (!result)
+                int temp =0;
+              attemp:  try
                 {
-                    throw new Exception("手爪夹紧出错");
+                    result = await CloseClaw(clawCloseByte).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        throw new Exception("手爪夹紧出错");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    temp++;
+                    if (temp <3)
+                    {
+                        await OpenClaw(clawOpenByte).ConfigureAwait(false);
+                        Thread.Sleep(500);
+                        goto attemp;
+                    }
+                    _logger?.Error(ex.Message);
+                    throw ex;
                 }
 
                 return true;
@@ -202,11 +228,7 @@ namespace Q_Platform.BLL
             {
                 await OpenClaw(clawOpenByte).ConfigureAwait(false);
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug($"GetTubeAsync 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
 
@@ -259,11 +281,7 @@ namespace Q_Platform.BLL
             {
                 await OpenClaw(clawOpenByte).ConfigureAwait(false);
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("PutTubeAsync 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
            
@@ -329,11 +347,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("GetNeedleAsync 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
         }
@@ -401,11 +415,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug($"PutNeedleAsync 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
            
@@ -536,11 +546,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("DoPipettingAsync 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
           
@@ -602,7 +608,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(300);
                 if (DateTime.Now > end)
                 {
-                    throw new TimeoutException("离心机手爪动作超时！");
+                    throw new TimeoutException("提取手爪动作超时！");
                 }
 
             } while (status == 0);
@@ -699,11 +705,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("PipettorMoveTo 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
 
@@ -748,11 +750,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Debug("CarrierMoveTo 停止");
-                    return false;
-                }
+                _logger.Error(ex.Message);
                 throw ex;
             }
           
@@ -778,7 +776,7 @@ namespace Q_Platform.BLL
             var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, cts).ConfigureAwait(false);
             if (!ret)
             {
-                return false;
+                throw new Exception("移动到安全位置失败!") ;
             }
 
             return true;

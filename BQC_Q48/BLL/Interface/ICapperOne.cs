@@ -12,14 +12,9 @@ namespace Q_Platform.BLL
     {
 
         Task<bool> GoHome(CancellationTokenSource cts);
-
-        Task<bool> AddSolve(Sample sample, CancellationTokenSource cts);
-
-
-        Task<bool> MoveOut(Sample sample, CancellationTokenSource cts);
-
-        Task<bool> MovePutGetPos(CancellationTokenSource cts);
-
+        Task<bool> AddSaltExtract(Sample sample, CancellationTokenSource cts);
+        Task<bool> AddSolveExtract(Sample sample, CancellationTokenSource cts);
+        Task<bool> AddWaterExtract(Sample sample, CancellationTokenSource cts);
 
 
         bool CloseHold(ushort num);

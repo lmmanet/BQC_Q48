@@ -55,7 +55,7 @@ namespace Q_Platform.BLL
             try
             {
                 var ret3 = Centri_GoHome().ConfigureAwait(false);
-                if (!ret3.GetAwaiter().GetResult())
+                if (!await ret3)
                 {
                     return false;
                 }
@@ -91,7 +91,33 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> CentrifugalAsync(Sample sample,CancellationTokenSource cts)
         {
-            throw new NotImplementedException();
+            int time = 60;
+            int vel = 3000;
+            bool isBig = true;
+            //上料
+            var result = _carrier.GetTubeInCentrifugal(sample, GoStation, isBig, cts);
+            if (!result)
+            {
+                throw new Exception("离心机上料失败！");
+            }
+
+            //离心
+
+            result = await DoCentrifugal(time, vel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                throw new Exception("离心机离心失败！");
+            }
+
+
+            //下料
+            result = _carrier.GetTubeOutCentrifugal(sample, GoStation, isBig, cts);
+            if (!result)
+            {
+                throw new Exception("离心机下料失败！");
+            }
+
+            return true;
         }
 
       

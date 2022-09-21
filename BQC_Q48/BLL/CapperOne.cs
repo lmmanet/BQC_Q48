@@ -23,6 +23,8 @@ namespace Q_Platform.BLL
 
         private readonly ICarrierOne _carrier; 
 
+        private readonly IAddSolid _addSolid;
+
         #endregion
 
         #region Constructors
@@ -30,7 +32,7 @@ namespace Q_Platform.BLL
         public CapperOne(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ICarrierOne carrier, IAddSolid addSolid) : base(io, motion, globalStatus,dataAccess, logger)
         {
             this._carrier = carrier;
-
+            this._addSolid = addSolid;
 
             _axisY = 5;
             _axisC1 = 6;
@@ -63,9 +65,13 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public override async Task<bool> GoHome(CancellationTokenSource cts)
         {
-            _logger?.Info($"拧盖模块1回零");
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Info($"拧盖模块1回零");
                 //注射器回零
                 var result1 = _syring.GoHome(cts).ConfigureAwait(false);
                 //拧盖回零
@@ -82,7 +88,7 @@ namespace Q_Platform.BLL
             {
                 if (cts?.IsCancellationRequested == true)
                 {
-                    _logger?.Info($"拧盖模块1回零 暂停");
+                    _logger?.Info($"拧盖模块1回零 停止");
                     return false;
                 }
                 _logger?.Warn($"{ex.Message}");
@@ -91,17 +97,244 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
+        /// 加盐提取
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> AddSaltExtract(Sample sample, CancellationTokenSource cts)
+        {
+            //判断是否有加盐工艺
+            if ((sample.TechParams.Tech & 0x1e00) == 0)
+            {
+                return true;
+            }
+
+            try
+            {
+
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                bool result;
+
+                //加溶剂 + 加盐
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
+                {
+                    result = await _addSolid.AddSaltExtract(sample, AddSolve, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
+                }
+
+                //装盖 内部判断在拧盖1就执行
+                result = await MoveOut(sample, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //下料到试管架
+                result = _carrier.GetSampleToMaterial(sample, cts);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //完成
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    Console.WriteLine("触发停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+
+        }
+
+        /// <summary>
+        /// 加溶剂提取
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> AddSolveExtract(Sample sample, CancellationTokenSource cts)
+        {
+            //判断是否有加溶剂工艺
+            if ((sample.TechParams.Tech & 0x01e0) == 0)
+            {
+                return true;
+            }
+
+            try
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+
+                bool result;
+
+                //加溶剂 
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
+                {
+                    result = await AddSolve(sample, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
+                }
+
+                //加盐
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
+                {
+                    result = await _addSolid.AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt1);
+                }
+
+                //装盖 内部判断在拧盖1就执行
+                result = await MoveOut(sample, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //下料到试管架
+                result = _carrier.GetSampleToMaterial(sample, cts);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //完成
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    Console.WriteLine("触发停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+
+        }
+
+        /// <summary>
+        /// 加水提取
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> AddWaterExtract(Sample sample, CancellationTokenSource cts)
+        {
+            //判断是否有加水工艺
+            if ((sample.TechParams.Tech & 0x04) == 0)
+            {
+                return true;
+            }
+
+            try
+            {
+
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                bool result;
+
+                //加水  //加溶剂A  
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
+                {
+                    result = await AddSolve(sample, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddWater);
+                }
+
+                //加固
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                {
+                    result = await _addSolid.AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddHomo);
+                }
+
+                //装盖 内部判断在拧盖1就执行
+                result = await MoveOut(sample, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //下料到试管架
+                result = _carrier.GetSampleToMaterial(sample, cts);
+                if (!result)
+                {
+                    return false;
+                }
+
+                //完成
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    Console.WriteLine("触发停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
         /// 加液
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
+        protected async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
         {
-            ushort sampleId = sample.Id;
-            _logger?.Info($"样品{sampleId}加液");
             try
             {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                ushort sampleId = sample.Id;
+                _logger?.Info($"样品{sampleId}加液");
                 //拧盖移动到上下料位
                 var result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
@@ -151,93 +384,28 @@ namespace Q_Platform.BLL
                     double volume = sample.TechParams.Solvent_D;
                     result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
                 }
+
+                //判断是否有后续动作
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                {
+                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+                }
+             
                 //完成
                 return true;
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"样品{sample.Id}加液,暂停");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
-                return false;
+                throw ex;
             }
           
         }
 
-        /// <summary>
-        /// 装盖及下料
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="getToMaterial"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public async Task<bool> MoveOut(Sample sample,CancellationTokenSource cts)
-        {
-            try
-            {
-                bool result;
-
-                //判断是否在拧盖1
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
-                {
-                    return true;
-                }
-
-                //判断试管是否有盖 装盖
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
-                {
-                    result = await CapperOn(_capperTorque, 40, cts).ConfigureAwait(false);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
-                }
-
-                ////判断是否要  下料到试管架
-                //if (getToMaterial)
-                //{
-                //    // 下料到试管架
-                //    result = _carrier.GetSampleFromCapperOneToMaterial(sample, CloseHold, OpenHold, cts);
-                //    if (!result)
-                //    {
-                //        return false;
-                //    }
-                //}
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    return false;
-                }
-                _logger?.Error(ex.Message);
-                throw ex;
-            }
-        }
-
-
-        #endregion
-
-        #region Protected Methods
-
-        public async Task<bool> MovePutGetPos(CancellationTokenSource cts)
-        {
-            //复位抱夹
-            OpenHolding();
-
-            //Y轴移动到上下料位置
-            var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                return false;
-            }
-            return true;
-        }
 
         /// <summary>
         /// 加液
@@ -248,9 +416,14 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> AddSolve(byte solve,double volume, CancellationTokenSource cts)
         {
-            _logger?.Debug($"AddSolve-{solve}-{volume}");
             try
             {
+
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Debug($"AddSolve-{solve}-{volume}");
                 //抱夹夹紧
                 _io.WriteBit_DO(_holding, true);
 
@@ -273,19 +446,54 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message);
                 throw ex;
             }
         }
 
-        #endregion
+        /// <summary>
+        /// 装盖及下料
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="getToMaterial"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> MoveOut(Sample sample,CancellationTokenSource cts)
+        {
+            try
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                bool result;
 
-        #region Private Methods
+                //判断是否在拧盖1
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
+                {
+                    return true;
+                }
 
+                //判断试管是否有盖 装盖
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                {
+                    result = await CapperOn(_capperTorque, 40, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Warn(ex.Message);
+                throw ex;
+            }
+        }
         
 
         #endregion
-
 
         /// <summary>
         /// 定时器
@@ -322,8 +530,7 @@ namespace Q_Platform.BLL
         }
 
 
-
-     
+      
 
     }
 }
