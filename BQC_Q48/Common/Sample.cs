@@ -54,5 +54,10 @@ namespace BQJX.Common
         /// 样品工艺参数
         /// </summary>
         public TechParams TechParams { get; set; }
+
+        /// <summary>
+        /// 振荡涡旋内部步骤
+        /// </summary>
+        public int VibrationAndVortexStep { get; set; }
     }
 }

@@ -105,7 +105,7 @@ namespace Q_Platform.BLL
         public async Task<bool> AddSaltExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加盐工艺
-            if ((sample.TechParams.Tech & 0x1e00) == 0)
+            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
             {
                 return true;
             }
@@ -120,15 +120,12 @@ namespace Q_Platform.BLL
                 bool result;
 
                 //加溶剂 + 加盐
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
+                result = await _addSolid.AddSaltExtract(sample, AddSolve, CloseHold, OpenHold, cts).ConfigureAwait(false);
+                if (!result)
                 {
-                    result = await _addSolid.AddSaltExtract(sample, AddSolve, cts).ConfigureAwait(false);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
+                    return false;
                 }
+                TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
 
                 //装盖 内部判断在拧盖1就执行
                 result = await MoveOut(sample, cts).ConfigureAwait(false);
@@ -171,7 +168,7 @@ namespace Q_Platform.BLL
         public async Task<bool> AddSolveExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加溶剂工艺
-            if ((sample.TechParams.Tech & 0x01e0) == 0)
+            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
             {
                 return true;
             }
@@ -199,7 +196,11 @@ namespace Q_Platform.BLL
                 //加盐
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
                 {
-                    result = await _addSolid.AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                    //加固重量
+                    var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0], 
+                        sample.TechParams.Solid_D[0], sample.TechParams.Solid_E[0],sample.TechParams.Solid_F[0] };
+
+                    result = await _addSolid.AddSolidAsync(sample, weight,CloseHold,OpenHold, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -248,8 +249,9 @@ namespace Q_Platform.BLL
         public async Task<bool> AddWaterExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加水工艺
-            if ((sample.TechParams.Tech & 0x04) == 0)
+            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater)&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo)) 
             {
+                Thread.Sleep(1000);
                 return true;
             }
 
@@ -262,10 +264,10 @@ namespace Q_Platform.BLL
                 }
                 bool result;
 
-                //加水  //加溶剂A  
+                //加水  
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
                 {
-                    result = await AddSolve(sample, cts).ConfigureAwait(false);
+                    result = await AddWater(sample, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -276,7 +278,11 @@ namespace Q_Platform.BLL
                 //加固
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
                 {
-                    result = await _addSolid.AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                    //加固重量
+                    var weight = new double[] { sample.TechParams.AddHomo[2], sample.TechParams.Solid_B[2], sample.TechParams.Solid_C[2],
+                        sample.TechParams.Solid_D[2], sample.TechParams.Solid_E[2],sample.TechParams.Solid_F[2] };
+
+                    result = await _addSolid.AddSolidAsync(sample, weight, CloseHold, OpenHold, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -343,7 +349,7 @@ namespace Q_Platform.BLL
                 }
 
                 //搬运试管到拧盖1  内部判断试管位置
-                result = _carrier.GetSampleToCapperOne(sample,cts);
+                result = _carrier.GetSampleFromMaterialToCapperOne(sample,cts);
                 if (!result)
                 {
                     throw new Exception("搬运试管到拧盖1 出错");
@@ -364,25 +370,89 @@ namespace Q_Platform.BLL
                 if (sample.TechParams.Solvent_A != 0)
                 {
                     double volume = sample.TechParams.Solvent_A;
-                    result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂B
                 if (sample.TechParams.Solvent_B != 0)
                 {
                     double volume = sample.TechParams.Solvent_B;
-                    result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂C
                 if (sample.TechParams.Solvent_C != 0)
                 {
                     double volume = sample.TechParams.Solvent_C;
-                    result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
-                }
-                //加溶剂D
-                if (sample.TechParams.Solvent_D != 0)
-                {
-                    double volume = sample.TechParams.Solvent_D;
                     result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
+                }
+        
+                //判断是否有后续动作
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                {
+                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+                }
+             
+                //完成
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Warn(ex.Message);
+                throw ex;
+            }
+          
+        }
+
+
+         /// <summary>
+        /// 加水
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        protected async Task<bool> AddWater(Sample sample, CancellationTokenSource cts)
+        {
+            try
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                ushort sampleId = sample.Id;
+                _logger?.Info($"样品{sampleId}加液");
+                //拧盖移动到上下料位
+                var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("拧盖移动到上下料位 出错") ;
+                }
+
+                //搬运试管到拧盖1  内部判断试管位置
+                result = _carrier.GetSampleFromMaterialToCapperOne(sample,cts);
+                if (!result)
+                {
+                    throw new Exception("搬运试管到拧盖1 出错");
+                }
+
+                //判断试管是否有盖 拆盖
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                {
+                    result = await CapperOff(cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        throw new Exception("拆盖 出错");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                }
+
+                //加溶剂A   内部判断是否有盖  需要修改
+                if (sample.TechParams.Solvent_A != 0)
+                {
+                    double volume = sample.TechParams.AddWater;  //加水量
+                    result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
                 }
 
                 //判断是否有后续动作
@@ -530,7 +600,7 @@ namespace Q_Platform.BLL
         }
 
 
-      
+
 
     }
 }

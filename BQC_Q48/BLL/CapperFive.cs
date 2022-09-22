@@ -24,7 +24,13 @@ namespace Q_Platform.BLL
             _holding = 47;
             _claw = 48;
 
+            _holdingCloseSensor = 48;  //I1.0
+            _holdingOpenSensor = 49;   //I1.1
+
             _xOffset = 60;    //拧盖X偏移量
+            _capperTorque = 50;  //拧盖力度
+            _capperTimeout = 40;  //拧盖超时时间 S 
+            _posData = _dataAccess.GetCapperPosData(5);
 
         }
 

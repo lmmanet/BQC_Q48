@@ -22,6 +22,7 @@ namespace Q_Platform.BLL
 
         private readonly ICarrierTwo _carrier;
 
+        private readonly static object _lockObj = new object();
 
         #region Construtors
 
@@ -161,42 +162,108 @@ namespace Q_Platform.BLL
 
 
 
-        public bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
-        {
-            //搬运试管到拧盖3
-            _carrier.GetSampleToCapperThree( sample,cts);
-
-
-            //拆盖  + 加液 + 振荡
-
-            //搬运试管到移栽
-            _carrier.GetSampleToTransfer(sample, func, cts);
-
-            return false;
-        }
-
-
-
-
-
-
         public bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
-            throw new NotImplementedException();
+            //从试管架取振荡完的净化管去离心   
+            return _carrier.GetSampleFromMaterialToTransfer(sample, func, cts);
         }
 
         public bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
-            throw new NotImplementedException();
+            //从移栽取下试管到试管架
+
+            return _carrier.GetSampleFromTransferToMarterial(sample, func, cts);
         }
 
+        /// <summary>
+        /// 根据工艺判断是否加液  为实现
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
-            throw new NotImplementedException();
+            ushort sampleId = sample.Id;
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从试管架取{sample.Id}样品移液管");
+
+                    //拧盖移动到上下料位
+                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+
+                    //从试管架取试管到拧盖3
+                    result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ TubeStatus-{sample.TubeStatus}");
+                    }
+
+                    //拆盖
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                    {
+                        result = CapperOff(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                    }
+
+                    //移动到上下料位
+                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+
+                    //搬运到移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    {
+                        result = _carrier.GetSampleFromCapperThreeToTransfer(sample, func, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                    }
+
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        return true;
+                    }
+
+                    throw new Exception($"从试管架取{sample.Id}样品移液管到移栽失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
         }
 
         public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
+            //从移栽取下完成移液的净化管   空管或者需要振荡的净化管
+
+            //拧盖3装盖
+
+            //搬运到振荡2  或直接下料到试管架
+
+            //完成振荡后下料到试管架
+
+
             throw new NotImplementedException();
         }
 

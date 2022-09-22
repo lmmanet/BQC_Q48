@@ -39,6 +39,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\AddSolidPosData.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Common\CarrierOnePosData.cs" />
     <Compile Include="Common\CarrierTwoPosData.cs" />
     <Compile Include="Common\CentrifugalCarrierPosData.cs" />
+    <Compile Include="Common\MySerialization.cs" />
     <Compile Include="Common\ClawInfo.cs" />
     <Compile Include="Common\ConcentrationPosData.cs" />
     <Compile Include="Common\EPG_ClawStatus.cs" />

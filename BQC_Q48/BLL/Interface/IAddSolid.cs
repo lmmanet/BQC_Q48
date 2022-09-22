@@ -9,17 +9,16 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, CancellationTokenSource cts);
+        Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
         /// <summary>
         /// 加固
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="solid">加固种类</param>
-        /// <param name="weight">加固重量</param>
+        /// <param name="weights">加固重量</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> AddSolidAsync(Sample sample, int[] solids, double[] weights, CancellationTokenSource cts);
+        Task<bool> AddSolidAsync(Sample sample, double[] weights, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
     }
 }

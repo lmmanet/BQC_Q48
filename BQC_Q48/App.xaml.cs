@@ -1,4 +1,5 @@
 ﻿using BQC_Q48.Views;
+using BQJX.Common;
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Communication.Balance;
@@ -29,10 +30,13 @@ namespace BQC_Q48
     public partial class App : Application
     {
         private string _axisDataFilePath;
+        public string _sampleFile;
         public App()
         {
             string currentPath = Environment.CurrentDirectory;
             _axisDataFilePath = currentPath+"\\AxisData.ini";
+            _sampleFile = currentPath + "\\Sample.xml";
+
             string connString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
             //加载Log配置
 
@@ -100,6 +104,7 @@ namespace BQC_Q48
         {
             base.OnStartup(e);
 
+            
             ///初始化卡
             SimpleIoc.Default.GetInstance<ICardBase>().Initialize(_axisDataFilePath);
 

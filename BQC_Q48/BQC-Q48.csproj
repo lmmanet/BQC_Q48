@@ -101,7 +101,6 @@
     <Compile Include="BLL\Interface\IVibrationOne.cs" />
     <Compile Include="BLL\Interface\IVibrationTwo.cs" />
     <Compile Include="BLL\MainPro.cs" />
-    <Compile Include="BLL\Supernate.cs" />
     <Compile Include="BLL\SyringOne.cs" />
     <Compile Include="BLL\SyringTwo.cs" />
     <Compile Include="BLL\VibrationOne.cs" />
@@ -115,6 +114,7 @@
     <Compile Include="Common\TechAttribute.cs" />
     <Compile Include="Common\TechParams.cs" />
     <Compile Include="Common\TechStatus.cs" />
+    <Compile Include="Common\TechStepStatus.cs" />
     <Compile Include="Common\UserModel.cs" />
     <Compile Include="Common\Validation\ValueLimitAttribute.cs" />
     <Compile Include="Converts\Base\BaseValueConverter.cs" />

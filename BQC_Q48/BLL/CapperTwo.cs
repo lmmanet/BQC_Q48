@@ -20,6 +20,8 @@ namespace Q_Platform.BLL
 
         private readonly ICarrierOne _carrier;
 
+        private readonly static object _lockObj = new object();
+
         #region Construtors
 
         public CapperTwo(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ICarrierOne carrier) : base(io, motion, globalStatus, dataAccess, logger)
@@ -63,56 +65,59 @@ namespace Q_Platform.BLL
             ushort sampleId = sample.Id;
             try
             {
-                _logger?.Info($"从试管架取{sample.Id}样品移液管");
-
-                //拧盖移动到上下料位
-                var result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
+                lock (_lockObj)
                 {
-                    throw new Exception("拧盖移动到上下料位 出错");
-                }
+                    _logger?.Info($"从试管架取{sample.Id}样品移液管");
 
-                //取空管到拧盖2
-                result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
-                if (!result)
-                {
-                    throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ TubeStatus-{sample.TubeStatus}");
-                }
-
-                //拆盖
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
-                {
-                    result = CapperOff(cts).GetAwaiter().GetResult();
+                    //拧盖移动到上下料位
+                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
                     if (!result)
                     {
-                        throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception("拧盖移动到上下料位 出错");
                     }
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
-                }
 
-                //移动到上下料位
-                result =  MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception("拧盖移动到上下料位 出错");
-                }
-
-                //搬运到移栽
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-                {
-                    result = _carrier.GetSampleFromCapperTwoToTransfer(sample, func,cts);
+                    //取空管到拧盖2
+                    result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
                     if (!result)
                     {
-                        throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ TubeStatus-{sample.TubeStatus}");
                     }
-                }
 
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
-                {
-                    return true;
-                }
+                    //拆盖
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                    {
+                        result = CapperOff(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                    }
 
-                throw new Exception($"从试管架取{sample.Id}样品移液管到移栽失败,SampleStatus-{sample.Status}");
+                    //移动到上下料位
+                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+
+                    //搬运到移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                    {
+                        result = _carrier.GetSampleFromCapperTwoToTransfer(sample, func, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                    }
+
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        return true;
+                    }
+
+                    throw new Exception($"从试管架取{sample.Id}样品移液管到移栽失败,SampleStatus-{sample.Status}");
+                }
             }
             catch (Exception ex)
             {
@@ -133,7 +138,7 @@ namespace Q_Platform.BLL
 
             //
 
-            return _carrier.GetSampleFromColdToTransfer(sample,1,func, cts);
+            return _carrier.GetSampleFromColdToTransfer(sample,func, cts);
         }
 
         public bool GetSampleFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
@@ -141,56 +146,59 @@ namespace Q_Platform.BLL
             ushort sampleId = sample.Id;
             try
             {
-                _logger?.Info($"从移栽取回{sample.Id}样品移液管");
-
-                //拧盖移动到上下料位
-                var result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
+                lock (_lockObj)
                 {
-                    throw new Exception("拧盖移动到上下料位 出错");
-                }
+                    _logger?.Info($"从移栽取回{sample.Id}样品移液管");
 
-                //取空管到拧盖2
-                result = _carrier.GetSampleFromTransferToCapperTwo(sample,func, cts);
-                if (!result)
-                {
-                    throw new Exception($"从移栽取{sample.Id}样品移液管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
-                }
-
-                //装盖
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-                {
-                    result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
+                    //拧盖移动到上下料位
+                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
                     if (!result)
                     {
-                        throw new Exception($"{sample.Id}样品移液管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception("拧盖移动到上下料位 出错");
                     }
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
-                }
 
-                //移动到上下料位
-                result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception("拧盖移动到上下料位 出错");
-                }
-
-                //搬运到移栽
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-                {
-                    result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
+                    //取空管到拧盖2
+                    result = _carrier.GetSampleFromTransferToCapperTwo(sample, func, cts);
                     if (!result)
                     {
-                        throw new Exception($"{sample.Id}样品移液管搬运到试管架 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception($"从移栽取{sample.Id}样品移液管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
                     }
-                }
 
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
-                {
-                    return true;
-                }
+                    //装盖
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                    {
+                        result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                    }
 
-                throw new Exception($"从移栽取{sample.Id}样品移液管到试管架失败,SampleStatus-{sample.Status}");
+                    //移动到上下料位
+                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("拧盖移动到上下料位 出错");
+                    }
+
+                    //搬运到移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                    {
+                        result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管搬运到试管架 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                    }
+
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
+                    {
+                        return true;
+                    }
+
+                    throw new Exception($"从移栽取{sample.Id}样品移液管到试管架失败,SampleStatus-{sample.Status}");
+                }
             }
             catch (Exception ex)
             {

@@ -123,9 +123,33 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public bool StartVortex(Sample sample, CancellationTokenSource cts)
         {
-            int time = 30;
-            int vel = 1000;
-         
+            int step = sample.VibrationAndVortexStep - 1;
+            int time = sample.TechParams.VortexTime[step];
+            int vel = sample.TechParams.VortexVel[step];
+            int bitIn = 0;
+            switch (sample.VibrationAndVortexStep)
+            {
+                case 1:
+                    bitIn = 3;
+                    break;
+                case 2:
+                    bitIn = 8;
+                    break;
+                case 3:
+                    bitIn = 12;
+                    break;
+                case 4:
+                    bitIn = 20;
+                    break;
+                default:
+                    break;
+            }
+
+            if (!TechStatusHelper.BitIsOn(sample.TechParams, bitIn))
+            {
+                return true;
+            }
+
             try
             {
                 lock (_lockObj)

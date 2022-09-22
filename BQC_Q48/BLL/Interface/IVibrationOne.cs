@@ -13,9 +13,9 @@ namespace Q_Platform.BLL
 
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        bool StartVibration(Sample sample, bool carryToCold ,CancellationTokenSource cts);
+        bool StartVibration(Sample sample, CancellationTokenSource cts);
 
-
+        Task StartVibrationAndVortex(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
 
     }
 }

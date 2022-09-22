@@ -13,11 +13,6 @@ namespace Q_Platform.BLL
 
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        //+++++++++++++++++++++++++离心移栽++++++++++++++++++++++++++++//
-
-        bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
-
-
 
         //==================================================================离心部分======================================================================================//
 

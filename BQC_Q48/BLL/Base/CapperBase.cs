@@ -175,12 +175,12 @@ namespace Q_Platform.BLL
         }
 
         
-        public bool CloseHold(ushort num)
+        public bool CloseHold()
         {
             return _io.WriteBit_DO(_holding, true);
         }
 
-        public bool OpenHold(ushort num)
+        public bool OpenHold()
         {
             return _io.WriteBit_DO(_holding, false);
         }
@@ -389,7 +389,7 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 关闭抱夹
         /// </summary>
-        protected virtual void CloseHolding(bool checkSensor = true)
+        protected virtual void CloseHolding(bool checkSensor = false)
         {
             _logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹夹紧

@@ -19,24 +19,28 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        bool GetSampleToCapperOne(Sample sample, CancellationTokenSource cts);
+        //===================================拧盖1=======================================//
+        bool GetSampleFromAddSolidToCapperOne(Sample sample, CancellationTokenSource cts);
+
+        bool GetSampleFromMaterialToCapperOne(Sample sample, CancellationTokenSource cts);
+
+        //===================================加固=======================================//
+        bool GetSampleFromCapperOneToAddSolid(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
+
 
         bool GetSampleToVortex(Sample sample, CancellationTokenSource cts);
 
-        bool GetSampleToAddSolid(Sample sample, CancellationTokenSource cts);
 
         bool GetSampleToVibration(Sample sample, CancellationTokenSource cts);
 
-        bool GetSampleToAddSolid(Sample sample, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts);
+       
 
         bool GetSampleToMaterial(Sample sample, CancellationTokenSource cts);
 
-        bool GetSampleToCold(Sample sample,ushort posNum, CancellationTokenSource cts);
+        bool GetSampleFromVibrationToCold(Sample sample, CancellationTokenSource cts);
 
         //===================================离心移栽=======================================//
         bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
-
-        bool GetSampleFromTransferToCarrierTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
         bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
@@ -49,7 +53,7 @@ namespace Q_Platform.BLL
         bool GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
 
 
-        bool GetSampleFromColdToTransfer(Sample sample,ushort posNum, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromColdToTransfer(Sample sample,Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
 
         bool GetSampleFromVibrationOneToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);

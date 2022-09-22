@@ -36,8 +36,19 @@ namespace Q_Platform.BLL
 
         //加标    清洗     浓缩混匀     取样1 2 
 
+        //=========================================搬运=========================================================//
+
+        bool GetSampleFromMaterialToCapperThree(Sample sample, CancellationTokenSource cts);
+
+       
+
 
         //=========================================离心移栽=========================================================//
+        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
         bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 

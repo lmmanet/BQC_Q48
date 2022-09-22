@@ -84,7 +84,55 @@ namespace Q_Platform.BLL
 
 
 
+        public bool GetSampleFromMaterialToCapperThree(Sample sample, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
 
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"搬运{sampleId}净化管到拧盖3");
+                    //试管在净化试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId - 1), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+                        if (sample.TubeStatus == 1)
+                        {
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                    }
+
+                    //试管在拧盖3   
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    {
+                        return true;
+                    }
+                    throw new Exception($"搬运{sampleId}净化管到拧盖3失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
 
 
 
@@ -179,6 +227,64 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
+        /// 从拧盖3搬运试管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从拧盖3搬运{sampleId}净化管到移栽");
+                    //试管在移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId),null,null, func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+                        if (sample.TubeStatus == 1)
+                        {
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId - 1), null, null, func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperThree);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    }
+
+                    //试管在移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        return true;
+                    }
+                    throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
         /// 从移栽搬运试管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
@@ -239,6 +345,127 @@ namespace Q_Platform.BLL
                 return false;
             }
         }
+
+        /// <summary>
+        /// 从试管架搬运试管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"搬运{sampleId}净化管到移栽");
+                    //试管在净化试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+                        if (sample.TubeStatus == 1)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    }
+
+                    //试管在移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        return true;
+                    }
+                    throw new Exception($"搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"搬运{sampleId}净化管到移栽 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 从移栽取下试管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从移栽搬运{sampleId}净化管到试管架");
+                    //试管在净化试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId - 1), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+                        if (sample.TubeStatus == 1)
+                        {
+                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf2);
+                    }
+
+                    //试管在移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    {
+                        return true;
+                    }
+                    throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message);
+                 throw ex;
+            }
+        }
+
+
 
         /// <summary>
         /// 搬运试管到移栽

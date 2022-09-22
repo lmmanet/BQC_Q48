@@ -13,9 +13,12 @@ using System.Threading.Tasks;
 namespace Q_Platform.BLL
 {
     public class CentrifugalCarrier : ICentrifugalCarrier
-    {    
-        
-        //把提取放此处？？
+    {
+        //运行参数
+        private Task _pipttorTask;            //移液提取 （包括离心搬运 拧盖2 拧盖3）
+        private List<Sample> _pipttorList = new List<Sample>();
+        private Dictionary<Sample, Action<Sample, CancellationTokenSource>> _sampleActionDic = new Dictionary<Sample, Action<Sample, CancellationTokenSource>>(); //回调列表
+
 
         #region Private Members
         private readonly static object _lockObj = new object();
@@ -45,7 +48,7 @@ namespace Q_Platform.BLL
 
         private ushort _clawId = 2;              //电爪485地址
         private double _stepMoveVel = 30;        //步进电机移动速度
-        private double _sevorMoveVel = 50;       //伺服电机移动速度
+        private double _sevorMoveVel = 2;       //伺服电机移动速度
         #endregion
 
         #region Construtors
@@ -547,32 +550,190 @@ namespace Q_Platform.BLL
 
 
 
-        public bool Pipetting(Sample sample,CancellationTokenSource cts)
+        public Task StartPipetting(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts)
         {
-            //_capperTwo.CapperOffAsync(sample, cts);
-
-            try
+            //判断去重
+            var ret = _pipttorList.Contains(sample);
+            if (!ret)
             {
-                lock (_lockObj)
+                _pipttorList.Add(sample);
+                //保存回调列表
+                _sampleActionDic.Add(sample, actionCallBack);
+            }
+
+            if (_pipttorTask != null)
+            {
+                if (!_pipttorTask.IsCompleted)
                 {
-                    //搬运2试管到拧盖3  包括拧盖3拆盖 加液？ 振荡
-                    //_capperThree.GetSampleToTransfer(sample, TransferMoveRightPutGetPos, cts);
-
-                    //搬运1试管到拧盖2  包括拆盖
-                    //_capperTwo.GetSampleToTransfer(sample, TransferMoveLeftPutGetPos, cts);
-
-                    //移液  通过拧盖2调用
-
-
-                    throw new Exception();
+                    return _pipttorTask;
                 }
             }
-            catch (Exception ex)
-            {
 
-                throw;
-            }
+            _pipttorTask = Task.Run(() =>
+            {
+                while (cts?.IsCancellationRequested != true && _pipttorList.Count > 0)
+                {
+                    var itemSample1 = _pipttorList[0];
+
+                    try
+                    {
+                        //是否提取上清液
+                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1) && sample.TechParams.TechStep == 5)
+                        {
+                            if (cts.IsCancellationRequested != true)
+                            {
+                                var result = DoPipettingOne(itemSample1, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("DoCentrifugal1 err");
+                                }
+                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal1);
+                                sample.TechParams.TechStep = 5;
+                            }
+                            else
+                            {
+                                throw new TaskCanceledException("程序停止");
+                            }
+
+                        }
+
+                        //提取净化管 净化液
+                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1) && sample.TechParams.TechStep == 8)
+                        {
+                            if (cts.IsCancellationRequested != true)
+                            {
+                                var result = DoPipettingTwo(itemSample1, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("DoCentrifugal2 err");
+                                }
+                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal2);
+                                sample.TechParams.TechStep = 8;
+                            }
+                            else
+                            {
+                                throw new TaskCanceledException("程序停止");
+                            }
+
+                        }
+
+                        //兽药提取浓缩液
+                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1) && sample.TechParams.TechStep == 11)
+                        {
+                            if (cts.IsCancellationRequested != true)
+                            {
+                                var result = DoPipettingThree(itemSample1, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("DoCentrifugal3 err");
+                                }
+                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal3);
+                                sample.TechParams.TechStep = 11;
+                            }
+                            else
+                            {
+                                throw new TaskCanceledException("程序停止");
+                            }
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        cts.Cancel();
+                        return;
+                    }
+                    //触发后续动作
+                    _sampleActionDic[itemSample1]?.Invoke(itemSample1, cts);
+                    //样品和任务从列表移除
+                    _pipttorList.Remove(itemSample1);
+                    _sampleActionDic.Remove(itemSample1);
+
+                }
+            });
+
+            return _pipttorTask;
+
+ 
         }
+
+
+
+
+
+        /// <summary>
+        /// 移液大管到净化管
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool DoPipettingOne(Sample sample,CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+                
+        /// <summary>
+        /// 净化管移液到大管  或者 净化管移液到样品小瓶  或者 净化移液到西林瓶
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool DoPipettingTwo(Sample sample,CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+                
+        /// <summary>
+        /// 大管移液到西林瓶浓缩    兽药
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool DoPipettingThree(Sample sample,CancellationTokenSource cts)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -745,6 +906,10 @@ namespace Q_Platform.BLL
 
 
 
+        #endregion
+
+        #region Protected Methods
+
 
 
         /// <summary>
@@ -842,9 +1007,7 @@ namespace Q_Platform.BLL
         }
 
 
-        #endregion
 
-        #region Protected Methods
 
         /// <summary>
         /// 离心机取料

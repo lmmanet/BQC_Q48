@@ -193,7 +193,7 @@ namespace Q_Platform.BLL
                 }
 
                 //移动到取料点位
-                var result = await CarrierMoveTo(pos, cts).ConfigureAwait(false);
+                var result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("移动到取料点出错");
@@ -252,13 +252,10 @@ namespace Q_Platform.BLL
                 }
 
                 //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece())
-                {
-                    throw new Exception("手爪上无试管");
-                }
+              
 
                 //移动到放料点位
-                var result = await CarrierMoveTo(pos, cts).ConfigureAwait(false);
+                var result = await CarrierMoveTo(pos, ClawIsGetchPiece, cts).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("移动到放料位出错");
@@ -593,6 +590,7 @@ namespace Q_Platform.BLL
                 throw new Exception("手爪打开失败！");
             }
             int status = 0;
+            Thread.Sleep(500);
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(10);
             do
             {
@@ -629,6 +627,7 @@ namespace Q_Platform.BLL
                 throw new Exception("手爪抓取物件失败！");
             }
             int status = 0;
+            Thread.Sleep(500);
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(10);
             do
             {
@@ -717,7 +716,7 @@ namespace Q_Platform.BLL
         /// <param name="coordinate"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> CarrierMoveTo(double[] coordinate, CancellationTokenSource cts)
+        protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<Task<bool>> func,CancellationTokenSource cts)
         {
             _logger?.Debug($"CarrierMoveTo");
             try
@@ -737,6 +736,17 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception("XY轴移动到指定位出错");
                 }
+
+                if (func != null)
+                {
+                    var funResult = await func.Invoke().ConfigureAwait(false);
+                    if (!funResult)
+                    {
+                        throw new Exception("手爪上无试管");
+                    }
+                }
+              
+               
 
                 //Z轴下降到取料位置
                 var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, cts).ConfigureAwait(false);

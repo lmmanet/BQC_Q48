@@ -54,7 +54,7 @@ namespace Q_Platform.BLL
 
         private AddSolidPosData _posData;                //位置数据
         private IGlobalStatus _globalStatus;
-        private int _step = -1;
+        private int _step;
         private bool _isAddSolidDone;
          
         #endregion
@@ -138,7 +138,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, CancellationTokenSource cts)
+        public async Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
         {
             //判断是否有加盐工艺
             if ((sample.TechParams.Tech & 0x1e00) == 0)
@@ -163,8 +163,12 @@ namespace Q_Platform.BLL
 
                 //加盐
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
-                {
-                    result = await AddSolidAsync(sample, new int[] { 1 }, new double[] { 1 }, cts).ConfigureAwait(false);
+                {  
+                    //加固重量
+                    var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
+                        sample.TechParams.Solid_D[1], sample.TechParams.Solid_E[1],sample.TechParams.Solid_F[1] };
+
+                    result = await AddSolidAsync(sample, weight,func1,func2, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -192,7 +196,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolidAsync(Sample sample,int[] solids,double[] weights, CancellationTokenSource cts)
+        public async Task<bool> AddSolidAsync(Sample sample,double[] weights, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
         {
             try
             {
@@ -213,14 +217,14 @@ namespace Q_Platform.BLL
                 }
 
                 //从拧盖1处搬试管(搬运到加固位)
-                result = _carrier.GetSampleToAddSolid(sample, cts);
+                result = _carrier.GetSampleFromCapperOneToAddSolid(sample,func1,func2 ,cts);
                 if (!result)
                 {
                     return false;
                 }
                
                 //加固   判断加固种类
-                result = await Add_Solid(solids, weights, cts).ConfigureAwait(false);
+                result = await Add_Solid(weights, cts).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -234,8 +238,8 @@ namespace Q_Platform.BLL
                     return false;
                 }
 
-                //搬运试管到拧盖1位
-                result = _carrier.GetSampleToCapperOne(sample, cts);
+                //从加固搬运试管到拧盖1位
+                result = _carrier.GetSampleFromAddSolidToCapperOne(sample, cts);
                 if (!result)
                 {
                     return false;
@@ -284,26 +288,25 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 加固
         /// </summary>
-        /// <param name="solids">添加种类1~6 </param>
         /// <param name="weights">加固重量</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> Add_Solid(int[] solids,double[] weights, CancellationTokenSource cts)
+        protected async Task<bool> Add_Solid(double[] weights, CancellationTokenSource cts)
         {
             if (cts?.IsCancellationRequested == true)
             {
                 throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
             }
-            solids.ToList().ForEach(s=>_logger.Debug($"Add_Solid {s}"));
-            int count = weights.Length;
-            while (_step < count)
+            weights.ToList().ForEach(w=>_logger.Debug($"Add_Solid Weight {w}"));
+
+            while (_step < 6)
             {
-                if (solids[_step] <= 0 || weights[_step] <= 0)
+                if (weights[_step] <= 0)
                 {
                     _step++;
                     continue;
                 }
-                var result = await Add_SolidSub(solids[_step], weights[_step], cts).ConfigureAwait(false);
+                var result = await Add_SolidSub(_step+1, weights[_step], cts).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("加固失败!");
