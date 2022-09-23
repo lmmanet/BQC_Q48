@@ -9,6 +9,8 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        Task StartPipetting(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
+
         //==================================================================离心移栽部分======================================================================================//
 
         /// <summary>
@@ -86,7 +88,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperTwoToTransfer(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToTransfer(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
         /// 从移栽取回无盖试管到拧盖2    移液 =》 CentrifugalCarrier => CapperTwo（拆盖完）(传入动作) => CarrierOne(传入动作)
@@ -94,7 +96,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToCapperTwo(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromTransferToMaterial(Sample sample, CancellationTokenSource cts);
 
 
 

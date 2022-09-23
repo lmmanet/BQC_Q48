@@ -120,7 +120,7 @@ namespace Q_Platform.BLL
                     }
                     else
                     {
-                        result = _carrier.GetSampleToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromVibrationToMaterial(sample, cts);
                         if (!result)
                         {
                             throw new Exception("搬运样品到试管架失败!");

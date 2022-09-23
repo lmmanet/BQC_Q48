@@ -178,7 +178,7 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运到试管架
-                    result = _carrier.GetSampleToMaterial(sample, cts);
+                    result = _carrier.GetSampleFromVortexToMaterial(sample, cts);
                     if (!result)
                     {
                         throw new Exception("搬运样品到试管架失败");

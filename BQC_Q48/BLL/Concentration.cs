@@ -1,5 +1,7 @@
-﻿using BQJX.Common.Interface;
+﻿using BQJX.Common.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
@@ -26,17 +28,26 @@ namespace Q_Platform.BLL
 
         private readonly IWeight _weight;
 
+        private ConcentrationPosData _posData;
+
         #endregion
 
         #region Variable
 
-        protected double _moveVel = 10;
+        protected double _yMoveVel = 500;
 
 
-        protected ushort _axisY;
+        protected ushort _axisY = 25;
 
-        protected ushort _claw1;
-        protected ushort _claw2;
+        protected ushort _zCylinderDown = 56;      //Q2.0
+        protected ushort _zCylinderUp = 55;        //Q1.7
+        protected ushort _zCylinderHigh = 55;      //I1.7
+        protected ushort _zCylinderLow = 56;       //I2.0
+        protected ushort _vaccumSensor1 = 57;      //I2.1
+        protected ushort _vaccumSensor2 = 58;      //I2.2
+        protected ushort _vaccum1 = 52;            //Q1.4
+        protected ushort _vaccum2 = 53;            //Q1.5
+
 
         protected double _xOffset = 50;    //浓缩X偏移量
 
@@ -44,7 +55,7 @@ namespace Q_Platform.BLL
 
         #region Constructors
 
-        public Concentration(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IWeight weight)
+        public Concentration(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IWeight weight, IConcentrationPosDataAccess dataAccess)
         {
             this._io = io;
             this._motion = motion;
@@ -52,10 +63,13 @@ namespace Q_Platform.BLL
             this._logger = new MyLogger(typeof(Concentration));
             this._globalStauts = globalStatus;
 
-            //IntialPosData();
+            _posData = dataAccess.GetPosData();
         }
 
         #endregion
+
+        #region Public Methods
+
 
         /// <summary>
         /// 回零
@@ -66,22 +80,55 @@ namespace Q_Platform.BLL
         {
             try
             {
-                throw new NotImplementedException();
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Info("浓缩回零");
+
+                //Z轴上升
+                //_io.WriteBit_DO(_claw, true);
+
+                //使能Y轴
+                await _motion.ServoOn(_axisY).ConfigureAwait(false);
+                //Y轴回零
+                var result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+
+                //复位真空
+
+                //Y轴移动到上下料位置
+                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+                //回零完成
+                return true;
             }
             catch (Exception ex)
             {
                 if (cts?.IsCancellationRequested == true)
                 {
+                    _logger?.Info("浓缩回零 停止");
                     return false;
                 }
-                _logger?.Error(ex.Message);
+                _logger?.Warn($"浓缩回零 err:{ex.Message}");
                 return false;
             }
-           
+
         }
+        #endregion
 
 
+        #region Private Methods
 
+
+        #endregion
 
 
 

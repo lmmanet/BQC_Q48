@@ -29,7 +29,7 @@ namespace Q_Platform.BLL
             _claw = 45;
 
             _holdingCloseSensor = 45;  //I0.5
-            _holdingOpenSensor = 16;   //I0.6
+            _holdingOpenSensor = 46;   //I0.6
 
             _xOffset = 60;    //拧盖X偏移量
             _capperTorque = 50;  //拧盖力度

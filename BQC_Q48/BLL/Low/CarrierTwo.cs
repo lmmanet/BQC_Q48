@@ -95,7 +95,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"搬运{sampleId}净化管到拧盖3");
                     //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -115,12 +115,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInCapper);
                     }
 
                     //试管在拧盖3   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
                         return true;
                     }
@@ -154,7 +154,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"搬运{sampleId}净化管到拧盖3");
                     //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -174,12 +174,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInCapper);
                     }
 
                     //试管在振荡
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationTwo))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -200,14 +200,14 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationTwo);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInVibration);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInCapper);
                     }
 
                     //试管在移栽
                   
                     //试管在拧盖3   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
                         return true;
                     }
@@ -243,8 +243,8 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     _logger?.Info($"从拧盖3搬运{sampleId}净化管到移栽");
-                    //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    //净化管在拧盖3
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -264,16 +264,72 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperThree);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInCapper);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
                     }
 
                     //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
                         return true;
                     }
-                    throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.Status}");
+                    throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.TubeStatus}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 从拧盖3取有盖试管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromCapperThreeToMaterial(Sample sample,CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"从拧盖3搬运{sampleId}净化管到净化管架");
+                    //净化管在拧盖3
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
+                    {
+                        if (sample.TubeStatus == 0)
+                        {
+                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId - 1),null,null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 1;
+                        }
+                        if (sample.TubeStatus == 1)
+                        {
+                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId ), null, null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            sample.TubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInCapper);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
+                    }
+
+                    //试管在移栽
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
+                    {
+                        return true;
+                    }
+                    throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败,SampleStatus-{sample.TubeStatus}");
                 }
             }
             catch (Exception ex)
@@ -302,7 +358,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"从移栽搬运{sampleId}净化管到拧盖3");
                     //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -322,12 +378,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperThree);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInTransfer);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInCapper);
                     }
 
                     //试管在拧盖3   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
                         return true;
                     }
@@ -364,7 +420,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"搬运{sampleId}净化管到移栽");
                     //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -384,12 +440,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
                     }
 
                     //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
                         return true;
                     }
@@ -426,7 +482,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"从移栽搬运{sampleId}净化管到试管架");
                     //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -446,12 +502,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf2);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInTransfer);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInShelf);
                     }
 
                     //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         return true;
                     }
@@ -485,7 +541,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"搬运{sampleId}净化管到移栽");
                     //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf2))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -505,12 +561,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf2);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
                     }
 
                     //试管在振荡
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationTwo))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -530,12 +586,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationTwo);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInVibration);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
                     }
 
                     //试管在拧盖3   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperThree))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
                         if (sample.TubeStatus == 0)
                         {
@@ -555,12 +611,12 @@ namespace Q_Platform.BLL
                             }
                             sample.TubeStatus = 0;
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperThree);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInCapper);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInTransfer);
                     }
 
                     //试管在移栽
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
                         return true;
                     }
@@ -1736,6 +1792,50 @@ namespace Q_Platform.BLL
 
 
         #endregion
+
+
+
+
+        /// <summary>
+        /// 大管移液到西林瓶浓缩    兽药
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool DoPipettingThree(Sample sample, CancellationTokenSource cts)
+        {
+            //大管到西林瓶    //净化管到西林瓶（不在移栽上）  
+
+            throw new NotImplementedException();
+        }
+
+        private bool DoPipettingFour(Sample sample, CancellationTokenSource cts)
+        {
+            //净化管到进样小瓶 （不在移栽上）  
+            //兽药提取浓缩液
+            //if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate2) && sample.TechParams.TechStep == 11)
+            //{
+            //    if (cts.IsCancellationRequested != true)
+            //    {
+            //        var result = DoPipettingThree(itemSample1, cts);
+            //        if (!result)
+            //        {
+            //            throw new Exception("DoCentrifugal3 err");
+            //        }
+            //        TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.ExtractSupernate2);
+            //        sample.TechParams.TechStep = 12;
+            //    }
+            //    else
+            //    {
+            //        throw new TaskCanceledException("程序停止");
+            //    }
+
+            //}
+            throw new NotImplementedException();
+        }
+
+
+
 
 
         /// <summary>

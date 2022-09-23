@@ -96,47 +96,12 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 样品离心
+        /// 启动离心机任务
         /// </summary>
         /// <param name="sample"></param>
+        /// <param name="actionCallBack"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> CentrifugalAsync(Sample sample,CancellationTokenSource cts)
-        {
-            int time = 60;
-            int vel = 3000;
-            bool isBig = true;
-            //上料
-            var result = _carrier.GetTubeInCentrifugal(sample, GoStation, isBig, cts);
-            if (!result)
-            {
-                throw new Exception("离心机上料失败！");
-            }
-
-            //离心
-
-            result = await DoCentrifugal(time, vel, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                throw new Exception("离心机离心失败！");
-            }
-
-
-            //下料
-            result = _carrier.GetTubeOutCentrifugal(sample, GoStation, isBig, cts);
-            if (!result)
-            {
-                throw new Exception("离心机下料失败！");
-            }
-
-            return true;
-        }
-
-
-        
-
-
-
         public Task StartCentrifugal(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts)
         {
             //判断去重
@@ -185,7 +150,7 @@ namespace Q_Platform.BLL
                         }
 
                         //是否二次离心   净化管离心
-                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2) && sample.TechParams.TechStep == 7)
+                        else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2) && sample.TechParams.TechStep == 7)
                         {
                             if (cts.IsCancellationRequested != true)
                             {
@@ -205,7 +170,7 @@ namespace Q_Platform.BLL
                         }
 
                         //是否三次离心
-                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3) && sample.TechParams.TechStep == 10)
+                        else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3) && sample.TechParams.TechStep == 10)
                         {
                             if (cts.IsCancellationRequested != true)
                             {
@@ -223,6 +188,12 @@ namespace Q_Platform.BLL
                             }
 
                         }
+
+                        else
+                        {
+                            //throw new Exception($"离心条件不满足 step:{sample.TechParams.TechStep}");
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -240,20 +211,6 @@ namespace Q_Platform.BLL
 
             return _centrifugalTask;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -284,7 +241,7 @@ namespace Q_Platform.BLL
                 }
 
                 ///离心
-                Thread.Sleep(30000);
+               
 
                 //取出试管
                 result = _carrier.GetTubeOutCentrifugal(sample, GoStation, true, cts);
@@ -670,10 +627,45 @@ namespace Q_Platform.BLL
             return true;
         }
 
-     
+
         #endregion
 
 
+        /// <summary>
+        /// 样品离心
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> CentrifugalAsync(Sample sample, CancellationTokenSource cts)
+        {
+            int time = 60;
+            int vel = 3000;
+            bool isBig = true;
+            //上料
+            var result = _carrier.GetTubeInCentrifugal(sample, GoStation, isBig, cts);
+            if (!result)
+            {
+                throw new Exception("离心机上料失败！");
+            }
 
+            //离心
+
+            result = await DoCentrifugal(time, vel, cts).ConfigureAwait(false);
+            if (!result)
+            {
+                throw new Exception("离心机离心失败！");
+            }
+
+
+            //下料
+            result = _carrier.GetTubeOutCentrifugal(sample, GoStation, isBig, cts);
+            if (!result)
+            {
+                throw new Exception("离心机下料失败！");
+            }
+
+            return true;
+        }
     }
 }

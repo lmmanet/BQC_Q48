@@ -8,26 +8,44 @@ namespace BQJX.Common
 {
     public enum SampleStatus
     {
-        IsInShelf = 0,                //样品在试管架
-        IsInCapperOne = 1,            //样品在拧盖1
-        IsUnCapped = 2,               //样品已拆盖
-        IsInAddSolid = 3,             //样品在加固
-        IsInVortexed = 4,             //样品在涡旋
-        IsInCapperTwo = 5,            //样品在拧盖2
-        IsInVibrationOne = 6,         //样品在振荡1
-        IsInCold = 7,                 //样品在冰浴
-        IsInTransfer = 8,             //样品在移栽
+        IsInShelf = 0,                //50ml离心管在试管架
+        IsInCapperOne = 1,            //50ml离心管在拧盖1
+        IsUnCapped = 2,               //50ml离心管已拆盖
+        IsInAddSolid = 3,             //50ml离心管在加固
+        IsInVortexed = 4,             //50ml离心管在涡旋
+        IsInCapperTwo = 5,            //50ml离心管在拧盖2
+        IsInVibrationOne = 6,         //50ml离心管在振荡1
+        IsInCold = 7,                 //50ml离心管在冰浴
+        IsInTransfer = 8,             //50ml离心管在移栽
+        IsInCentrifugal = 9,          //50ml离心管在离心
 
-        IsInCentrifugal = 9,          //样品在离心
-        IsInShelf2 = 10,              //样品在净化试管架
-        IsInCapperThree = 11,         //样品在拧盖3
-        IsInVibrationTwo = 12,        //样品在振荡2
-        IsInShelf3 = 13,              //样品在西林瓶试管架
-        IsInCapperFour = 14,          //样品在拧盖4
-        IsInConcentration =15,        //样品在浓缩
-        IsInWeigh =16,                //样品在浓缩称重
-        IsInCapperFive =17,           //样品在拧盖5
-        IsInBottleShelf =18           //样品在小瓶架  完成
+
+        IsPurfyInShelf = 10,              //净化管在试管架
+        IsPurfyInCapper = 11,         //净化管在拧盖3
+        IsPurfyUnCapped = 12,             //净化管已拆盖
+        IsPurfyInVibration = 13,        //净化管在振荡2
+        IsPurfyInTransfer = 14,           //净化管在移栽
+        IsPurfyInCentrifugal = 15,        //净化管在离心机
+
+
+        IsSelingInShelf = 16,              //西林瓶在试管架
+        IsSelingInCapper = 17,          //西林瓶在拧盖4
+        IsSelingUnCapped = 18,             //西林瓶已拆盖
+        IsSelingInConcentration = 19,        //西林瓶在浓缩
+        IsSelingInWeigh = 20,                //西林瓶在浓缩称重
+
+        IsBottleInShelf = 21,         //进样小瓶在试管架
+        IsBottleInCapper = 22,           //进样小瓶在拧盖5
+        IsBottleUnCapped = 23,              //进样小瓶已拆盖
+
+        IsPolishInShelf =24,               //兽药样品萃取试管
+        IsPolishInCapper = 25,             //兽药样品萃取试管
+        IsPolishUnCapped = 26,             //兽药样品萃取试管
+        IsPolishInVibration = 27,          //兽药样品萃取试管
+        IsPolishInVortexed = 28,           //兽药样品萃取试管
+        IsPolishInCold = 29,               //兽药样品萃取试管
+        IsPolishInTransfer = 30,         //兽药样品萃取试管
+        IsPolishInCentrifugal = 31       //兽药样品萃取试管
 
     }
 

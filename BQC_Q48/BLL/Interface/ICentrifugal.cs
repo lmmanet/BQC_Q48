@@ -8,7 +8,6 @@ namespace Q_Platform.BLL
     public interface ICentrifugal
     {
         Task<bool> GoHome(CancellationTokenSource cts);
-        Task<bool> CentrifugalAsync(Sample sample, CancellationTokenSource cts);
 
         Task StartCentrifugal(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
 

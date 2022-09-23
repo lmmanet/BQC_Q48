@@ -180,7 +180,7 @@ namespace BQC_Q48
                 new StepAxisEleGear{ AxisName="拧盖5 Y轴",SlaveId=22,EleGear = 787.40},
                 new StepAxisEleGear{ AxisName="拧盖5 C1轴",SlaveId=23,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="拧盖5 C2轴",SlaveId=24,EleGear = 10000},
-                new StepAxisEleGear{ AxisName="浓缩Y轴",SlaveId=25,EleGear = 787.40,HomeMode = 14},
+                new StepAxisEleGear{ AxisName="浓缩Y轴",SlaveId=25,EleGear = 787.40,HomeMode = 14,HomeHigh = 50,HomeLow = 50},
                 new StepAxisEleGear{ AxisName="C加液轴",SlaveId=26,EleGear = 12000},
                 new StepAxisEleGear{ AxisName="拧盖Z3轴",SlaveId=29,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="拧盖Z4轴",SlaveId=28,EleGear = 10000},

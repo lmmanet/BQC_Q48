@@ -17,7 +17,7 @@ namespace BQJX.Common
         /// <returns></returns>
         public static bool BitIsOn(Sample sample, int bit)
         {
-            int value = sample.Status;
+            uint value = sample.Status;
             int temp = 1 << bit;
             return (value & temp) == temp;
         }
@@ -36,7 +36,7 @@ namespace BQJX.Common
         public static void SetBitOn(Sample sample, int bit)
         {
             int temp = 1 << bit;
-            sample.Status = sample.Status | temp;
+            sample.Status = (uint)(sample.Status | temp);
         }
 
         public static void SetBitOn(Sample sample, SampleStatus index)
@@ -52,7 +52,7 @@ namespace BQJX.Common
         public static void ResetBit(Sample sample, int bit)
         {
             int temp = ~(1 << bit);
-            sample.Status = sample.Status & temp;
+            sample.Status = (uint)(sample.Status & temp);
         }
 
         public static void ResetBit(Sample sample, SampleStatus index)

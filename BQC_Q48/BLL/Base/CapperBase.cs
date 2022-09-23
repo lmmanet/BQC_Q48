@@ -291,7 +291,7 @@ namespace Q_Platform.BLL
         /// 拆盖
         /// </summary>
         /// <returns></returns>
-        protected async Task<bool> CapperOff(CancellationTokenSource cts)
+        protected async Task<bool> CapperOff(CancellationTokenSource cts,double offset = -0.75)
         {
 
             try
@@ -323,8 +323,8 @@ namespace Q_Platform.BLL
                 //手爪夹紧
                 CloseClaw();
                 //开始松开
-                var result1 =  _motion.RelativeMoveWithCheckDone(_axisC1, -0.75, 50, cts).ConfigureAwait(false);
-                var result2 =  _motion.RelativeMoveWithCheckDone(_axisC2, -0.75, 50, cts).ConfigureAwait(false);
+                var result1 =  _motion.RelativeMoveWithCheckDone(_axisC1, offset, 50, cts).ConfigureAwait(false);
+                var result2 =  _motion.RelativeMoveWithCheckDone(_axisC2, offset, 50, cts).ConfigureAwait(false);
 
                 if (!await result1 || !await result2)
                 {

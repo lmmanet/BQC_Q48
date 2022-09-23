@@ -11,13 +11,18 @@ namespace Q_Platform.BLL
     public interface ICapperThree
     {
 
+        /// <summary>
+        /// 拧盖3回零
+        /// </summary>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
 
         //==================================================================离心部分======================================================================================//
 
         /// <summary>
-        /// 从净化管架取试管到移栽（离心） Centrifugal => CentrifugalCarrier => CapperThree (决定由哪里取料) => CarrierTwo
+        /// 从净化管架取试管到移栽（离心） 
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
@@ -27,7 +32,7 @@ namespace Q_Platform.BLL
 
 
         /// <summary>
-        /// 离心完成后从移栽中取出试管  Centrifugal (小管) => CentrifugalCarrier(小管) => CapperThree => Carrier
+        /// 离心完成后从移栽中取出试管 
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func">移栽旋转动作</param>
@@ -36,7 +41,7 @@ namespace Q_Platform.BLL
         bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
 
-        //==================================================================移液部分（大管到小管  小管到大管）.（农残氮吹移液）======================================================================================//
+        //==================================================================移液部分======================================================================================//
 
         /// <summary>
         /// 从拧盖3取净化管到移栽  移液 =》 CentrifugalCarrier => CapperThree => CarrierTwo
@@ -48,16 +53,21 @@ namespace Q_Platform.BLL
         bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
         /// <summary>
-        /// 从移栽取出净化管，空管 或 上清液管   移液 =》 CentrifugalCarrier => CapperThree（装盖完决定放回试管架或振荡） => CarrierTwo
+        /// 从移栽搬运无盖净化管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="func">移栽旋转动作</param>
+        /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMarterialPiperttor(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
-
-
-
+        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        
+        /// <summary>
+        /// 从拧盖3搬运有盖净化盖到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
 
 
 

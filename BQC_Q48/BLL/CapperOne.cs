@@ -135,7 +135,7 @@ namespace Q_Platform.BLL
                 }
 
                 //下料到试管架
-                result = _carrier.GetSampleToMaterial(sample, cts);
+                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
                 if (!result)
                 {
                     return false;
@@ -216,7 +216,7 @@ namespace Q_Platform.BLL
                 }
 
                 //下料到试管架
-                result = _carrier.GetSampleToMaterial(sample, cts);
+                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
                 if (!result)
                 {
                     return false;
@@ -298,7 +298,7 @@ namespace Q_Platform.BLL
                 }
 
                 //下料到试管架
-                result = _carrier.GetSampleToMaterial(sample, cts);
+                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
                 if (!result)
                 {
                     return false;
@@ -358,7 +358,7 @@ namespace Q_Platform.BLL
                 //判断试管是否有盖 拆盖
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                 {
-                    result = await CapperOff(cts).ConfigureAwait(false);
+                    result = await CapperOff(cts,-0.75).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拆盖 出错");
@@ -440,7 +440,7 @@ namespace Q_Platform.BLL
                 //判断试管是否有盖 拆盖
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                 {
-                    result = await CapperOff(cts).ConfigureAwait(false);
+                    result = await CapperOff(cts,-0.75).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拆盖 出错");

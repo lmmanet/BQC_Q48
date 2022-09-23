@@ -37,17 +37,25 @@ namespace Q_Platform.BLL
         private ICapperOne _capperOne;
         private IVortex _vortex;
         private ICapperTwo _capperTwo;
+        private ICapperThree _capperThree;
+        private ICapperFour _capperFour;
+        private ICapperFive _capperFive;
+        private IConcentration _concentration;
         private IVibrationOne _vibrationOne;
         private IAddSolid _addSolid;    
         private ICarrierOne _carrierOne;
         private ICentrifugal _centrifugal;
+
+
+        private ICentrifugalCarrier _centrifugalCarrier;
 
         #endregion
 
 
         #region Construtor
 
-        public MainPro(ICapperOne capperOne, IVortex vortex, ICapperTwo capperTwo, IVibrationOne vibrationOne, IAddSolid addSolid, ICarrierOne carrierOne,ICentrifugal centrifugal)
+        public MainPro(ICapperOne capperOne, IVortex vortex, ICapperTwo capperTwo, IVibrationOne vibrationOne, IAddSolid addSolid, ICarrierOne carrierOne,ICentrifugal centrifugal, ICentrifugalCarrier centrifugalCarrier
+            , ICapperThree capperThree, ICapperFour capperFour, ICapperFive capperFive, IConcentration concentration)
         {
             this._capperOne = capperOne;
             this._vortex = vortex;
@@ -57,6 +65,13 @@ namespace Q_Platform.BLL
             this._carrierOne = carrierOne;
             this._centrifugal = centrifugal;
 
+
+            this._capperThree = capperThree;
+            this._capperFour = capperFour;
+            this._capperFive = capperFive;
+            this._concentration = concentration;
+
+            this._centrifugalCarrier = centrifugalCarrier;
         }
         #endregion
 
@@ -98,6 +113,11 @@ namespace Q_Platform.BLL
                 var result5 = _addSolid.GoHome(cts);  //加固回零  无需单独回零
 
                 var result7 = _centrifugal.GoHome(cts); // 离心机回零
+                var result8 = _capperThree.GoHome(cts); // 拧盖3回零
+                var result9 = _capperFour.GoHome(cts); // 拧盖4回零
+                var result10 = _capperFive.GoHome(cts); // 拧盖5回零
+                var result11= _concentration.GoHome(cts); // 浓缩回零
+
                 if (!result1.GetAwaiter().GetResult())
                 {
                     return;
@@ -121,6 +141,26 @@ namespace Q_Platform.BLL
                 if (!result7.GetAwaiter().GetResult())
                 {
                     return;
+                }     
+                if (!result8.GetAwaiter().GetResult())
+                {
+                    Console.WriteLine("回零失败 result8！");
+                    return;
+                }    
+                if (!result9.GetAwaiter().GetResult())
+                {
+                    Console.WriteLine("回零失败 result9！");
+                    return;
+                }   
+                if (!result10.GetAwaiter().GetResult())
+                {
+                    Console.WriteLine("回零失败 result10！");
+                    return;
+                }      
+                if (!result11.GetAwaiter().GetResult())
+                {
+                    Console.WriteLine("回零失败 result11！");
+                    return;
                 }
                 Console.WriteLine("HomeDone");
             });
@@ -139,7 +179,7 @@ namespace Q_Platform.BLL
                 _workList = new List<Sample>();
                 for (int i = 1; i < 24;)
                 {
-                    Sample sample = new Sample() { Id = (ushort)i++, Status = 1, TechParams = new TechParams() 
+                    Sample sample = new Sample() { Id = (ushort)i++, Status = 1025, TechParams = new TechParams() 
                     { 
                         AddWater = 8,
                         Solvent_A =3,
@@ -156,14 +196,14 @@ namespace Q_Platform.BLL
                         VortexTime = new int[] { 40,40, 40 },
                         VortexVel = new int[] { 1000, 1000, 1000 },
                         Tech = 0xF43EE00,
-                        TechStep = 3
+                        TechStep = 3  
                     } };
                     _workList.Add(sample);
 
                     Sample sample1 = new Sample()
                     {
                         Id = (ushort)i++,
-                        Status = 1,
+                        Status = 1025,
                         TechParams = new TechParams()
                         {
                             AddWater = 8,
@@ -186,6 +226,10 @@ namespace Q_Platform.BLL
                     };
                     _workList.Add(sample1);
                 }
+
+                //调试
+                _workList[0].TechParams.TechStep = 5;
+                _workList[0].Status = 0x401;
             }
 
             if (_main != null)
@@ -197,21 +241,41 @@ namespace Q_Platform.BLL
             }
             _main = Task.Run(() =>
             {
+
+
+
+
+
+                //测试离心部分
+                for (int i = 0; i < 8; i++)
+                {
+                    (_carrierOne as CarrierOne).Test(_workList[i], cts);
+                }
                 while (_workList.Count > 0 && cts?.IsCancellationRequested != true)
                 {
-                    var result = Ext(_workList[0]).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        return;
-                    }
 
-                    //var ret = _capperOne.Extract(_workList[0], ExtractCallBack, _workList, cts);
-                    //if (!ret)
-                    //{
-                    //    return;
-                    //}
+                    Centrifugal(_workList[0], cts);
 
+                    Thread.Sleep(5000);
+                    _workList.Remove(_workList[0]);
                 }
+
+
+
+
+
+
+
+
+                //正式程序
+                //while (_workList.Count > 0 && cts?.IsCancellationRequested != true)
+                //{
+                //    var result = Ext(_workList[0]).GetAwaiter().GetResult();
+                //    if (!result)
+                //    {
+                //        return;
+                //    }
+                //}
             
                 
                
@@ -352,37 +416,24 @@ namespace Q_Platform.BLL
 
 
 
-        //离心 
+        //一次离心 
         public void Centrifugal(Sample sample, CancellationTokenSource cts)
         {
+            sample.TechParams.TechStep = 4;
             _centrifugal.StartCentrifugal(sample, CentrifugalCallBack, cts);
 
         }
 
 
-        //取上清液+ 振荡2  +  加入离心列表   离心回调
+        //一次移液  二次移液
         public void CentrifugalCallBack(Sample sample, CancellationTokenSource cts)
         {
-            if (sample.TechParams.TechStep == 5)
-            {
-                //取上清液
-
-            }
-            else if (sample.TechParams.TechStep == 8)
-            {
-                //提取净化液
-
-            }
-            else if (sample.TechParams.TechStep == 11)
-            {
-                //提取浓缩液
-
-            }
+            _centrifugalCarrier.StartPipetting(sample, Extract, cts);
         }
 
 
         //提取净化液
-        public void Extract(Sample sample)
+        public void Extract(Sample sample, CancellationTokenSource cts)
         {
 
         }

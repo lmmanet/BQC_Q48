@@ -50,6 +50,8 @@ namespace Q_Platform.BLL
 
         bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
+        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
+
         bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
         bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);

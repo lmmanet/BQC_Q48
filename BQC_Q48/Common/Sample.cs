@@ -32,7 +32,7 @@ namespace BQJX.Common
         /// 样品位置状态 
         /// <see cref="SampleStatus"/>
         /// </summary>
-        public int Status { get; set; }
+        public uint Status { get; set; }
         
         /// <summary>
         /// 试管状态
