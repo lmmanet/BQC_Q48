@@ -17,6 +17,7 @@ namespace Q_Platform.BLL
     {
 
         private readonly ICarrierOne _carrier;
+        private readonly ICapperFive capperFive;
 
         #region Private Members
 
