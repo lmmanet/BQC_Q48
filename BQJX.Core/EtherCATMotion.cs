@@ -10,13 +10,16 @@ namespace BQJX.Core
 {
     public class EtherCATMotion : IEtherCATMotion
     {
+
         #region Private Members
 
         private ILogger _logger;
 
         private ushort _CardID = 0;
 
-        private List<AxisEleGear> _eleGearList; 
+        private List<AxisEleGear> _eleGearList;
+
+        private List<int> _coordinates = new List<int>();
 
         #endregion
 
@@ -70,8 +73,21 @@ namespace BQJX.Core
             {
                 throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
             }
-            ushort AxisNum = 2; //插补轴数     
+            ushort AxisNum = 2; //插补轴数
             ushort Crd = 0;//坐标系号
+
+            for (int i = 0; i < 3; i++)
+            {
+                var b = _coordinates.Contains(i);
+                if (b)
+                {
+                    continue;
+                }
+                Crd =(ushort) i;
+                _coordinates.Add(Crd);
+                break;
+            }
+           
 
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo[0]);
             double Tacc = ele.Tacc;
@@ -100,7 +116,9 @@ namespace BQJX.Core
                 throw new EtherCATMotionException($"InterPolation_2D_lineWithCheckDone err:{ret}");
             }
 
-            return await CheckDone(axisNo[0], cts).ConfigureAwait(false);
+            var result = await CheckDone(axisNo[0], cts).ConfigureAwait(false);
+            _coordinates.Remove(Crd);
+            return result;
 
         }
 

@@ -115,46 +115,18 @@ namespace Q_Platform.BLL
             }
         }
 
-        /// <summary>
-        /// 涡旋
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool StartVortex(Sample sample, CancellationTokenSource cts)
+      
+        public bool StartVortex(Sample sample, int step, CancellationTokenSource cts)
         {
-            int step = sample.VibrationAndVortexStep - 1;
+            int vel = sample.TechParams.VortexVel[step] / 60;
             int time = sample.TechParams.VortexTime[step];
-            int vel = sample.TechParams.VortexVel[step];
-            int bitIn = 0;
-            switch (sample.VibrationAndVortexStep)
-            {
-                case 1:
-                    bitIn = 3;
-                    break;
-                case 2:
-                    bitIn = 8;
-                    break;
-                case 3:
-                    bitIn = 12;
-                    break;
-                case 4:
-                    bitIn = 20;
-                    break;
-                default:
-                    break;
-            }
-
-            if (!TechStatusHelper.BitIsOn(sample.TechParams, bitIn))
-            {
-                return true;
-            }
-
             try
             {
+
                 lock (_lockObj)
                 {
                     _logger?.Info($"{sample.Id}样品涡旋-{time}s-{vel}rpm");
+
                     //到上下料位
                     var result = MovePutGetPos(cts).GetAwaiter().GetResult();
                     if (!result)
@@ -166,11 +138,10 @@ namespace Q_Platform.BLL
                     result = _carrier.GetSampleToVortex(sample, cts);
                     if (!result)
                     {
-                        throw new Exception("搬运样品到涡旋失败");
+                        throw new Exception($"搬运{sample.Id}样品到涡旋失败!");
                     }
 
                     //开始涡旋
-
                     result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
                     if (!result)
                     {
@@ -184,16 +155,15 @@ namespace Q_Platform.BLL
                         throw new Exception("搬运样品到试管架失败");
                     }
 
-                    //完成
-
                     return true;
+
                 }
             }
             catch (Exception ex)
             {
                 if (cts?.IsCancellationRequested != false)
                 {
-                    _logger?.Info($"{sample.Id}样品涡旋-{time}s-{vel}rpm 停止");
+                    _logger?.Info($"样品{sample.Id}振荡-{time}s-{vel}rpm 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -358,8 +328,7 @@ namespace Q_Platform.BLL
         #endregion
 
 
-
-
+    
 
 
 

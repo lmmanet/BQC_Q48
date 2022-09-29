@@ -9,7 +9,7 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task StartCentrifugal(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
+        Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, bool isInsert = false);
 
 
 

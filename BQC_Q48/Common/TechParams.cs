@@ -85,55 +85,46 @@ namespace BQJX.Common
         public int[] VortexVel { get; set; } = new int[4];
 
         /// <summary>
-        /// 提取振荡时间
+        /// 提取振荡1时间
         /// </summary>
         public int[] VibrationOneTime { get; set; } = new int[4];
 
         /// <summary>
-        /// 提取振荡速度
+        /// 提取振荡1速度
         /// </summary>
-        public int[] VibrationOneVel { get; set; } = new int[4];
+        public int[] VibrationOneVel { get; set; } = new int[4];  
+        
+        /// <summary>
+        /// 提取振荡2时间
+        /// </summary>
+        public int[] VibrationTwoTime { get; set; } = new int[2];
 
-
-
+        /// <summary>
+        /// 提取振荡2速度
+        /// </summary>
+        public int[] VibrationTwoVel { get; set; } = new int[2];
 
         /// <summary>
         /// 离心速度
         /// </summary>
-        public int CentrifugalOneVelocity { get; set; }
+        public int[] CentrifugalOneVelocity { get; set; } = new int[3];
 
         /// <summary>
         /// 离心时间
         /// </summary>
-        public int CentrifugalOneTime { get; set; }
+        public int[] CentrifugalOneTime { get; set; } = new int[3];
 
         /// <summary>
         /// 上清液提取量
         /// </summary>
         public double ExtractVolume { get; set; }
 
-        /// <summary>
-        /// 净化振荡时间
-        /// </summary>
-        public int VibrationTwoTime { get; set; }
+        public double cusuanan { get; set; }//醋酸铵加入量
 
-        /// <summary>
-        /// 净化振荡速度
-        /// </summary>
-        public int VibrationTwoVel { get; set; }
-
-        /// <summary>
-        /// 净化离心速度
-        /// </summary>
-        public int CentrifugalTwoVelocity { get; set; }
-
-        /// <summary>
-        /// 净化离心时间
-        /// </summary>
-        public int CentrifugalTwoTime { get; set; }
+        public double Extract { get; set; }   //完全倾倒
 
 
-        /// <summary>
+         /// <summary>
         /// 浓缩量
         /// </summary>
         public double ConcentrationVolume { get; set; }
@@ -151,17 +142,17 @@ namespace BQJX.Common
         /// <summary>
         /// 定容复溶
         /// </summary>
-        public double MyProperty { get; set; }
+        public double Redissolve { get; set; }
 
         /// <summary>
         /// 加标A
         /// </summary>
-        public double Add_A { get; set; }
+        public double Add_Mark_A { get; set; }
         
         /// <summary>
         /// 加标B
         /// </summary>
-        public double Add_B { get; set; }
+        public double Add_Mark_B { get; set; }
 
 
 

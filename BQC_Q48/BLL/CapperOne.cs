@@ -25,6 +25,8 @@ namespace Q_Platform.BLL
 
         private readonly IAddSolid _addSolid;
 
+        private readonly static object _lockObj = new object();
+
         #endregion
 
         #region Constructors
@@ -48,7 +50,7 @@ namespace Q_Platform.BLL
             _capperTimeout = 40;  //拧盖超时时间 S 
 
             _posData = _dataAccess.GetCapperPosData(1);
-            _syring = new SyringOne(io,motion);
+            _syring = new SyringOne(io,motion, globalStatus);
 
 
 
@@ -102,7 +104,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSaltExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddSaltExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加盐工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
@@ -112,37 +114,41 @@ namespace Q_Platform.BLL
 
             try
             {
-
-                if (cts?.IsCancellationRequested == true)
+                lock (_lockObj)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
-                bool result;
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
+                    bool result;
 
-                //加溶剂 + 加盐
-                result = await _addSolid.AddSaltExtract(sample, AddSolve, CloseHold, OpenHold, cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    return false;
-                }
-                TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
+                    //加溶剂 + 加盐
+                    result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
 
-                //装盖 内部判断在拧盖1就执行
-                result = await MoveOut(sample, cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    return false;
+                    //装盖 内部判断在拧盖1就执行
+                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        return false;
+                    }
+
+                    //下料到试管架
+                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
+
+                    //完成
+                    return true;
                 }
 
-                //下料到试管架
-                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //完成
-                return true;
+              
 
             }
             catch (Exception ex)
@@ -165,7 +171,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolveExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddSolveExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加溶剂工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
@@ -175,55 +181,60 @@ namespace Q_Platform.BLL
 
             try
             {
-                if (cts?.IsCancellationRequested == true)
+                lock (_lockObj)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
 
-                bool result;
+                    bool result;
 
-                //加溶剂 
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
-                {
-                    result = await AddSolve(sample, cts).ConfigureAwait(false);
+                    //加溶剂 
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
+                    {
+                        result = AddSolve(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
+                    }
+
+                    //加盐
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
+                    {
+                        //加固重量
+                        var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
+                        sample.TechParams.Solid_D[1], sample.TechParams.Solid_E[1],sample.TechParams.Solid_F[1] };
+
+                        result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt1);
+                    }
+
+                    //装盖 内部判断在拧盖1就执行
+                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
                     if (!result)
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
-                }
 
-                //加盐
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
-                {
-                    //加固重量
-                    var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0], 
-                        sample.TechParams.Solid_D[0], sample.TechParams.Solid_E[0],sample.TechParams.Solid_F[0] };
-
-                    result = await _addSolid.AddSolidAsync(sample, weight,CloseHold,OpenHold, cts).ConfigureAwait(false);
+                    ////下料到试管架
+                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
                     if (!result)
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt1);
+
+                    //完成
+                    return true;
                 }
 
-                //装盖 内部判断在拧盖1就执行
-                result = await MoveOut(sample, cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //下料到试管架
-                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //完成
-                return true;
+            
 
             }
             catch (Exception ex)
@@ -246,7 +257,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> AddWaterExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddWaterExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加水工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater)&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo)) 
@@ -257,55 +268,57 @@ namespace Q_Platform.BLL
 
             try
             {
-
-                if (cts?.IsCancellationRequested == true)
+                lock (_lockObj)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
-                bool result;
+                    bool result;
 
-                //加水  
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
-                {
-                    result = await AddWater(sample, cts).ConfigureAwait(false);
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    }
+                    //加水  
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
+                    {
+                        result = AddWater(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddWater);
+                    }
+
+                    //加固
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                    {
+                        //加固重量
+                        var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0],
+                        sample.TechParams.Solid_D[0], sample.TechParams.Solid_E[0],sample.TechParams.Solid_F[0] };
+
+                        result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddHomo);
+                    }
+
+                    //装盖 内部判断在拧盖1就执行
+                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
                     if (!result)
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddWater);
-                }
 
-                //加固
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
-                {
-                    //加固重量
-                    var weight = new double[] { sample.TechParams.AddHomo[2], sample.TechParams.Solid_B[2], sample.TechParams.Solid_C[2],
-                        sample.TechParams.Solid_D[2], sample.TechParams.Solid_E[2],sample.TechParams.Solid_F[2] };
-
-                    result = await _addSolid.AddSolidAsync(sample, weight, CloseHold, OpenHold, cts).ConfigureAwait(false);
+                    ////下料到试管架
+                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
                     if (!result)
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddHomo);
-                }
 
-                //装盖 内部判断在拧盖1就执行
-                result = await MoveOut(sample, cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    return false;
+                    //完成
+                    return true;
                 }
-
-                //下料到试管架
-                result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //完成
-                return true;
 
             }
             catch (Exception ex)
@@ -565,40 +578,7 @@ namespace Q_Platform.BLL
 
         #endregion
 
-        /// <summary>
-        /// 定时器
-        /// </summary>
-        /// <param name="time">分钟</param>
-        /// <param name="taskCallBack"></param>
-        public void Delay(int time,Func<Sample, CancellationTokenSource,Task<bool>> func,Sample sample ,CancellationTokenSource cts)
-        {
-            DateTime end = DateTime.Now + TimeSpan.FromMinutes(time);
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(5000);
-                    if (cts?.IsCancellationRequested == true)
-                    {
-                        return;
-                    }
-                    //时间到
-                    if (DateTime.Now > end)
-                    {
-                        if (cts?.IsCancellationRequested == true)
-                        {
-                            throw new TaskCanceledException();
-                        }
-
-                        func?.Invoke(sample,cts);
-                        return;
-                    }
-
-                    return;
-                }
-            });
-        }
-
+     
 
 
 

@@ -17,6 +17,7 @@ using Q_Platform.DAL;
 using BQJX.Common.Common;
 using System.Reflection;
 using System.Collections.ObjectModel;
+using Q_Platform.BLL;
 
 namespace Q_Platform.ViewModels.UC
 {
@@ -525,6 +526,7 @@ namespace Q_Platform.ViewModels.UC
         /// </summary>
         private async void ResetFieldBus()
         {
+
             //停止状态刷新
             _refresh = true;
             Thread.Sleep(500);

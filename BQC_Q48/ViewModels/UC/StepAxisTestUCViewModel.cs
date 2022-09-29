@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using Q_Platform.Models;
 using Q_Platform.DAL;
 using System.Reflection;
+using System.Windows;
 
 namespace Q_Platform.ViewModels.UC
 {
@@ -335,27 +336,43 @@ namespace Q_Platform.ViewModels.UC
 
         private void PutCapperOff()
         {
+            try
+            {
             iLS_Motion.RelativeMoveWithCheckDone(AxisNo, -2, 50, null);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void GetCapperOn()
         {
-            if (AxisNo == 17 || AxisNo == 18 )  //拧盖3
+            try
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null);
+                if (AxisNo == 17 || AxisNo == 18)  //拧盖3
+                {
+                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                }
+                else if (AxisNo == 20 || AxisNo == 21) //拧盖4
+                {
+                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                }
+                else if (AxisNo == 23 || AxisNo == 24) //拧盖5
+                {
+                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                }
+                else
+                {
+                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50, 0, null);
+                }
             }
-            else if(AxisNo == 20 || AxisNo == 21 ) //拧盖4
+            catch (Exception ex)
             {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null);
+                MessageBox.Show(ex.Message);
             }
-            else if(AxisNo == 23 || AxisNo == 24 ) //拧盖5
-            {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30,0, null); 
-            }
-            else
-            {
-                iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50,0, null);
-            }
+         
             
         }
 
@@ -549,87 +566,233 @@ namespace Q_Platform.ViewModels.UC
 
         private void StopMove()
         {
-            iLS_Motion.StopMove(AxisNo);
+            try
+            {
+                iLS_Motion.StopMove(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void EmgStopMove()
         {
-            iLS_Motion.Emg_stop(AxisNo);
+            try
+            {
+                iLS_Motion.Emg_stop(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void ResetAxisAml()
         {
-            iLS_Motion.ResetAxisAlm(AxisNo);
+            try
+            {
+                iLS_Motion.ResetAxisAlm(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private async void AbsMove()
         {
-            await RunCommandAsync(() => AbsMoveBusy, async () =>
+            try
             {
-                AbsMoveDone = await iLS_Motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
-            });
+                await RunCommandAsync(() => AbsMoveBusy, async () =>
+                {
+                    AbsMoveDone = await iLS_Motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
         }
 
         private async void RelativeMove()
         {
-            await RunCommandAsync(() => RelativeMoveBusy, async () =>
+            try
             {
-                RelativeMoveDone = await iLS_Motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
-            });
+                await RunCommandAsync(() => RelativeMoveBusy, async () =>
+                {
+                    RelativeMoveDone = await iLS_Motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
 
         }
 
         private void VelocityMove()
         {
-            iLS_Motion.VelocityMove(AxisNo, TargetVel);
+            try
+            {
+                iLS_Motion.VelocityMove(AxisNo, TargetVel);
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
         }
 
         private void HomeMove()
         {
-            if (AxisNo == 12 || AxisNo == 13 || AxisNo == 27 || AxisNo == 28 || AxisNo == 29)
-            {//12 13 27 28 29
-                iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null);
-            }
-            else
+            try
             {
+                if (AxisNo == 12 || AxisNo == 13 || AxisNo == 27 || AxisNo == 28 || AxisNo == 29)
+                {//12 13 27 28 29
+                    iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null);
+                }
+                else
+                {
 
-                iLS_Motion.GoHomeWithCheckDone(AxisNo, null);
+                    iLS_Motion.GoHomeWithCheckDone(AxisNo, null);
+                }
+
+
             }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
 
+                });
+            }
         }
 
         private void EnableMotion()
         {
-            iLS_Motion.ServoOn(AxisNo);
+            try
+            {
+                iLS_Motion.ServoOn(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
         }
 
         private void DisableMotion()
         {
-            iLS_Motion.ServeOff(AxisNo);
+            try
+            {
+                iLS_Motion.ServeOff(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
+
         }
 
         private void JogF()
         {
-            double jogVel = TargetVel > 100 ? 100 : TargetVel;
-            iLS_Motion.JogF(AxisNo);
+            try
+            {
+                double jogVel = TargetVel > 100 ? 100 : TargetVel;
+                iLS_Motion.JogF(AxisNo);
+
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
+
         }
 
         private void JogR()
         {
-            double jogVel = TargetVel > 100 ? 100 : TargetVel;
-            iLS_Motion.JogR(AxisNo);
+            try
+            {
+                double jogVel = TargetVel > 100 ? 100 : TargetVel;
+                iLS_Motion.JogR(AxisNo);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
+
         }
 
         private void StopJog()
         {
-            iLS_Motion.StopMove(AxisNo);
+            try
+            {
+                iLS_Motion.StopMove(AxisNo);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
+
         }
 
 
 
         private void ClearPosOffset()
         {
-           iLS_Motion.GoHomeWithCheckDone(AxisNo,32,null);
+            try
+            {
+                iLS_Motion.GoHomeWithCheckDone(AxisNo, 32, null);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+
+                });
+            }
+
         }
 
 

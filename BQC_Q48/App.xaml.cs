@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -34,7 +35,7 @@ namespace BQC_Q48
         public App()
         {
             string currentPath = Environment.CurrentDirectory;
-            _axisDataFilePath = currentPath+"\\AxisData.ini";
+            _axisDataFilePath = "C:\\Program Files\\AppConfig" + "\\AxisData.ini";
             _sampleFile = currentPath + "\\Sample.xml";
 
             string connString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
@@ -66,6 +67,8 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<ILS_Motion>(() => new LS_Motion(SimpleIoc.Default.GetInstance<IModbusBase>("StepMotion"), logger, GetStepAxisInfos()));
             SimpleIoc.Default.Register<IEPG26>(() => new EPG26(SimpleIoc.Default.GetInstance<IModbusBase>("Claw"), logger));
             SimpleIoc.Default.Register<IWeight>(() => new Weight(SimpleIoc.Default.GetInstance<IModbusBase>("Balance"), logger));
+
+            SimpleIoc.Default.Register<ISyringTwo,SyringTwo>();
 
             SimpleIoc.Default.Register<IGlobalStatus, GlobalStatus>();
 
@@ -104,7 +107,6 @@ namespace BQC_Q48
         {
             base.OnStartup(e);
 
-            
             ///初始化卡
             SimpleIoc.Default.GetInstance<ICardBase>().Initialize(_axisDataFilePath);
 
@@ -142,7 +144,7 @@ namespace BQC_Q48
                 new AxisEleGear{ AxisName="搬运Z2轴",AxisNo=12,EleGear = 0.0787},
                 new AxisEleGear{ AxisName="净化振荡",AxisNo=13,EleGear = 1,HomeOffset = 0.75},
                 new AxisEleGear{ AxisName="净化移液器",AxisNo=14,EleGear = 9.45},         //1r  == 0.1058ml   1058p/r
-                new AxisEleGear{ AxisName="净化注射器",AxisNo=15,EleGear = 1}
+                new AxisEleGear{ AxisName="净化注射器",AxisNo=15,EleGear = 9.45,HomeOffset = -23}        //50ul  == 60mm  ==
 
             };
 

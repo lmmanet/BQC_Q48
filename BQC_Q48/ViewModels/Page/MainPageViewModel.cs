@@ -1,6 +1,7 @@
 ﻿using BQJX.Models;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using Q_Platform.BLL;
 using Q_Platform.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Q_Platform.ViewModels.Page
 {
     public class MainPageViewModel : MyViewModelBase
     {
+        private readonly IMainPro _mainPro;
 
         #region Properties
 
@@ -34,19 +36,25 @@ namespace Q_Platform.ViewModels.Page
 
         public ICommand DeleteCommand { get; set; }
 
+        public ICommand StartTaskCommand { get; set; }
+        public ICommand StopTaskCommand { get; set; }
+        public ICommand ContinueCommand { get; set; }
+        public ICommand InitialSysCommand { get; set; }
+        public ICommand PauseTaskCommand { get; set; }
+
         #endregion
 
         #region Construtors
 
 
-        public MainPageViewModel()
+        public MainPageViewModel(IMainPro mainPro)
         {
             Messenger.Default.Register<WorkLog>(this, "logWorkLog", LoggingWorkLog);
 
 
             RegisterCommnand();
 
-
+            this._mainPro = mainPro;
         }
 
         private void LoggingWorkLog(WorkLog obj)
@@ -72,6 +80,36 @@ namespace Q_Platform.ViewModels.Page
             UpCommand = new RelayCommand<object>(Up);
             EditCommand = new RelayCommand<object>(Edit);
             DeleteCommand = new RelayCommand<object>(Delete);
+            StartTaskCommand = new RelayCommand(StartPro);
+            StopTaskCommand = new RelayCommand(StopPro);
+            ContinueCommand = new RelayCommand(ContinuePro);
+            InitialSysCommand = new RelayCommand(InitialSys);
+            PauseTaskCommand = new RelayCommand(PausePro);
+        }
+
+        private void InitialSys()
+        {
+            _mainPro.GoHome();
+        }
+
+        private void ContinuePro()
+        {
+            _mainPro.ContinuePro();
+        }
+
+        private void StopPro()
+        {
+            _mainPro.StopPro();
+        }
+           
+        private void PausePro()
+        {
+            _mainPro.PausePro();
+        }
+
+        private void StartPro()
+        {
+            _mainPro.StartPro();
         }
 
         private void Delete(object obj)
@@ -91,7 +129,7 @@ namespace Q_Platform.ViewModels.Page
 
         private void LightSwich()
         {
-            throw new NotImplementedException();
+            _mainPro.SwitchLight();
         }
 
 

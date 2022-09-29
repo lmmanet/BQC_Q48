@@ -70,7 +70,7 @@ namespace Q_Platform.BLL
         //===============================================================离心移栽==================================================================//
 
 
-        //=************************************************************************************************************************=//
+
         //================================================移液部分 兽药=================================================//
 
         /// <summary>
@@ -446,14 +446,14 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从拧盖2搬运{sampleId}样品管到试管架1");
 
                     //装盖
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
                         result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"{sample.Id}样品管装盖 失败！ TubeStatus-{sample.TubeStatus}");
                         }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
                     }
 
                     //移动到上下料位
@@ -509,26 +509,6 @@ namespace Q_Platform.BLL
 
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool GetSampleFromMaterialToTransfer(Sample sample ,CancellationTokenSource cts)
-        {
-            
-            var result = GetSampleFromMaterialAndPipetting(sample, true, cts);
-            if (!result)
-            {
-                throw new Exception("移液失败!");
-            }
-            result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
-            return result;
-
-        }
-
-       
         public bool GetSampleFromMaterialAndPipettingSmallToBig(Sample sample, CancellationTokenSource cts)
         {
             var result = GetSampleFromMaterialAndPipetting(sample, false, cts);
@@ -608,18 +588,66 @@ namespace Q_Platform.BLL
             }
         }
 
+
+
+
+        /// <summary>
+        /// 从冰浴取试管到移栽  拧盖无需锁 只做中转作用
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func">移栽旋转动作</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         public bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
             //无需锁 只做中转作用
             return _carrier.GetSampleFromColdToTransfer(sample,func, cts);
         }
 
-    
+        /// <summary>
+        /// 从冰浴取萃取管到移栽  拧盖无需锁 只做中转作用
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func">移栽旋转动作</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            //无需锁 只做中转作用
+            return _carrier.GetPolishFromColdToTransfer(sample, func, cts);
+        }
 
+
+        /// <summary>
+        /// 离心完成后从移栽中取出试管
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func">移栽旋转动作</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
         {
             return _carrier.GetSampleFromTransferToMaterial(sample, func, cts);
         }
+
+        /// <summary>
+        /// 离心完后从移栽中取出萃取管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            return _carrier.GetPolishFromTransferToMaterial(sample, func, cts);
+        }
+
+
+
+
+
+
+
 
         private bool GetSampleFromMaterialAndPipetting(Sample sample, bool isBigToSmall, CancellationTokenSource cts)
         {

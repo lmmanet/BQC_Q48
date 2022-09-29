@@ -16,19 +16,29 @@ namespace Q_Platform.BLL
     public class CapperThree : CapperBase, ICapperThree
     {
 
+        #region Private Members
+
         private static ILogger logger = new MyLogger(typeof(CapperThree));
 
-        private readonly SyringBase _syring;
+        private readonly ISyringTwo _syring;
 
         private readonly ICarrierTwo _carrier;
 
-        private readonly static object _lockObj = new object();
+        private readonly IVibrationTwo _vibration;
+
+        private readonly ICapperFour _capperFour;
+
+        private readonly static object _lockObj = new object(); 
+
+        #endregion
 
         #region Construtors
 
-        public CapperThree(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess,ICarrierTwo carrier) : base(io, motion, globalStatus, dataAccess, logger)
+        public CapperThree(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess,ICarrierTwo carrier, IVibrationTwo vibration, ISyringTwo syring, ICapperFour capperFour) : base(io, motion, globalStatus, dataAccess, logger)
         {
             this._carrier = carrier;
+            this._vibration = vibration;
+            this._capperFour = capperFour;
             _axisY = 16;
             _axisC1 = 17;
             _axisC2 = 18;
@@ -43,7 +53,7 @@ namespace Q_Platform.BLL
             _capperTimeout = 40;  //拧盖超时时间 S 
 
             _posData = _dataAccess.GetCapperPosData(3);
-            _syring = new SyringTwo(io, motion);
+            _syring = syring;
         }
 
         #endregion
@@ -84,82 +94,6 @@ namespace Q_Platform.BLL
             }
         }
 
-        /// <summary>
-        /// 加液
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
-        {
-            ushort sampleId = sample.Id;
-            _logger?.Info($"净化管{sampleId}加液");
-            try
-            {
-                //拧盖移动到上下料位
-                var result = await MovePutGetPos(cts).ConfigureAwait(false);
-                if (!result)
-                {
-                    throw new Exception("拧盖移动到上下料位 出错");
-                }
-
-                //搬运试管到拧盖1  内部判断试管位置
-                result = _carrier.GetSampleToCapperThree(sample, cts);
-                if (!result)
-                {
-                    throw new Exception("搬运净化管到拧盖3 出错");
-                }
-
-                //判断试管是否有盖 拆盖
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
-                {
-                    result = await CapperOff(cts, -1.3).ConfigureAwait(false);
-                    if (!result)
-                    {
-                        throw new Exception("拆盖 出错");
-                    }
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
-                }
-
-                //加溶剂A   内部判断是否有盖  需要修改
-                //if (sample.TechParams.Solvent_A != 0)
-                //{
-                //    double volume = sample.TechParams.Solvent_A;
-                //    result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
-                //}
-                ////加溶剂B
-                //if (sample.TechParams.Solvent_B != 0)
-                //{
-                //    double volume = sample.TechParams.Solvent_B;
-                //    result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
-                //}
-                ////加溶剂C
-                //if (sample.TechParams.Solvent_C != 0)
-                //{
-                //    double volume = sample.TechParams.Solvent_C;
-                //    result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
-                //}
-                ////加溶剂D
-                //if (sample.TechParams.Solvent_D != 0)
-                //{
-                //    double volume = sample.TechParams.Solvent_D;
-                //    result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
-                //}
-                //完成
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
-
-        }
-
         //==================================================================离心部分======================================================================================//
 
         /// <summary>
@@ -182,18 +116,124 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleToBottleOrToSeiling(Sample sample, CancellationTokenSource cts)
         {
-            //从移栽取下试管到试管架
+            try
+            {
+                lock (_lockObj)
+                {
+                    bool result;
+                    _logger?.Info($"从试管架取{sample.Id}样品净化管到拧盖3");
 
-            return _carrier.GetSampleFromTransferToMarterial(sample, func, cts);
+                    //从试管架取净化管到拧盖3
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPurfyInShelf))
+                    {
+                        result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyInCapper);
+                    }
+
+                    //拆盖
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
+                    {
+                        result = CapperOff(cts, -1.3).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
+                    }
+
+                    //提取样品液 无浓缩  ==》工艺完成   调用两次
+                    if (!TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractPurify))
+                    {
+                        //直接提取净化液 需要锁定
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
+                        {
+                            result = _capperFour.GetSampleFromPurify(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从净化管{sample.Id}提取样品失败!");
+                            }
+                            //程序完成
+                            TechStatusHelper.ResetBit(sample.TechParams, TechStatus.ExtractSample);
+                        }
+                        
+                    }
+                    //移液到浓缩西林瓶
+                    else
+                    {
+                        //拧盖4动作  搬运西林瓶到试管架
+
+                        result = PipettingFromCapperThreeToCapperFour(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从净化管{sample.Id}提取浓缩液体失败!");
+                        }
+                    }
+
+                    //装盖
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
+                    {
+                        result = CapperOn(30, 40, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品净化管装盖 失败!");
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
+                    }
+
+                    //搬回空净化管到试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
+                    {
+                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从拧盖3搬运净化管{sample.Id}到试管架失败!");
+                        }
+                    }
+
+                    //在试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                    {
+                        return true;
+                    }
+
+                    throw new Exception($"从移栽取{sample.Id}样品净化管到拧盖3 失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested == true)
+                {
+                    _logger?.Error(ex.Message);
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
         }
 
+        /// <summary>
+        /// 离心完成后从移栽取出净化管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        {
+            return _carrier.GetSampleFromTransferToMarterial(sample, func, cts);
+        }
 
         //==================================================================移液部分======================================================================================//
 
         /// <summary>
-        /// 根据工艺判断是否加液  为实现
+        /// 根据工艺判断是否加液  
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
@@ -220,6 +260,52 @@ namespace Q_Platform.BLL
                     if (!result)
                     {
                         throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ TubeStatus-{sample.TubeStatus}");
+                    }
+
+                    //拆盖
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
+                    {
+                        result = CapperOff(cts, -1.3).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
+                    }
+
+                    //是否加液
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolveAcetic))
+                    {
+                        result = AddSolve(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolveAcetic);
+                    }
+
+                    //是否振荡  ==》 下料到拧盖3
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.VibrationBeforePurify))
+                    {
+                        //装盖
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
+                        {
+                            result = CapperOn(30,40,cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品移液管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            }
+                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
+                        }
+
+                        //振荡
+                        result = _vibration.StartVibrationTwo(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液振荡 失败！ TubeStatus-{sample.TubeStatus}");
+                        }
+
+                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.VibrationBeforePurify);
                     }
 
                     //拆盖
@@ -271,7 +357,7 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 从移栽搬运无盖净化管到拧盖3
+        /// 从移栽搬运净化管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
@@ -321,12 +407,12 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 从拧盖3搬运有盖净化盖到试管架
+        /// 从拧盖3搬运净化管到振荡或者搬运净化管到试管架
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try
@@ -334,9 +420,18 @@ namespace Q_Platform.BLL
                 bool result;
                 lock (_lockObj)
                 {
-                    _logger?.Info($"从拧盖3取{sampleId}样品净化管到试管架");
+                    //&& sample.TechParams.TechStep == 6
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))//有净化振荡过程
+                    {
+                        _logger?.Info($"从拧盖3取{sampleId}样品净化管到振荡 振荡");
+                    }
+                    else
+                    {
+                        _logger?.Info($"从拧盖3取{sampleId}样品净化空管到试管架");//油脂管
+                    }
+                  
 
-                    //拆盖
+                    //装盖
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                     {
                         result = CapperOn(30, 40, cts).GetAwaiter().GetResult();
@@ -354,23 +449,27 @@ namespace Q_Platform.BLL
                         throw new Exception("拧盖移动到上下料位 出错");
                     }
 
-                    //搬运到移栽
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
-                    {
-                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"从拧盖3取{sampleId}样品净化管到试管架 失败！ TubeStatus-{sample.TubeStatus}");
-                        }
-                    }
-
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
-                    {
-                        return true;
-                    }
-
-                    throw new Exception($"从拧盖3取{sampleId}样品净化管到试管架失败,SampleStatus-{sample.Status}");
                 }
+
+                //开始振荡
+                if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.PurifyVibration))
+                {
+                    result = _vibration.StartVibrationOne(sample ,cts);
+                    if (!result)
+                    {
+                        throw new Exception($"净化管{sampleId}振荡失败");
+                    }
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.PurifyVibration);
+                }
+
+                //在试管架
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                {
+                    return true;
+                }
+
+                throw new Exception($"从振荡取{sampleId}样品净化管到试管架失败,SampleStatus-{sample.Status}");
+
             }
             catch (Exception ex)
             {
@@ -386,85 +485,15 @@ namespace Q_Platform.BLL
 
 
 
-     
+        //==================================================================浓缩部分======================================================================================//
 
-        public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
-        {
-            //从移栽取下完成移液的净化管   空管或者需要振荡的净化管
 
-            //拧盖3装盖
 
-            //搬运到振荡2  或直接下料到试管架
 
-            //完成振荡后下料到试管架
-            ushort sampleId = sample.Id;
-            try
-            {
-                lock (_lockObj)
-                {
-                    _logger?.Info($"从试管架取{sample.Id}样品移液管");
 
-                    //拧盖移动到上下料位
-                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        throw new Exception("拧盖移动到上下料位 出错");
-                    }
 
-                    //从试管架取试管到拧盖3
-                    result = _carrier.GetSampleFromTransferToCapperThree(sample, func, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"从移栽取{sample.Id}样品净化管 失败！ TubeStatus-{sample.TubeStatus}");
-                    }
 
-                    //拆盖
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
-                    {
-                        result = CapperOn(30,40, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"{sample.Id}样品移液管装盖 失败！ TubeStatus-{sample.TubeStatus}");
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
-                    }
 
-                    //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        throw new Exception("拧盖移动到上下料位 出错");
-                    }
-
-                    //搬运到移栽
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
-                    {
-                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
-                        }
-                    }
-
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
-                    {
-                        return true;
-                    }
-
-                    throw new Exception($"从试管架取{sample.Id}样品移液管到移栽失败,SampleStatus-{sample.Status}");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
-        }
 
 
 
@@ -472,7 +501,101 @@ namespace Q_Platform.BLL
 
         #endregion
 
+        /// <summary>
+        /// 从净化管移液到西林瓶浓缩
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool PipettingFromCapperThreeToCapperFour(Sample sample,CancellationTokenSource cts)
+        {
+            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingInCapper)&& SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
+            {
+                var result = _carrier.DoPipettingTwo(sample,1, cts);
+                if (!result)
+                {
+                    throw new Exception($"西林瓶{sample.Id}移取待浓缩液失败!");
+                }
+            }
+            if (!TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractPurify))
+            {
+                return true;
+            }
+            return false;
+        }
 
+
+        /// <summary>
+        /// 加液
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            double volume = 5;
+            _logger?.Info($"净化管{sampleId}加液-{volume}ml");
+            try
+            {
+                //拧盖移动到加液位
+                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("拧盖移动到上下料位 出错");
+                }
+
+                //搬运试管到拧盖1  内部判断试管位置
+                result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                if (!result)
+                {
+                    throw new Exception("搬运净化管到拧盖3 出错");
+                }
+
+                //判断试管是否有盖 拆盖
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
+                {
+                    result = await CapperOff(cts, -1.3).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        throw new Exception("拆盖 出错");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
+                }
+
+                //加入醋酸铵水溶液
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolveAcetic))
+                {
+                    //加入醋酸铵水溶液
+                    result = AddSolve(volume, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception($"净化管{sampleId}加液 出错");
+                    }
+
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolveAcetic);
+                }
+
+                //完成
+                if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolveAcetic))
+                {
+                    return true;
+                }
+
+                throw new Exception($"净化管{sampleId}加液-{volume}ml 失败! 状态错误");
+
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+
+        }
 
         public async Task<bool> MovePutGetPos(CancellationTokenSource cts)
         {
@@ -496,7 +619,7 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
+        protected async Task<bool> AddSolve(double volume, CancellationTokenSource cts,byte solve = 0x01)
         {
             _logger?.Debug($"AddSolve-{solve}-{volume}");
             try
@@ -527,8 +650,6 @@ namespace Q_Platform.BLL
                 throw ex;
             }
         }
-
-
 
         protected CapperPosData GetPosData()
         {

@@ -1,0 +1,825 @@
+2022-09-27 08:32:47.9492 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:47.9722 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:47.9722 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.1068 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.1297 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.1297 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.2424 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.2574 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.2574 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.3940 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.4629 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.4629 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.4998 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.5666 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.5815 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.5815 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.7172 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.7591 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.7591 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.8708 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.8847 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.8847 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.9007 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.9146 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.9146 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.9316 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.9406 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.9406 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.9406 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.9615 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:48.9845 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:48.9845 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:48.9914 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.0134 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.0134 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.0204 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.0383 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.0383 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.0632 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.1600 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.1779 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.1779 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.2926 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.3026 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.3026 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.4382 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.4602 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.4602 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.5888 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.5988 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.5988 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.6238 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.7075 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.7275 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.7275 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.8511 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.8661 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.8661 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:49.8841 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:49.8990 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:49.8990 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.0127 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.0207 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.0207 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.0466 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.1294 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.1493 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.1493 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.2890 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.3029 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.3029 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.4466 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.4585 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.4585 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.5692 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.5852 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.5852 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.6101 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.7168 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.7378 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.7378 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.7527 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.7687 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.7687 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:50.8973 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:50.9153 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:50.9153 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.0460 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.0709 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.0709 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.0928 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.2045 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.2275 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.2394 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.3501 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.3641 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.3641 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.4828 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.4918 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.4918 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.6334 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.6573 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.6573 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.6763 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.6763 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.6932 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.6932 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:51.8358 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:51.8777 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:51.8777 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.0164 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.0393 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.0393 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.1620 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.1769 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.1769 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.2078 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.3215 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.3355 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.3355 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.4751 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.5040 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.5040 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.6517 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.6666 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.6666 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.6826 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.6965 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.6965 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.7145 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.8172 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.8352 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.8352 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:52.9728 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:52.9977 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:52.9977 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.1334 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.1762 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.1762 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.3119 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.3328 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.3328 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.3528 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.4545 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.4715 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.4874 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.6211 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.6430 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.6440 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.6590 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.6590 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.6590 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.8205 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:53.8465 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.8465 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:53.8654 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:53.9841 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.0050 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.0190 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.1536 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.1766 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.1766 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.3202 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.3342 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.3342 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.4449 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.4618 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.4618 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.4907 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.6064 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.6373 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.6373 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.6453 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.6822 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.6822 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.8119 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:54.8607 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:54.8607 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:54.9944 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.0393 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.0393 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:55.0642 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.1709 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.2238 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.2238 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:55.3624 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.4153 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.4153 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:55.5549 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.6018 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.6018 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:55.7384 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.7583 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.7583 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:55.7843 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.9030 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:55.9419 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:55.9419 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.0745 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.1313 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.1313 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.2540 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.2989 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.3039 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.4365 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.4914 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.4914 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.5213 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.6200 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.6589 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.6589 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.7856 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.8075 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.8075 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.8245 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.8325 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.8325 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.9561 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:56.9721 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:56.9721 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:56.9910 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.1047 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.1277 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.1277 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.2603 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.2853 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.2853 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.4079 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.4249 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.4249 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.5446 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.5665 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.5665 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.5894 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.6802 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.6962 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.6962 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.7121 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.7291 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.7291 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:57.8567 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:57.8797 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:57.8797 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.0073 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.0243 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.0243 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.0432 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.1589 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.1918 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.1918 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.3305 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.3554 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.3554 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.4811 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.4940 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.5030 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.6257 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.6456 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.6456 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.6656 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.6745 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.6905 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.6905 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.8221 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.8331 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.8331 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:58.9737 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:58.9897 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:58.9897 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.0994 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.1174 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.1174 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.1423 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.2400 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.2560 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.2560 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.3886 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.4126 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.4126 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.5472 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.5871 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.5871 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.7237 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.7576 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.7576 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:32:59.7786 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.8773 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:32:59.9023 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:32:59.9023 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.0409 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.0738 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.0738 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.1945 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.2364 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.2394 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.3760 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.4209 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.4209 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.4448 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.5555 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.5814 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.5964 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.7061 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.7061 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.7221 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:00.8557 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:00.8796 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:00.8796 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.0063 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:01.0183 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.0183 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.0462 | _refreshTask err:对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.1519 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:01.1759 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.1759 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.3005 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:01.3205 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.3205 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.4531 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:01.4770 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.4770 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.4940 | 串口打开失败,Exception:System.UnauthorizedAccessException: 对端口“COM8”的访问被拒绝。
+   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 BQJX.Communication.Modbus.ModbusRtu.OpenSerialPort() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 638
+   在 BQJX.Communication.Modbus.ModbusRtu.<Open>d__4.MoveNext() 位置 D:\AppV10\BQC_Q48\BQJX.Communication\Modbus\ModbusRtu.cs:行号 60 
+2022-09-27 08:33:01.5060 | ReadMultiInputRegister 从站：1对端口“COM8”的访问被拒绝。 
+2022-09-27 08:33:01.5060 | GetClawStatus err:System.Collections.Generic.List`1[System.UInt16] 
+2022-09-27 08:33:01.5319 | _refreshTask err:对端口“COM8”的访问被拒绝。 

@@ -17,6 +17,21 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -79,6 +94,8 @@
     <Compile Include="BLL\CapperOne.cs" />
     <Compile Include="BLL\CapperThree.cs" />
     <Compile Include="BLL\CapperTwo.cs" />
+    <Compile Include="BLL\GlobalCache.cs" />
+    <Compile Include="BLL\Interface\ISyringTwo.cs" />
     <Compile Include="BLL\Low\CarrierOne.cs" />
     <Compile Include="BLL\Low\CarrierTwo.cs" />
     <Compile Include="BLL\Centrifugal.cs" />
@@ -86,7 +103,7 @@
     <Compile Include="BLL\Concentration.cs" />
     <Compile Include="BLL\Base\VibrationBase.cs" />
     <Compile Include="BLL\Interface\ICentrifugalCarrier.cs" />
-    <Compile Include="BLL\IMainPro.cs" />
+    <Compile Include="BLL\Interface\IMainPro.cs" />
     <Compile Include="BLL\Interface\ICapperFive.cs" />
     <Compile Include="BLL\Interface\ICapperFour.cs" />
     <Compile Include="BLL\Interface\ICapperThree.cs" />
@@ -106,6 +123,7 @@
     <Compile Include="BLL\VibrationOne.cs" />
     <Compile Include="BLL\VibrationTwo.cs" />
     <Compile Include="BLL\Vortex.cs" />
+    <Compile Include="Common\MethodHelper.cs" />
     <Compile Include="Common\TechStatusHelper.cs" />
     <Compile Include="Common\SampleStatusHelper.cs" />
     <Compile Include="Common\SampleStatus.cs" />
@@ -377,7 +395,7 @@
       <Version>5.4.1.1</Version>
     </PackageReference>
     <PackageReference Include="MySql.Data">
-      <Version>8.0.28</Version>
+      <Version>8.0.29</Version>
     </PackageReference>
     <PackageReference Include="NLog">
       <Version>5.0.0</Version>
@@ -385,6 +403,18 @@
     <PackageReference Include="PropertyChanged.Fody">
       <Version>3.4.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

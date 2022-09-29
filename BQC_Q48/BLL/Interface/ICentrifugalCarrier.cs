@@ -13,30 +13,44 @@ namespace Q_Platform.BLL
 
         //==================================================================离心移栽部分======================================================================================//
 
+        bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+        bool GetSampleFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+        bool GetPolishFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+        bool GetPolishFroCentrifugaToShelf(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+        bool GetPurifyFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+        bool GetPurifyFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+
+
+
         /// <summary>
         /// 搬运试管到离心机  （离心机调用）
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func">离心机动作GoStation</param>
-        /// <param name="isBig">大小管 获取移栽坐标</param>
+        /// <param name="varTube">1:样品大管 2;净化小管 3;萃取大管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetTubeInCentrifugal(Sample sample, Func<ushort, Task<bool>> func, bool isBig, CancellationTokenSource cts);
+        bool GetTubeInCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, CancellationTokenSource cts);
 
         /// <summary>
         /// 从离心机取出试管  （离心机调用）
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func">离心机动作GoStation</param>
-        /// <param name="isBig">大小管 获取移栽坐标</param>
+        /// <param name="varTube">1:样品大管 2;净化小管 3;萃取大管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetTubeOutCentrifugal(Sample sample, Func<ushort, Task<bool>> func, bool isBig, CancellationTokenSource cts);
+        bool GetTubeOutCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, CancellationTokenSource cts);
 
         //==================================================================离心部分======================================================================================//
 
         /// <summary>
-        /// 从冰浴取试管到移栽   Centrifugal => CentrifugalCarrier => CapperTwo (管理冰浴仓) => CarrierOne 
+        /// 从冰浴取试管到移栽  
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
@@ -44,21 +58,48 @@ namespace Q_Platform.BLL
         bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
-        /// 从净化管架取试管到移栽（离心） Centrifugal => CentrifugalCarrier => CapperThree (决定由哪里取料) => CarrierTwo
+        /// 从冰浴搬运萃取管到移栽
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMarterialToTransfer(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromColdToTransfer(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
-        /// 离心完成后从移栽中取出试管  Centrifugal(大管/小管) => CentrifugalCarrier(大管/小管) => CapperThree/CapperTwo => Carrier
+        /// 从试管架搬运净化管到移栽
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="isBig">大管或者小管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMarterial(Sample sample, bool isBig ,CancellationTokenSource cts);
+        bool GetPurifyFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+
+
+
+        /// <summary>
+        /// 从移栽取离心完成后的试管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="isBig"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+
+        /// <summary>
+        /// 从移栽取离心完成后的萃取管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="isBig"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+
+        /// <summary>
+        /// 离心完成后从移栽中取净化管  
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPurifyFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
 
         //==================================================================移液部分（大管到小管  小管到大管）.（农残氮吹移液）======================================================================================//
 

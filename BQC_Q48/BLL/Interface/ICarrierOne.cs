@@ -39,6 +39,14 @@ namespace Q_Platform.BLL
         bool GetSampleFromCapperOneToAddSolid(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
         /// <summary>
+        /// 从拧盖1搬运试管到振荡
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromCapperOneToVibration(Sample sample, CancellationTokenSource cts);
+
+        /// <summary>
         /// 从拧盖1搬运样品管到试管架1
         /// </summary>
         /// <param name="sample"></param>
@@ -205,7 +213,29 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
-          
+        /// <summary>
+        /// 从拧盖2取萃取管到振荡
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromCapperTwoToVibration(Sample sample, CancellationTokenSource cts);
 
+        /// <summary>
+        /// 从冰浴搬运萃取管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+
+        /// <summary>
+        /// 从离心移栽取出离心完后的萃取管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
     }
 }

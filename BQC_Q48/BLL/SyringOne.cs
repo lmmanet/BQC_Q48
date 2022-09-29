@@ -1,4 +1,5 @@
-﻿using BQJX.Core.Interface;
+﻿using BQJX.Common.Interface;
+using BQJX.Core.Interface;
 using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Q_Platform.BLL
 
         #region Construtors
 
-        public SyringOne(IIoDevice io, ILS_Motion motion) : base(io, motion,logger)
+        public SyringOne(IIoDevice io, ILS_Motion motion,IGlobalStatus globalStatus) : base(io, motion,logger,globalStatus)
         {
             _axisAddLiquid = 4;
             _port1 = 24;

@@ -1,4 +1,5 @@
-﻿using BQJX.Core.Interface;
+﻿using BQJX.Common.Interface;
+using BQJX.Core.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Q_Platform.BLL
         protected readonly IIoDevice _io;
         protected readonly ILS_Motion _motion;
         protected readonly ILogger _logger;
+        protected readonly IGlobalStatus _globalStauts;
         #endregion
 
         #region Protected Variants
@@ -41,11 +43,12 @@ namespace Q_Platform.BLL
 
         #region Construtors
 
-        public SyringBase(IIoDevice io, ILS_Motion motion,ILogger logger)
+        public SyringBase(IIoDevice io, ILS_Motion motion,ILogger logger, IGlobalStatus globalStauts)
         {
             this._motion = motion;
             this._io = io;
             this._logger = logger;
+            this._globalStauts = globalStauts;
         }
 
 
@@ -101,13 +104,13 @@ namespace Q_Platform.BLL
         public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
         {
             _logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
-            if (volume <= 10 && cts?.IsCancellationRequested != true)
+            if (volume <= 10 && !_globalStauts.IsStopped)
             {
                 return await AddSolveSub(solve, volume, null).ConfigureAwait(false);
             }
             if (volume >10 && volume <= 20 &&cts?.IsCancellationRequested != true)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != true)
+                if (_step == 1 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -116,7 +119,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != true)
+                if (_step == 2 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, volume -10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -127,9 +130,9 @@ namespace Q_Platform.BLL
                     return true;
                 }
             }
-            if (volume > 20 && volume <= 30 && cts?.IsCancellationRequested != true)
+            if (volume > 20 && volume <= 30 && !_globalStauts.IsStopped)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != true)
+                if (_step == 1 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -138,7 +141,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != true)
+                if (_step == 2 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -147,7 +150,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 3 && cts?.IsCancellationRequested != true)
+                if (_step == 3 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, volume - 20, null).ConfigureAwait(false);
                     if (!ret1)
@@ -158,9 +161,9 @@ namespace Q_Platform.BLL
                     return true;
                 }
             }
-            if (volume >30 && volume <= 40 && cts?.IsCancellationRequested != true)
+            if (volume >30 && volume <= 40 && !_globalStauts.IsStopped)
             {
-                if (_step == 1 && cts?.IsCancellationRequested != true)
+                if (_step == 1 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -169,7 +172,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 2 && cts?.IsCancellationRequested != true)
+                if (_step == 2 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -178,7 +181,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 3 && cts?.IsCancellationRequested != true)
+                if (_step == 3 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, 10, null).ConfigureAwait(false);
                     if (!ret1)
@@ -187,7 +190,7 @@ namespace Q_Platform.BLL
                     }
                     _step++;
                 }
-                if (_step == 4 && cts?.IsCancellationRequested != true)
+                if (_step == 4 && !_globalStauts.IsStopped)
                 {
                     var ret1 = await AddSolveSub(solve, volume - 30, null).ConfigureAwait(false);
                     if (!ret1)
@@ -257,12 +260,12 @@ namespace Q_Platform.BLL
             if ((solve & 0x02) == 0x02)
             {
                 _io.WriteBit_DO(_port2, true);
-                _io.WriteBit_DO(_port7, true);
+                _io.WriteBit_DO(_port6, true);
             }
             if ((solve & 0x04) == 0x04)
             {
                 _io.WriteBit_DO(_port3, true);
-                _io.WriteBit_DO(_port6, true);
+                _io.WriteBit_DO(_port7, true);
             }
             if ((solve & 0x08) == 0x08)
             {

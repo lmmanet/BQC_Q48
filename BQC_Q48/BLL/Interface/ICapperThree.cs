@@ -38,8 +38,16 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMarterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleToBottleOrToSeiling(Sample sample, CancellationTokenSource cts);
 
+        /// <summary>
+        /// 离心完成后从移栽取出净化管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
         //==================================================================移液部分======================================================================================//
 
@@ -67,7 +75,13 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts);
+
+
+
+
+
+
 
 
 

@@ -21,6 +21,6 @@ namespace Q_Platform.BLL
         /// <param name="step">涡旋步骤号</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool StartVortex(Sample sample, CancellationTokenSource cts);
+        bool StartVortex(Sample sample, int step, CancellationTokenSource cts);
     }
 }

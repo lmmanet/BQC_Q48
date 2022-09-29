@@ -280,10 +280,16 @@
 
         </Grid>
 
+        <Border Grid.Row="2" Padding="5 10">
+        <UniformGrid  Rows="1">
+            <Button Width="140" Command="{Binding StartTaskCommand}" Content="运行序列" />
+            <Button Width="140" Command="{Binding PauseTaskCommand}" Content="暂停序列" />
+            <Button Width="140" Command="{Binding StopTaskCommand}" Content="停止序列" />
+            <Button Width="140" Command="{Binding ContinueCommand}" Content="继续序列" />
+            <Button Width="140" Command="{Binding InitialSysCommand}" Content="系统初始化" />
+        </UniformGrid>
 
-        <!--<local:MainControl Grid.Row="2" />-->
-
-
+</Border>
 
 
 

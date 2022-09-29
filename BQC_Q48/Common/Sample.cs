@@ -32,8 +32,8 @@ namespace BQJX.Common
         /// 样品位置状态 
         /// <see cref="SampleStatus"/>
         /// </summary>
-        public uint Status { get; set; }
-        
+        public Int64 Status { get; set; }
+
         /// <summary>
         /// 试管状态
         /// 对应0-1
@@ -59,5 +59,21 @@ namespace BQJX.Common
         /// 振荡涡旋内部步骤
         /// </summary>
         public int VibrationAndVortexStep { get; set; }
+
+        /// <summary>
+        /// 西林瓶重量2
+        /// </summary>
+        public double SeilingWeight1 { get; set; }
+
+        /// <summary>
+        /// 西林瓶重量2
+        /// </summary>
+        public double SeilingWeight2 { get; set; }
+
+        /// <summary>
+        /// 提取样品液步骤
+        /// </summary>
+        public int ExtractSampleStep { get; set; }
+
     }
 }

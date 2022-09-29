@@ -41,6 +41,7 @@ namespace Q_Platform.BLL
             this._io = io;
             this._globalStauts = globalStauts;
             this._logger = logger;
+            _globalStauts.StopProgramEventArgs += StopMove;
         }
 
         #endregion
@@ -83,6 +84,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStauts.IsStopped)
+                {
+                    return false;
+                }
                 if (cts?.IsCancellationRequested == true)
                 {
                     _logger?.Info("振荡回零 停止");
@@ -92,6 +97,12 @@ namespace Q_Platform.BLL
                 return false;
             }
         
+        }
+
+        public bool StopMove()
+        {
+            _motion.StopMove(_axisNo);
+            return true;
         }
 
         /// <summary>
@@ -115,6 +126,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStauts.IsStopped)
+                {
+                    return false;
+                }
                 throw ex;
             }
         }

@@ -20,32 +20,39 @@ namespace BQJX.Common
         IsInCentrifugal = 9,          //50ml离心管在离心
 
 
-        IsPurfyInShelf = 10,              //净化管在试管架
-        IsPurfyInCapper = 11,         //净化管在拧盖3
-        IsPurfyUnCapped = 12,             //净化管已拆盖
-        IsPurfyInVibration = 13,        //净化管在振荡2
-        IsPurfyInTransfer = 14,           //净化管在移栽
-        IsPurfyInCentrifugal = 15,        //净化管在离心机
+        IsPurfyInShelf = 12,              //净化管在试管架
+        IsPurfyInCapper = 13,         //净化管在拧盖3
+        IsPurfyUnCapped = 14,             //净化管已拆盖
+        IsPurfyInVibration = 15,        //净化管在振荡2
+        IsPurfyInTransfer = 16,           //净化管在移栽
+        IsPurfyInCentrifugal = 17,        //净化管在离心机
 
 
-        IsSelingInShelf = 16,              //西林瓶在试管架
-        IsSelingInCapper = 17,          //西林瓶在拧盖4
-        IsSelingUnCapped = 18,             //西林瓶已拆盖
-        IsSelingInConcentration = 19,        //西林瓶在浓缩
-        IsSelingInWeigh = 20,                //西林瓶在浓缩称重
+        IsSelingInShelf = 20,              //西林瓶在试管架
+        IsSelingInCapper = 21,          //西林瓶在拧盖4
+        IsSelingUnCapped = 22,             //西林瓶已拆盖
+        IsSelingInConcentration = 23,        //西林瓶在浓缩
+        IsSelingInWeigh = 24,                //西林瓶在浓缩称重
 
-        IsBottleInShelf = 21,         //进样小瓶在试管架
-        IsBottleInCapper = 22,           //进样小瓶在拧盖5
-        IsBottleUnCapped = 23,              //进样小瓶已拆盖
+        IsBottle1InShelf = 32,            //进样小瓶1在试管架
+        IsBottle1InCapper = 33,           //进样小瓶1在拧盖5
+        IsBottle1UnCapped = 34,           //进样小瓶1已拆盖
+        IsBottle1ExtractDone =35,         //进样小瓶1完成取样
+        IsBottle2InShelf = 36,            //进样小瓶2在试管架
+        IsBottle2InCapper = 37,           //进样小瓶2在拧盖5
+        IsBottle2UnCapped = 38,           //进样小瓶2已拆盖
+        IsBottle2ExtractDone = 39,        //进样小瓶2完成取样
 
-        IsPolishInShelf =24,               //兽药样品萃取试管
-        IsPolishInCapper = 25,             //兽药样品萃取试管
-        IsPolishUnCapped = 26,             //兽药样品萃取试管
-        IsPolishInVibration = 27,          //兽药样品萃取试管
-        IsPolishInVortexed = 28,           //兽药样品萃取试管
-        IsPolishInCold = 29,               //兽药样品萃取试管
-        IsPolishInTransfer = 30,         //兽药样品萃取试管
-        IsPolishInCentrifugal = 31       //兽药样品萃取试管
+
+
+        IsPolishInShelf =40,               //兽药样品萃取试管
+        IsPolishInCapper = 41,             //兽药样品萃取试管
+        IsPolishUnCapped = 52,             //兽药样品萃取试管
+        IsPolishInVibration = 53,          //兽药样品萃取试管
+        IsPolishInVortexed = 44,           //兽药样品萃取试管
+        IsPolishInCold = 45,               //兽药样品萃取试管
+        IsPolishInTransfer = 46,         //兽药样品萃取试管
+        IsPolishInCentrifugal = 47       //兽药样品萃取试管
 
     }
 

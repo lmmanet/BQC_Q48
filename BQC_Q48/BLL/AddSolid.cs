@@ -79,6 +79,7 @@ namespace Q_Platform.BLL
             this._carrier = carrier;
 
             _posData = _dataAccess.GetPosData();
+            _globalStatus.StopProgramEventArgs += StopAddSolid;
         }
 
         #endregion
@@ -122,6 +123,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
                 if (cts?.IsCancellationRequested == true)
                 {
                     _logger?.Info("加盐模块回零,停止");
@@ -130,6 +135,21 @@ namespace Q_Platform.BLL
                 _logger?.Warn($"GoHome err:{ex.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 停止加盐
+        /// </summary>
+        /// <returns></returns>
+        public bool StopAddSolid()
+        {
+            _motion.StopMove(_axisY1);
+            _stepMotion.StopMove(_axisY2);
+            _stepMotion.StopMove(_axisC1);
+            _stepMotion.StopMove(_axisC2);
+            Z1_Cylinder_Up();
+            Z2_Cylinder_Up();
+            return true;
         }
 
         /// <summary>
@@ -151,7 +171,7 @@ namespace Q_Platform.BLL
                 bool result;
 
                 //加溶剂 
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !_globalStatus.IsPause)
                 {
                     result = await addSolveFunc(sample, cts).ConfigureAwait(false);
                     if (!result)
@@ -162,11 +182,11 @@ namespace Q_Platform.BLL
                 }
 
                 //加盐
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2) && !_globalStatus.IsPause)
                 {  
                     //加固重量
-                    var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
-                        sample.TechParams.Solid_D[1], sample.TechParams.Solid_E[1],sample.TechParams.Solid_F[1] };
+                    var weight = new double[] { sample.TechParams.AddHomo[2], sample.TechParams.Solid_B[2], sample.TechParams.Solid_C[2],
+                        sample.TechParams.Solid_D[2], sample.TechParams.Solid_E[2],sample.TechParams.Solid_F[2] };
 
                     result = await AddSolidAsync(sample, weight,func1,func2, cts).ConfigureAwait(false);
                     if (!result)
@@ -176,15 +196,34 @@ namespace Q_Platform.BLL
                     TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt2);
                 }
 
+                if (_globalStatus.IsPause)
+                {
+                    while (true)
+                    {
+                        Thread.Sleep(2000);
+                        if (_globalStatus.IsStopped)
+                        {
+                            return false;
+                        }
+                        if (!_globalStatus.IsStopped&& !_globalStatus.IsPause)
+                        {
+                            return await AddSaltExtract(sample, addSolveFunc, func1, func2, cts).ConfigureAwait(false);
+                        }
+                    }
+                }
+
                 //完成
                 return true;
 
             }
             catch (Exception ex)
             {
-                
-                Console.WriteLine(ex.Message);
-                throw ex;
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                return false;
             }
 
 
@@ -217,19 +256,26 @@ namespace Q_Platform.BLL
                 }
 
                 //从拧盖1处搬试管(搬运到加固位)
-                result = _carrier.GetSampleFromCapperOneToAddSolid(sample,func1,func2 ,cts);
-                if (!result)
+                if (!SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInAddSolid))
                 {
-                    return false;
+                    result = _carrier.GetSampleFromCapperOneToAddSolid(sample, func1, func2, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
                 }
-               
+
                 //加固   判断加固种类
-                result = await Add_Solid(weights, cts).ConfigureAwait(false);
-                if (!result)
+                if (!_isAddSolidDone)
                 {
-                    return false;
+                    result = await Add_Solid(weights, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    _isAddSolidDone = true;
                 }
-                _isAddSolidDone = true;
+              
 
                 //完成后加固到接驳位
             Done: result = await MovePutGetPos(cts).ConfigureAwait(false);
@@ -251,7 +297,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                throw ex;
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                return false;
             }
         }
 
@@ -341,14 +392,15 @@ namespace Q_Platform.BLL
                 //X气缸移动到加固位
                 X_Cylinder_Left();
                 //伺服Y轴移动到指定位置
-                var result = await _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, cts).ConfigureAwait(false);
-                if (!result)
+                var result11 =  _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, cts).ConfigureAwait(false);
+                var result22 =  _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
+
+                if (!await result11)
                 {
                     throw new Exception("伺服Y轴移动到指定位置出错");
                 }
                 //步进Y轴移动到指定位置
-                result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
-                if (!result)
+                if (!await result22)
                 {
                     throw new Exception("步进Y轴移动到指定位置出错");
                 }
@@ -366,7 +418,12 @@ namespace Q_Platform.BLL
                 var result2 = CheckDone2(weight + gross2).ConfigureAwait(false);
                 await result1;
                 await result2;
-
+                             
+                while (_globalStatus.IsPause)
+                {
+                    Thread.Sleep(2000);
+                }
+                
                 //Z1 Z2气缸上升
                 Z1_Cylinder_Up();
                 Z2_Cylinder_Up();
@@ -375,6 +432,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
                 //Z1 Z2气缸上升
                 Z1_Cylinder_Up();
                 Z2_Cylinder_Up();

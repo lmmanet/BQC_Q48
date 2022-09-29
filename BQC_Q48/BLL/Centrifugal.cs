@@ -1,8 +1,13 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using GalaSoft.MvvmLight.Ioc;
+using Q_Platform.Common;
 using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +17,6 @@ namespace Q_Platform.BLL
     {
         //运行参数
         private Task _centrifugalTask;        //离心   （离心搬运分离出来）
-        private List<Sample> _centrifugalList = new List<Sample>();
-        private Dictionary<Sample, Action<Sample, CancellationTokenSource>> _sampleActionDic = new Dictionary<Sample, Action<Sample, CancellationTokenSource>>(); //回调列表
 
         #region Private Members
 
@@ -21,6 +24,7 @@ namespace Q_Platform.BLL
         private readonly IIoDevice _io;
         private readonly ILogger _logger;
         private readonly ICentrifugalCarrier _carrier;
+        private readonly IGlobalStatus _globalStatus;
         private readonly static object _lockObj = new object();
 
         #endregion
@@ -39,12 +43,13 @@ namespace Q_Platform.BLL
 
         #region Construtors
 
-        public Centrifugal(IEtherCATMotion motion, IIoDevice io, ICentrifugalCarrier carrier)
+        public Centrifugal(IEtherCATMotion motion, IIoDevice io, ICentrifugalCarrier carrier,IGlobalStatus globalStatus)
         {
             this._motion = motion;
             this._io = io;
             this._carrier = carrier; 
             this._logger = new MyLogger(typeof(Centrifugal));
+            this._globalStatus = globalStatus;
         }
 
         #endregion
@@ -95,6 +100,12 @@ namespace Q_Platform.BLL
 
         }
 
+        public bool StopMove()
+        {
+            _motion.StopMove(_axisCentrigugal);
+            return true;
+        }
+
         /// <summary>
         /// 启动离心机任务
         /// </summary>
@@ -102,17 +113,18 @@ namespace Q_Platform.BLL
         /// <param name="actionCallBack"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public Task StartCentrifugal(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts)
+        public Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, bool isInsert = false)
         {
-            //判断去重
-            var ret = _centrifugalList.Contains(sample);
-            if (!ret)
+            if (isInsert)
             {
-                _centrifugalList.Add(sample);
-                //保存回调列表
-                _sampleActionDic.Add(sample, actionCallBack);
+                GlobalCache.InsertCentrifugalKeyValue(sample, actionCallBack);
             }
-
+            else
+            {
+                GlobalCache.AddCentrifugalKeyValue(sample, actionCallBack);
+            }
+         
+   
             if (_centrifugalTask != null)
             {
                 if (!_centrifugalTask.IsCompleted)
@@ -123,97 +135,117 @@ namespace Q_Platform.BLL
 
             _centrifugalTask = Task.Run(() =>
             {
-                while (cts?.IsCancellationRequested != true && _centrifugalList.Count > 0)
+                while (cts?.IsCancellationRequested != true && GlobalCache.GetCentrifugalKeyValueCount() > 0)
                 {
-                    var itemSample1 = _centrifugalList[0];
-                
+                    KeyValuePair<Sample, string> item = GlobalCache.GetCentrifugalKeyValues(0);
+                    var itemSample1 = item.Key;
+
                     try
                     {
-                        //是否一次离心
-                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1) && sample.TechParams.TechStep == 4)
-                        {
-                            if (cts.IsCancellationRequested != true)
+                        lock (_lockObj)
+                        {  
+                            //是否一次离心
+                            if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1) && itemSample1.TechParams.TechStep == 10)
                             {
-                                var result = DoCentrifugal(itemSample1, cts);
-                                if (!result)
+                                if (!_globalStatus.IsStopped)
                                 {
-                                    throw new Exception("DoCentrifugal1 err");
+                                    var result = DoCentrifugal(itemSample1, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("DoCentrifugal1 err");
+                                    }
+                                    TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal1);
+                                    itemSample1.TechParams.TechStep = 11;
+
+                                    //触发后续动作
+                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+
+                                    //样品和任务从列表移除
+
+                                    GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
                                 }
-                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal1);
-                                sample.TechParams.TechStep = 5;
+                                else
+                                {
+                                    throw new TaskCanceledException("程序停止");
+                                }
+
                             }
+
+                            //是否二次离心   净化管离心
+                            else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2) && itemSample1.TechParams.TechStep == 20)
+                            {
+                                if (!_globalStatus.IsStopped)
+                                {
+                                    var result = DoCentrifugalSmall(itemSample1, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("DoCentrifugal2 err");
+                                    }
+                                    TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal2);
+                                    itemSample1.TechParams.TechStep = 21;
+
+                                    //触发后续动作
+                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+
+                                    //样品和任务从列表移除
+
+                                    GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
+                                }
+                                else
+                                {
+                                    throw new TaskCanceledException("程序停止");
+                                }
+
+                            }
+
+                            //是否三次离心
+                            else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3) && itemSample1.TechParams.TechStep == 30)
+                            {
+                                if (!_globalStatus.IsStopped)
+                                {
+                                    var result = DoPolishCentrifugal(itemSample1, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("DoCentrifugal3 err");
+                                    }
+                                    TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal3);
+                                    itemSample1.TechParams.TechStep = 31;
+
+                                    //触发后续动作
+                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+
+                                    //样品和任务从列表移除
+
+                                    GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
+                                }
+                                else
+                                {
+                                    throw new TaskCanceledException("程序停止");
+                                }
+
+                            }
+
                             else
                             {
-                                throw new TaskCanceledException("程序停止");
+                                return;
                             }
-
                         }
-
-                        //是否二次离心   净化管离心
-                        else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2) && sample.TechParams.TechStep == 7)
-                        {
-                            if (cts.IsCancellationRequested != true)
-                            {
-                                var result = DoCentrifugalSmall(itemSample1, cts);
-                                if (!result)
-                                {
-                                    throw new Exception("DoCentrifugal2 err");
-                                }
-                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal2);
-                                sample.TechParams.TechStep = 8;
-                            }
-                            else
-                            {
-                                throw new TaskCanceledException("程序停止");
-                            }
-
-                        }
-
-                        //是否三次离心
-                        else if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3) && sample.TechParams.TechStep == 10)
-                        {
-                            if (cts.IsCancellationRequested != true)
-                            {
-                                var result = DoCentrifugal(itemSample1, cts);
-                                if (!result)
-                                {
-                                    throw new Exception("DoCentrifugal3 err");
-                                }
-                                TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal3);
-                                sample.TechParams.TechStep = 11;
-                            }
-                            else
-                            {
-                                throw new TaskCanceledException("程序停止");
-                            }
-
-                        }
-
-                        else
-                        {
-                            //throw new Exception($"离心条件不满足 step:{sample.TechParams.TechStep}");
-                        }
+                     
 
                     }
                     catch (Exception ex)
                     {
-                        cts.Cancel();
+                        _logger?.Error(ex.Message);
                         return;
                     }
-                    //触发后续动作
-                    _sampleActionDic[itemSample1]?.Invoke(itemSample1, cts);
-                    //样品和任务从列表移除
-                    _centrifugalList.Remove(itemSample1);
-                    _sampleActionDic.Remove(itemSample1);
 
                 }
             });
 
             return _centrifugalTask;
-        }
-
-
-
+        }  
+        
+        
 
         /// <summary>
         /// 大管离心
@@ -223,40 +255,96 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public bool DoCentrifugal(Sample sample, CancellationTokenSource cts)
         {
-
             lock (_lockObj)
             {
-                //移栽上料
-                var result = _carrier.GetSampleFromColdToTransfer(sample, cts);
-                if (!result)
+                bool result;
+                //从冰浴搬运样品到离心机
+                if (!SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal1))
                 {
-                    return false;
+                    result = _carrier.GetSampleFromColdToCentrifugal(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                }
+             
+                ///离心
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.Centrifugal1)
+                    && !_globalStatus.IsStopped)
+                {
+
+
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.Centrifugal1);
                 }
 
-                ///放试管进离心机
-                result = _carrier.GetTubeInCentrifugal(sample, GoStation, true, cts);
-                if (!result)
+                //从离心机搬运离心完后的样品到试管架
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) )
                 {
-                    return false;
+                    result = _carrier.GetSampleFromCentrifugalToMaterial(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
                 }
+               
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && !_globalStatus.IsStopped)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+        }
+        
+        /// <summary>
+        /// 萃取大管离心
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool DoPolishCentrifugal(Sample sample, CancellationTokenSource cts)
+        {
+            lock (_lockObj)
+            {
+                bool result;
+                //上料
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal3))
+                {
+                    result = _carrier.GetPolishFromColdToCentrifugal(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                }
+           
 
                 ///离心
-               
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.Centrifugal3)
+                    && !_globalStatus.IsStopped)
+                {
+
+
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.Centrifugal3);
+                }
+
 
                 //取出试管
-                result = _carrier.GetTubeOutCentrifugal(sample, GoStation, true, cts);
-                if (!result)
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                 {
-                    return false;
+                    result = _carrier.GetPolishFroCentrifugaToShelf(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                }
+              
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf) && !_globalStatus.IsStopped)
+                {
+                    return true;
                 }
 
-                ///移栽下料
-                result = _carrier.GetSampleFromTransferToMarterial(sample, true, cts);
-                if (!result)
-                {
-                    return false;
-                }
-                return true;
+                return false;
             }
 
         }
@@ -271,118 +359,47 @@ namespace Q_Platform.BLL
         {
             lock (_lockObj)
             {
-                //移栽上料
-                var result = _carrier.GetSampleFromColdToTransfer(sample, cts);
-                if (!result)
+                bool result;
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal2))
                 {
-                    return false;
+                    result = _carrier.GetPurifyFromMaterialToCentrifugal(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
                 }
-
-                ///放试管进离心机
-                result = _carrier.GetTubeInCentrifugal(sample, GoStation, false, cts);
-                if (!result)
-                {
-                    return false;
-                }
+                   
 
                 ///离心
-                Thread.Sleep(30000);
-
-                //取出试管
-                result = _carrier.GetTubeOutCentrifugal(sample, GoStation, false, cts);
-                if (!result)
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal2)
+                    && !_globalStatus.IsStopped)
                 {
-                    return false;
+
+
+                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.Centrifugal2);
                 }
 
-                ///移栽下料
-                result = _carrier.GetSampleFromTransferToMarterial(sample, false, cts);
-                if (!result)
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                 {
-                    return false;
+                    result = _carrier.GetPurifyFromCentrifugalToMaterial(sample, GoStation, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
                 }
-                return true;
+                    
+
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf) && !_globalStatus.IsStopped)
+                {
+                    return true;
+                }
+
+                return false;
             }
 
         }
 
 
-        /// <summary>
-        /// 大小管同时离心
-        /// </summary>
-        /// <param name="sample1">大管</param>
-        /// <param name="sample2">小管</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool DoCentrifugalSmallAndBig(Sample sample1,Sample sample2, CancellationTokenSource cts)
-        {
-            lock (_lockObj)
-            {
-                //移栽上料
-                var result = _carrier.GetSampleFromColdToTransfer(sample1, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //小管移栽上料
-                result = _carrier.GetSampleFromMarterialToTransfer(sample2, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                ///放大试管进离心机
-                result = _carrier.GetTubeInCentrifugal(sample1, GoStation, true, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                ///放小试管进离心机
-                result = _carrier.GetTubeInCentrifugal(sample2, GoStation, false, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-
-                ///离心
-                Thread.Sleep(30000);
-
-
-
-                //取出大试管
-                result = _carrier.GetTubeOutCentrifugal(sample1, GoStation, true, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                //取出大试管
-                result = _carrier.GetTubeOutCentrifugal(sample2, GoStation, false, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                ///移栽下料 大试管
-                result = _carrier.GetSampleFromTransferToMarterial(sample1, true, cts);
-                if (!result)
-                {
-                    return false;
-                }       
-                
-                ///移栽下料 小试管
-                result = _carrier.GetSampleFromTransferToMarterial(sample2, false, cts);
-                if (!result)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-        }
 
 
         #endregion
@@ -630,42 +647,5 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
-        /// <summary>
-        /// 样品离心
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public async Task<bool> CentrifugalAsync(Sample sample, CancellationTokenSource cts)
-        {
-            int time = 60;
-            int vel = 3000;
-            bool isBig = true;
-            //上料
-            var result = _carrier.GetTubeInCentrifugal(sample, GoStation, isBig, cts);
-            if (!result)
-            {
-                throw new Exception("离心机上料失败！");
-            }
-
-            //离心
-
-            result = await DoCentrifugal(time, vel, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                throw new Exception("离心机离心失败！");
-            }
-
-
-            //下料
-            result = _carrier.GetTubeOutCentrifugal(sample, GoStation, isBig, cts);
-            if (!result)
-            {
-                throw new Exception("离心机下料失败！");
-            }
-
-            return true;
-        }
     }
 }
