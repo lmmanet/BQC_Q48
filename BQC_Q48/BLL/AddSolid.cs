@@ -15,9 +15,7 @@ namespace Q_Platform.BLL
 {
     public class AddSolid : IAddSolid
     {
-
         private readonly ICarrierOne _carrier;
-        private readonly ICapperFive capperFive;
 
         #region Private Members
 
