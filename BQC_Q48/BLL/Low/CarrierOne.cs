@@ -69,23 +69,23 @@ namespace Q_Platform.BLL
                     //试管在加固
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInAddSolid))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromAddSolidToCapperOne((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从加固搬运{sampleId}样品到拧盖1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从加固搬运{sampleId}样品到拧盖1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromAddSolidToCapperOne((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从加固搬运{sampleId}样品到拧盖1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从加固搬运{sampleId}样品到拧盖1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInAddSolid);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperOne);
@@ -131,23 +131,23 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToCapperOne((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到拧盖1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到拧盖1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToCapperOne((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到拧盖1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到拧盖1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperOne);
@@ -193,23 +193,23 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -253,23 +253,23 @@ namespace Q_Platform.BLL
                     //试管在涡旋
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -314,23 +314,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToAddSolid((ushort)(2 * sampleId - 1), func1, func2, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到加固失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到加固失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToAddSolid((ushort)(2 * sampleId), func1, func2, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到加固失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到加固失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInAddSolid);
@@ -375,23 +375,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVibration((ushort)(2 * sampleId ), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVibration((ushort)(2 * sampleId-1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVibrationOne);
@@ -471,23 +471,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     //if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     //{
-                    //    if (sample.TubeStatus == 0)
+                    //    if (sample.SampleTubeStatus == 0)
                     //    {
                     //        result = GetSampleFromCapperOneToCold((ushort)(2 * sampleId), null, null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从拧盖1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从拧盖1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 1;
+                    //        sample.SampleTubeStatus = 1;
                     //    }
-                    //    if (sample.TubeStatus == 1)
+                    //    if (sample.SampleTubeStatus == 1)
                     //    {
                     //        result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId - 1), null, null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从拧盖1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从拧盖1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 0;
+                    //        sample.SampleTubeStatus = 0;
                     //    }
                     //    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                     //    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
@@ -496,23 +496,23 @@ namespace Q_Platform.BLL
                     //试管在涡旋
                     //if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
                     //{
-                    //    if (sample.TubeStatus == 0)
+                    //    if (sample.SampleTubeStatus == 0)
                     //    {
                     //        result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId - 1), cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从涡旋处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从涡旋处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 1;
+                    //        sample.SampleTubeStatus = 1;
                     //    }
-                    //    if (sample.TubeStatus == 1)
+                    //    if (sample.SampleTubeStatus == 1)
                     //    {
                     //        result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId), cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从涡旋处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从涡旋处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 0;
+                    //        sample.SampleTubeStatus = 0;
                     //    }
                     //    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
                     //    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
@@ -521,23 +521,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖2   
                     //if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     //{
-                    //    if (sample.TubeStatus == 0)
+                    //    if (sample.SampleTubeStatus == 0)
                     //    {
                     //        result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId - 1), null, null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从拧盖2处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从拧盖2处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 1;
+                    //        sample.SampleTubeStatus = 1;
                     //    }
-                    //    if (sample.TubeStatus == 1)
+                    //    if (sample.SampleTubeStatus == 1)
                     //    {
                     //        result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId), null, null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从拧盖2处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从拧盖2处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 0;
+                    //        sample.SampleTubeStatus = 0;
                     //    }
                     //    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperTwo);
                     //    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
@@ -546,23 +546,23 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     //if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     //{
-                    //    if (sample.TubeStatus == 0&& !_globalStauts.IsStopped)
+                    //    if (sample.SampleTubeStatus == 0&& !_globalStauts.IsStopped)
                     //    {
                     //        result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId - 1), null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从移栽处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从移栽处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 1;
+                    //        sample.SampleTubeStatus = 1;
                     //    }
-                    //    if (sample.TubeStatus == 1&& !_globalStauts.IsStopped)
+                    //    if (sample.SampleTubeStatus == 1&& !_globalStauts.IsStopped)
                     //    {
                     //        result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId), null, cts);
                     //        if (!result)
                     //        {
-                    //            throw new Exception($"从移栽处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                    //            throw new Exception($"从移栽处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                     //        }
-                    //        sample.TubeStatus = 0;
+                    //        sample.SampleTubeStatus = 0;
                     //    }
                     //    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
                     //    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
@@ -574,23 +574,23 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId - 1), (ushort)(2 * posNum - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId), (ushort)(2 * posNum), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
 
                         GlobalCache.Instance.ColdDic.Add(sample, posNum);
@@ -637,23 +637,23 @@ namespace Q_Platform.BLL
                     //试管在试管架2
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架取{sample.Id}样品离心管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架取{sample.Id}样品离心管到拧盖2 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架取{sample.Id}样品离心管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架取{sample.Id}样品离心管到拧盖2 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperTwo);
@@ -686,7 +686,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -698,23 +698,23 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperTwo((ushort)(2 * sampleId - 1), func, cts);
+                            result = GetSampleFromTransferTo_CapperTwo((ushort)(2 * sampleId - 1), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperTwo((ushort)(2 * sampleId ), func, cts);
+                            result = GetSampleFromTransferTo_CapperTwo((ushort)(2 * sampleId ), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCapperTwo);
@@ -756,23 +756,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperTwo);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -815,23 +815,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1处搬运试管失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1处搬运试管失败！SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -865,7 +865,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             //查询冰浴字典
             ushort posNum = 0;
@@ -886,23 +886,23 @@ namespace Q_Platform.BLL
                     //试管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToTransfer((ushort)(2 * sampleId),(ushort)(2*posNum -1), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToTransfer((ushort)(2 * sampleId - 1), (ushort)(2 * posNum), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         GlobalCache.Instance.ColdDic.Remove(sample);
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCold);
@@ -949,23 +949,23 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
@@ -998,7 +998,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1010,23 +1010,23 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId - 1), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInTransfer);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -1071,23 +1071,23 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToVortex((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToVortex((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVortexed);
@@ -1096,23 +1096,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVortex((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVortex((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVortexed);
@@ -1123,23 +1123,23 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVortexed);
@@ -1186,23 +1186,23 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从试管架搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从试管架搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVibrationOne);
@@ -1211,23 +1211,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVibration((ushort)(2 * sampleId), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperOneToVibration((ushort)(2 * sampleId - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVibrationOne);
@@ -1236,23 +1236,23 @@ namespace Q_Platform.BLL
                     //试管在涡旋    
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToVibration((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToVibration((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVibrationOne);
@@ -1261,23 +1261,23 @@ namespace Q_Platform.BLL
                     //试管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToVibration((ushort)(2 * sampleId), cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToVibration((ushort)(2 * sampleId - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}样品到振荡1失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}样品到振荡1失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCold);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVibrationOne);
@@ -1312,139 +1312,139 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleToTransfer(Sample sample,Func<ushort, CancellationTokenSource,bool> func,CancellationTokenSource cts)
+        public bool GetSampleToTransfer(Sample sample,Func<ushort, CancellationTokenSource, Task<bool>> func,CancellationTokenSource cts)
         {
-            ushort sampleId = sample.Id;
-            bool result;
-            try
-            {
-                lock (_lockObj)
-                {
-                    _logger?.Info($"搬运{sampleId}样品到离心移栽");
-                    //试管在试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
-                    {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 1;
-                        }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                    }
+            //ushort sampleId = sample.Id;
+            //bool result;
+            //try
+            //{
+            //    lock (_lockObj)
+            //    {
+            //        _logger?.Info($"搬运{sampleId}样品到离心移栽");
+            //        //试管在试管架
+            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
+            //        {
+            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 1;
+            //            }
+            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 0;
+            //            }
+            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
+            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+            //        }
 
-                    //试管在拧盖1
-       
-                    //试管在加固
+            //        //试管在拧盖1
 
-                    //试管在涡旋
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
-                    {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId),func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 1;
-                        }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId - 1),func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                    }
+            //        //试管在加固
 
-                    //试管在拧盖2   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-                    {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId), func,cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 1;
-                        }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId - 1), func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperTwo);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                    }
+            //        //试管在涡旋
+            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
+            //        {
+            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId),func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 1;
+            //            }
+            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId - 1),func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 0;
+            //            }
+            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
+            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+            //        }
 
-                    //试管在振荡
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
-                    {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 1;
-                        }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
-                            }
-                            sample.TubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                    }
+            //        //试管在拧盖2   
+            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+            //        {
+            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId), func,cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 1;
+            //            }
+            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId - 1), func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 0;
+            //            }
+            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperTwo);
+            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+            //        }
+
+            //        //试管在振荡
+            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
+            //        {
+            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 1;
+            //            }
+            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+            //            {
+            //                result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), func, cts);
+            //                if (!result)
+            //                {
+            //                    throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+            //                }
+            //                sample.SampleTubeStatus = 0;
+            //            }
+            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
+            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+            //        }
 
 
-                    //试管在移栽
+            //        //试管在移栽
 
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
-                    {
-                        return true;
-                    }
-                    throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-                _logger?.Error(ex.Message);
-                throw ex;
-            }
-
+            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+            //        {
+            //            return true;
+            //        }
+            //        throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    if (_globalStatus.IsStopped)
+            //    {
+            //        return false;
+            //    }
+            //    _logger?.Error(ex.Message);
+            //    throw ex;
+            //}
+            throw new NotImplementedException();
         }
 
 
@@ -1501,23 +1501,23 @@ namespace Q_Platform.BLL
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToCold((ushort)(2 * sampleId  +47), (ushort)(2 * posNum - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToCold((ushort)(2 * sampleId +48), (ushort)(2 * posNum ), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCapper);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
@@ -1551,7 +1551,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1564,23 +1564,23 @@ namespace Q_Platform.BLL
                     //萃取管在移栽  
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperTwo((ushort)(2 * sampleId +47), func, cts);
+                            result = GetSampleFromTransferTo_CapperTwo((ushort)(2 * sampleId +47), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperTwo((ushort)(2 * sampleId + 48), func, cts);
+                            result = GetSampleFromTransferTo_CapperTwo((ushort)(2 * sampleId + 48), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInTransfer);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCapper);
@@ -1623,23 +1623,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId + 47), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToMaterial((ushort)(2 * sampleId + 48), null,null,cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCapper);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInShelf);
@@ -1679,23 +1679,23 @@ namespace Q_Platform.BLL
                 //试管在试管架2
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                 {
-                    if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                    if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                     {
                         var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 47), cts);
                         if (!result)
                         {
-                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
                         }
-                        sample.TubeStatus = 1;
+                        sample.PolishStatus = 1;
                     }
-                    if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                    if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                     {
                         var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 48), cts);
                         if (!result)
                         {
-                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
                         }
-                        sample.TubeStatus = 0;
+                        sample.PolishStatus = 0;
                     }
                     SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCapper);
@@ -1726,7 +1726,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1739,23 +1739,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId +47), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId+48), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCapper);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
@@ -1830,23 +1830,23 @@ namespace Q_Platform.BLL
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 47), (ushort)(2 * posNum - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 48), (ushort)(2 * posNum ), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVibration);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
@@ -1920,23 +1920,23 @@ namespace Q_Platform.BLL
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToCold((ushort)(2 * sampleId + 47), (ushort)(2 * posNum - 1), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVortexToCold((ushort)(2 * sampleId + 48), (ushort)(2 * posNum ), cts);
                             if (!result)
                             {
-                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVortexed);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
@@ -2012,23 +2012,23 @@ namespace Q_Platform.BLL
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 47), (ushort)(2 * posNum - 1), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 48), (ushort)(2 * posNum), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVibration);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
@@ -2079,23 +2079,23 @@ namespace Q_Platform.BLL
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToVibration((ushort)(2 * sampleId + 47), cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromCapperTwoToVibration((ushort)(2 * sampleId + 48), cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败！TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败！PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCapper);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInVibration);
@@ -2127,7 +2127,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             //查询冰浴字典
             ushort posNum = 0;
@@ -2148,23 +2148,23 @@ namespace Q_Platform.BLL
                     //试管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToTransfer((ushort)(2 * sampleId +47), (ushort)(2 * posNum - 1), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}萃取管到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromColdToTransfer((ushort)(2 * sampleId +48), (ushort)(2 * posNum), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从冰浴搬运{sampleId}萃取管到离心移栽失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从冰浴搬运{sampleId}萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         GlobalCache.Instance.ColdDic.Remove(sample);
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCold);
@@ -2198,7 +2198,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -2210,23 +2210,23 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId +47), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}萃取管到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}萃取管到试管架失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.PolishStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
                             result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId +48), func, cts);
                             if (!result)
                             {
-                                throw new Exception($"从离心移栽搬运{sampleId}萃取管到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从离心移栽搬运{sampleId}萃取管到试管架失败！ PolishStatus-{sample.PolishStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInTransfer);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInShelf);
@@ -2994,7 +2994,7 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool GetSampleFromCapperTwoToTransfer(ushort num, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        protected bool GetSampleFromCapperTwoToTransfer(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             byte clawOpenByte = 40;
 
@@ -3009,6 +3009,9 @@ namespace Q_Platform.BLL
             //{
             //    return false;
             //}
+
+            //旋转到指定位置
+            var result1 = func.Invoke(num, cts);
 
             //取料
             base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
@@ -3035,9 +3038,9 @@ namespace Q_Platform.BLL
                 Thread.Sleep(2000);
             }
 
-            //旋转到指定位置
-            result = func.Invoke(num, cts);
-            if (!result)
+            //旋转到指定位置  判断
+         
+            if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
@@ -3364,7 +3367,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转指定角度</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool GetSampleFromTransferToMaterial(ushort num, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        protected bool GetSampleFromTransferToMaterial(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             byte clawOpenByte = 40;
 
@@ -3374,8 +3377,8 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromTransferToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //旋转到指定位置
-            var result = func.Invoke(num,cts);
-            if (!result)
+            var result1 = func.Invoke(num,cts);
+            if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             } 
@@ -3391,7 +3394,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(2000);
             }
             //移动到安全位置
-            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3413,7 +3416,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转指定角度</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool GetSampleFromTransferToCapperTwo(ushort num, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        protected bool GetSampleFromTransferTo_CapperTwo(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             byte clawOpenByte = 40;
 
@@ -3428,8 +3431,8 @@ namespace Q_Platform.BLL
                 Thread.Sleep(2000);
             }
             //旋转到指定位置
-            var result = func.Invoke(num, cts);
-            if (!result)
+            var result1 = func.Invoke(num, cts);
+            if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
@@ -3444,7 +3447,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(2000);
             }
             //移动到安全位置
-            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3472,7 +3475,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转指定角度</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool GetSampleFromColdToTransfer(ushort num,ushort posNum, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        protected bool GetSampleFromColdToTransfer(ushort num,ushort posNum, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             byte clawOpenByte = 40;
 
@@ -3482,6 +3485,9 @@ namespace Q_Platform.BLL
                 throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
             }
             _logger.Debug($"GetSampleFromColdToTransfer-{num}-{posNum},clawOpenByte-{clawOpenByte}");
+
+            //旋转到指定位置
+            var result = func.Invoke(num, cts);
 
             //取料
             base.GetTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
@@ -3503,9 +3509,9 @@ namespace Q_Platform.BLL
             {
                 Thread.Sleep(2000);
             }
-            //旋转到指定位置
-            var result = func.Invoke(num,cts);
-            if (!result)
+
+            //判断是否旋转到位
+            if (!result.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
@@ -3851,23 +3857,23 @@ namespace Q_Platform.BLL
                     //试管在拧盖1
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        if (sample.TubeStatus == 0)
+                        if (sample.SampleTubeStatus == 0)
                         {
                             result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId - 1), func1, func2, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1)
+                        if (sample.SampleTubeStatus == 1)
                         {
                             result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId), func1, func2, cts);
                             if (!result)
                             {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                             }
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
@@ -3940,15 +3946,15 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        if (sample.TubeStatus == 0 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
                           
-                            sample.TubeStatus = 1;
+                            sample.SampleTubeStatus = 1;
                         }
-                        if (sample.TubeStatus == 1 && !_globalStatus.IsStopped)
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
                           
-                            sample.TubeStatus = 0;
+                            sample.SampleTubeStatus = 0;
                         }
 
                         GlobalCache.Instance.ColdDic.Add(sample, posNum);

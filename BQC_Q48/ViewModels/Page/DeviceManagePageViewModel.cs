@@ -14,7 +14,7 @@ namespace Q_Platform.ViewModels.Page
 
         #region Properties
 
-        public FrameworkElement CurrentContent { get; set; } = new AxisTestUC1();
+        public FrameworkElement CurrentContent { get; set; } = new SampleStatusMonitor();
 
         public string PageTitle { get; set; }
 
@@ -51,6 +51,7 @@ namespace Q_Platform.ViewModels.Page
         /// <param name="o"></param>
         private void SwichContent(object o)
         {
+            //SampleStatusMonitor
             var page = GetPage(o.ToString());
             if (page != null)
             {

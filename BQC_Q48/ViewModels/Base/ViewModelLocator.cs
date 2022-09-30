@@ -41,6 +41,8 @@ namespace BQC_Q48.ViewModels
             SimpleIoc.Default.Register<FieldBusTestUCViewModel>();
             SimpleIoc.Default.Register<IoTestUCViewModel>();
             SimpleIoc.Default.Register<BalanceTestUCViewModel>();
+
+            SimpleIoc.Default.Register<SampleStatusMonitorViewModel>();
         }
 
         #endregion
@@ -70,6 +72,10 @@ namespace BQC_Q48.ViewModels
         public IoTestUCViewModel IoTestUCViewModel => ServiceLocator.Current.GetInstance<IoTestUCViewModel>();
 
         public BalanceTestUCViewModel BalanceTestUCViewModel => ServiceLocator.Current.GetInstance<BalanceTestUCViewModel>();
+
+
+
+        public SampleStatusMonitorViewModel SampleStatusMonitorViewModel => ServiceLocator.Current.GetInstance<SampleStatusMonitorViewModel>();
 
 
         #endregion

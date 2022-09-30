@@ -530,6 +530,7 @@ namespace BQJX.Core
                 short status = 0;
                 do
                 {
+                    Thread.Sleep(1000);
                     status = LTDMC.dmc_check_done(_CardID, axis);
                     if (status != 0) // 读取指定轴运动状态
                     {
@@ -542,7 +543,6 @@ namespace BQJX.Core
                         }
                         return true;
                     }
-                    Thread.Sleep(1000);
                 } while (cts?.IsCancellationRequested != true);
                 if (cts?.IsCancellationRequested == true)
                 {

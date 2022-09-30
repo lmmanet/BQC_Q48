@@ -93,7 +93,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从拧盖2取样品管到试管架（移液后）
@@ -110,7 +110,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从振荡1取样品管到移栽 （振荡完离心前）
@@ -158,7 +158,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从拧盖2取萃取管到试管架2
@@ -183,7 +183,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从振荡1取萃取管到冰浴
@@ -227,7 +227,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从离心移栽取出离心完后的萃取管到试管架
@@ -236,6 +236,6 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
     }
 }

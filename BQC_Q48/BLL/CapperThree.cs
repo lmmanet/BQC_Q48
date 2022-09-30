@@ -103,7 +103,7 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <param name="func">移栽旋转动作</param>
         /// <returns></returns>
-        public bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             //从试管架取振荡完的净化管去离心   
             return _carrier.GetSampleFromMaterialToTransfer(sample, func, cts);
@@ -143,7 +143,7 @@ namespace Q_Platform.BLL
                         result = CapperOff(cts, -1.3).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                     }
@@ -203,7 +203,7 @@ namespace Q_Platform.BLL
                         return true;
                     }
 
-                    throw new Exception($"从移栽取{sample.Id}样品净化管到拧盖3 失败,SampleStatus-{sample.Status}");
+                    throw new Exception($"从移栽取{sample.Id}样品净化管到拧盖3 失败,PurifyStatus-{sample.PurifyStatus}");
                 }
             }
             catch (Exception ex)
@@ -225,7 +225,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             return _carrier.GetSampleFromTransferToMarterial(sample, func, cts);
         }
@@ -233,13 +233,13 @@ namespace Q_Platform.BLL
         //==================================================================移液部分======================================================================================//
 
         /// <summary>
-        /// 根据工艺判断是否加液  
+        /// 从拧盖3取净化管到移栽  移液 =》 CentrifugalCarrier => CapperThree => CarrierTwo  根据工艺判断是否加液  
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try
@@ -256,11 +256,15 @@ namespace Q_Platform.BLL
                     }
 
                     //从试管架取试管到拧盖3
-                    result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPurfyInShelf))
                     {
-                        throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ TubeStatus-{sample.TubeStatus}");
+                        result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ PurifyStatus-{sample.PurifyStatus}");
+                        }
                     }
+                  
 
                     //拆盖
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
@@ -268,7 +272,7 @@ namespace Q_Platform.BLL
                         result = CapperOff(cts, -1.3).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                     }
@@ -279,7 +283,7 @@ namespace Q_Platform.BLL
                         result = AddSolve(sample, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
                         TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolveAcetic);
                     }
@@ -293,7 +297,7 @@ namespace Q_Platform.BLL
                             result = CapperOn(30,40,cts).GetAwaiter().GetResult();
                             if (!result)
                             {
-                                throw new Exception($"{sample.Id}样品移液管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                                throw new Exception($"{sample.Id}样品移液管装盖 失败！ PurifyStatus-{sample.PurifyStatus}");
                             }
                             SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
                         }
@@ -302,19 +306,19 @@ namespace Q_Platform.BLL
                         result = _vibration.StartVibrationTwo(sample, cts);
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液振荡 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}净化管加醋酸铵水溶液振荡 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
 
                         TechStatusHelper.ResetBit(sample.TechParams, TechStatus.VibrationBeforePurify);
                     }
 
-                    //拆盖
+                    //二次拆盖
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                     {
                         result = CapperOff(cts, -1.3).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                     }
@@ -332,7 +336,7 @@ namespace Q_Platform.BLL
                         result = _carrier.GetSampleFromCapperThreeToTransfer(sample, func, cts);
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ PurifyStatus-{sample.PurifyStatus}");
                         }
                     }
 
@@ -346,7 +350,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped)
                 {
                     _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
                     return false;
@@ -363,7 +367,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try

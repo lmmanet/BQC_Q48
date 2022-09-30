@@ -20,14 +20,14 @@
 
         <Grid>
             <StackPanel Orientation="Vertical">
-                <Button Content="伺服轴测试" Command="{Binding SwichCommand}" CommandParameter="AxisTestUC1"/>
-                <Button Content="步进轴测试" Command="{Binding SwichCommand}" CommandParameter="StepAxisTestUC"/>
-                <Button Content="电爪测试" Command="{Binding SwichCommand}" CommandParameter="ClawTestUC"/>
-                <Button Content="称台测试" Command="{Binding SwichCommand}" CommandParameter="BalanceTestUC"/>
-                <Button Content="提取IO测试" Command="{Binding SwichCommand}" CommandParameter="ExtractIoTestUC"/>
-                <Button Content="净化IO测试" Command="{Binding SwichCommand}" CommandParameter="PurifyTestIoUC"/>
-                <Button Content="离心中转IO测试" Command="{Binding SwichCommand}" CommandParameter="IoTestUC"/>
-                <Button Content="总线测试" Command="{Binding SwichCommand}" CommandParameter="FieldBusTestUC"/>
+                <Button Command="{Binding SwichCommand}" CommandParameter="AxisTestUC1" Content="伺服轴测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="StepAxisTestUC" Content="步进轴测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="ClawTestUC" Content="电爪测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="BalanceTestUC" Content="称台测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="ExtractIoTestUC" Content="提取IO测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="SampleStatusMonitor" Content="净化IO测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="IoTestUC" Content="离心中转IO测试" />
+                <Button Command="{Binding SwichCommand}" CommandParameter="FieldBusTestUC" Content="总线测试" />
             </StackPanel>
         </Grid>
 

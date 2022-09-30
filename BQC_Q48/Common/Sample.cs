@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PropertyChanged;
 
 namespace BQJX.Common
 {
+
+    [AddINotifyPropertyChangedInterface]
     public class Sample
     {
         /// <summary>
@@ -35,10 +38,39 @@ namespace BQJX.Common
         public Int64 Status { get; set; }
 
         /// <summary>
-        /// 试管状态
+        /// 试管状态  样品管  萃取管  净化管  西林瓶  小瓶
+        /// 同一个变量  后面的处理会影响到前面的处理
         /// 对应0-1
         /// </summary>
-        public int TubeStatus { get; set; }
+        public int SampleTubeStatus { get; set; }
+
+        /// <summary>
+        /// 萃取管状态
+        /// </summary>
+        public int PolishStatus { get; set; }
+
+        /// <summary>
+        /// 净化管状态
+        /// </summary>
+        public int PurifyStatus { get; set; }
+
+        /// <summary>
+        /// 西林瓶状态
+        /// </summary>
+        public int SeilingStatus { get; set; }
+
+        /// <summary>
+        /// 小瓶状态
+        /// </summary>
+        public int BottleStatus { get; set; }
+
+
+
+
+
+
+
+
 
         /// <summary>
         /// 样品处理工艺
@@ -54,11 +86,6 @@ namespace BQJX.Common
         /// 样品工艺参数
         /// </summary>
         public TechParams TechParams { get; set; }
-
-        /// <summary>
-        /// 振荡涡旋内部步骤
-        /// </summary>
-        public int VibrationAndVortexStep { get; set; }
 
         /// <summary>
         /// 西林瓶重量2

@@ -240,6 +240,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UC\SampleStatusMonitor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UC\StepAxisTestUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -262,6 +266,7 @@
     <Compile Include="ViewModels\UC\ClawTestUCViewModel.cs" />
     <Compile Include="ViewModels\UC\FieldBusTestUCViewModel.cs" />
     <Compile Include="ViewModels\UC\IoTestUCViewModel.cs" />
+    <Compile Include="ViewModels\UC\SampleStatusMonitorViewModel.cs" />
     <Compile Include="ViewModels\UC\StepAxisTestUCViewModel.cs" />
     <Compile Include="ViewModels\Windows\MainWindowViewModel.cs" />
     <Compile Include="Views\Page\AlarmPage.xaml.cs">
@@ -308,6 +313,9 @@
     </Compile>
     <Compile Include="Views\UC\IoTestUC.xaml.cs">
       <DependentUpon>IoTestUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UC\SampleStatusMonitor.xaml.cs">
+      <DependentUpon>SampleStatusMonitor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UC\StepAxisTestUC.xaml.cs">
       <DependentUpon>StepAxisTestUC.xaml</DependentUpon>

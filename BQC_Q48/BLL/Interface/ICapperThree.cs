@@ -28,7 +28,7 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <param name="func">移栽旋转动作</param>
         /// <returns></returns>
-        bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
 
         /// <summary>
@@ -47,18 +47,18 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         //==================================================================移液部分======================================================================================//
 
         /// <summary>
-        /// 从拧盖3取净化管到移栽  移液 =》 CentrifugalCarrier => CapperThree => CarrierTwo
+        /// 从拧盖3取净化管到移栽  移液 =》 CentrifugalCarrier => CapperThree => CarrierTwo  根据工艺判断是否加液  
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从移栽搬运无盖净化管到拧盖3
@@ -67,7 +67,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
         
         /// <summary>
         /// 从拧盖3搬运有盖净化盖到试管架

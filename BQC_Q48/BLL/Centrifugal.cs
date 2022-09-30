@@ -157,7 +157,7 @@ namespace Q_Platform.BLL
                                     TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal1);
                                     itemSample1.TechParams.TechStep = 11;
 
-                                    //触发后续动作
+                                    //触发后续动作   取上清液  加入移液列表
                                     MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
 
                                     //样品和任务从列表移除
@@ -184,7 +184,7 @@ namespace Q_Platform.BLL
                                     TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal2);
                                     itemSample1.TechParams.TechStep = 21;
 
-                                    //触发后续动作
+                                    //触发后续动作   取净化液  加入到移液列表
                                     MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
 
                                     //样品和任务从列表移除
@@ -211,7 +211,7 @@ namespace Q_Platform.BLL
                                     TechStatusHelper.ResetBit(itemSample1.TechParams, TechStatus.Centrifugal3);
                                     itemSample1.TechParams.TechStep = 31;
 
-                                    //触发后续动作
+                                    //触发后续动作   取萃取液  加入移液列表
                                     MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
 
                                     //样品和任务从列表移除

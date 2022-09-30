@@ -45,6 +45,7 @@ namespace BQC_Q48
             var logger = SimpleIoc.Default.GetInstance<ILogger>();
          
             #region 注册数据业务
+
             SimpleIoc.Default.Register<IDataAccessBase>(() => new MySqlDataAccessBase(connString));
             SimpleIoc.Default.Register<ICarrierOneDataAccess, CarrierOneDataAccess>();
             SimpleIoc.Default.Register<ICarrierTwoDataAccess, CarrierTwoDataAccess>();
@@ -53,16 +54,18 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IVortexPosDataAccess, VortexPosDataAccess>();
             SimpleIoc.Default.Register<IConcentrationPosDataAccess, ConcentrationPosDataAccess>();
             SimpleIoc.Default.Register<ICapperPosDataAccess, CapperPosDataAccess>(); 
+
             #endregion
 
             #region 注册基础业务
+
             SimpleIoc.Default.Register<ICardBase, CardBase>();
             SimpleIoc.Default.Register<IEtherCATMotion>(() => new EtherCATMotion(GetSevorAxisInfos(), logger));
             SimpleIoc.Default.Register<IIoDevice, IoDevice>();
 
-            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetStepMotionSerialPortInfo(), logger), "StepMotion");
-            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetClawSerialPortInfo(), logger), "Claw");
-            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetBalanceSerialPortInfo(), logger), "Balance");
+            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetStepMotionSerialPortInfo(), null), "StepMotion");
+            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetClawSerialPortInfo(), null), "Claw");
+            SimpleIoc.Default.Register<IModbusBase>(() => new ModbusRtu(GetBalanceSerialPortInfo(), null), "Balance");
 
             SimpleIoc.Default.Register<ILS_Motion>(() => new LS_Motion(SimpleIoc.Default.GetInstance<IModbusBase>("StepMotion"), logger, GetStepAxisInfos()));
             SimpleIoc.Default.Register<IEPG26>(() => new EPG26(SimpleIoc.Default.GetInstance<IModbusBase>("Claw"), logger));
@@ -77,25 +80,34 @@ namespace BQC_Q48
             #region 注册业务
 
             //搬运
+
             SimpleIoc.Default.Register<ICarrierOne, CarrierOne>();  //搬运1
             SimpleIoc.Default.Register<ICarrierTwo, CarrierTwo>();  //搬运2
             SimpleIoc.Default.Register<ICentrifugalCarrier, CentrifugalCarrier>();  //离心搬运
             //加固
+
             SimpleIoc.Default.Register<IAddSolid, AddSolid>();     //加固
             //拧盖
+
             SimpleIoc.Default.Register<ICapperOne, CapperOne>();
             SimpleIoc.Default.Register<ICapperTwo, CapperTwo>();
             SimpleIoc.Default.Register<ICapperThree, CapperThree>();
             SimpleIoc.Default.Register<ICapperFour, CapperFour>();
             SimpleIoc.Default.Register<ICapperFive, CapperFive>();
-            //振荡
+           ////振荡
+
             SimpleIoc.Default.Register<IVibrationOne, VibrationOne>();
             SimpleIoc.Default.Register<IVibrationTwo, VibrationTwo>();
+
             //离心
+
             SimpleIoc.Default.Register<ICentrifugal, Centrifugal>();
+
             //浓缩
+
             SimpleIoc.Default.Register<IConcentration, Concentration>();
             //涡旋
+
             SimpleIoc.Default.Register<IVortex, Vortex>();
 
             #endregion

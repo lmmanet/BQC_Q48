@@ -80,7 +80,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -151,7 +151,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -212,7 +212,7 @@ namespace Q_Platform.BLL
                         result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
                     }
@@ -267,7 +267,7 @@ namespace Q_Platform.BLL
                         result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
                     }
@@ -435,42 +435,46 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts)
+        public async Task<bool> GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
             try
             {
-                lock (_lockObj)
+                return await Task.Run(() =>
                 {
-                    _logger?.Info($"从拧盖2搬运{sampleId}样品管到试管架1");
-
-                    //装盖
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                    lock (_lockObj)
                     {
-                        result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
+                        _logger?.Info($"从拧盖2搬运{sampleId}样品管到试管架1");
+
+                        //装盖
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                        {
+                            result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品管装盖 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+                            }
+                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
+                        }
+
+                        //移动到上下料位
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception("拧盖移动到上下料位 出错");
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
-                    }
 
-                    //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        //搬运到试管架1
+                        result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
+                        }
+                        return true;
                     }
-
-                    //搬运到试管架1
-                    result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
-                    }
-                    return true;
-                }
+                });
+              
             }
             catch (Exception ex)
             {
@@ -546,7 +550,7 @@ namespace Q_Platform.BLL
                     result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
                     if (!result)
                     {
-                        throw new Exception($"从试管架2取{sample.Id}离心空管 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception($"从试管架2取{sample.Id}离心空管 失败！ PolishStatus-{sample.PolishStatus}");
                     }
 
                     //拆盖
@@ -555,7 +559,7 @@ namespace Q_Platform.BLL
                         result = CapperOff(cts,-0.75).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}离心空管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}离心空管拆盖 失败！ PolishStatus-{sample.PolishStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                     }
@@ -598,7 +602,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             //无需锁 只做中转作用
             return _carrier.GetSampleFromColdToTransfer(sample,func, cts);
@@ -611,7 +615,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             //无需锁 只做中转作用
             return _carrier.GetPolishFromColdToTransfer(sample, func, cts);
@@ -625,7 +629,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             return _carrier.GetSampleFromTransferToMaterial(sample, func, cts);
         }
@@ -637,7 +641,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             return _carrier.GetPolishFromTransferToMaterial(sample, func, cts);
         }
@@ -669,7 +673,7 @@ namespace Q_Platform.BLL
                     result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
                     if (!result)
                     {
-                        throw new Exception($"从试管架取{sample.Id}样品离心管 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception($"从试管架取{sample.Id}样品离心管 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                     }
 
                     //拆盖
@@ -678,7 +682,7 @@ namespace Q_Platform.BLL
                         result = CapperOff(cts,-0.75).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品离心管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品离心管拆盖 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                     }
@@ -698,7 +702,7 @@ namespace Q_Platform.BLL
                         result = CapperOnAsync(sample,cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品离心管装盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品离心管装盖 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                     }
@@ -742,7 +746,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        public bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try
@@ -762,7 +766,7 @@ namespace Q_Platform.BLL
                     result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
                     if (!result)
                     {
-                        throw new Exception($"从试管架2取{sample.Id}样品萃取管 失败！ TubeStatus-{sample.TubeStatus}");
+                        throw new Exception($"从试管架2取{sample.Id}样品萃取管 失败！ PolishStatus-{sample.PolishStatus}");
                     }
 
                     //拆盖
@@ -771,7 +775,7 @@ namespace Q_Platform.BLL
                         result = CapperOff(cts, -0.75).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品萃取管拆盖 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品萃取管拆盖 失败！ PolishStatus-{sample.PolishStatus}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
                     }
@@ -789,7 +793,7 @@ namespace Q_Platform.BLL
                         result = _carrier.GetPolishFromCapperTwoToTransfer(sample, func, cts);
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品萃取管搬运到移栽 失败！ TubeStatus-{sample.TubeStatus}");
+                            throw new Exception($"{sample.Id}样品萃取管搬运到移栽 失败！ PolishStatus-{sample.PolishStatus}");
                         }
                     }
 
@@ -818,7 +822,7 @@ namespace Q_Platform.BLL
         /// 从移栽回收萃取管（提取浓缩液后）
         /// </summary>
         /// <returns></returns>
-        private bool RecylePolishFromTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        private bool RecylePolishFromTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try

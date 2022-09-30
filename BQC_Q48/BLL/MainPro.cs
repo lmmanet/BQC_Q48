@@ -2,6 +2,7 @@
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using GalaSoft.MvvmLight.Messaging;
 using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
@@ -266,7 +267,20 @@ namespace Q_Platform.BLL
                 //调试
                 //_workList[0].Status = 1172527144961;
                 //_workList[0].TechParams.Tech = 0xD03EEF9;//D03EEF9
+
+
+                foreach (var item in _workList)
+                {
+                    Messenger.Default.Send<Sample>(item,"Add");
+                }
+
+
+
+
             }
+
+
+
 
             if (_main != null)
             {
