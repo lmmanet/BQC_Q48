@@ -7,6 +7,7 @@ using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,49 +89,52 @@ namespace Q_Platform.BLL
 
         #region Public Methods
 
-        public void GoHome()
+        public Task GoHome(Expression<Func<bool>> homeDoneFlag)
         {
+            //回零完成标志
+            homeDoneFlag.SetPropertyValue(false);
+
             if (_taskHome != null)
             {
                 if (_taskHome.IsCompleted == false) //是否完成
                 {
-                    return;
+                    return _taskHome;
                 }
 
                 if (_taskHome.IsCanceled == true) //被取消而执行完成
                 {
-                    return;
+                    return _taskHome;
                 }
 
                 if (_taskHome.IsFaulted == true) //未经处理异常而停止
                 {
-                    return;
+                    return _taskHome;
                 }
             }
            
-            _taskHome = Task.Run(() =>
+            _taskHome = Task.Run(async() =>
             {
-                var result6 = _carrierOne.GoHome(cts);  //搬运1回零
+                var result6 = _carrierOne.GoHome(cts).ConfigureAwait(false);  //搬运1回零
                
-                var result20 = _carrierTwo.GoHome(cts); //2
+                var result20 = _carrierTwo.GoHome(cts).ConfigureAwait(false); //搬运2回零
 
-                if (!result6.GetAwaiter().GetResult())
+                if (!await result6)
                 {
                     Console.WriteLine("carrieroneHomeErr");
                     return;
                 }
-                var result1 = _capperOne.GoHome(cts);  //拧盖1回零
-                var result2 = _vortex.GoHome(cts);  //涡旋回零
-                var result3 = _capperTwo.GoHome(cts);  //拧盖2回零
-                var result4 = _vibrationOne.GoHome(cts);  //振荡回零
-                var result5 = _addSolid.GoHome(cts);  //加固回零  无需单独回零
+                var result1 = _capperOne.GoHome(cts).ConfigureAwait(false);  //拧盖1回零
+                var result2 = _vortex.GoHome(cts).ConfigureAwait(false);  //涡旋回零
+                var result3 = _capperTwo.GoHome(cts).ConfigureAwait(false);  //拧盖2回零
+                var result4 = _vibrationOne.GoHome(cts).ConfigureAwait(false);  //振荡回零
+                var result5 = _addSolid.GoHome(cts).ConfigureAwait(false);  //加固回零  无需单独回零
 
                 var result7 = _centrifugal.GoHome(cts); // 离心机回零
 
-                if (!result20.GetAwaiter().GetResult())
+                if (!await result20)
                 {
                     Console.WriteLine("carriertwoHomeErr");
-                    return;
+                    return ;
                 }
 
                 var result8 = _capperThree.GoHome(cts); // 拧盖3回零
@@ -138,53 +142,60 @@ namespace Q_Platform.BLL
                 var result10 = _capperFive.GoHome(cts); // 拧盖5回零
                 var result11= _concentration.GoHome(cts); // 浓缩回零
 
-                if (!result1.GetAwaiter().GetResult())
+                if (!await result1)
                 {
                     return;
                 }
-                if (!result2.GetAwaiter().GetResult())
+                if (!await result2)
                 {
                     return;
                 }
-                if (!result3.GetAwaiter().GetResult())
+                if (!await result3)
                 {
                     return;
                 }
-                if (!result4.GetAwaiter().GetResult())
+                if (!await result4)
                 {
                     return;
                 }
-                if (!result5.GetAwaiter().GetResult())
+                if (!await result5)
                 {
                     return;
                 }
-                if (!result7.GetAwaiter().GetResult())
+                if (!await result7)
                 {
                     return;
                 }     
-                if (!result8.GetAwaiter().GetResult())
+                if (!await result8)
                 {
                     Console.WriteLine("回零失败 result8！");
                     return;
                 }    
-                if (!result9.GetAwaiter().GetResult())
+                if (!await result9)
                 {
                     Console.WriteLine("回零失败 result9！");
                     return;
                 }   
-                if (!result10.GetAwaiter().GetResult())
+                if (!await result10)
                 {
                     Console.WriteLine("回零失败 result10！");
                     return;
                 }      
-                if (!result11.GetAwaiter().GetResult())
+                if (!await result11)
                 {
                     Console.WriteLine("回零失败 result11！");
                     return;
                 }
                _logger.Info("HomeDone");
+
+                //回零完成
+                homeDoneFlag.SetPropertyValue(true);
+          
                 
             });
+
+            return _taskHome;
+
         }
 
         public void StartPro()
@@ -347,9 +358,10 @@ namespace Q_Platform.BLL
             }).ConfigureAwait(false);
         }
 
-        public void PausePro()
+        public void PausePro(Expression<Func<bool>> pauseFlag)
         {
             _globalStatus.PauseProgram();
+            pauseFlag.SetPropertyValue(true);
         }
 
         public void ContinuePro()

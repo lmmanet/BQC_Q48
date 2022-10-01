@@ -50,6 +50,7 @@ namespace Q_Platform.BLL
             this._carrier = carrier; 
             this._logger = new MyLogger(typeof(Centrifugal));
             this._globalStatus = globalStatus;
+            _globalStatus.StopProgramEventArgs += StopMove;
         }
 
         #endregion
@@ -69,12 +70,6 @@ namespace Q_Platform.BLL
                 if (!result)
                 {
                     throw new Exception("离心移栽回零失败!");
-                }
-
-                var ret3 = Centri_GoHome().ConfigureAwait(false);
-                if (!await ret3)
-                {
-                    return false;
                 }
                 OpenShadow();
 
@@ -464,22 +459,11 @@ namespace Q_Platform.BLL
                 }
             }
           
-
-            //离心机回零
-            result = await Centri_GoHome().ConfigureAwait(false);
-            if (!result)
-            {
-                return false;
-            }
-
             //打开门
             OpenShadow();
 
             return isDone;
         }
-
-
-
 
         #endregion
 
@@ -551,8 +535,7 @@ namespace Q_Platform.BLL
                 }
             } while (!result);
         }
-
-   
+           
         /// <summary>
         /// 旋转到指定工位
         /// </summary>
@@ -621,29 +604,67 @@ namespace Q_Platform.BLL
             {
                 return true;
             }
-        }
-
+        }      
+        
         /// <summary>
-        /// 离心机回零
+        /// 旋转到指定工位
         /// </summary>
-        /// <returns></returns>
-        protected async Task<bool> Centri_GoHome()
+        /// <param name="num">1:初始位 2：90°位 3：180°位 4：270°位</param>
+        protected async Task<bool> GoStation2(ushort num)
         {
-            //检查是否使能
-            if (!_motion.IsServeOn(_axisCentrigugal))
+            //判断离心机是否停止
+            var cv = Math.Abs(Math.Round(_motion.GetCurrentVel(_axisCentrigugal), 1));
+            if (cv > 0.2)
+            {
+                _logger?.Error($"离心机未停止 速度：{cv}");
+                throw new Exception("离心机未停止");
+            }
+
+            //打开护罩
+            OpenShadow();
+
+            //离心机使能
+            var status = _motion.GetMotionStatus(_axisCentrigugal);
+            if ((status & 4) != 4)
             {
                 _motion.ServoOn(_axisCentrigugal);
             }
 
-            var result = await _motion.GohomeWithCheckDone(_axisCentrigugal, _homeMode, null).ConfigureAwait(false);
+            double offset = 0;
+
+            //离心机移动到指定位置
+            if (num == 1)
+            {
+                offset = 0.05;
+            }
+            else if(num == 2)
+            {
+                offset = 0.3;
+            }
+            else if(num == 3)
+            {
+                offset = 0.55;
+            }
+            else if (num == 4)
+            {
+                offset = 0.8;
+            }
+            else
+            {
+                throw new Exception($"指定位置编号不存在 num：{num}");
+            }
+
+            //离心机回零
+            var result = await _motion.GohomeWithCheckDone(_axisCentrigugal, _homeMode,offset, null).ConfigureAwait(false);
             if (!result)
             {
-                _logger?.Error($"离心机回零出错");
-                throw new Exception("离心机回零出错");
+                _logger?.Error($"离心机移动到指定位出错");
+                throw new Exception("离心机移动到指定位置出错");
             }
-            return true;
-        }
 
+            return true;
+         
+        }
 
         #endregion
 

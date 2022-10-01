@@ -26,7 +26,7 @@ namespace Q_Platform.BLL
 
         private readonly ICarrierOne _carrier;
 
-        private readonly IGlobalStatus _globalStauts;
+        private readonly IGlobalStatus _globalStatus;
 
         private readonly IVortexPosDataAccess _dataAccess;
 
@@ -61,12 +61,19 @@ namespace Q_Platform.BLL
             this._io = io;
             this._stepMotion = motion;
             this._logger = new MyLogger(typeof(Vortex));
-            this._globalStauts = globalStatus;
+            this._globalStatus = globalStatus;
             this._dataAccess = dataAccess;
 
             this._carrier = carrier;
 
             _posData = dataAccess.GetPosData();
+
+            _globalStatus.StopProgramEventArgs += StopMove;
+        }
+
+        public void UpdatePosData()
+        {
+            _posData = _dataAccess.GetPosData();
         }
 
         #endregion
@@ -115,7 +122,15 @@ namespace Q_Platform.BLL
             }
         }
 
-      
+        public bool StopMove()
+        {
+            //停止涡旋电机
+            _io.WriteBit_DO(_vortexMotion1, false);
+            _io.WriteBit_DO(_vortexMotion2, false);
+            _stepMotion.StopMove(_axisY);
+            return true;
+        }
+
         public bool StartVortex(Sample sample, int step, CancellationTokenSource cts)
         {
             int vel = sample.TechParams.VortexVel[step] / 60;
@@ -183,19 +198,47 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
         {
-            PressUp();
-
-            //步进Y轴移动到原点位置
-            var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
-            if (!result)
+            try
             {
+                PressUp();
+
+                //步进Y轴移动到原点位置
+                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                   throw new Exception("Y轴移动到指定位置出错!");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await MovePutGetPos(cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
                 return false;
             }
-          
-            return true;
+           
 
         }
-
 
         /// <summary>
         /// 开始涡旋
@@ -206,57 +249,85 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> StartVortexAsync(int time,int vel,CancellationTokenSource cts)
         {
-            //Y轴移动到涡旋位置
-            var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
-            if (!result)
+            try
             {
-                return false;
-            }
-
-            //下压气缸动作
-            PressDown();
-
-            //启动涡旋电机
-            _io.WriteByte_DA(_vortexMotionVel1, vel*10);
-            _io.WriteByte_DA(_vortexMotionVel2, vel*10);
-
-            _io.WriteBit_DO(_vortexMotion1,true);
-            _io.WriteBit_DO(_vortexMotion2,true);
-            //开始定时
-            DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
-            do
-            {
-                Thread.Sleep(1000);
-                if (DateTime.Now > end)
+                //Y轴移动到涡旋位置
+                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
+                if (!result)
                 {
-                    break;
-                }
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _io.WriteBit_DO(_vortexMotion1, false);
-                    _io.WriteBit_DO(_vortexMotion2, false);
-                    await Task.Delay(500).ConfigureAwait(false);
-                    //下压气缸上升
-                    PressUp();
                     return false;
                 }
-            } while (true);
 
-            //停止涡旋电机
-            _io.WriteBit_DO(_vortexMotion1, false);
-            _io.WriteBit_DO(_vortexMotion2, false);
-            //延时
-            await Task.Delay(1000).ConfigureAwait(false);
-            //下压气缸上升
-            PressUp();
-            //Y轴移动到上下料位置
-            result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
-            if (!result)
+                //下压气缸动作
+                PressDown();
+
+                //启动涡旋电机
+                _io.WriteByte_DA(_vortexMotionVel1, vel * 10);
+                _io.WriteByte_DA(_vortexMotionVel2, vel * 10);
+
+                _io.WriteBit_DO(_vortexMotion1, true);
+                _io.WriteBit_DO(_vortexMotion2, true);
+                //开始定时
+                DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
+                do
+                {
+                    Thread.Sleep(1000);
+                    if (DateTime.Now > end)
+                    {
+                        break;
+                    }
+                    if (cts?.IsCancellationRequested == true)
+                    {
+                        _io.WriteBit_DO(_vortexMotion1, false);
+                        _io.WriteBit_DO(_vortexMotion2, false);
+                        await Task.Delay(500).ConfigureAwait(false);
+                        //下压气缸上升
+                        PressUp();
+                        return false;
+                    }
+                } while (true);
+
+                //停止涡旋电机
+                _io.WriteBit_DO(_vortexMotion1, false);
+                _io.WriteBit_DO(_vortexMotion2, false);
+                //延时
+                await Task.Delay(1000).ConfigureAwait(false);
+
+                //Y轴移动到上下料位置
+                result = await MovePutGetPos(cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
             {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await StartVortexAsync(time,vel,cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
                 return false;
             }
-
-            return true;
+          
         }
 
 
@@ -321,8 +392,6 @@ namespace Q_Platform.BLL
             } while (!result);
 
         }
-
-
 
 
         #endregion

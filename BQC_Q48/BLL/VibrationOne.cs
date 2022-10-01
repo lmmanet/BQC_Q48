@@ -274,18 +274,6 @@ namespace Q_Platform.BLL
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         #region Private Methods
 
         private bool StartVibration(Sample sample, int step, CancellationTokenSource cts)

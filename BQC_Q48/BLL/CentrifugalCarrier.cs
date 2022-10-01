@@ -50,8 +50,8 @@ namespace Q_Platform.BLL
         private ushort _y_WP = 2;                //Y气缸伸出感应
 
         private ushort _clawId = 2;              //电爪485地址
-        private double _stepMoveVel = 30;        //步进电机移动速度
-        private double _sevorMoveVel = 50;       //伺服电机移动速度
+        private double _stepMoveVel = 80;        //步进电机移动速度
+        private double _sevorMoveVel = 80;       //伺服电机移动速度
         #endregion
 
         #region Construtors
@@ -72,10 +72,15 @@ namespace Q_Platform.BLL
             this._logger = new MyLogger(typeof(CentrifugalCarrier));
             this._globalStatus = globalStatus;
             _globalStatus.StopProgramEventArgs += StopMove;
+            _globalStatus.PauseProgramEventArgs += StopMove;
 
             _posData = _dataAccess.GetPosData();
         }
 
+        public void UpdatePosData()
+        {
+            _posData = _dataAccess.GetPosData();
+        }
 
         #endregion
 
@@ -1714,8 +1719,6 @@ namespace Q_Platform.BLL
 
         #region Protected Methods
 
-
-
         /// <summary>
         /// 离心移栽移动到左侧上下料位(传入到搬运1)
         /// </summary>
@@ -1725,22 +1728,51 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> TransferMoveLeftPutGetPos(ushort num, CancellationTokenSource cts)
         {
-            double[] poss1 = GetLeftCoordinate(num, true);
-            //X C轴回零
-            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
-         
-
-            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
-            if (!await result1)
+            try
             {
-                throw new Exception("移栽X轴移动到目标位失败!");
-            }
+                double[] poss1 = GetLeftCoordinate(num, true);
+                //X C轴回零
+                var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
 
-            if (!await result2)
-            {
-                throw new Exception("移栽旋转轴移动到目标位失败!");
+
+                var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
+                if (!await result1)
+                {
+                    throw new Exception("移栽X轴移动到目标位失败!");
+                }
+
+                if (!await result2)
+                {
+                    throw new Exception("移栽旋转轴移动到目标位失败!");
+                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await TransferMoveLeftPutGetPos(num, cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
+            }
+        
         }
 
         /// <summary>
@@ -1749,21 +1781,50 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> TransferMoveLeftPipettorPos(CancellationTokenSource cts)
         {
-            double[] poss1 = GetLeftCoordinate(1, false); //小管的位置
-            //X C轴回零
-            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
-           
-            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
-            if (!await result1)
+            try
             {
-                throw new Exception("移栽X轴移动到目标位失败!");
-            }
+                double[] poss1 = GetLeftCoordinate(1, false); //小管的位置
+                                                              //X C轴回零
+                var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
 
-            if (!await result2)
-            {
-                throw new Exception("移栽旋转轴移动到目标位失败!");
+                var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
+                if (!await result1)
+                {
+                    throw new Exception("移栽X轴移动到目标位失败!");
+                }
+
+                if (!await result2)
+                {
+                    throw new Exception("移栽旋转轴移动到目标位失败!");
+                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {                
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await TransferMoveLeftPipettorPos(cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
+            }
+           
         }
 
         /// <summary>
@@ -1774,22 +1835,51 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> TransferMoveRightPutGetPos(ushort num, CancellationTokenSource cts)
         {
-            double[] poss1 = GetRightCoordinate(num, false);
-            //X C轴回零
-            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
-          
-            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
-
-            if (!await result1)
+            try
             {
-                throw new Exception("移栽X轴移动到目标位失败!");
-            }
+                double[] poss1 = GetRightCoordinate(num, false);
+                //X C轴回零
+                var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
 
-            if (!await result2)
-            {
-                throw new Exception("移栽旋转轴移动到目标位失败!");
+                var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
+
+                if (!await result1)
+                {
+                    throw new Exception("移栽X轴移动到目标位失败!");
+                }
+
+                if (!await result2)
+                {
+                    throw new Exception("移栽旋转轴移动到目标位失败!");
+                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await TransferMoveRightPutGetPos(num,cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
+            }
+         
         }
 
         /// <summary>
@@ -1798,22 +1888,51 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> TransferMoveRightPipettorPos(CancellationTokenSource cts)
         {
-            double[] poss1 = GetRightCoordinate(1, false);
-            //X C轴回零
-            var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
-           
-            var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
-
-            if (!await result1)
+            try
             {
-                throw new Exception("移栽X轴移动到目标位失败!");
-            }
+                double[] poss1 = GetRightCoordinate(1, false);
+                //X C轴回零
+                var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, poss1[0], _stepMoveVel, cts).ConfigureAwait(false);
 
-            if (!await result2)
-            {
-                throw new Exception("移栽旋转轴移动到目标位失败!");
+                var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, poss1[1], _stepMoveVel, cts).ConfigureAwait(false);
+
+                if (!await result1)
+                {
+                    throw new Exception("移栽X轴移动到目标位失败!");
+                }
+
+                if (!await result2)
+                {
+                    throw new Exception("移栽旋转轴移动到目标位失败!");
+                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await TransferMoveRightPipettorPos(cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
+            }
+   
         }
 
         /// <summary>
@@ -1874,13 +1993,28 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                await OpenClaw(clawOpenByte).ConfigureAwait(false);
-                await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }
-                throw ex;
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await GetTubeAtCentrifugal(pos, func, cts, clawCloseByte, clawOpenByte);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
             }
         }
 
@@ -1946,13 +2080,28 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                await OpenClaw(clawOpenByte).ConfigureAwait(false);
-                await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }
-                throw ex;
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await PutTubeAtCentrifugal(pos, func, cts, clawOpenByte);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
             }
         }
 
@@ -2016,13 +2165,28 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                await OpenClaw(clawOpenByte).ConfigureAwait(false);
-                await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }
-                throw ex;
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await GetTubeAtTransfer(pos, clawOpenByte, cts, clawOpenByte);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
             }
 
         }
@@ -2090,15 +2254,33 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                await OpenClaw(clawOpenByte).ConfigureAwait(false);
-                await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, null).ConfigureAwait(false);
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }
-                throw ex;
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await PutTubeAtTransfer(pos, clawOpenByte, cts);
+                    }
+
+                    return false;
+                }
+
+                _logger.Warn(ex.Message);
+                return false;
             }
         }
+
+
+
 
         /// <summary>
         /// Y气缸取放料位

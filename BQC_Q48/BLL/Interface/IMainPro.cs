@@ -1,15 +1,18 @@
 ﻿using BQJX.Common;
+using System;
+using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
     public interface IMainPro
     {
         void ContinuePro();
-        void GoHome();
+        Task GoHome(Expression<Func<bool>> homeDoneFlag);
         void StartPro();
         void StopPro();
-        void PausePro();
+        void PausePro(Expression<Func<bool>> pauseFlag);
         void SwitchLight();
 
 

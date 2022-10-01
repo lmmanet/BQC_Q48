@@ -979,6 +979,18 @@ namespace BQJX.Communication.CL2C
                     _logger?.Error(result.Message);
                     throw new CommunicationException(result.Message);
                 }
+
+                await Task.Delay(500).ConfigureAwait(false);
+
+                //电机在使能状态
+                var status = await GetMotionIoStatus(axisNo).ConfigureAwait(false);
+               
+                //电机故障
+                if ((status & 0x01) == 0x01)
+                {
+                    throw new Exception("电机报警!");
+                }
+              
                 return true;
             }
             catch (CommunicationException cmex)

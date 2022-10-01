@@ -46,6 +46,13 @@ namespace Q_Platform.BLL
             _posData = _dataAccess.GetPosData();
         }
 
+
+        public override void UpdatePosData()
+        {
+            _posData = _dataAccess.GetPosData();
+        }
+
+
         #endregion
 
         #region Public Methods   搬运部分
@@ -105,8 +112,8 @@ namespace Q_Platform.BLL
                 {
                     return false;
                 }
-                _logger?.Error(ex.Message);
-                throw ex;
+                _logger?.Warn(ex.Message);
+                return false;
             }
           
            
@@ -2356,8 +2363,6 @@ namespace Q_Platform.BLL
 
         #region Protected Methods
 
-        //==========================================================================================================//
-
         /// <summary>
         /// 从试管架到拧盖1
         /// </summary>
@@ -2375,14 +2380,17 @@ namespace Q_Platform.BLL
 
             _logger.Debug($"GetSampleFromMaterialToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result= base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2403,14 +2411,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromMaterialToVortex-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -2430,14 +2441,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromMaterialToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =  base.PutTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -2457,27 +2471,18 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromMaterialToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
-            //判断X位置
-            //if (_motion.GetCurrentPos(_axisY) <100)
-            //{
-            //移动到安全位置
-            var result = CarrierMoveToSafePos(GetSampleTubeCoordinate(76), cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
-            //}
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+
             //放料
-            base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result=  base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
 
             return true;
 
@@ -2500,34 +2505,32 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromMaterialToTransfer-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
-            //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
+
+            //移动到安全位置
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
+
             //旋转到指定位置
             result = func.Invoke(num,cts);
             if (!result)
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+ 
             //放料
-            base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2550,14 +2553,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromAddSolidToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetAddSolidCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetAddSolidCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2587,15 +2593,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+           
             //取料
-            base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result = base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke() != false;
@@ -2603,13 +2606,13 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //放料
-            base.PutTubeAsync(GetAddSolidCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetAddSolidCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2637,15 +2640,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //取料
-            base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result = base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -2653,13 +2653,13 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+         
             //放料
-            base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -2686,15 +2686,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+         
             //取料
-            base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result = base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -2702,13 +2699,13 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //放料
-            base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2736,15 +2733,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+           
             //取料
-            base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result =  base.GetTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -2752,10 +2746,7 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+        
             //判断X位置
             //if (num % 2 == 0)
             //{
@@ -2768,8 +2759,11 @@ namespace Q_Platform.BLL
             //}
 
             //放料
-            base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2793,14 +2787,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromVortexToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result =base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -2820,14 +2817,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromVortexToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =   base.PutTubeAsync(GetCapperOneCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2848,14 +2848,17 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromVortexToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result =base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2877,34 +2880,31 @@ namespace Q_Platform.BLL
             }
             _logger.Debug($"GetSampleFromVortexToTransfer-{num},clawOpenByte-{clawOpenByte}");
             //取料
-            base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
-            //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
+            //移动到安全位置
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
+    
             //旋转到指定位置
             result = func.Invoke(num,cts);
             if (!result)
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+    
             //放料
-            base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -2927,14 +2927,17 @@ namespace Q_Platform.BLL
             _logger.Debug($"GetSampleFromVortexToCold-{num},clawOpenByte-{clawOpenByte}");
 
             //取料
-            base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //放料
-            base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -2963,26 +2966,26 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+         
             //取料
-            base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+      
             //放料
-            base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3014,10 +3017,10 @@ namespace Q_Platform.BLL
             var result1 = func.Invoke(num, cts);
 
             //取料
-            base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             //result = func2?.Invoke(num) != false;
@@ -3027,7 +3030,7 @@ namespace Q_Platform.BLL
             //}
 
             //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
             if (!result)
             {
                 throw new Exception("搬运移动到安全位置失败!");
@@ -3045,8 +3048,11 @@ namespace Q_Platform.BLL
                 throw new Exception("移栽移动到指定位失败!");
             }
             //放料
-            base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =  base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3072,15 +3078,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //取料
-            base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result = base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -3089,13 +3092,12 @@ namespace Q_Platform.BLL
                 return false;
             }
 
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
             //放料
-            base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3124,10 +3126,10 @@ namespace Q_Platform.BLL
             //}
 
             //取料
-            base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             //result = func2?.Invoke(num) != false;
@@ -3137,8 +3139,11 @@ namespace Q_Platform.BLL
             //}
 
             //放料
-            base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3170,26 +3175,26 @@ namespace Q_Platform.BLL
                 return false;
             }
             while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
             //取料
-            base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+         
 
             //放料
-            base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -3222,10 +3227,10 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result = base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -3234,13 +3239,13 @@ namespace Q_Platform.BLL
                 return false;
             }
 
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //放料
-            base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetVortexCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -3268,15 +3273,12 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //取料
-            base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            result =  base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //取料完成辅助动作
             result = func2?.Invoke(num) != false;
@@ -3285,13 +3287,13 @@ namespace Q_Platform.BLL
                 return false;
             }
 
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+          
             //放料
-            base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3321,20 +3323,20 @@ namespace Q_Platform.BLL
             //}
 
             //取料
-            base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            var result = base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             //取料完成辅助动作
             //result = func2?.Invoke(num) != false;
             //if (!result)
             //{
             //    return false;
             //}
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+   
             //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3346,14 +3348,14 @@ namespace Q_Platform.BLL
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+         
 
             //放料
-            base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -3382,30 +3384,26 @@ namespace Q_Platform.BLL
             {
                 throw new Exception("移栽移动到指定位失败!");
             } 
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
 
             //取料
-            base.GetTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult(); if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
+
             //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
-            //放料
-            base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
 
+            //放料
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3436,29 +3434,26 @@ namespace Q_Platform.BLL
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+           
             //取料
-            base.GetTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
-            //移动到安全位置
-            var result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
+            //移动到安全位置
+            result = CarrierMoveToSafePos(GetColdCoordinate(1), cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
+       
             //放料
-            base.PutTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result = base.PutTubeAsync(GetCapperTwoCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
 
         }
@@ -3487,13 +3482,13 @@ namespace Q_Platform.BLL
             _logger.Debug($"GetSampleFromColdToTransfer-{num}-{posNum},clawOpenByte-{clawOpenByte}");
 
             //旋转到指定位置
-            var result = func.Invoke(num, cts);
+            var result1 = func.Invoke(num, cts);
 
             //取料
-            base.GetTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result = base.GetTubeAsync(GetColdCoordinate(posNum), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
             //移动到安全位置
             if (num != 1)
@@ -3505,23 +3500,20 @@ namespace Q_Platform.BLL
                     return false;
                 }
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+           
 
             //判断是否旋转到位
-            if (!result.GetAwaiter().GetResult())
+            if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
-            while (_globalStatus.IsPause)
-            {
-                Thread.Sleep(2000);
-            }
+           
             //放料
-            base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =  base.PutTubeAsync(GetTransferCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -3543,21 +3535,24 @@ namespace Q_Platform.BLL
             _logger.Debug($"GetSampleFromColdToVibration-{num},clawOpenByte-{clawOpenByte}");
           
             //取料
-            base.GetTubeAsync(GetColdCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            var result =  base.GetTubeAsync(GetColdCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
             {
-                Thread.Sleep(2000);
+                return false;
             }
+          
             //放料
-            base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
-
+            result =  base.PutTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                return false;
+            }
             return true;
         }
 
         #endregion
 
         #region Private Methods
-
 
         /// <summary>
         /// 获取50ml试管位置
@@ -3897,9 +3892,6 @@ namespace Q_Platform.BLL
             }
 
         }
-
-
-
 
 
 

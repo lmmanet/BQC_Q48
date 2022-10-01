@@ -31,6 +31,8 @@ namespace Q_Platform.BLL
 
         private ConcentrationPosData _posData;
 
+        private readonly IConcentrationPosDataAccess _dataAccess;
+
         #endregion
 
         #region Variable
@@ -66,8 +68,14 @@ namespace Q_Platform.BLL
 
             this._logger = new MyLogger(typeof(Concentration));
             this._globalStauts = globalStatus;
+            this._dataAccess = dataAccess;
 
             _posData = dataAccess.GetPosData();
+        }
+
+        public void UpdatePosData()
+        {
+            _posData = _dataAccess.GetPosData();
         }
 
         #endregion

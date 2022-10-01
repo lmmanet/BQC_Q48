@@ -111,7 +111,7 @@ namespace Q_Platform.ViewModels.UC
         /// <returns></returns>
         private async Task DoFuc1()
         {
-            SimpleIoc.Default.GetInstance<IMainPro>().GoHome();
+            
            
 
         }

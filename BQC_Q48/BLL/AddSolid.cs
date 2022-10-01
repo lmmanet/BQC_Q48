@@ -15,7 +15,6 @@ namespace Q_Platform.BLL
 {
     public class AddSolid : IAddSolid
     {
-        private readonly ICarrierOne _carrier;
 
         #region Private Members
 
@@ -26,6 +25,7 @@ namespace Q_Platform.BLL
         private readonly IAddSolidPosDataAccess _dataAccess;
         private readonly IWeight _weight;
 
+        private readonly ICarrierOne _carrier;
         #endregion
 
         #region Private Variant
@@ -48,8 +48,6 @@ namespace Q_Platform.BLL
         private double _rotateVel = 10;                  //旋转加固旋转速度
         private ushort _weightId1 = 1;                   //称台1
         private ushort _weightId2 = 2;                   //称台2
-
-        private double _xOffset = 50;                    //工位1 2 X方向坐标偏移
 
         private AddSolidPosData _posData;                //位置数据
         private IGlobalStatus _globalStatus;
@@ -79,6 +77,12 @@ namespace Q_Platform.BLL
 
             _posData = _dataAccess.GetPosData();
             _globalStatus.StopProgramEventArgs += StopAddSolid;
+            _globalStatus.PauseProgramEventArgs += StopAddSolid;
+        }
+
+        public void UpdatePosData()
+        {
+            _posData = _dataAccess.GetPosData();
         }
 
         #endregion
@@ -318,20 +322,48 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
         {
-            if (cts?.IsCancellationRequested == true)
+            try
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-            }
-            _logger?.Debug($"MovePutGetPos");
-            //步进Y轴移动到原点位置
-            var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
-            if (!result)
-            {
-                throw new Exception("步进Y轴移动到指定位出错");
-            }
-            X_Cylinder_Right();
+                if (cts?.IsCancellationRequested == true)
+                {
+                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                }
+                _logger?.Debug($"MovePutGetPos");
+                //步进Y轴移动到原点位置
+                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("步进Y轴移动到指定位出错");
+                }
+                X_Cylinder_Right();
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await MovePutGetPos(cts);
+                    }
+
+                    return false;
+                }
+                _logger.Error(ex.Message);
+                return false;
+            }
+          
 
         }
 
@@ -405,8 +437,18 @@ namespace Q_Platform.BLL
                 }
 
                 //C1 C2低速旋转
-                _stepMotion.VelocityMove(_axisC1, _rotateVel);
-                _stepMotion.VelocityMove(_axisC2, _rotateVel);
+                result11 = _stepMotion.VelocityMove(_axisC1, _rotateVel).ConfigureAwait(false);
+                result22 = _stepMotion.VelocityMove(_axisC2, _rotateVel).ConfigureAwait(false);
+
+                //检测旋转轴是否有报警
+                if (!await result11)
+                {
+                    throw new Exception("加盐旋转电机1报警");
+                }
+                if (!await result22)
+                {
+                    throw new Exception("加盐旋转电机2报警");
+                }
 
                 //Z1 Z2气缸下降 
                 Z1_Cylinder_Down();
@@ -417,12 +459,7 @@ namespace Q_Platform.BLL
                 var result2 = CheckDone2(weight + gross2).ConfigureAwait(false);
                 await result1;
                 await result2;
-                             
-                while (_globalStatus.IsPause)
-                {
-                    Thread.Sleep(2000);
-                }
-                
+                   
                 //Z1 Z2气缸上升
                 Z1_Cylinder_Up();
                 Z2_Cylinder_Up();
@@ -435,15 +472,23 @@ namespace Q_Platform.BLL
                 {
                     return false;
                 }
-                //Z1 Z2气缸上升
-                Z1_Cylinder_Up();
-                Z2_Cylinder_Up();
 
-                //停止电机旋转
-                await _stepMotion.StopMove(_axisC1).ConfigureAwait(false);
-                await _stepMotion.StopMove(_axisC2).ConfigureAwait(false);
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
 
-                throw ex;
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await Add_SolidSub(solid, weight, cts);
+                    }
+
+                    return false;
+                }
+                _logger.Error(ex.Message);
+                return false;
             }
         }
 

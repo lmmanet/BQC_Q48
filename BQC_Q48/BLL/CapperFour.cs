@@ -29,7 +29,6 @@ namespace Q_Platform.BLL
 
         private readonly static object _lockObj = new object();
 
-        private double _capperoff = -1.5; //拆盖偏移
 
         #endregion
 
@@ -52,16 +51,80 @@ namespace Q_Platform.BLL
             _holdingOpenSensor = 46;   //I0.6
 
             _xOffset = 60;    //拧盖X偏移量
-            _capperTorque = 30;  //拧盖力度
-            _capperTimeout = 40;  //拧盖超时时间 S 
             _posData = _dataAccess.GetCapperPosData(4);
 
+        }
+
+        public override void UpdatePosData()
+        {
+            _posData = _dataAccess.GetCapperPosData(4);
         }
 
         #endregion
 
 
         #region Public Methods
+
+        /// <summary>
+        /// 装盖
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
+        {
+            //判断样品是否有盖
+
+            var result = await CapperOn(30, 40, cts).ConfigureAwait(false);
+
+            if (!result)
+            {
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await CapperOnAsync(sample, cts);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 拆盖
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
+        {
+            //判断样品是否有盖
+            var result = await CapperOff(cts, -1.5).ConfigureAwait(false);
+
+            if (!result)
+            {
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return await CapperOffAsync(sample, cts);
+                    }
+                }
+            }
+
+            return result;
+        }
 
 
         public Task StartConcentration(Sample sample,CancellationTokenSource cts)
@@ -306,7 +369,7 @@ namespace Q_Platform.BLL
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
                     {
                         //拆盖
-                        result = CapperOff(cts, _capperoff).GetAwaiter().GetResult();
+                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"西林瓶{sample.Id}拆盖失败!");
@@ -375,7 +438,7 @@ namespace Q_Platform.BLL
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
                     {
                         //拆盖
-                        result = CapperOff(cts, _capperoff).GetAwaiter().GetResult();
+                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"西林瓶{sample.Id}拆盖失败!");
@@ -470,7 +533,7 @@ namespace Q_Platform.BLL
             //装盖
             if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingUnCapped))
             {
-                result = CapperOn(_capperTorque, 40, cts).GetAwaiter().GetResult();
+                result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"西林瓶{sample.Id}装盖失败!");

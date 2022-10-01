@@ -162,7 +162,17 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode, CancellationTokenSource cts);
+        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode, CancellationTokenSource cts); 
+        
+        /// <summary>
+        /// 回零
+        /// </summary>
+        /// <param name="axisNo"></param>
+        /// <param name="homeMode">回零模式</param>
+        /// <param name="offset">回零偏移</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode,double offset, CancellationTokenSource cts);
 
         /// <summary>
         /// 2D直线插补

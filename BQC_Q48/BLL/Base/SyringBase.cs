@@ -49,6 +49,7 @@ namespace Q_Platform.BLL
             this._io = io;
             this._logger = logger;
             this._globalStauts = globalStauts;
+            _globalStauts.StopProgramEventArgs += StopMove;
         }
 
 
@@ -92,6 +93,12 @@ namespace Q_Platform.BLL
                 throw ex;
             }
             
+        }
+
+        public bool StopMove()
+        {
+            _motion.StopMove(_axisAddLiquid);
+            return true;
         }
 
         /// <summary>

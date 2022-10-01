@@ -67,6 +67,35 @@ namespace BQJX.Core
             return await CheckDone(axisNo, cts);
         }
 
+        public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, double offset, CancellationTokenSource cts)
+        {
+            if (cts?.IsCancellationRequested == true)
+            {
+                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+            }
+            AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
+            ushort mode = homeMode;
+            double lowVel = 1;
+            double highVel = 10;
+            double accT = 0.1;
+            double decT = 0.1;
+            var result = LTDMC.nmc_set_home_profile(_CardID, axisNo, mode, lowVel, highVel, accT, decT, offset);
+            if (result != 0)
+            {
+                _logger.Error($"set_home_profile err:{result}");
+                throw new EtherCATMotionException($"set_home_profile err:{result}");
+            }
+            result = LTDMC.nmc_home_move(_CardID, axisNo);//执行回原点运动
+            if (result != 0)
+            {
+                _logger.Error($"home_move err:{result}");
+                throw new EtherCATMotionException($"home_move err:{result}");
+            }
+            return await CheckDone(axisNo, cts);
+
+        }
+
+
         public async Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, CancellationTokenSource cts)
         {
             if (cts?.IsCancellationRequested == true)

@@ -11,9 +11,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using PropertyChanged;
 
 namespace Q_Platform.ViewModels.Page
 {
+    [AddINotifyPropertyChangedInterface]
     public class MainPageViewModel : MyViewModelBase
     {
         private readonly IMainPro _mainPro;
@@ -23,6 +25,39 @@ namespace Q_Platform.ViewModels.Page
         public ObservableCollection<SampleModel> SampleList { get; set; }
 
         public ObservableCollection<WorkLog> WorkLogList { get; set; } = new ObservableCollection<WorkLog>();
+
+        /// <summary>
+        /// 运行按钮
+        /// </summary>
+        public bool RunBtnEnable { get; set; } = false;
+
+        /// <summary>
+        /// 暂停按钮
+        /// </summary>
+        public bool PauseBtnEnable { get; set; } = false;
+
+        /// <summary>
+        /// 停止按钮
+        /// </summary>
+        public bool StopBtnEnable { get; set; } = true;
+
+        /// <summary>
+        /// 继续按钮
+        /// </summary>
+        public bool ContinueBtnEnable { get; set; } = false;
+
+        /// <summary>
+        /// 初始化按钮
+        /// </summary>
+        public bool InitBtnEnable { get; set; } = true;
+
+
+
+        /// <summary>
+        /// 回零完成
+        /// </summary>
+        public bool HomeDoneFlag { get; set; }
+
 
         #endregion
 
@@ -46,11 +81,9 @@ namespace Q_Platform.ViewModels.Page
 
         #region Construtors
 
-
         public MainPageViewModel(IMainPro mainPro)
         {
             Messenger.Default.Register<WorkLog>(this, "logWorkLog", LoggingWorkLog);
-
 
             RegisterCommnand();
 
@@ -83,18 +116,31 @@ namespace Q_Platform.ViewModels.Page
             StartTaskCommand = new RelayCommand(StartPro);
             StopTaskCommand = new RelayCommand(StopPro);
             ContinueCommand = new RelayCommand(ContinuePro);
-            InitialSysCommand = new RelayCommand(InitialSys);
+            InitialSysCommand = new RelayCommand(async()=>await InitialSys());
             PauseTaskCommand = new RelayCommand(PausePro);
         }
 
-        private void InitialSys()
+        private async Task InitialSys()
         {
-            _mainPro.GoHome();
+            await _mainPro.GoHome(()=>HomeDoneFlag).ConfigureAwait(false);
+
+            //回零完成判断是否回零成功  并使能启动按钮
+            if (HomeDoneFlag)
+            {
+                RunBtnEnable = true;
+            }
+            else
+            {
+                RunBtnEnable = false;
+            }
         }
 
         private void ContinuePro()
         {
             _mainPro.ContinuePro();
+
+            PauseBtnEnable = true;
+            ContinueBtnEnable = false;
         }
 
         private void StopPro()
@@ -104,12 +150,17 @@ namespace Q_Platform.ViewModels.Page
            
         private void PausePro()
         {
-            _mainPro.PausePro();
+            _mainPro.PausePro(()=>ContinueBtnEnable);
+
+            PauseBtnEnable = false;
         }
 
         private void StartPro()
         {
             _mainPro.StartPro();
+
+            PauseBtnEnable = true;
+            ContinueBtnEnable = false;
         }
 
         private void Delete(object obj)
@@ -140,15 +191,6 @@ namespace Q_Platform.ViewModels.Page
         {
             base.Cleanup();
         }
-
-
-
-
-
-
-
-
-
 
 
 
