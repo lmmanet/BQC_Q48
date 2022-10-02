@@ -11,6 +11,8 @@ namespace Q_Platform.BLL
 
         Task StartPipetting(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
 
+        Task StartConcentration(Sample sample, CancellationTokenSource cts);
+
         //==================================================================离心移栽部分======================================================================================//
 
         bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
@@ -25,7 +27,27 @@ namespace Q_Platform.BLL
 
         bool GetPurifyFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sample1">大管</param>
+        /// <param name="sample2">小管</param>
+        /// <param name="var"></param>
+        /// <param name="GoStation"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetBigAndSmallToCentrifugal(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sample1">大管</param>
+        /// <param name="sample2">小管</param>
+        /// <param name="var"></param>
+        /// <param name="GoStation"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetBigAndSmallToToMarterial(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
 
         /// <summary>
         /// 搬运试管到离心机  （离心机调用）
@@ -49,57 +71,57 @@ namespace Q_Platform.BLL
 
         //==================================================================离心部分======================================================================================//
 
-        /// <summary>
-        /// 从冰浴取试管到移栽  
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从冰浴取试管到移栽  
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从冰浴搬运萃取管到移栽
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从冰浴搬运萃取管到移栽
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetPolishFromColdToTransfer(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从试管架搬运净化管到移栽
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPurifyFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从试管架搬运净化管到移栽
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetPurifyFromMaterialToTransfer(Sample sample, CancellationTokenSource cts);
 
 
 
-        /// <summary>
-        /// 从移栽取离心完成后的试管到试管架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="isBig"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从移栽取离心完成后的试管到试管架
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="isBig"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetSampleFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从移栽取离心完成后的萃取管到试管架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="isBig"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从移栽取离心完成后的萃取管到试管架
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="isBig"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetPolishFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 离心完成后从移栽中取净化管  
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPurifyFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 离心完成后从移栽中取净化管  
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetPurifyFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
 
         //==================================================================移液部分（大管到小管  小管到大管）.（农残氮吹移液）======================================================================================//
 

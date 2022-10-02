@@ -435,12 +435,15 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运样品管到拧盖2
-                    result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInShelf))
                     {
-                        throw new Exception($"从试管架2搬运{ sampleId }样品管到拧盖2失败!");
+                        result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从试管架2搬运{ sampleId }样品管到拧盖2失败!");
+                        }
                     }
-
+                   
                     //拆盖
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                     {
@@ -511,11 +514,15 @@ namespace Q_Platform.BLL
                         }
 
                         //搬运到试管架1
-                        result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInCapperTwo))
                         {
-                            throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
+                            result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
+                            }
                         }
+                     
                         return true;
                     }
                 });

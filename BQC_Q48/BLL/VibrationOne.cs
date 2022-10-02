@@ -45,8 +45,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-    
-
 
         /// <summary>
         /// 振荡涡旋提取
@@ -72,206 +70,249 @@ namespace Q_Platform.BLL
             {
                 while (!_globalStauts.IsStopped && GlobalCache.GetVibrationOneVortexKeyValueCount() > 0)
                 {
-                    KeyValuePair<Sample, string> item = GlobalCache.GetVibrationOneVortexKeyValues(0);
-                    var itemSample = item.Key;
-
-                    try
+                    lock (_lockObj)
                     {
-                        //是否振荡  跳过    加水振荡
-                        if (itemSample.TechParams.TechStep == 2)
+                        KeyValuePair<Sample, string> item = GlobalCache.GetVibrationOneVortexKeyValues(0);
+                        var itemSample = item.Key;
+
+                        try
                         {
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.Vibration))
+                            //加水振荡 涡旋
+                            if (itemSample.MainStep == 1 && !_globalStauts.IsStopped)
                             {
-                                if (!_globalStauts.IsStopped)
+                                //振荡 
+                                if (sample.SubStep == 4)
                                 {
-                                    var result = StartVibration(itemSample,0, cts);
-                                    if (!result)
+                                    // 跳过
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration))
                                     {
-                                        throw new Exception("StartVibration err");
+                                        sample.SubStep++;
                                     }
 
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.Vibration);
+                                    if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration) && !_globalStauts.IsStopped)
+                                    {
+                                        var result = StartVibration(itemSample, 0, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVibration err");
+                                        }
+
+                                        sample.SubStep++;
+                                    }
+
                                 }
-                                else
+
+                                //涡旋
+                                if (sample.SubStep == 5)
                                 {
-                                    throw new TaskCanceledException("程序停止");
+                                    // 跳过
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
+                                    {
+                                        sample.SubStep++;
+                                    }
+                                    //是否涡旋
+                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
+                                    {
+                                        var result = _vortex.StartVortex(itemSample, 0, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVortex err");
+                                        }
+                                        sample.SubStep++;
+                                    }
+
                                 }
 
                             }
 
-                            //判断是否涡旋
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
+                            //加溶剂振荡 涡旋
+                            if (itemSample.MainStep == 2 && !_globalStauts.IsStopped)
                             {
-                                if (!_globalStauts.IsStopped)
+                                if (sample.SubStep == 4)
                                 {
-                                    var result = _vortex.StartVortex(itemSample,0, cts);
-                                    if (!result)
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
                                     {
-                                        throw new Exception("StartVortex err");
+                                        sample.SubStep++;
                                     }
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.Vortex);
+
+                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
+                                    {
+                                        var result = StartVibration(itemSample, 1, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVibration err");
+                                        }
+                                        sample.SubStep++;
+                                    }
                                 }
-                                else
+
+                                //判断是否涡旋
+                                if (sample.SubStep == 5)
                                 {
-                                    throw new TaskCanceledException("程序停止");
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
+                                    {
+                                        sample.SubStep++;
+                                    }
+
+                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
+                                    {
+                                        var result = _vortex.StartVortex(itemSample, 1, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVortex err");
+                                        }
+                                        sample.SubStep++;
+                                    }
+
                                 }
 
                             }
-                           
+
+                            //加盐振荡 涡旋
+                            if (itemSample.MainStep == 3 && !_globalStauts.IsStopped)
+                            {
+                                if (sample.SubStep == 4)
+                                {
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
+                                    {
+                                        sample.SubStep++;
+                                    }
+
+                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
+                                    {
+                                        var result = StartVibration(itemSample, 2, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVibration err");
+                                        }
+
+                                        sample.SubStep++;
+                                    }
+
+                                }
+
+                                //判断是否涡旋
+                                if (sample.SubStep == 5)
+                                {
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
+                                    {
+                                        sample.SubStep++;
+                                    }
+
+                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
+                                    {
+                                        var result = _vortex.StartVortex(itemSample, 2, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVortex err");
+                                        }
+                                        sample.SubStep++;
+                                    }
+                                }
+                            }
+
+                            //程序完成 
+                            if (itemSample.MainStep != 1 && itemSample.SubStep == 6)
+                            {
+                                itemSample.MainStep++;
+                                itemSample.SubStep = 0;
+                            }
+
+
+                            //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
+                            MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
+
+                            //移除当前项
+                            GlobalCache.RemoveVibrationOneVortexKeyValue(itemSample, item.Value);
+
                         }
-                        //是否振荡  跳过
-                        if (itemSample.TechParams.TechStep == 4)
+                        catch (Exception ex)
                         {
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.ExtractVibration1))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = StartVibration(itemSample,1, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVibration err");
-                                    }
+                            _globalStauts.PauseProgram();
 
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVibration1);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            //判断是否涡旋
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = _vortex.StartVortex(itemSample,1, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVortex err");
-                                    }
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVortex1);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            sample.TechParams.TechStep = 5;
+                            _logger?.Warn(ex.Message);
+                            return;
                         }
-                        //是否振荡  跳过
-                        if (itemSample.TechParams.TechStep == 6)
-                        {
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.ExtractVibration2))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = StartVibration(itemSample,2, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVibration err");
-                                    }
-
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVibration2);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            //判断是否涡旋
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = _vortex.StartVortex(itemSample,2, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVortex err");
-                                    }
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVortex2);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            sample.TechParams.TechStep = 10;
-                        }
-                        //是否振荡  跳过
-                        if (itemSample.TechParams.TechStep == 22)
-                        {
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.ExtractVibration3))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = StartVibration(itemSample,3, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVibration err");
-                                    }
-
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVibration3);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            //判断是否涡旋
-                            if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex3))
-                            {
-                                if (!_globalStauts.IsStopped)
-                                {
-                                    var result = _vortex.StartVortex(itemSample,3, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVortex err");
-                                    }
-                                    TechStatusHelper.ResetBit(itemSample.TechParams, TechStatus.ExtractVortex3);
-                                }
-                                else
-                                {
-                                    throw new TaskCanceledException("程序停止");
-                                }
-
-                            }
-
-                            sample.TechParams.TechStep = 30;
-                        }
-
-
-
-
                     }
-                    catch (Exception ex)
-                    {
-                        _globalStauts.PauseProgram();
-
-                        _logger?.Error(ex.Message);
-                        return;
-                    }
-
-                    //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
-                    MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
-
-                    GlobalCache.RemoveVibrationOneVortexKeyValue(itemSample,item.Value);
-
+                    Thread.Sleep(1000);
                 }
             });
 
             return _vibrationOnevortexTask;
 
         }
+
+
+        /// <summary>
+        /// 萃取管振荡涡旋
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool StartPolishVibrationAndVortex(Sample sample,CancellationTokenSource cts)
+        {
+            try
+            {
+                lock (_lockObj)
+                {
+                    //萃取振荡 涡旋
+                    if (sample.MainStep == 9 && !_globalStauts.IsStopped)
+                    {
+                        if (sample.SubStep == 0)
+                        {
+                            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
+                            {
+                                sample.SubStep++;
+                            }
+
+                            if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
+                            {
+                                var result = StartVibration(sample, 3, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("StartVibration err");
+                                }
+
+                                sample.SubStep++;
+                            }
+
+                        }
+
+                        //判断是否涡旋
+                        if (sample.SubStep == 1)
+                        {
+                            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
+                            {
+                                sample.SubStep++;
+                            }
+
+                            if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
+                            {
+                                var result = _vortex.StartVortex(sample, 3, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("StartVortex err");
+                                }
+                                sample.SubStep++;
+                            }
+                        }
+
+                        if (sample.SubStep == 2)
+                        {
+                            sample.SubStep = 0;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
 
 
         #region Private Methods
@@ -346,6 +387,7 @@ namespace Q_Platform.BLL
             }
         }
 
+       
 
 
         #endregion

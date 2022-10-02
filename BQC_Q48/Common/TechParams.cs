@@ -176,12 +176,6 @@ namespace BQJX.Common
         public int Tech { get; set; }
 
         /// <summary>
-        /// 工艺步骤
-        /// <see cref="TechStepStatus"/>
-        /// </summary>
-        public int TechStep { get; set; }
-
-        /// <summary>
         /// 工艺创建时间
         /// </summary>
         public DateTime Createtime { get; set; }

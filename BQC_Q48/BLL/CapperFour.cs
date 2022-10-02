@@ -191,21 +191,9 @@ namespace Q_Platform.BLL
                 {
                     bool result;
 
-                    //搬运西林瓶到拧盖4 并称重
-                    result = GetSeilingAndWeight11(sample,null, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
-                    }
-
                     //开始移取浓缩液 浓缩
                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
                     {
-                        result = _carrier.DoPipettingTwo(sample,1, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"西林瓶{sample.Id}移取待浓缩液失败!");
-                        }
 
                         //搬运到浓缩
                         result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
@@ -274,20 +262,6 @@ namespace Q_Platform.BLL
                 {
                     bool result;
 
-                    //搬运西林瓶到拧盖4 并称重
-                    result = GetSeilingAndWeight11(sample,AddMark_B, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
-                    }
-
-                    //开始移取浓缩液 浓缩
-                    result = _carrier.DoPipettingTwo(sample,2, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"西林瓶{sample.Id}移取待浓缩液失败!");
-                    }
-
                     //搬运到浓缩
                     result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
                     if (!result)
@@ -331,6 +305,28 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
+        /// 农残移液
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool DoPipettingOne(Sample sample,CancellationTokenSource cts)
+        {
+            return _carrier.DoPipettingTwo(sample, 1, cts); 
+        }
+
+        /// <summary>
+        /// 兽残移液
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool DoPipettingTwo(Sample sample,CancellationTokenSource cts)
+        {
+           return _carrier.DoPipettingTwo(sample, 2, cts);
+         }
+
+        /// <summary>
         /// 从净化管移液到小瓶
         /// </summary>
         /// <param name="sample"></param>
@@ -341,79 +337,16 @@ namespace Q_Platform.BLL
             return _capperFive.DoPipettingFromCapperThreeToBottle(sample, cts);
         }
 
-
-        /// <summary>
-        /// 获取西林瓶重量 农残
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool GetSeilingAndWeight(Sample sample, CancellationTokenSource cts)
-        {
-
-            try
-            {
-                lock (_lockObj)
-                {
-                    bool result;
-                    //搬运西林瓶到拧盖4
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInShelf))
-                    {
-                        result = _carrier.GetSelingFromMaterialToCapperFour(sample, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
-                        }
-                    }
-
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
-                    {
-                        //拆盖
-                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"西林瓶{sample.Id}拆盖失败!");
-                        }
-                    }
-
-                    if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
-                    {
-                        //搬运到称重称重
-                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, null, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"西林瓶{sample.Id}称重失败!");
-                        }
-                    }
-
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-
-
-
-        }
-
-
-        #endregion
-
-
-        #region Private Methods
-
         /// <summary>
         /// 获取西林瓶重量
         /// </summary>
         /// <param name="sample"></param>
+        /// <param name="func">加标1</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSeilingAndWeight11(Sample sample,Func<Sample,CancellationTokenSource,bool> func,CancellationTokenSource cts)
+        public async Task<bool> GetSeilingAndWeight(Sample sample, CancellationTokenSource cts)
         {
-         
+            await Task.Delay(100).ConfigureAwait(false);
             try
             {
                 lock (_lockObj)
@@ -438,7 +371,7 @@ namespace Q_Platform.BLL
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
                     {
                         //拆盖
-                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
+                        result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"西林瓶{sample.Id}拆盖失败!");
@@ -449,7 +382,7 @@ namespace Q_Platform.BLL
                     if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
                         //搬运到称重称重
-                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, func, cts);
+                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, AddMark_B, cts);
                         if (!result)
                         {
                             throw new Exception($"西林瓶{sample.Id}称重失败!");
@@ -464,10 +397,19 @@ namespace Q_Platform.BLL
 
                 throw;
             }
-          
 
-           
+
+
         }
+
+        #endregion
+
+
+        #region Private Methods
+
+
+
+
 
         /// <summary>
         /// 复溶并提取样品液

@@ -17,7 +17,7 @@ namespace Q_Platform.BLL
         Task StartVibrationAndVortex(Sample sample, string methodAction, CancellationTokenSource cts);
 
 
-
+        bool StartPolishVibrationAndVortex(Sample sample, CancellationTokenSource cts);
 
 
 

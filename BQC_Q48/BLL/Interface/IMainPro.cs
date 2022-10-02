@@ -22,7 +22,7 @@ namespace Q_Platform.BLL
 
         void Centrifugal(Sample sample, CancellationTokenSource cts);
 
-        void AddSolve(Sample sample, CancellationTokenSource cts);
+        void WetBack(Sample sample, CancellationTokenSource cts);
         void AddSalt(Sample sample, CancellationTokenSource cts);
         void CentrifugalCallBack(Sample sample, CancellationTokenSource cts);
     }

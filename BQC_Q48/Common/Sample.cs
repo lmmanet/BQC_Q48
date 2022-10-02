@@ -65,13 +65,6 @@ namespace BQJX.Common
         public int BottleStatus { get; set; }
 
 
-
-
-
-
-
-
-
         /// <summary>
         /// 样品处理工艺
         /// </summary>
@@ -98,9 +91,24 @@ namespace BQJX.Common
         public double SeilingWeight2 { get; set; }
 
         /// <summary>
-        /// 提取样品液步骤
+        /// 样品处理主步骤
+        /// <see cref="TechStepStatus"/>
         /// </summary>
-        public int ExtractSampleStep { get; set; }
+        public int MainStep { get; set; }
 
+        /// <summary>
+        /// 样品处理子步骤
+        /// </summary>
+        public int SubStep { get; set; }
+
+        /// <summary>
+        /// 移液步骤
+        /// </summary>
+        public int PipettorStep { get; set; } = 1;
+
+        /// <summary>
+        /// 回湿最终时间
+        /// </summary>
+        public DateTime WetBackEndTime { get; set; }
     }
 }

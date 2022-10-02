@@ -172,6 +172,7 @@ namespace Q_Platform.BLL
             //判断是否有加盐工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
             {
+                sample.MainStep = 4;
                 return true;
             }
 
@@ -186,27 +187,39 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //加溶剂 + 加盐
-                    result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
                     {
-                        return false;
+                        result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep = 2;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
-
-                    //装盖 内部判断在拧盖1就执行
-                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
-                    if (!result)
+                   
+                    if (sample.SubStep == 2)
                     {
-                        return false;
+                        //装盖 内部判断在拧盖1就执行
+                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep++;
                     }
+                   
 
-                    //下料到试管架
-                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                    if (!result)
+                    if (sample.SubStep == 3)
                     {
-                        return false;
+                        //下料到试管架
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep++;
                     }
-
+                  
                     //完成
                     return true;
                 }
@@ -239,6 +252,7 @@ namespace Q_Platform.BLL
             //判断是否有加溶剂工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
             {
+                sample.MainStep = 3;
                 return true;
             }
 
@@ -254,18 +268,18 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //加溶剂 
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && sample.SubStep == 0)
                     {
                         result = AddSolve(sample, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
                         }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
+                        sample.SubStep++;
                     }
 
                     //加盐
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1) && sample.SubStep == 1)
                     {
                         //加固重量
                         var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
@@ -276,22 +290,33 @@ namespace Q_Platform.BLL
                         {
                             return false;
                         }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt1);
+                        sample.SubStep++;
                     }
 
-                    //装盖 内部判断在拧盖1就执行
-                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.SubStep == 2)
                     {
-                        return false;
+                        //装盖 内部判断在拧盖1就执行
+                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep++;
+                    }
+                   
+
+                    if (sample.SubStep == 3)
+                    {
+                        ////下料到试管架
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep++;
                     }
 
-                    ////下料到试管架
-                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                    if (!result)
-                    {
-                        return false;
-                    }
+                  
 
                     //完成
                     return true;
@@ -323,9 +348,9 @@ namespace Q_Platform.BLL
         public bool AddWaterExtract(Sample sample, CancellationTokenSource cts)
         {
             //判断是否有加水工艺
-            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater)&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo)) 
+            if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo)) 
             {
-                Thread.Sleep(1000);
+                sample.MainStep = 2;
                 return true;
             }
 
@@ -340,18 +365,18 @@ namespace Q_Platform.BLL
                         throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
                     }
                     //加水  
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater) && sample.SubStep == 0)
                     {
                         result = AddWater(sample, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
                         }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddWater);
+                        sample.SubStep = 1;
                     }
 
                     //加固
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo) && sample.SubStep == 1)
                     {
                         //加固重量
                         var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0],
@@ -362,21 +387,29 @@ namespace Q_Platform.BLL
                         {
                             return false;
                         }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddHomo);
+                        sample.SubStep = 2;
                     }
 
-                    //装盖 内部判断在拧盖1就执行
-                    result = MoveOut(sample, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.SubStep == 2)
                     {
-                        return false;
+                        //装盖 内部判断在拧盖1就执行
+                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep = 3;
                     }
 
-                    ////下料到试管架
-                    result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
-                    if (!result)
+                    if (sample.SubStep == 3)
                     {
-                        return false;
+                        ////下料到试管架
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
+                        sample.SubStep = 4;
                     }
 
                     //完成

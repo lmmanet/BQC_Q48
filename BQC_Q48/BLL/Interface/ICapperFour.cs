@@ -50,10 +50,14 @@ namespace Q_Platform.BLL
 
 
 
+        Task<bool> GetSeilingAndWeight(Sample sample, CancellationTokenSource cts);
 
 
 
-        bool GetSeilingAndWeight(Sample sample, CancellationTokenSource cts);
+
+        bool DoPipettingOne(Sample sample, CancellationTokenSource cts);
+        bool DoPipettingTwo(Sample sample, CancellationTokenSource cts);
+
 
     }
 

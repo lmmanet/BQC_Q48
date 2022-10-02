@@ -22,6 +22,11 @@ namespace Q_Platform.BLL
 
         Task _main;
 
+        Task _wetBackTask;
+        Task _vibrationTask;
+        Task _centrifugalTask;
+        Task _pipettingTask;
+        Task _concentrationTask;
         //任务列表
 
         List<Sample> _workList;
@@ -210,7 +215,7 @@ namespace Q_Platform.BLL
                 _workList = new List<Sample>();
                 for (int i = 1; i < 11;)
                 {
-                    Sample sample = new Sample() { Id = (ushort)i, Status = 1172527124481, TechParams = new TechParams()  //113-2018 果蔬
+                    Sample sample = new Sample() { Id = (ushort)i, Status = 1172527124481,MainStep =3, TechParams = new TechParams()  //113-2018 果蔬
                     {
                         AddWater = 0,
                         Solvent_A = 10,    //ACE
@@ -240,7 +245,7 @@ namespace Q_Platform.BLL
                         ExtractSampleVolume = 1,                     //最终样品1ml
 
                         Tech = 0xF03EE00,                         //工艺
-                        TechStep = 5
+                       
                     }
                     };
                     _workList.Add(sample);
@@ -249,7 +254,7 @@ namespace Q_Platform.BLL
                     //Sample sample1 = new Sample()
                     //{
                     //    Id = (ushort)i,
-                    //    Status = 1172527124481,
+                    //    Status = 1172527124481, MainStep =1
                     //    TechParams = new TechParams()
                     //    {
                     //        AddWater = 8,
@@ -268,7 +273,7 @@ namespace Q_Platform.BLL
                     //        VortexTime = new int[] { 40, 40, 40 },
                     //        VortexVel = new int[] { 1000, 1000, 1000 },
                     //        Tech = 0x1F43EE19,
-                    //        TechStep =1
+                    //       
                     //    }
                     //};
                     //_workList.Add(sample1);
@@ -367,16 +372,12 @@ namespace Q_Platform.BLL
         public void ContinuePro()
         {
             _globalStatus.ContinueProgram();
-            //if (_workList == null)
-            //{
-            //    _workList = MySerialization.DeserializeFromXml<List<Sample>>(_sampleFile);
-            //}
-            //GlobalCache.GetStatusFromFile();
 
-            //cts = new CancellationTokenSource();
-            //Task.Run(() =>
-            //{
-            //}).ConfigureAwait(false);
+            //启动任务
+             _wetBackTask.Start();
+             _vibrationTask.Start();
+            _centrifugalTask.Start();
+            _pipettingTask.Start();
         }
 
         public void SwitchLight()
@@ -402,56 +403,47 @@ namespace Q_Platform.BLL
 
         protected bool Ext(Sample sample)
         {
-
             //加水提取
-            if (sample.TechParams.TechStep ==1 && !_globalStatus.IsStopped)
+            if (sample.MainStep ==1 && !_globalStatus.IsStopped)
             {
                 var ret = _capperOne.AddWaterExtract(sample, cts);
                 if (!ret)
                 {
                     //暂停所有任务 
                     _globalStatus.PauseProgram();
-                   
                     return false;
                 }
                 //把样品加入到振荡涡旋列表  并启动程序
-                sample.TechParams.TechStep = 2;
-                _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@AddSolve", cts);
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@WetBack", cts);
             }
 
-            if (sample.TechParams.TechStep == 3 && !_globalStatus.IsStopped)
+            if (sample.MainStep == 2 && !_globalStatus.IsStopped)
             {
                 var result = _capperOne.AddSolveExtract(sample, cts);
                 if (!result)
                 {
                     _globalStatus.PauseProgram();
-                    Console.WriteLine("加液提取出错");
                     return false;
                 }
-                TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
 
                 //把样品加入到振荡涡旋列表  并启动程序
-                sample.TechParams.TechStep = 4;
                 //_vibrationOne.StartVibrationAndVortex(sample, AddSalt,cts);
-                _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@AddSalt", cts);
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@AddSalt", cts);
                 //Thread.Sleep(500);
             }
 
-            if (sample.TechParams.TechStep == 5 && !_globalStatus.IsStopped)
+            if (sample.MainStep == 3 && !_globalStatus.IsStopped)
             {
                 var result = _capperOne.AddSaltExtract(sample, cts);
                 if (!result)
                 {
                     _globalStatus.PauseProgram();
-                    Console.WriteLine("加盐提取出错");
                     return false;
                 }
-                TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve1);
 
                 //把样品加入到振荡涡旋列表  并启动程序
-                sample.TechParams.TechStep = 6;
                 //_vibrationOne.StartVibrationAndVortex(sample, Centrifugal,cts);
-                _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
 
                 //Thread.Sleep(500);
             }
@@ -465,24 +457,47 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="workList">任务列表</param>
-        public void AddSolve(Sample sample, CancellationTokenSource cts)
+        public void WetBack(Sample sample, CancellationTokenSource cts)
         {
-            Task.Run(() =>
+            int minutes = sample.TechParams.WetTime;
+            DateTime end = DateTime.Now + TimeSpan.FromMinutes(minutes);
+            sample.WetBackEndTime = end;
+
+            GlobalCache.AddWetBack(sample);
+
+            if (_wetBackTask != null)
             {
-                int minutes = sample.TechParams.WetTime;
-                DateTime end = DateTime.Now + TimeSpan.FromMinutes(minutes);
-                while (minutes >0)
+                if (!_wetBackTask.IsCompleted)
                 {
-                    if (DateTime.Now >= end)
-                    {
-                        break;
-                    }
-                    Thread.Sleep(10000);
+                    return;
                 }
-                _workList.Insert(1, sample);
-                sample.TechParams.TechStep = 3;
+            }
+
+            _wetBackTask = Task.Run(() =>
+            {
+                int count = 10;
+                while (count > 0 && !_globalStatus.IsStopped)
+                {
+                    var list = GlobalCache.GetWetBackList();
+                  
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        var itemSample = list[i];
+                        if (DateTime.Now > itemSample.WetBackEndTime)
+                        {
+                            itemSample.SubStep = 0;
+                            itemSample.MainStep = 2;
+                            //插入列表首位
+                            _workList.Insert(1, itemSample);
+                            list.Remove(itemSample);
+                        }
+                    }
+                    count = list.Count;
+                    Thread.Sleep(5000);
+                }
+               
             });
-          
+         
         }
 
         /// <summary>
@@ -501,21 +516,21 @@ namespace Q_Platform.BLL
         //一次离心 
         public void Centrifugal(Sample sample, CancellationTokenSource cts)
         {
-            if (sample.TechParams.TechStep ==10)
+            if (sample.MainStep ==4)
             {
                 _logger.Info("振荡完成 下一步一次离心!");
-                _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts);
+                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts);
             }
-            else if (sample.TechParams.TechStep == 20)
+            else if (sample.MainStep == 7)
             {
                 _logger.Info("净化振荡完成 下一步二次离心!");
-                _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
+                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
             }
             
-            else if (sample.TechParams.TechStep == 30)
+            else if (sample.MainStep == 10)
             {
                 _logger.Info("萃取振荡完成 下一步三次离心!");
-                _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
+                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
             }
             
         }
@@ -524,7 +539,16 @@ namespace Q_Platform.BLL
         //一次移液  二次移液
         public void CentrifugalCallBack(Sample sample, CancellationTokenSource cts)
         {
-            _centrifugalCarrier.StartPipetting(sample, Centrifugal, cts);
+            if (sample.MainStep == 8 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
+            {
+                _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
+            }
+            if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate3) && sample.MainStep == 11)
+            {
+                _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
+            }
+
+            _pipettingTask = _centrifugalCarrier.StartPipetting(sample, Centrifugal, cts);
         }
 
 
@@ -541,6 +565,7 @@ namespace Q_Platform.BLL
             {
                 Id = 1,
                 Status = 0x11100101001,
+                MainStep = 3,
                 TechParams = new TechParams()  //113-2018 果蔬
                 {
                     AddWater = 0,
@@ -571,7 +596,7 @@ namespace Q_Platform.BLL
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
                     Tech = 0xF03EE00,                         //工艺
-                    TechStep = 3
+                  
                 }
             };
 
@@ -579,6 +604,7 @@ namespace Q_Platform.BLL
             {
                 Id = 1,
                 Status = 0x11100101001,
+                MainStep = 1,
                 TechParams = new TechParams()  //113-2018 坚果
                 {
                     AddWater = 10,
@@ -609,7 +635,6 @@ namespace Q_Platform.BLL
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
                     Tech = 0xF03EE19,                         //工艺
-                    TechStep = 1
                 }
             };
 
@@ -617,6 +642,7 @@ namespace Q_Platform.BLL
             {
                 Id = 1,
                 Status = 0x11100101001,
+                MainStep = 1,
                 TechParams = new TechParams()  //121-2021 果蔬
                 {
                     AddWater = 9,
@@ -647,14 +673,13 @@ namespace Q_Platform.BLL
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
                     Tech = 0x801ECF9,                         //工艺
-                    TechStep = 1
                 }
             };
 
             Sample sample4 = new Sample()     //121-2021 坚果
             {
                 Id = 1,
-                Status = 0x11100101001,
+                Status = 0x11100101001,MainStep =1,
                 TechParams = new TechParams()  //121-2021 坚果
                 {
                     AddWater = 10,
@@ -685,7 +710,7 @@ namespace Q_Platform.BLL
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
                     Tech = 0x801ECF9,                         //工艺
-                    TechStep = 1
+                  
                 }
             };
 
@@ -693,6 +718,7 @@ namespace Q_Platform.BLL
             {
                 Id = 1,
                 Status = 0x11100101001,
+                MainStep = 1,
                 TechParams = new TechParams()  //兽药
                 {
                     AddWater = 1,
@@ -725,7 +751,6 @@ namespace Q_Platform.BLL
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
                     Tech = 0x3EFDE1AB,                         //工艺
-                    TechStep = 1
                 }
             };
 

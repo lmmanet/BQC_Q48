@@ -57,49 +57,68 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     _logger?.Info($"样品{sampleId}净化管开始振荡-{time}s-{vel}rpm");
-
+                    bool result;
                     //振荡回零
-                    var result = GoHome(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.SubStep == 18 && !_globalStauts.IsStopped)
                     {
-                        throw new Exception("振荡回零失败!");
+                        result = GoHome(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("振荡回零失败!");
+                        }
+                        sample.SubStep++;
                     }
 
                     //搬运  从拧盖3搬运净化管到振荡
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
+                    if (sample.SubStep == 19 && !_globalStauts.IsStopped)
                     {
-                        result = _carrier.GetSampleFromCapperThreeToVibration(sample, cts);
-                        if (!result)
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                         {
-                            throw new Exception("搬运样品到振荡失败!");
+                            result = _carrier.GetSampleFromCapperThreeToVibration(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception("搬运样品到振荡失败!");
+                            }
                         }
+                        sample.SubStep++;
                     }
 
                     //开始振荡
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))
+                    if (sample.SubStep == 20 && !_globalStauts.IsStopped)
                     {
-                        result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))
                         {
-                            throw new Exception("样品振荡失败!");
+                            result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception("样品振荡失败!");
+                            }
                         }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.PurifyVibration);
+                        sample.SubStep++;
                     }
 
                     //搬运净化管到试管架
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                    if (sample.SubStep == 21 && !_globalStauts.IsStopped)
                     {
-                        result = _carrier.GetSampleFromVibrationToMaterial(sample, cts);
-                        if (!result)
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
-                            throw new Exception("搬运样品到试管架失败!");
+                            result = _carrier.GetSampleFromVibrationToMaterial(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception("搬运样品到试管架失败!");
+                            }
                         }
+                        sample.SubStep++;
                     }
 
+
                     //完成
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                    if (sample.SubStep == 22 && !_globalStauts.IsStopped)
                     {
-                        return true;
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                        {
+                            return true;
+                        }
                     }
                     throw new Exception("从拧盖3搬运净化管到振荡 失败!");
                 }

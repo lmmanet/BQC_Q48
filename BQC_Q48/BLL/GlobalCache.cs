@@ -25,6 +25,9 @@ namespace Q_Platform.BLL
         private List<Sample> VibrationOnevortexSampleList = new List<Sample>();
         private List<string> VibrationOnevortexActionList = new List<string>();
 
+        //回湿列表
+        private List<Sample> WetBackSampleList = new List<Sample>();
+
         //离心机部分
         private List<Sample> CentrifugalSampleList = new List<Sample>();
         private List<string> CentrifugalActionList = new List<string>();
@@ -81,6 +84,28 @@ namespace Q_Platform.BLL
         {
             return GlobalCache.Instance.VibrationOnevortexSampleList.Count;
         }
+
+
+        //=========================================================================================//
+
+        public static void AddWetBack(Sample sample)
+        {
+            if (GlobalCache.Instance.WetBackSampleList.Contains(sample))
+            {
+                return;
+            }
+            GlobalCache.Instance.WetBackSampleList.Add(sample);
+        }
+
+        public static List<Sample>GetWetBackList()
+        {
+           return GlobalCache.Instance.WetBackSampleList;
+        }
+
+
+
+
+
 
 
 

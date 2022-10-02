@@ -166,6 +166,7 @@ namespace Q_Platform.BLL
             //判断是否有加盐工艺
             if ((sample.TechParams.Tech & 0x1e00) == 0)
             {
+                sample.SubStep = 2;
                 return true;
             }
 
@@ -174,18 +175,18 @@ namespace Q_Platform.BLL
                 bool result;
 
                 //加溶剂 
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !_globalStatus.IsPause)
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !_globalStatus.IsPause && sample.SubStep == 0)
                 {
                     result = await addSolveFunc(sample, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSolve2);
+                    sample.SubStep++;
                 }
 
                 //加盐
-                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2) && !_globalStatus.IsPause)
+                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2) && !_globalStatus.IsPause && sample.SubStep == 1)
                 {  
                     //加固重量
                     var weight = new double[] { sample.TechParams.AddHomo[2], sample.TechParams.Solid_B[2], sample.TechParams.Solid_C[2],
@@ -196,23 +197,7 @@ namespace Q_Platform.BLL
                     {
                         return false;
                     }
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddSalt2);
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (true)
-                    {
-                        Thread.Sleep(2000);
-                        if (_globalStatus.IsStopped)
-                        {
-                            return false;
-                        }
-                        if (!_globalStatus.IsStopped&& !_globalStatus.IsPause)
-                        {
-                            return await AddSaltExtract(sample, addSolveFunc, func1, func2, cts).ConfigureAwait(false);
-                        }
-                    }
+                    sample.SubStep = 2;
                 }
 
                 //完成
@@ -221,11 +206,22 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (!_globalStatus.IsStopped)
                 {
-                    return false;
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                        if (_globalStatus.IsStopped)
+                        {
+                            return false;
+                        }
+                        if (!_globalStatus.IsStopped && !_globalStatus.IsPause)
+                        {
+                            return await AddSaltExtract(sample, addSolveFunc, func1, func2, cts).ConfigureAwait(false);
+                        }
+                    }
                 }
-                _logger?.Error(ex.Message);
+                _logger?.Warn(ex.Message);
                 return false;
             }
 
