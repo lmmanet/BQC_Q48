@@ -247,14 +247,14 @@
                                         VerticalAlignment="Center"
                                         Background="Red"
                                         Visibility="{Binding Flag, Converter={cv:IntToVisibilityConverter}, ConverterParameter=1}">
-                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="hot" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="Alarm" />
                                 </Border>
                                 <Border Margin="10,0,0,0"
                                         Padding="2,0"
                                         VerticalAlignment="Center"
                                         Background="Blue"
                                         Visibility="{Binding Flag, Converter={cv:IntToVisibilityConverter}, ConverterParameter=2}">
-                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="new" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="8" Foreground="White" Text="Notify" />
                                 </Border>
                                 <Border Margin="10,0,0,0"
                                         Padding="2,0"
@@ -285,7 +285,7 @@
         <Setter Property="Width" Value="40" />
         <Setter Property="FontSize" Value="8" />
         <Setter Property="IsEnabled" Value="False" />
-        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="Margin" Value="5" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">

@@ -25,7 +25,7 @@ namespace Q_Platform.BLL
 
         private readonly ILS_Motion _motion;
 
-        private readonly IGlobalStatus _globalStauts;
+        private readonly IGlobalStatus _globalStatus;
 
         private readonly ISyringTwo _syringTwo;
 
@@ -67,7 +67,7 @@ namespace Q_Platform.BLL
             _syringTwo = syringTwo;
 
             this._logger = new MyLogger(typeof(Concentration));
-            this._globalStauts = globalStatus;
+            this._globalStatus = globalStatus;
             this._dataAccess = dataAccess;
 
             _posData = dataAccess.GetPosData();
@@ -155,14 +155,9 @@ namespace Q_Platform.BLL
                     {
                         throw new Exception($"样品{sample.Id}浓缩失败!");
                     }
-
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.Concentration);
                 }
-                if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
-                {
-                    return true;
-                }
-                throw new Exception($"样品{sample.Id}浓缩失败! 状态错误");
+                return true;
+                
             }
             catch (Exception ex)
             {
@@ -199,14 +194,8 @@ namespace Q_Platform.BLL
                         throw new Exception($"样品{sample.Id}复溶失败!");
                     }
 
-                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.Redissolve);
                 }
-
-                if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Redissolve))
-                {
-                    return true;
-                }
-                throw new Exception($"样品{sample.Id}复溶失败! 状态错误");
+                return true;
             }
             catch (Exception ex)
             {
@@ -298,12 +287,27 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                StopRotate();
-                Thread.Sleep(500);
-                //Z气缸上升
-                Z_Cylinder_Up();
-                _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
-                throw ex;
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return Redissolve(volume,vel, time, cts);
+                    }
+
+                    return false;
+                }
+                _logger.Error(ex.Message);
+                return false;
             }
 
         }
@@ -386,20 +390,29 @@ namespace Q_Platform.BLL
                 return true;
 
             }
-            catch (TaskCanceledException)
-            {
-                CloseVaccume();
-                StopRotate();
-                Thread.Sleep(1000);
-                //Z气缸上升
-                Z_Cylinder_Up();
-                _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
-                return false;
-            }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
 
-                throw ex;
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(2000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        return DoConcentration(vel,time, cts);
+                    }
+
+                    return false;
+                }
+                _logger.Error(ex.Message);
+                return false;
             }
 
 

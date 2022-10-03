@@ -458,80 +458,112 @@ namespace Q_Platform.BLL
                         if (sample.SeilingStatus == 0 && !_globalStatus.IsStopped)
                         {
                             //搬运到称重
-                            result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId - 1), cts);
-                            if (!result)
+                            if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId - 1), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SubStep++;
                             }
 
-                            //读取称台值
-                            var weitht = ReadWeight();
-                            if (weitht <= sample.SeilingWeight1 + 0.5)
-                            {
-                                _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
-                                //判断是否加标
-                                if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.AddMark2))
+                            if (sample.SubStep == 1 && !_globalStatus.IsStopped)
+                            {  //读取称台值
+                                var weitht = ReadWeight();
+                                if (weitht <= sample.SeilingWeight1 + 0.5)
                                 {
-                                    result = addMarkFunc?.Invoke(sample,cts) == false;
-                                    if (result)
+                                    _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
+                                    //判断是否加标
+                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2))
                                     {
-                                        throw new Exception($"{sampleId}西林瓶加标失败");
+                                        result = addMarkFunc?.Invoke(sample, cts) == false;
+                                        if (result)
+                                        {
+                                            throw new Exception($"{sampleId}西林瓶加标失败");
+                                        }
+                                        //TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1); 下一步复位
                                     }
-                                    //TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1); 下一步复位
                                 }
+                                else
+                                {
+                                    _logger?.Debug($"浓缩失败 称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
+                                    sample.ConcentrationFailure = true;
+                                }
+                                sample.SubStep++;
                             }
 
                             //搬运回
-                            result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId - 1), cts);
-                            if (!result)
+                            if (sample.SubStep ==2 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId - 1), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SubStep++;
                             }
-
+                          
                             sample.SeilingStatus = 1;
                         }
 
                         if (sample.SeilingStatus == 1 && !_globalStatus.IsStopped)
                         {
                             //搬运到称重
-                            result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId), cts);
-                            if (!result)
+                            if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SubStep++;
                             }
 
                             //读取称台值
-                            var weitht = ReadWeight();
-                            if (weitht <= sample.SeilingWeight2 + 0.5)
+                            if (sample.SubStep == 4 && !_globalStatus.IsStopped)
                             {
-                                _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
-                                //判断是否加标
-                                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1))
+                                var weitht = ReadWeight();
+                                if (weitht <= sample.SeilingWeight2 + 0.5)
                                 {
-                                    result = addMarkFunc?.Invoke(sample,cts) == false;
-                                    if (result)
+                                    _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
+                                    //判断是否加标
+                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1))
                                     {
-                                        throw new Exception($"{sampleId}西林瓶加标失败");
+                                        result = addMarkFunc?.Invoke(sample, cts) == false;
+                                        if (result)
+                                        {
+                                            throw new Exception($"{sampleId}西林瓶加标失败");
+                                        }
+                                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1);
                                     }
-                                    TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1);
                                 }
+                                else
+                                {
+                                    _logger?.Debug($"浓缩失败 称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
+                                    sample.ConcentrationFailure = true;
+                                }
+                                sample.SubStep++;
                             }
+
 
                             //搬运回
-                            result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId), cts);
-                            if (!result)
+                            if (sample.SubStep == 5 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SubStep++;
                             }
-
-                            sample.SeilingStatus = 0;
+                            if (sample.SubStep == 6)
+                            {
+                                sample.SubStep = 0;
+                                sample.SeilingStatus = 0;
+                                return true;
+                            }
                         }
-                    }
-
-                    //试管在拧盖3   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInConcentration))
-                    {
-                        return true;
                     }
                     throw new Exception($"从浓缩搬运{sampleId}西林瓶到称重 失败,SampleStatus-{sample.Status}");
                 }

@@ -77,6 +77,9 @@ namespace Q_Platform.ViewModels.Page
         public ICommand InitialSysCommand { get; set; }
         public ICommand PauseTaskCommand { get; set; }
 
+        public ICommand AddSampleCommand { get; set; }
+
+
         #endregion
 
         #region Construtors
@@ -118,6 +121,12 @@ namespace Q_Platform.ViewModels.Page
             ContinueCommand = new RelayCommand(ContinuePro);
             InitialSysCommand = new RelayCommand(async()=>await InitialSys());
             PauseTaskCommand = new RelayCommand(PausePro);
+            AddSampleCommand = new RelayCommand<Object>(AddSample);
+        }
+
+        private void AddSample(object obj)
+        {
+            //string btnName = obj.ToString();
         }
 
         private async Task InitialSys()

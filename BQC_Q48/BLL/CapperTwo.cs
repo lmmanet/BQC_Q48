@@ -143,12 +143,15 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运萃取管到拧盖2
-                    result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInShelf))
                     {
-                        throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
+                        result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
+                        }
                     }
-
+                   
                     //拆盖
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped))
                     {
@@ -168,13 +171,21 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运到移栽
-                    result = _carrier.GetPolishFromCapperTwoToTransfer(sample, func, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInCapper))
                     {
-                        throw new Exception($"从拧盖2搬运{ sampleId }萃取管到移栽失败!");
+                        result = _carrier.GetPolishFromCapperTwoToTransfer(sample, func, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从拧盖2搬运{ sampleId }萃取管到移栽失败!");
+                        }
                     }
 
-                    return true;
+                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInTransfer))
+                    {
+                        return true;
+                    }
+                    throw new Exception("试管状态错误！");
+                   
                 }
             }
             catch (Exception ex)

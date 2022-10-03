@@ -1344,3 +1344,7 @@ D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\BQC-Q48.csproj.Fody.RuntimeCopyL
 D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\BQC-Q48.csproj.CopyComplete
 D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\UC\SampleStatusMonitor.g.cs
 D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\UC\SampleStatusMonitor.baml
+D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\UC\Base\TubePos.g.cs
+D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\Windows\AddSampleWin.g.cs
+D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\UC\Base\TubePos.baml
+D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\Views\Windows\AddSampleWin.baml

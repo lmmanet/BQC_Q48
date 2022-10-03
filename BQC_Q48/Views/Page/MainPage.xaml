@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:BQC_Q48.Views"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:uc="clr-namespace:Q_Platform.Views.UC.Base"
       d:DesignHeight="1000"
       d:DesignWidth="800"
       DataContext="{Binding Source={StaticResource Locator}, Path=MainPageViewModel}"
@@ -131,6 +132,7 @@
     </Page.Resources>
 
     <Grid>
+      
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="1.3*" />
@@ -171,7 +173,9 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Binding="{Binding Id, Converter={cv:SampleIdToPosString}}" Header="样品位置" />
                         <DataGridTextColumn Width="*" Binding="{Binding SnNum}" Header="样品编号" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="样品名称" />
+                        <DataGridTextColumn Width="*" Binding="{Binding Name}"  Header="样品名称" >
+                          
+                        </DataGridTextColumn>
                         <DataGridTextColumn Width="*" Binding="{Binding CurrentProcess}" Header="当前进度" />
                         <DataGridTextColumn Width="*" Binding="{Binding TechName}" Header="处理工艺" />
                         <DataGridTextColumn Width="*" Binding="{Binding Status}" Header="当前状态" />
@@ -220,6 +224,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+
                     <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
                         <Grid>
                             <TextBlock Margin="5,0,0,0"
@@ -233,13 +238,46 @@
 
                     <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
 
-                    <ContentControl Grid.Row="1"
-                                    Width="300"
-                                    Height="600"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch">
-                        <!--<local:TubePos SampleCount="{Binding SampleCount}" />-->
-                    </ContentControl>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="400" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <ContentControl Grid.Column="0"
+                                        Width="400"
+                                        Height="400"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                            <uc:TubePos SampleCount="15"  Command="{Binding AddSampleCommand}"/>
+                        </ContentControl>
+
+                        <Border Grid.Column="1" Padding="20,10" BorderBrush="Gray" BorderThickness="1,0,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="冰浴温度:" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="样品小瓶温度:" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="标准品温度:" />
+                                <TextBox Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
+                                <TextBox Grid.Row="1" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
+                                <TextBox Grid.Row="2" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
+
+                            </Grid>
+                        </Border>
+
+                    </Grid>
+
 
 
                 </Grid>
@@ -281,6 +319,8 @@
         </Grid>
 
         <Border Grid.Row="2" Padding="5,10">
+
+
             <UniformGrid Rows="1">
                 <Button Width="140" Command="{Binding StartTaskCommand}" Content="运行序列" IsEnabled="{Binding RunBtnEnable}" />
                 <Button Width="140" Command="{Binding PauseTaskCommand}" Content="暂停序列" IsEnabled="{Binding PauseBtnEnable}" />

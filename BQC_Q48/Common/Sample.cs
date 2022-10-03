@@ -17,14 +17,24 @@ namespace BQJX.Common
         public ushort Id { get; set; }
 
         /// <summary>
-        /// 样品编号
+        /// 样品1编号
         /// </summary>
-        public string SnNum { get; set; }
+        public string SnNum1 { get; set; }
 
         /// <summary>
-        /// 样品名称
+        /// 样品2编号
         /// </summary>
-        public string Name { get; set; }
+        public string SnNum2 { get; set; }
+
+        /// <summary>
+        /// 样品1名称
+        /// </summary>
+        public string Name1 { get; set; }
+
+        /// <summary>
+        /// 样品2名称
+        /// </summary>
+        public string Name2 { get; set; }
 
         /// <summary>
         /// 样品创建时间
@@ -110,5 +120,10 @@ namespace BQJX.Common
         /// 回湿最终时间
         /// </summary>
         public DateTime WetBackEndTime { get; set; }
+
+        /// <summary>
+        /// 浓缩失败
+        /// </summary>
+        public bool ConcentrationFailure { get; set; }
     }
 }

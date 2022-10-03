@@ -228,6 +228,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UC\Base\TubePos.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UC\ClawTestUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -245,6 +249,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UC\StepAxisTestUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Windows\AddSampleWin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -305,6 +313,9 @@
     <Compile Include="Views\UC\Base\TechSinglePosUC.xaml.cs">
       <DependentUpon>TechSinglePosUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UC\Base\TubePos.xaml.cs">
+      <DependentUpon>TubePos.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UC\ClawTestUC.xaml.cs">
       <DependentUpon>ClawTestUC.xaml</DependentUpon>
     </Compile>
@@ -319,6 +330,9 @@
     </Compile>
     <Compile Include="Views\UC\StepAxisTestUC.xaml.cs">
       <DependentUpon>StepAxisTestUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Windows\AddSampleWin.xaml.cs">
+      <DependentUpon>AddSampleWin.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

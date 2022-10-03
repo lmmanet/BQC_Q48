@@ -1,0 +1,63 @@
+2022-10-03 10:48:27.5635 | 初始卡失败! CardCount:0 
+2022-10-03 10:48:45.1108 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:23:42.6069 | 初始卡失败! CardCount:0 
+2022-10-03 11:23:45.7036 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:25:18.6154 | 初始卡失败! CardCount:0 
+2022-10-03 11:25:22.0154 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:32:32.4226 | 初始卡失败! CardCount:0 
+2022-10-03 11:32:35.8518 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:33:44.0828 | 初始卡失败! CardCount:0 
+2022-10-03 11:33:47.2284 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:35:11.9197 | 初始卡失败! CardCount:0 
+2022-10-03 11:35:15.3074 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:36:00.1567 | 初始卡失败! CardCount:0 
+2022-10-03 11:36:04.2974 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:40:00.6122 | 初始卡失败! CardCount:0 
+2022-10-03 11:40:03.7450 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:42:23.0408 | 初始卡失败! CardCount:0 
+2022-10-03 11:42:26.5534 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:42:55.7814 | 初始卡失败! CardCount:0 
+2022-10-03 11:42:59.2003 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:45:02.2608 | 初始卡失败! CardCount:0 
+2022-10-03 11:45:07.4534 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:49:30.6806 | 初始卡失败! CardCount:0 
+2022-10-03 11:49:36.6189 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:51:47.8282 | 初始卡失败! CardCount:0 
+2022-10-03 11:51:50.4355 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 11:54:32.8302 | 初始卡失败! CardCount:0 
+2022-10-03 11:54:35.9579 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:01:15.2780 | 初始卡失败! CardCount:0 
+2022-10-03 12:01:18.4474 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:08:01.1690 | 初始卡失败! CardCount:0 
+2022-10-03 12:08:04.3883 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:10:10.8493 | 初始卡失败! CardCount:0 
+2022-10-03 12:10:15.5406 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:11:50.4257 | 初始卡失败! CardCount:0 
+2022-10-03 12:11:54.5675 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:12:22.9908 | 初始卡失败! CardCount:0 
+2022-10-03 12:12:26.9631 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:12:54.0864 | 初始卡失败! CardCount:0 
+2022-10-03 12:13:00.2989 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:13:57.8112 | 初始卡失败! CardCount:0 
+2022-10-03 12:14:02.2847 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:17:43.0095 | 初始卡失败! CardCount:0 
+2022-10-03 12:17:47.4647 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:19:46.9784 | 初始卡失败! CardCount:0 
+2022-10-03 12:19:51.6476 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:21:08.1982 | 初始卡失败! CardCount:0 
+2022-10-03 12:21:12.5210 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:29:57.0909 | 初始卡失败! CardCount:0 
+2022-10-03 12:30:03.0128 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:32:50.8208 | 初始卡失败! CardCount:0 
+2022-10-03 12:32:55.3721 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:35:33.4659 | 初始卡失败! CardCount:0 
+2022-10-03 12:35:37.8862 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:40:42.7190 | 初始卡失败! CardCount:0 
+2022-10-03 12:40:47.1907 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:43:40.2727 | 初始卡失败! CardCount:0 
+2022-10-03 12:43:48.7610 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:47:09.2223 | 初始卡失败! CardCount:0 
+2022-10-03 12:47:14.4334 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:47:45.7949 | GetPosData err:Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES) 
+2022-10-03 12:49:05.5387 | 初始卡失败! CardCount:0 
+2022-10-03 12:49:52.4355 | 初始卡失败! CardCount:0 

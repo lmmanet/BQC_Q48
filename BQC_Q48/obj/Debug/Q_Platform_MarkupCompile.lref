@@ -1,4 +1,4 @@
-﻿D:\项目\Q平台\App\BQC_Q48\BQC_Q48\obj\Debug\GeneratedInternalTypeHelper.g.cs
+﻿
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\App.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\Page\AlarmPage.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\Page\DeviceManagePage.xaml;;
@@ -12,11 +12,13 @@ FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\Base\IoUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\Base\StatusUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\Base\TechPosUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\Base\TechSinglePosUC.xaml;;
+FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\Base\TubePos.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\ClawTestUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\FieldBusTestUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\IoTestUC.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\SampleStatusMonitor.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\UC\StepAxisTestUC.xaml;;
+FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\Windows\AddSampleWin.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Views\Windows\MainWindow.xaml;;
 FD:\项目\Q平台\App\BQC_Q48\BQC_Q48\Resources\Styles\Buttons.xaml;;
 

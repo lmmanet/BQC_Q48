@@ -178,15 +178,8 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception();
                         }
-
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.ExtractSample);
                     }
-
-                    if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
-                    {
-                        return true;
-                    }
-                    throw new Exception("提取净化样品液失败!");
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -217,69 +210,99 @@ namespace Q_Platform.BLL
             bool result;
             lock (_lockObj)
             {
-                result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
+                if (sample.SubStep ==0 && !_globalStatus.IsStopped)
                 {
-                    throw new Exception("拧盖Y轴到接驳位出错!");
+                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("拧盖Y轴到接驳位出错!");
+                    }
+                    sample.SubStep++;
                 }
 
                 //搬运小瓶到拧盖5 第一组
-                if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsBottle1InShelf))
+                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
                     {
-                        throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
+                        result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
+                        }
                     }
+                    sample.SubStep++;
                 }
 
                 //拆盖 第一组
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1ExtractDone))
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1ExtractDone))
                     {
-                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+                        {
+                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                            }
+                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
+                        }
+                    }
+                    sample.SubStep++;
+                }
+
+                //两次移液
+                if (sample.SubStep == 3 && !_globalStatus.IsStopped)
+                {
+                    result = _carrier.DoPipettingOne(sample, var, GetNextBottle, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"样品小瓶{sample.Id}移液失败!");
+                    }
+                    sample.SubStep++;
+                }
+
+
+                //装盖
+                if (sample.SubStep == 4 && !_globalStatus.IsStopped)
+                {
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
+                    {
+                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
                         }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2UnCapped);
                     }
+                    sample.SubStep++;
                 }
 
-                //两次移液
-                result = _carrier.DoPipettingOne(sample, var, GetNextBottle, cts);
-                if (!result)
-                {
-                    throw new Exception($"样品小瓶{sample.Id}移液失败!");
-                }
-
-                //装盖
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
-                {
-                    result = CapperOnAsync(sample,cts).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
-                    }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2UnCapped);
-                }
 
                 //搬运小瓶到小瓶架
-                if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsBottle2InCapper))
+                if (sample.SubStep == 5 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetBottleFromCapperFiveToMaterial_Two(sample, cts);
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
                     {
-                        throw new Exception($"搬运{sample.Id}样品小瓶到小瓶架失败!");
+                        result = _carrier.GetBottleFromCapperFiveToMaterial_Two(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"搬运{sample.Id}样品小瓶到小瓶架失败!");
+                        }
+                    }
+                    sample.SubStep++;
+                }
+
+                if (sample.SubStep == 6 )
+                {
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
+                    {
+                        sample.SubStep = 0;
+                        return true;
                     }
                 }
-
-
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
-                {
-                    return true;
-                }
+            
                 return false;
 
 
