@@ -29,7 +29,7 @@ namespace Q_Platform.ViewModels.Page
         /// <summary>
         /// 运行按钮
         /// </summary>
-        public bool RunBtnEnable { get; set; } = false;
+        public bool RunBtnEnable { get; set; } = true;
 
         /// <summary>
         /// 暂停按钮

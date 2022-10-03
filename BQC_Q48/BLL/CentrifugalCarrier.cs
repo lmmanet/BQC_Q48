@@ -39,6 +39,9 @@ namespace Q_Platform.BLL
 
         private readonly IVibrationOne _vibrationOne;
 
+        private readonly ICarrierOne _carrierOne;
+        private readonly ICarrierTwo _carrierTwo;
+
         private CentrifugalCarrierPosData _posData;
 
         #endregion
@@ -61,7 +64,8 @@ namespace Q_Platform.BLL
         #region Construtors
 
         public CentrifugalCarrier(IEtherCATMotion motion, IIoDevice io, ILS_Motion stepMotion, IEPG26 claw, ICentrifugalCarrierPosDataAccess dataAccess, 
-            ICapperTwo capperTwo,ICapperThree capperThree, ICapperFour capperFour, IGlobalStatus globalStatus, IVibrationOne vibrationOne)
+            ICapperTwo capperTwo,ICapperThree capperThree, ICapperFour capperFour, IGlobalStatus globalStatus, IVibrationOne vibrationOne,
+            ICarrierOne carrierOne,ICarrierTwo carrierTwo)
         {
             this._motion = motion;
             this._io = io;
@@ -73,6 +77,9 @@ namespace Q_Platform.BLL
             this._capperThree = capperThree;
             this._capperFour = capperFour;
             this._vibrationOne = vibrationOne;
+            this._carrierOne = carrierOne;
+            this._carrierTwo = carrierTwo;
+
 
             this._logger = new MyLogger(typeof(CentrifugalCarrier));
             this._globalStatus = globalStatus;
@@ -214,8 +221,7 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //取出试管
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal1)
-                        && !_globalStatus.IsStopped)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal) && !_globalStatus.IsStopped)
                     {
                         result = GetTubeOutCentrifugal(sample, GoStation, 1, cts);
                         if (!result)
@@ -1080,7 +1086,7 @@ namespace Q_Platform.BLL
 
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                 {
-                    var result = _capperTwo.GetSampleFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetSampleFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }样品到移栽 失败");
@@ -1124,7 +1130,7 @@ namespace Q_Platform.BLL
 
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                 {
-                    var result = _capperTwo.GetPolishFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetPolishFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }样品到移栽 失败");
@@ -1167,7 +1173,7 @@ namespace Q_Platform.BLL
 
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                 {
-                    var result = _capperThree.GetSampleFromMarterialToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                    var result = _carrierTwo.GetSampleFromMaterialToTransfer(sample, TransferMoveRightPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }净化管到移栽 失败");
@@ -1211,7 +1217,7 @@ namespace Q_Platform.BLL
                 //取出大管
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                 {
-                    var result = _capperTwo.GetSampleFromTransferToMaterial(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetSampleFromTransferToMaterial(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"从移栽取出{sample.Id}样品管 失败");
@@ -1254,7 +1260,7 @@ namespace Q_Platform.BLL
                 //取出大管
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                 {
-                    var result = _capperTwo.GetPolishFromTransferToMaterial(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetPolishFromTransferToMaterial(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"从移栽取出{sample.Id}萃取管 失败");
@@ -1298,7 +1304,7 @@ namespace Q_Platform.BLL
                 //取出净化小管
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                 {
-                    var result = _capperThree.GetSampleFromTransferToMaterial(sample, TransferMoveRightPutGetPos, cts);
+                    var result = _carrierTwo.GetSampleFromTransferToMaterial(sample, TransferMoveRightPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"从移栽取出{sample.Id}净化管 失败");
@@ -1561,7 +1567,7 @@ namespace Q_Platform.BLL
                 {
                     _logger?.Info($"取{sample.Id}样品净化管到移栽");
 
-                    var result = _capperThree.GetSampleFromMarterialToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                    var result = _carrierTwo.GetSampleFromMaterialToTransfer(sample, TransferMoveRightPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }样品净化管到移栽 失败");
@@ -1683,68 +1689,59 @@ namespace Q_Platform.BLL
                     var itemSample1 = _pipttorList[0];
 
                     try
-                    {
-                        lock (_lockObj)
+                    {   //==========================不能加锁  锁在子方法内部=============================//
+                        
+                        //是否提取上清液  ==》净化管
+                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate) && itemSample1.MainStep == 5)
                         {
-                            //是否提取上清液  ==》净化管
-                            if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate) && itemSample1.MainStep == 5)
+                            if (!_globalStatus.IsStopped)
                             {
-                                if (!_globalStatus.IsStopped)
+                                var result = DoPipettingOne(itemSample1, cts).GetAwaiter().GetResult();
+                                if (!result)
                                 {
-                                    var result = DoPipettingOne(itemSample1, cts).GetAwaiter().GetResult();
-                                    if (!result)
-                                    {
-                                        throw new Exception("DoCentrifugal1 err");
-                                    }
-
-                                    itemSample1.MainStep++;
-
-                                    //触发后续动作   振荡净化 提取样品液  振荡涡旋
-                                    _sampleActionDic[itemSample1]?.Invoke(itemSample1, cts);
-                                    //样品和任务从列表移除
-                                    _pipttorList.Remove(itemSample1);
-                                    _sampleActionDic.Remove(itemSample1);
-                                    
-                                }
-                            }
-
-                            //提取净化管 净化液   ==》  //存在第三次移液  兽药处理工艺
-                            if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate2) && itemSample1.MainStep == 8)
-                            {
-                                if (!_globalStatus.IsStopped && itemSample1.MainStep == 8)
-                                {
-                                    var result = DoPipettingTwo(itemSample1, cts);   //净化管到大管移液
-                                    if (!result)
-                                    {
-                                        throw new Exception("DoCentrifugal2 err");
-                                    }
-                                    itemSample1.MainStep++; //振荡1涡旋1
-                                }
-                            }
-
-                        }
-
-                        //占用拧盖2  当再次重启怎么获得锁  拧盖2有料时候？？
-                        lock (_lockCapperTwo)
-                        {
-                            //释放锁  可以进行离心工作
-                            if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate2) && itemSample1.MainStep == 9)
-                            {
-                                if (!_globalStatus.IsStopped && itemSample1.MainStep == 9)
-                                {
-                                    var result = _vibrationOne.StartPolishVibrationAndVortex(itemSample1, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("萃取管振荡涡旋失败!");
-                                    }
-                                    itemSample1.MainStep++;
+                                    throw new Exception("DoCentrifugal1 err");
                                 }
 
-                                //移除已经完成的
+                                itemSample1.MainStep = 7;
+
+                                //触发后续动作   振荡净化 提取样品液  振荡涡旋
+                                _sampleActionDic[itemSample1]?.Invoke(itemSample1, cts);
+                                //样品和任务从列表移除
                                 _pipttorList.Remove(itemSample1);
                                 _sampleActionDic.Remove(itemSample1);
+
                             }
                         }
+
+                        //提取净化管 净化液   ==》  //存在第三次移液  兽药处理工艺
+                        if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate2))//&& itemSample1.MainStep == 8
+                        {
+                            if (!_globalStatus.IsStopped && itemSample1.MainStep == 8)
+                            {
+                                var result = DoPipettingTwo(itemSample1, cts);   //净化管到大管移液
+                                if (!result)
+                                {
+                                    throw new Exception("DoCentrifugal2 err");
+                                }
+                                itemSample1.MainStep++; //振荡1涡旋1
+                            }
+
+                            if (!_globalStatus.IsStopped && itemSample1.MainStep == 9)
+                            {
+                                var result = _vibrationOne.StartPolishVibrationAndVortex(itemSample1, cts);
+                                if (!result)
+                                {
+                                    throw new Exception("萃取管振荡涡旋失败!");
+                                }
+                                itemSample1.MainStep++;
+                            }
+
+                            //移除已经完成的
+                            _pipttorList.Remove(itemSample1);
+                            _sampleActionDic.Remove(itemSample1);
+                        }
+
+                        
                    
                     }
                     catch (Exception ex)
@@ -1796,7 +1793,7 @@ namespace Q_Platform.BLL
                         if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractSupernate3) && itemSample.MainStep >= 11)
                         {
                             //拧盖4  搬运搬运西林瓶到拧盖4  =》拆盖 ==》称重
-                            var result1 = _capperFour.GetSeilingAndWeight(sample,cts);
+                            var result1 = _capperFour.GetSeilingAndWeight(itemSample, cts);
                            
                             //加入锁 移液过程
                             lock (_lockObj) 
@@ -1807,7 +1804,7 @@ namespace Q_Platform.BLL
                                     //搬运已经离心的萃取管到拧盖2 ==》拆盖 ==>到移栽
                                     if (itemSample.MainStep == 11 && !_globalStatus.IsStopped)
                                     {
-                                        result = _capperTwo.GetPolishFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                                        result = _capperTwo.GetPolishFromMaterialToTransfer(itemSample, TransferMoveLeftPutGetPos, cts);
                                         if (!result)
                                         {
                                             throw new Exception("搬运萃取管到移栽失败!");
@@ -1835,7 +1832,7 @@ namespace Q_Platform.BLL
                                     //拧盖4 搬运2开始移液 == >移栽移动到右侧   
                                     if (itemSample.MainStep == 13 && !_globalStatus.IsStopped)
                                     {
-                                        result = _capperFour.DoPipettingTwo(sample, cts);//兽残移液
+                                        result = _capperFour.DoPipettingTwo(itemSample, cts);//兽残移液
                                         if (!result)
                                         {
                                             throw new Exception("从萃取管移取上清液失败!");
@@ -1845,7 +1842,7 @@ namespace Q_Platform.BLL
                                     //从移栽搬运无盖萃取管到拧盖2
                                     if (itemSample.MainStep == 14 && !_globalStatus.IsStopped)
                                     {
-                                        result = _capperTwo.GetPolishFromTransferToCapperTwo(sample, TransferMoveLeftPutGetPos, cts);
+                                        result = _capperTwo.GetPolishFromTransferToCapperTwo(itemSample, TransferMoveLeftPutGetPos, cts);
                                         if (!result)
                                         {
                                             throw new Exception("搬运萃取管到拧盖2失败!");
@@ -1855,7 +1852,7 @@ namespace Q_Platform.BLL
                                     //拧盖2装盖
                                     if (itemSample.MainStep == 15 && !_globalStatus.IsStopped)
                                     {
-                                        result = _capperTwo.GetPolishFromCapperTwoToMaterial(sample, cts);
+                                        result = _capperTwo.GetPolishFromCapperTwoToMaterial(itemSample, cts);
                                         if (!result)
                                         {
                                             throw new Exception("从拧盖2搬运萃取管到试管架失败!");
@@ -1869,7 +1866,7 @@ namespace Q_Platform.BLL
                             //移液后的  浓缩步骤
                             if (itemSample.MainStep >= 16 && !_globalStatus.IsStopped)
                             {
-                                result = _capperFour.DoConcentrationTwo(sample, cts);//兽残浓缩
+                                result = _capperFour.DoConcentrationTwo(itemSample, cts);//兽残浓缩
                                 if (!result)
                                 {
                                     throw new Exception("浓缩失败!");
@@ -1895,7 +1892,7 @@ namespace Q_Platform.BLL
                                 //提取样品液
                                 if (itemSample.MainStep == 16 && !_globalStatus.IsStopped)
                                 {
-                                    result = _capperFour.DoConcentrationOne(sample, cts);
+                                    result = _capperFour.DoConcentrationOne(itemSample, cts);
                                     if (!result)
                                     {
                                         throw new Exception("提取样品液失败!");
@@ -1910,7 +1907,7 @@ namespace Q_Platform.BLL
                                 //拧盖4  搬运搬运西林瓶到拧盖4  =》拆盖 ==》称重
                                 if (itemSample.MainStep == 8 && !_globalStatus.IsStopped)
                                 {
-                                    result = _capperFour.GetSeilingAndWeight(sample, cts).GetAwaiter().GetResult();
+                                    result = _capperFour.GetSeilingAndWeight(itemSample, cts).GetAwaiter().GetResult();
                                     if (!result)
                                     {
                                         throw new Exception("搬运西林到称重失败!");
@@ -1921,7 +1918,7 @@ namespace Q_Platform.BLL
                                 //拧盖4 搬运2开始移液 == >移栽移动到右侧  
                                 if (itemSample.MainStep == 13 && !_globalStatus.IsStopped)
                                 {
-                                    result = _capperFour.DoPipettingOne(sample, cts);//农残移液
+                                    result = _capperFour.DoPipettingOne(itemSample, cts);//农残移液
                                     if (!result)
                                     {
                                         throw new Exception("从净化管移取上清液失败!");
@@ -1932,7 +1929,7 @@ namespace Q_Platform.BLL
                                 //开始浓缩
                                 if (itemSample.MainStep >= 16 && !_globalStatus.IsStopped)
                                 {
-                                    result = _capperFour.DoConcentrationOne(sample, cts);
+                                    result = _capperFour.DoConcentrationOne(itemSample, cts);
                                     if (!result)
                                     {
                                         throw new Exception("浓缩失败!");
@@ -1970,69 +1967,74 @@ namespace Q_Platform.BLL
         private async Task<bool> DoPipettingOne(Sample sample,CancellationTokenSource cts)
         {
             try
-            {   
-                _logger?.Info($"{sample.Id}样品开始移上清液-Volume-{sample.TechParams.ExtractVolume}ml");
-                bool result;
-                //搬运净化管到拧盖3 ==> 拆盖 ==>搬运无盖试管到移栽
-                if (sample.SubStep <= 11 && !_globalStatus.IsStopped)
+            {
+                lock (_lockObj)   //锁定移栽占用部分
                 {
-                    result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
-                    if (!result)
+                    _logger?.Info($"{sample.Id}样品开始移上清液-Volume-{sample.TechParams.ExtractVolume}ml");
+                    bool result;
+                    //搬运净化管到拧盖3 ==> 拆盖 ==>搬运无盖试管到移栽
+                    if (sample.SubStep <= 11 && !_globalStatus.IsStopped)
                     {
-                        throw new Exception($"{sample.Id}样品取净化管移液 失败");
+                        result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品取净化管移液 失败");
+                        }
+                        sample.SubStep++;
                     }
-                    sample.SubStep++;
-                }
 
-                //移栽移动到移液位
-                if (sample.SubStep == 12 && !_globalStatus.IsStopped)
-                {
                     //移栽移动到移液位
-                    result = TransferMoveLeftPipettorPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.SubStep == 12 && !_globalStatus.IsStopped)
                     {
-                        throw new Exception($"移栽移动到左侧 移液 失败");
+                        //移栽移动到移液位
+                        result = TransferMoveLeftPipettorPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception($"移栽移动到左侧 移液 失败");
+                        }
+                        sample.SubStep++;
                     }
-                    sample.SubStep++;
-                }
 
-                //搬运样品管到拧盖2 ==> 拆盖 
-                if (sample.SubStep == 13 && !_globalStatus.IsStopped)
-                {
-                    result = _capperTwo.GetSampleFromMaterialToCapperTwo(sample, cts);
-                    if (!result)
+                    //搬运样品管到拧盖2 ==> 拆盖 
+                    if (sample.SubStep == 13 && !_globalStatus.IsStopped)
                     {
-                        throw new Exception($"搬运{sample.Id}样品离心管移液 失败");
+                        result = _capperTwo.GetSampleFromMaterialToCapperTwo(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"搬运{sample.Id}样品离心管移液 失败");
+                        }
+                        sample.SubStep++;
                     }
-                    sample.SubStep++;
-                }
 
-                //拧盖2 ==》搬运1开始移液
-                if (sample.SubStep == 14 && !_globalStatus.IsStopped)
-                {
-                    result = _capperTwo.DoPipettingOne(sample, cts);
-                    if (!result)
+                    //拧盖2 ==》搬运1开始移液
+                    if (sample.SubStep == 14 && !_globalStatus.IsStopped)
                     {
-                        throw new Exception($"{sample.Id}样品管取上清液 失败");
+                        result = _carrierOne.DoPipetting(sample, true, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"{sample.Id}样品管取上清液 失败");
+                        }
+                        sample.SubStep++;
                     }
-                    sample.SubStep++;
+
+                    //搬运净化管到拧盖3
+                    if (sample.SubStep == 15 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperThree.GetSampleFromTransferToCapperThree(sample, TransferMoveRightPutGetPos, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
+                        }
+                        sample.SubStep++;
+                    }
                 }
-              
+            
+                //=============================================================================================//
                 //拧盖2 回收试管
                 var res1 = _capperTwo.GetSampleFromCapperTwoToMaterial(sample, cts); //包括搬运到试管架
-
-                if (sample.SubStep == 15 && !_globalStatus.IsStopped)
-                {
-                    result = _capperThree.GetSampleFromTransferToCapperThree(sample, TransferMoveRightPutGetPos, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
-                    }
-                    sample.SubStep++;
-                }
-
+                
                 //搬运空试管到拧盖3
-                if (sample.SubStep >= 16 && !_globalStatus.IsStopped)  //16 ~22
+                if (sample.SubStep >= 16 && !_globalStatus.IsStopped && sample.SubStep < 22)  //16 ~22
                 {
                     var result1 = _capperThree.GetSampleFromCapperThreeToVibration(sample, cts);
                     if (!result1)
@@ -2042,14 +2044,13 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
                
-
                 //拧盖2 回收试管   判断完成
                 if (!await res1)
                 {
                     throw new Exception($"从拧盖2取{sample.Id}样品管到试管架1 失败");
                 }
 
-                if (sample.SubStep == 22 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 23 && !_globalStatus.IsStopped)
                 {
                     sample.SubStep = 0;
                     return true;
@@ -2112,7 +2113,7 @@ namespace Q_Platform.BLL
                     //==》搬运1开始移液
                     if (sample.SubStep == 13 && !_globalStatus.IsStopped)
                     {
-                        result = _capperTwo.DoPipettingTwo(sample, cts);
+                        result = _carrierOne.DoPipetting(sample, false, cts);
                         if (!result)
                         {
                             throw new Exception("提取净化液失败!");
@@ -2130,34 +2131,33 @@ namespace Q_Platform.BLL
                         }
                         sample.SubStep++;
                     }
-                  
-                   
-                }
 
-                //搬运空试管到拧盖3
-                if (sample.SubStep == 15 && !_globalStatus.IsStopped)
-                {
-                    var result1 = _capperThree.GetSampleFromTransferToCapperThree(sample, TransferMoveRightPutGetPos, cts);
-                    if (!result1)
+                    //搬运空试管到拧盖3
+                    if (sample.SubStep == 15 && !_globalStatus.IsStopped)
                     {
-                        throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
+                        var result1 = _capperThree.GetSampleFromTransferToCapperThree(sample, TransferMoveRightPutGetPos, cts);
+                        if (!result1)
+                        {
+                            throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
+                        }
+                        sample.SubStep++;
                     }
-                    sample.SubStep++;
                 }
 
-                //从拧盖3搬运试管到试管架
-                if (sample.SubStep == 16 && !_globalStatus.IsStopped) // 16~22
+                //======================+++++++++++++++++++++++++++====================================//
+                //从拧盖3搬运净化管到试管架
+                if (sample.SubStep >= 16 && !_globalStatus.IsStopped && sample.SubStep < 22) // 16~22
                 {
                     var result3 = _capperThree.GetSampleFromCapperThreeToVibration(sample, cts);
                     if (!result3)
                     {
                         throw new Exception($"搬运{sample.Id}净化管到试管架 失败");
                     }
-                    sample.SubStep = 22;
+                    sample.SubStep++;
                 }
 
                 //下一步搬运到振荡
-                if (sample.SubStep == 22 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 23 && !_globalStatus.IsStopped)
                 {
                     sample.SubStep = 0;
                     return true;
@@ -3036,47 +3036,6 @@ namespace Q_Platform.BLL
         #endregion
 
 
-        /// <summary>
-        /// 提取净化液  直接提取净化上清液
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool GetSampleToBottle(Sample sample,CancellationTokenSource cts)
-        {
-            try
-            {
-                bool result;
-                lock (_lockObj)
-                {
-                    //从移栽搬运净化管到拧盖3
-                    result = _capperThree.GetSampleFromTransferToCapperThree(sample, TransferMoveRightPutGetPos, cts);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                }
-
-                //拧盖3移液到小瓶
-                result = _capperThree.GetSampleToBottleOrToSeiling(sample, cts);
-                if (!result)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Error(ex.Message);
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
-        }
 
 
 

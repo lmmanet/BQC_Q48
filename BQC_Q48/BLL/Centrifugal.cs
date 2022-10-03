@@ -644,7 +644,7 @@ namespace Q_Platform.BLL
         /// 旋转到指定工位
         /// </summary>
         /// <param name="num">1:初始位 2：90°位 3：180°位 4：270°位</param>
-        protected async Task<bool> GoStation(ushort num)
+        protected async Task<bool> GoStation1(ushort num)
         {
             //判断离心机是否停止
             var cv = Math.Abs(Math.Round(_motion.GetCurrentVel(_axisCentrigugal), 1));
@@ -714,7 +714,7 @@ namespace Q_Platform.BLL
         /// 旋转到指定工位
         /// </summary>
         /// <param name="num">1:初始位 2：90°位 3：180°位 4：270°位</param>
-        protected async Task<bool> GoStation2(ushort num)
+        protected async Task<bool> GoStation(ushort num)
         {
             //判断离心机是否停止
             var cv = Math.Abs(Math.Round(_motion.GetCurrentVel(_axisCentrigugal), 1));

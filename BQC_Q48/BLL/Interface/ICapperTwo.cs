@@ -18,41 +18,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从冰浴取试管到移栽  拧盖无需锁 只做中转作用
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func">移栽旋转动作</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
-    
-        /// <summary>
-        /// 从冰浴取萃取管到移栽  拧盖无需锁 只做中转作用
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func">移栽旋转动作</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 离心完成后从移栽中取出试管
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func">移栽旋转动作</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
-
-        /// <summary>
-        /// 离心完后从移栽中取出萃取管到试管架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
      
         //================================================移液部分 兽药=================================================//
 
@@ -116,9 +82,6 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         Task<bool> GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
-
-        bool DoPipettingOne(Sample sample, CancellationTokenSource cts);
-        bool DoPipettingTwo(Sample sample, CancellationTokenSource cts);
 
 
     }

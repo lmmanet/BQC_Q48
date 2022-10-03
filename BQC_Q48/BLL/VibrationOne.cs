@@ -81,12 +81,12 @@ namespace Q_Platform.BLL
                             if (itemSample.MainStep == 1 && !_globalStauts.IsStopped)
                             {
                                 //振荡 
-                                if (sample.SubStep == 4)
+                                if (itemSample.SubStep == 4)
                                 {
                                     // 跳过
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                     if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration) && !_globalStauts.IsStopped)
@@ -97,18 +97,18 @@ namespace Q_Platform.BLL
                                             throw new Exception("StartVibration err");
                                         }
 
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                 }
 
                                 //涡旋
-                                if (sample.SubStep == 5)
+                                if (itemSample.SubStep == 5)
                                 {
                                     // 跳过
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
                                     //是否涡旋
                                     if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
@@ -118,7 +118,7 @@ namespace Q_Platform.BLL
                                         {
                                             throw new Exception("StartVortex err");
                                         }
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                 }
@@ -128,11 +128,11 @@ namespace Q_Platform.BLL
                             //加溶剂振荡 涡旋
                             if (itemSample.MainStep == 2 && !_globalStauts.IsStopped)
                             {
-                                if (sample.SubStep == 4)
+                                if (itemSample.SubStep == 4)
                                 {
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                     if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
@@ -142,16 +142,16 @@ namespace Q_Platform.BLL
                                         {
                                             throw new Exception("StartVibration err");
                                         }
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
                                 }
 
                                 //判断是否涡旋
-                                if (sample.SubStep == 5)
+                                if (itemSample.SubStep == 5)
                                 {
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                     if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
@@ -161,7 +161,7 @@ namespace Q_Platform.BLL
                                         {
                                             throw new Exception("StartVortex err");
                                         }
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                 }
@@ -171,11 +171,11 @@ namespace Q_Platform.BLL
                             //加盐振荡 涡旋
                             if (itemSample.MainStep == 3 && !_globalStauts.IsStopped)
                             {
-                                if (sample.SubStep == 4)
+                                if (itemSample.SubStep == 4)
                                 {
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                     if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
@@ -186,17 +186,17 @@ namespace Q_Platform.BLL
                                             throw new Exception("StartVibration err");
                                         }
 
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                 }
 
                                 //判断是否涡旋
-                                if (sample.SubStep == 5)
+                                if (itemSample.SubStep == 5)
                                 {
                                     if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
                                     {
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
 
                                     if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
@@ -206,7 +206,7 @@ namespace Q_Platform.BLL
                                         {
                                             throw new Exception("StartVortex err");
                                         }
-                                        sample.SubStep++;
+                                        itemSample.SubStep++;
                                     }
                                 }
                             }
@@ -258,8 +258,9 @@ namespace Q_Platform.BLL
                     //萃取振荡 涡旋
                     if (sample.MainStep == 9 && !_globalStauts.IsStopped)
                     {
-                        if (sample.SubStep == 0)
+                        if (sample.SubStep == 0 && !_globalStauts.IsStopped)
                         {
+                            //从拧盖2搬运萃取管到振荡
                             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
                             {
                                 sample.SubStep++;
@@ -279,7 +280,7 @@ namespace Q_Platform.BLL
                         }
 
                         //判断是否涡旋
-                        if (sample.SubStep == 1)
+                        if (sample.SubStep == 1 && !_globalStauts.IsStopped)
                         {
                             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
                             {
@@ -354,7 +355,6 @@ namespace Q_Platform.BLL
                     //搬运下料     //判断是哪次振荡   下料到试管架或者冰浴
                     if (step == 2 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex2))
                     {
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.ExtractVibration2);
                         result = _carrier.GetSampleFromVibrationToCold(sample, cts);
                         if (!result)
                         {

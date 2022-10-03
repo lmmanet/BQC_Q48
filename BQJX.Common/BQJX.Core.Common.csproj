@@ -55,6 +55,7 @@
     <Compile Include="Common\EPG_ClawStatus.cs" />
     <Compile Include="Common\ExpressionHelpers.cs" />
     <Compile Include="Common\GlobalStatus.cs" />
+    <Compile Include="Common\OccupyMethodException.cs" />
     <Compile Include="Common\PosNameAttribute.cs" />
     <Compile Include="Common\StepAxisEleGear.cs" />
     <Compile Include="Common\TestThroughAttribute.cs" />

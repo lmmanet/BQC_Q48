@@ -19,35 +19,6 @@ namespace Q_Platform.BLL
         Task<bool> GoHome(CancellationTokenSource cts);
 
 
-        //==================================================================离心部分======================================================================================//
-
-        /// <summary>
-        /// 从净化管架取试管到移栽（离心） 
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <param name="func">移栽旋转动作</param>
-        /// <returns></returns>
-        bool GetSampleFromMarterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
-
-
-        /// <summary>
-        /// 离心完成后从移栽中取出试管 
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func">移栽旋转动作</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleToBottleOrToSeiling(Sample sample, CancellationTokenSource cts);
-
-        /// <summary>
-        /// 离心完成后从移栽取出净化管到试管架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         //==================================================================移液部分======================================================================================//
 

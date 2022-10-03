@@ -6,6 +6,7 @@ using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,10 +68,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"搬运{sampleId}样品到拧盖1");
              
                     //试管在加固
@@ -101,10 +112,15 @@ namespace Q_Platform.BLL
                     //试管在拧盖1
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
+                        _currentMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到拧盖1失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+               return GetSampleFromAddSolidToCapperOne(sample, cts);
             }
             catch (Exception ex)
             {
@@ -129,10 +145,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"从试管架搬运{sampleId}样品到拧盖1");
 
                     //试管在试管架
@@ -163,10 +189,15 @@ namespace Q_Platform.BLL
                     //试管在拧盖1
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
+                        _currentMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到拧盖1失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromMaterialToCapperOne(sample, cts);
             }
             catch (Exception ex)
             {
@@ -191,10 +222,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
                 
                     //试管在振荡
@@ -225,10 +266,16 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
+                        
+                        _currentMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromVibrationToMaterial(sample, cts);
             }
             catch (Exception ex)
             {
@@ -251,10 +298,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
 
                     //试管在涡旋
@@ -285,10 +342,16 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
+                           
+                        _currentMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromVortexToMaterial(sample, cts);
             }
             catch (Exception ex)
             {
@@ -311,10 +374,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到加固");
 
@@ -345,10 +418,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInAddSolid))
                     {
+                        _currentMethodName = string.Empty;   
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到加固失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromCapperOneToAddSolid(sample, func1, func2, cts);
             }
             catch (Exception ex)
             {
@@ -372,10 +450,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到振荡1");
 
@@ -406,10 +494,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
+                        _currentMethodName = string.Empty; 
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到振荡1失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromCapperOneToVibration(sample, cts);
             }
             catch (Exception ex)
             {
@@ -436,8 +529,10 @@ namespace Q_Platform.BLL
             bool result;
             ushort posNum = 0;
 
+            Thread.Sleep(300);
             try
-            { 
+            {
+     
                 //试管在冰浴
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                 {
@@ -448,6 +543,16 @@ namespace Q_Platform.BLL
          
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                 attemp: for (int i = 1; i < 9; i++)
                     {
                         if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
@@ -610,10 +715,15 @@ namespace Q_Platform.BLL
                     //试管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                     {
+                        _currentMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到冰浴失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromVibrationToCold(sample, cts);
             }
             catch (Exception ex)
             {
@@ -635,10 +745,21 @@ namespace Q_Platform.BLL
         public bool GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"从试管架取{sample.Id}样品离心管到拧盖2");
 
                     //试管在试管架2
@@ -667,12 +788,17 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
+                        _currentMethodName = string.Empty;    
                         return true;
                     }
                     throw new Exception($"从试管架取{sample.Id}样品样品离心管到拧盖2失败,SampleStatus-{sample.Status}");
 
                 }
 
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromMaterialToCapperTwo(sample, cts);
             }
             catch (Exception ex)
             {
@@ -697,10 +823,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"从离心移栽搬运{sampleId}试管到拧盖2");
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
@@ -728,10 +865,15 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
+                        _currentMethodName = string.Empty;   
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromTransferToCapperTwo(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -754,10 +896,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
                    
                     //试管在拧盖2   
@@ -788,10 +941,15 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromCapperTwoToMaterial(sample,  cts);
             }
             catch (Exception ex)
             {
@@ -814,10 +972,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
                     //试管在拧盖1  需要传送气缸动作
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
@@ -847,10 +1016,15 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromCapperOneToMaterial(sample, cts);
             }
             catch (Exception ex)
             {
@@ -884,10 +1058,21 @@ namespace Q_Platform.BLL
 
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
 
                     //试管在冰浴
@@ -920,10 +1105,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromColdToTransfer(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -947,10 +1137,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
 
                     //试管在振荡
@@ -982,10 +1182,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromVibrationOneToTransfer(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -1009,10 +1214,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"从离心移栽搬运{sampleId}样品到试管架");   //试管在试管架 //试管在拧盖1 //试管在加固 //试管在涡旋 //试管在拧盖2   //试管在振荡 //试管在冰浴 
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
@@ -1040,10 +1256,15 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromTransferToMaterial(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -1056,9 +1277,6 @@ namespace Q_Platform.BLL
             }
         }
 
-     
-
-
 
         /// <summary>
         /// 搬运试管到涡旋
@@ -1070,10 +1288,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"搬运{sampleId}样品到涡旋");
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
@@ -1158,10 +1387,15 @@ namespace Q_Platform.BLL
                     //试管在涡旋
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到涡旋失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleToVortex(sample,  cts);
             }
             catch (Exception ex)
             {
@@ -1185,10 +1419,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"搬运{sampleId}样品到振荡1");
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
@@ -1295,10 +1540,15 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到振荡1失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleToVibration(sample, cts);
             }
             catch (Exception ex)
             {
@@ -1311,151 +1561,6 @@ namespace Q_Platform.BLL
             }
 
         }
-
-        /// <summary>
-        /// 搬运试管到离心移栽
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool GetSampleToTransfer(Sample sample,Func<ushort, CancellationTokenSource, Task<bool>> func,CancellationTokenSource cts)
-        {
-            //ushort sampleId = sample.Id;
-            //bool result;
-            //try
-            //{
-            //    lock (_lockObj)
-            //    {
-            //        _logger?.Info($"搬运{sampleId}样品到离心移栽");
-            //        //试管在试管架
-            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
-            //        {
-            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 1;
-            //            }
-            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 0;
-            //            }
-            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
-            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-            //        }
-
-            //        //试管在拧盖1
-
-            //        //试管在加固
-
-            //        //试管在涡旋
-            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
-            //        {
-            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId),func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 1;
-            //            }
-            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromVortexToTransfer((ushort)(2 * sampleId - 1),func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从涡旋搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 0;
-            //            }
-            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
-            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-            //        }
-
-            //        //试管在拧盖2   
-            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-            //        {
-            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId), func,cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 1;
-            //            }
-            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromCapperTwoToTransfer((ushort)(2 * sampleId - 1), func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从拧盖2搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 0;
-            //            }
-            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperTwo);
-            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-            //        }
-
-            //        //试管在振荡
-            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
-            //        {
-            //            if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 1;
-            //            }
-            //            if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-            //            {
-            //                result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), func, cts);
-            //                if (!result)
-            //                {
-            //                    throw new Exception($"从振荡1搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-            //                }
-            //                sample.SampleTubeStatus = 0;
-            //            }
-            //            SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
-            //            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-            //        }
-
-
-            //        //试管在移栽
-
-            //        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
-            //        {
-            //            return true;
-            //        }
-            //        throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    if (_globalStatus.IsStopped)
-            //    {
-            //        return false;
-            //    }
-            //    _logger?.Error(ex.Message);
-            //    throw ex;
-            //}
-            throw new NotImplementedException();
-        }
-
-
-
 
         //===================================================================萃取管====================================================================================//
 
@@ -1471,6 +1576,7 @@ namespace Q_Platform.BLL
             bool result;
             ushort posNum = 0;
 
+            Thread.Sleep(300);
             try
             {
                 //萃取管在冰浴
@@ -1480,6 +1586,16 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
@@ -1533,10 +1649,15 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromCapperTwoToCold(sample, cts);
             }
             catch (Exception ex)
             {
@@ -1562,10 +1683,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"从移栽搬运{sampleId}样品萃取管到拧盖2");
 
                     //萃取管在移栽  
@@ -1595,10 +1726,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromTransferToCapperTwo(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -1621,10 +1757,21 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"从拧盖2搬运{sampleId}样品萃取管到试管架2");
 
                     //试管在拧盖2   
@@ -1654,10 +1801,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromCapperTwoToMaterial(sample, cts);
             }
             catch (Exception ex)
             {
@@ -1679,8 +1831,19 @@ namespace Q_Platform.BLL
         public bool GetPolishFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
+            Thread.Sleep(300);
             try
             {
+                if (!string.IsNullOrEmpty(_currentMethodName))
+                {
+                    if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                    {
+                        throw new OccupyMethodException();
+                    }
+                }
+                _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                 _logger?.Info($"从试管架2取{sample.Id}样品萃取管到拧盖2");
 
                 //试管在试管架2
@@ -1709,10 +1872,15 @@ namespace Q_Platform.BLL
                 }
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                 {
+                    _currentMethodName = string.Empty;
                     return true;
                 }
                 throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
 
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromMaterialToCapperTwo(sample, cts);
             }
             catch (Exception ex)
             {
@@ -1737,10 +1905,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"从拧盖2搬运{sampleId}样品萃取管到离心移栽");
 
                     //试管在拧盖2   
@@ -1770,10 +1948,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromCapperTwoToTransfer(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -1800,6 +1983,7 @@ namespace Q_Platform.BLL
             bool result;
             ushort posNum = 0;
 
+            Thread.Sleep(300);
             try
             {
                 //萃取管在冰浴
@@ -1809,6 +1993,16 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
@@ -1862,10 +2056,15 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromVibrationToCold(sample,func1, func2, cts);
             }
             catch (Exception ex)
             {
@@ -1890,6 +2089,7 @@ namespace Q_Platform.BLL
             bool result;
             ushort posNum = 0;
 
+            Thread.Sleep(300);
             try
             {
                 //萃取管在冰浴
@@ -1899,6 +2099,16 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
@@ -1952,10 +2162,15 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromVortexToCold(sample,  cts);
             }
             catch (Exception ex)
             {
@@ -1982,6 +2197,7 @@ namespace Q_Platform.BLL
             bool result;
             ushort posNum = 0;
 
+            Thread.Sleep(300);
             try
             {
                 //萃取管在冰浴
@@ -1991,6 +2207,16 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
@@ -2044,10 +2270,15 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromVibrationToVortex(sample, func1, func2, cts);
             }
             catch (Exception ex)
             {
@@ -2071,6 +2302,7 @@ namespace Q_Platform.BLL
             ushort sampleId = sample.Id;
             bool result;
 
+            Thread.Sleep(300);
             try
             {
                 //萃取管在振荡
@@ -2080,6 +2312,14 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从拧盖2搬运{ sample.Id}萃取管到振荡");
 
@@ -2111,10 +2351,15 @@ namespace Q_Platform.BLL
                     //萃取管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromCapperTwoToVibration(sample,cts);
             }
             catch (Exception ex)
             {
@@ -2146,10 +2391,20 @@ namespace Q_Platform.BLL
 
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"搬运{sampleId}萃取管到离心移栽");
 
                     //试管在冰浴
@@ -2182,10 +2437,15 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromColdToTransfer(sample,func, cts);
             }
             catch (Exception ex)
             {
@@ -2209,10 +2469,20 @@ namespace Q_Platform.BLL
         {
             ushort sampleId = sample.Id;
             bool result;
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"从离心移栽搬运{sampleId}萃取管到试管架");   //试管在试管架 //试管在拧盖1 //试管在加固 //试管在涡旋 //试管在拧盖2   //试管在振荡 //试管在冰浴 
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
@@ -2240,10 +2510,15 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败,SampleStatus-{sample.Status}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromTransferToMaterial(sample, func, cts);
             }
             catch (Exception ex)
             {
@@ -2271,11 +2546,21 @@ namespace Q_Platform.BLL
         public bool DoPipetting(Sample sample,bool bigToSmall, CancellationTokenSource cts)
         {
             double volume = sample.TechParams.ExtractVolume;
-       
+
+            Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger.Info($"样品{ sample.Id}移液-{volume}ml");
                     if (sample.PipettorStep == 1 && !_globalStatus.IsStopped)
                     {
@@ -2341,10 +2626,15 @@ namespace Q_Platform.BLL
                             throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep}");
                         }
                         sample.PipettorStep = 1;
+                        _currentMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep}");
                 }
+            }
+            catch (OccupyMethodException)
+            {
+                return DoPipetting(sample, bigToSmall, cts);
             }
             catch (Exception ex)
             {
@@ -3174,7 +3464,7 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
-            while (_globalStatus.IsPause)
+        
             //取料
             result = base.GetTubeAsync(GetVibrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
@@ -3826,75 +4116,6 @@ namespace Q_Platform.BLL
 
 
 
-
-
-        /// <summary>
-        /// 从拧盖1搬运试管到试管架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func1"></param>
-        /// <param name="func2"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        protected bool GetSampleFromCapperOneToMaterial(Sample sample, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
-        {
-            ushort sampleId = sample.Id;
-            bool result;
-            if (cts?.IsCancellationRequested == true)
-            {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-            }
-            _logger?.Info($"从拧盖1搬运{sampleId}样品到试管架");
-            try
-            {
-                lock (_lockObj)
-                {
-                    //试管在拧盖1
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
-                    {
-                        if (sample.SampleTubeStatus == 0)
-                        {
-                            result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId - 1), func1, func2, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-                            }
-                            sample.SampleTubeStatus = 1;
-                        }
-                        if (sample.SampleTubeStatus == 1)
-                        {
-                            result = GetSampleFromCapperOneToMaterial((ushort)(2 * sampleId), func1, func2, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-                            }
-                            sample.SampleTubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInShelf);
-                    }
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
-                    {
-                        return true;
-                    }
-                    throw new Exception($"从拧盖1搬运{sampleId}样品到试管架失败,SampleStatus-{sample.Status}");
-
-                }
-            }
-            catch (Exception ex)
-            {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
-
-        }
-
-
-
         public bool Test(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
@@ -3934,7 +4155,6 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {

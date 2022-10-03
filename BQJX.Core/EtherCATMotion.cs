@@ -21,6 +21,8 @@ namespace BQJX.Core
 
         private List<int> _coordinates = new List<int>();
 
+        private readonly object _lockObj = new object();
+
         #endregion
 
         #region Construtors
@@ -105,17 +107,21 @@ namespace BQJX.Core
             ushort AxisNum = 2; //插补轴数
             ushort Crd = 0;//坐标系号
 
-            for (int i = 0; i < 3; i++)
+            lock (_lockObj)
             {
-                var b = _coordinates.Contains(i);
-                if (b)
+                for (int i = 0; i < 3; i++)
                 {
-                    continue;
+                    var b = _coordinates.Contains(i);
+                    if (b)
+                    {
+                        continue;
+                    }
+                    Crd = (ushort)i;
+                    _coordinates.Add(Crd);
+                    break;
                 }
-                Crd =(ushort) i;
-                _coordinates.Add(Crd);
-                break;
             }
+         
            
 
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo[0]);
@@ -559,7 +565,7 @@ namespace BQJX.Core
                 short status = 0;
                 do
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     status = LTDMC.dmc_check_done(_CardID, axis);
                     if (status != 0) // 读取指定轴运动状态
                     {

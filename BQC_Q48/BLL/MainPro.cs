@@ -217,17 +217,17 @@ namespace Q_Platform.BLL
                 {
                     Sample sample = new Sample() { Id = (ushort)i, Status = 1172527124481,MainStep =3, TechParams = new TechParams()  //113-2018 果蔬
                     {
-                        AddWater = 0,
-                        Solvent_A = 10,    //ACE
-                        Solvent_B = 0,
-                        Solvent_C = 0,
+                        //AddWater = 0,
+                        //Solvent_A = 10,    //ACE
+                        //Solvent_B = 0,
+                        //Solvent_C = 0,
                         WetTime = 0,
-                        AddHomo = new double[3] { 0, 0, 1 },    //均质子
-                        Solid_B = new double[3] { 0, 0, 4 },    //硫酸镁
-                        Solid_C = new double[3] { 0, 0, 1 },    //氯化钠
-                        Solid_D = new double[3] { 0, 0, 1 },    //柠檬酸钠
-                        Solid_E = new double[3] { 0, 0, 0.5 },  //氢二钠
-                        Solid_F = new double[3] { 0, 0, 0 },    //
+                        //AddHomo = new double[3] { 0, 0, 1 },    //均质子
+                        //Solid_B = new double[3] { 0, 0, 4 },    //硫酸镁
+                        //Solid_C = new double[3] { 0, 0, 1 },    //氯化钠
+                        //Solid_D = new double[3] { 0, 0, 1 },    //柠檬酸钠
+                        //Solid_E = new double[3] { 0, 0, 0.5 },  //氢二钠
+                        //Solid_F = new double[3] { 0, 0, 0 },    //
                         VibrationOneTime = new int[] { 0, 0, 60, 0 },
                         VibrationOneVel = new int[] { 0, 0, 400, 0 },
                         VibrationTwoTime = new int[] { 60, 0 },
@@ -308,46 +308,39 @@ namespace Q_Platform.BLL
             _main = Task.Run(() =>
             {
 
-                //测试离心部分
-                //for (int i = 0; i < 8; i++)
-                //{
-                //    (_carrierOne as CarrierOne).Test(_workList[i], cts);
-                //}
-                //while (_workList.Count > 0 && !_globalStauts.IsStopped)
-                //{
 
-                //    Centrifugal(_workList[0], cts);
+                for (int i = 0; i < 8; i++)
+                {
+                    var sample = _workList[i];
+                    sample.Status = 0x10100101080;
+                    GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i+1));
+                    sample.MainStep = 4;
+                    Centrifugal(sample, cts);
+                }
 
-                //    Thread.Sleep(5000);
-                //    _workList.Remove(_workList[0]);
-                //}
+              
 
-                //for (int i = 0; i < 10; i++)
-                //{
-                //    var result = _capperFour.DoConcentrationOne(_workList[i], cts);
-                //    if (!result)
-                //    {
-                //        return;
-                //    }
-                //}
+
+
+
 
 
                 //正式程序
-                while (_workList.Count > 0 && !_globalStatus.IsStopped)
-                {
-                    var result = Ext(_workList[0]);
-                    if (!result)
-                    {
-                        while (_globalStatus.IsPause)
-                        {
-                            Thread.Sleep(2000);
-                            if (!_globalStatus.IsPause)
-                                continue;
-                        }
-                        return;
-                    }
-                   
-                }
+                //while (_workList.Count > 0 && !_globalStatus.IsStopped)
+                //{
+                //    var result = Ext(_workList[0]);
+                //    if (!result)
+                //    {
+                //        while (_globalStatus.IsPause)
+                //        {
+                //            Thread.Sleep(2000);
+                //            if (!_globalStatus.IsPause)
+                //                continue;
+                //        }
+                //        return;
+                //    }
+
+                //}
             });
         }
 
@@ -373,11 +366,11 @@ namespace Q_Platform.BLL
         {
             _globalStatus.ContinueProgram();
 
-            //启动任务
-             _wetBackTask.Start();
-             _vibrationTask.Start();
-            _centrifugalTask.Start();
-            _pipettingTask.Start();
+            //启动任务  如果已经完成  重新实例再启动？   
+            // _wetBackTask?.Start();
+            // _vibrationTask?.Start();
+            //_centrifugalTask?.Start();
+            //_pipettingTask?.Start();
         }
 
         public void SwitchLight()
@@ -443,6 +436,7 @@ namespace Q_Platform.BLL
 
                 //把样品加入到振荡涡旋列表  并启动程序
                 //_vibrationOne.StartVibrationAndVortex(sample, Centrifugal,cts);
+
                 _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
 
                 //Thread.Sleep(500);

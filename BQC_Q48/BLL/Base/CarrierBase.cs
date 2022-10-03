@@ -199,6 +199,12 @@ namespace Q_Platform.BLL
             {
                 _logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
                 //判断手爪是否抓取物件 在指定打开位置
+                var result = await CarrierMoveToSafePos(pos, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    throw new Exception("XY移动到目标位置出错!");
+                }
+
                 if (!await ClawIsGetchPiece())
                 {
                     //打开手爪到指定位置
@@ -214,7 +220,7 @@ namespace Q_Platform.BLL
                 }
 
                 //移动到取料点位
-                var result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
+                result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("移动到取料点出错");
