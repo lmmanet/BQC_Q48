@@ -123,7 +123,7 @@ namespace Q_Platform.BLL
                     _motion.ServoOn(_axisY);
                     await Task.Delay(1000).ConfigureAwait(false);
                 }
-                result = await _motion.P2pMoveWithCheckDone(_axisY, 0, 30, cts).ConfigureAwait(false);
+                result = await _motion.P2pMoveWithCheckDone(_axisY, 0, 30, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("Y轴回零失败!");
@@ -134,7 +134,7 @@ namespace Q_Platform.BLL
                     _motion.ServoOn(_axisX);
                     await Task.Delay(1000).ConfigureAwait(false);
                 }
-                result = await _motion.P2pMoveWithCheckDone(_axisX, 0, 30, cts).ConfigureAwait(false);
+                result = await _motion.P2pMoveWithCheckDone(_axisX, 0, 30, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("X轴回零失败!");
@@ -199,10 +199,31 @@ namespace Q_Platform.BLL
             {
                 _logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
                 //判断手爪是否抓取物件 在指定打开位置
-                var result = await CarrierMoveToSafePos(pos, cts).ConfigureAwait(false);
+               s1: var result = await CarrierMoveToSafePos(pos, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception("XY移动到目标位置出错!");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception("XY移动到目标位置出错!");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception("XY移动到目标位置出错!");
+                    }
+                  
                 }
 
                 if (!await ClawIsGetchPiece())
@@ -220,9 +241,21 @@ namespace Q_Platform.BLL
                 }
 
                 //移动到取料点位
-                result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
+                s2: result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception("移动到取料点出错");
                 }
 
@@ -262,21 +295,6 @@ namespace Q_Platform.BLL
                     return false;
                 }
               
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await GetTubeAsync(pos, clawOpenByte, cts, clawCloseByte);
-                    }
-
-                    return false;
-                }
-              
                 _logger.Warn(ex.Message);
                 return false;
             }
@@ -295,15 +313,27 @@ namespace Q_Platform.BLL
             {
                 _logger?.Debug($"PutTubeAsync-{clawOpenByte}");
                 //如果手爪打开 判定放料完成
-                if (await _claw.ClawGetchStatus(_clawSlaveId) == 1)
+                if (await _claw.ClawGetchStatus(_clawSlaveId) == 3)
                 {
                     return true;
                 }
 
                 //移动到放料点位
-                var result = await CarrierMoveTo(pos, ClawIsGetchPiece, cts).ConfigureAwait(false);
+                s1: var result = await CarrierMoveTo(pos, ClawIsGetchPiece, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception("移动到放料位出错");
                 }
              
@@ -327,20 +357,6 @@ namespace Q_Platform.BLL
                     return false;
                 }
 
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await PutTubeAsync(pos, clawOpenByte, cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -372,22 +388,58 @@ namespace Q_Platform.BLL
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] posArray = new double[2] { pos[0], pos[1] };
-                var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
+                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception($"GetNeedleAsync XY移动到指定位置失败");
                 }
                 //移液器移动到0位
-                result = await _motion.GohomeWithCheckDone(_axisP, 21, cts).ConfigureAwait(false);
+                s2: result = await _motion.GohomeWithCheckDone(_axisP, 21, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception($"GetNeedleAsync 移液器回零失败");
                 }
               
                 //Z2轴下降到指定位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _moveVel, cts).ConfigureAwait(false);
+                s3: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                    }
                     throw new Exception($"GetNeedleAsync Z2轴移动到指定位置失败");
                 }
 
@@ -395,9 +447,21 @@ namespace Q_Platform.BLL
                 Thread.Sleep(1000);
 
                 //Z2轴上升到安全位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, cts).ConfigureAwait(false);
+                s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                    }
                     throw new Exception($"GetNeedleAsync Z2轴移动到安全位置失败");
                 }
 
@@ -410,20 +474,6 @@ namespace Q_Platform.BLL
                     return false;
                 }
 
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await GetNeedleAsync(pos,  cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -454,24 +504,87 @@ namespace Q_Platform.BLL
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] posArray = new double[2] { pos[0], pos[1] };
-                var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, cts).ConfigureAwait(false);
+               s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"PutNeedleAsync XY移动到指定位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception($"PutNeedleAsync XY移动到指定位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"PutNeedleAsync XY移动到指定位置失败");
+                    }
+                  
                 }
                 
                 //Z2轴下降到指定位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2] - putOffset, _moveVel, cts).ConfigureAwait(false);
+               s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2] - putOffset, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"PutNeedleAsync Z2轴移动到指定位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                        else
+                        {
+                            throw new Exception($"PutNeedleAsync Z2轴移动到指定位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                       throw new Exception($"PutNeedleAsync Z2轴移动到指定位置失败");
+                    }
+                   
                 }
             
                 //移液器移动到推枪头位
-                result = await _motion.P2pMoveWithCheckDone(_axisP, _putOffNeedle, _absorbVel, cts).ConfigureAwait(false);
+               s3: result = await _motion.P2pMoveWithCheckDone(_axisP, _putOffNeedle, _absorbVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception("移液器推枪头失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                        else
+                        {
+                            throw new Exception("移液器推枪头失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception("移液器推枪头失败");
+                    }
+                   
                 }
 
                 _isGotNeedle = false;
@@ -484,10 +597,32 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //Z2轴上升到安全位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, cts).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"GetNeedleAsync Z2轴移动到安全位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                        else
+                        {
+                            throw new Exception($"GetNeedleAsync Z2轴移动到安全位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"GetNeedleAsync Z2轴移动到安全位置失败");
+                    }
+
+                   
                 }
 
                 return result;
@@ -499,20 +634,6 @@ namespace Q_Platform.BLL
                     return false;
                 }
 
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await PutNeedleAsync(pos, cts, putOffset);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                return false;
             }
@@ -547,41 +668,146 @@ namespace Q_Platform.BLL
                 #region 去吸取溶液
 
                 //XY轴移动到取液位置
-                var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _moveVel, cts).ConfigureAwait(false);
+                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync XY移动到取液位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync XY移动到取液位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync XY移动到取液位置失败");
+                    }
+                   
                 }
 
                 //Z2轴下降到取位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourcePos[2], _moveVel, cts).ConfigureAwait(false);
+                s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourcePos[2], _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync Z2轴移动到取液位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync Z2轴移动到取液位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync Z2轴移动到取液位置失败");
+                    }
+                   
                 }
 
                 //开始吸液
-                result = await _motion.P2pMoveWithCheckDone(_axisP, volume, _absorbVel, cts).ConfigureAwait(false);
+               s3: result = await _motion.P2pMoveWithCheckDone(_axisP, volume, _absorbVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync 移液器吸液失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync 移液器吸液失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync 移液器吸液失败");
+                    }
+                   
                 }
 
                 Thread.Sleep(500);
                 _syringHaveLiquid = true;
 
                 //Z2轴上升到安全位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, cts).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync Z2轴移动到安全位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync Z2轴移动到安全位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync Z2轴移动到安全位置失败");
+                    }
+                 
                 }
                
                 //吸取空气柱
-                result = await _motion.P2pMoveWithCheckDone(_axisP, volume + 0.1, _syringVel, cts).ConfigureAwait(false);
+               s5: result = await _motion.P2pMoveWithCheckDone(_axisP, volume + 0.1, _syringVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync 移液器吸空气柱失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s5;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync 移液器吸空气柱失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync 移液器吸空气柱失败");
+                    }
+                  
                 }
             #endregion
 
@@ -595,47 +821,173 @@ namespace Q_Platform.BLL
                 double[] poses = GetPipettingSafePos();
                 if (poses!=null)
                 {
-                    result = await _motion.InterPolation_2D_lineWithCheckDone(axes, poses, _moveVel, cts).ConfigureAwait(false);
+                   s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, poses, _moveVel, _globalStatus).ConfigureAwait(false);
                     if (!result)
                     {
-                        throw new Exception($"DoPipettingAsync XY移动到移液规避位置失败");
+                        if (_globalStatus.IsPause)
+                        {
+                            while (_globalStatus.IsPause)
+                            {
+                                Thread.Sleep(1000);
+                            }
+
+                            if (!_globalStatus.IsStopped)
+                            {
+                                goto s6;
+                            }
+                            else
+                            {
+                                throw new Exception($"DoPipettingAsync XY移动到移液规避位置失败");
+                            }
+
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync XY移动到移液规避位置失败");
+                        }
+                       
                     }
 
                 }
 
                 //XY轴移动到吐液位置
-                result = await _motion.InterPolation_2D_lineWithCheckDone(axes, targetPosArray, _moveVel, cts).ConfigureAwait(false);
+               s7: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, targetPosArray, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync XY移动到吐液位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s7;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync XY移动到吐液位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync XY移动到吐液位置失败");
+                    }
+                 
                 }
              
 
                 //Z2轴下降到取位置
-                result = await _motion.P2pMoveWithCheckDone(_axisZ2, targetPos[2], _moveVel, cts).ConfigureAwait(false);
+               s8: result = await _motion.P2pMoveWithCheckDone(_axisZ2, targetPos[2], _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync Z2轴移动到吐液位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s8;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync Z2轴移动到吐液位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync Z2轴移动到吐液位置失败");
+                    }
+                   
                 }
 
                 //开始吐液
-                result = await _motion.P2pMoveWithCheckDone(_axisP, 0, _syringVel, cts).ConfigureAwait(false);
+               s9: result = await _motion.P2pMoveWithCheckDone(_axisP, 0, _syringVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s9;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                    }
+                  
                 }
                 //吸取空气 
-                result = await _motion.P2pMoveWithCheckDone(_axisP, 0.5, _syringVel, cts).ConfigureAwait(false);
+               s10: result = await _motion.P2pMoveWithCheckDone(_axisP, 0.5, _syringVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync 移液器吸空气失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s10;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync 移液器吸空气失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync 移液器吸空气失败");
+                    }
+                   
                 }
 
                 //再吐液
-                result = await _motion.P2pMoveWithCheckDone(_axisP, 0, _syringVel, cts).ConfigureAwait(false);
+               s11: result = await _motion.P2pMoveWithCheckDone(_axisP, 0, _syringVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s11;
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception($"DoPipettingAsync 移液器吐液失败");
+                    }
+                   
                 }
                 _syringHaveLiquid = false;
 
@@ -650,21 +1002,6 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsStopped)
                 {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await DoPipettingAsync(sourcePos, targetPos, volume,cts);
-                    }
-
                     return false;
                 }
 
@@ -684,20 +1021,58 @@ namespace Q_Platform.BLL
             _logger?.Debug($"CheckAxisZInSafePos");
             if (!AxisIsInSafePos(_axisZ1))
             {
-                var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, cts).ConfigureAwait(false);
+               s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"Z1轴移动到安全位置失败!");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception($"Z1轴移动到安全位置失败!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception($"Z1轴移动到安全位置失败!");
+                    }
                 }
 
             }
 
             if (!AxisIsInSafePos(_axisZ2))
             {
-                var result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, cts).ConfigureAwait(false);
+                s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception($"Z2轴移动到安全位置失败!");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                        else
+                        {
+                            throw new Exception($"Z2轴移动到安全位置失败!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception($"Z2轴移动到安全位置失败!");
+                    }
                 }
             }
             return true;
@@ -746,10 +1121,12 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CloseClaw(byte closePos)
         {
-            _logger?.Debug($"CloseClaw-{closePos}");
+            int attemp = 0;
+            _logger?.Debug($"CloseClaw-{closePos}-attemp-{attemp}");
             var result = await _claw.SendCommand(_clawSlaveId, closePos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
+                _logger?.Error("_claw.SendCommand err!");
                 throw new Exception("手爪抓取物件失败！");
             }
             int status = 0;
@@ -764,6 +1141,10 @@ namespace Q_Platform.BLL
                 }
                 if (status == 3)
                 {
+                    if (attemp<2)
+                    {
+                        return await CloseClaw(closePos);
+                    }
                     throw new Exception("手爪未抓取到物料！");
                 }
                 Thread.Sleep(300);
@@ -784,7 +1165,7 @@ namespace Q_Platform.BLL
         protected async Task<bool> SyringHome(CancellationTokenSource cts)
         {
             _logger?.Debug($"SyringHome");
-            var result = await _motion.GohomeWithCheckDone(_axisP, 21, cts).ConfigureAwait(false);
+            var result = await _motion.GohomeWithCheckDone(_axisP, 21, _globalStatus).ConfigureAwait(false);
             if (!result)
             {
                 throw new Exception($"PutNeedleAsync 移液器回零失败");
@@ -813,10 +1194,31 @@ namespace Q_Platform.BLL
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
-                var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, cts).ConfigureAwait(false);
+               s1: var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!ret)
                 {
-                    throw new Exception("XY轴移动到指定位出错");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception("XY轴移动到指定位出错");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception("XY轴移动到指定位出错");
+                    }
+              
                 }
 
                 if (func != null)
@@ -829,10 +1231,30 @@ namespace Q_Platform.BLL
                 }
 
                 //Z轴下降到取料位置
-                var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, cts).ConfigureAwait(false);
+               s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
-                    throw new Exception("Z1轴下降到指定位置失败");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                        else
+                        {
+                            throw new Exception("Z1轴下降到指定位置失败");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception("Z1轴下降到指定位置失败");
+                    }
                 }
 
                 return true;
@@ -841,21 +1263,6 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsStopped)
                 {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await CarrierMoveTo(coordinate,func, cts);
-                    }
-
                     return false;
                 }
 
@@ -884,10 +1291,30 @@ namespace Q_Platform.BLL
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
-                var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, cts).ConfigureAwait(false);
+              s1:  var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, _globalStatus).ConfigureAwait(false);
                 if (!ret)
                 {
-                    throw new Exception("移动到安全位置失败!");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                        else
+                        {
+                            throw new Exception("移动到安全位置失败!");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception("移动到安全位置失败!");
+                    }
                 }
 
                 return true;
@@ -896,21 +1323,6 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsStopped)
                 {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await CarrierMoveToSafePos(coordinate, cts);
-                    }
-
                     return false;
                 }
 

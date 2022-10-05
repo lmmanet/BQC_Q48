@@ -32,6 +32,15 @@ namespace Q_Platform.BLL
         bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
+        /// 从拧盖3取净化管到移栽 无振荡加液  
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func">移栽旋转动作</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromCapperThreeToTransferWithoutVibration(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+
+        /// <summary>
         /// 从移栽搬运无盖净化管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
@@ -48,11 +57,17 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts);
 
+        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
 
 
-
-
-
+        /// <summary>
+        /// 拧盖3移液   由拧盖4移液调用
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func">移液动作</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool DoPipetting(Sample sample, Func<Sample, CancellationTokenSource, bool> func, CancellationTokenSource cts);
 
 
 

@@ -177,14 +177,13 @@ namespace Q_Platform.BLL
                     }
 
                     //开始振荡
-                    if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.VibrationBeforePurify))
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.VibrationBeforePurify))
                     {
                         result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("样品振荡失败!");
                         }
-                        TechStatusHelper.SetBitOn(sample.TechParams, TechStatus.VibrationBeforePurify);
                     }
 
 

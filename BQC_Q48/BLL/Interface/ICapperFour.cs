@@ -37,16 +37,6 @@ namespace Q_Platform.BLL
         bool DoConcentrationTwo(Sample sample, CancellationTokenSource cts);
 
 
-        /// <summary>
-        /// 从净化管移液到小瓶
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetSampleFromPurify(Sample sample, CancellationTokenSource cts);
-
-
-
 
 
 
@@ -54,9 +44,15 @@ namespace Q_Platform.BLL
 
 
 
+        /// <summary>
+        /// 农残移液  从净化管 ==》 西林瓶  从净化管==》小瓶
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="var">1:浓缩移液 2:提取样品</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool DoPipettingOne(Sample sample,int var, CancellationTokenSource cts);
 
-        bool DoPipettingOne(Sample sample, CancellationTokenSource cts);
-        bool DoPipettingTwo(Sample sample, CancellationTokenSource cts);
 
 
     }

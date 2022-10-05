@@ -115,3 +115,12 @@ D:\项目\Q平台\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.csproj.CoreCompileIn
 D:\项目\Q平台\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.csproj.CopyComplete
 D:\项目\Q平台\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.dll
 D:\项目\Q平台\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.pdb
+D:\App\BQC_Q48\BQJX.Core\bin\Debug\BQJX.Core.dll
+D:\App\BQC_Q48\BQJX.Core\bin\Debug\BQJX.Core.pdb
+D:\App\BQC_Q48\BQJX.Core\bin\Debug\BQJX.Common.dll
+D:\App\BQC_Q48\BQJX.Core\bin\Debug\BQJX.Common.pdb
+D:\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.csproj.AssemblyReference.cache
+D:\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.csproj.CoreCompileInputs.cache
+D:\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.csproj.CopyComplete
+D:\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.dll
+D:\App\BQC_Q48\BQJX.Core\obj\Debug\BQJX.Core.pdb

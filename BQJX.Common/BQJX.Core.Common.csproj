@@ -49,6 +49,7 @@
     <Compile Include="Common\CarrierOnePosData.cs" />
     <Compile Include="Common\CarrierTwoPosData.cs" />
     <Compile Include="Common\CentrifugalCarrierPosData.cs" />
+    <Compile Include="Common\DictionaryEx.cs" />
     <Compile Include="Common\MySerialization.cs" />
     <Compile Include="Common\ClawInfo.cs" />
     <Compile Include="Common\ConcentrationPosData.cs" />

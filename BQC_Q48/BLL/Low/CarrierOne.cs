@@ -2546,7 +2546,12 @@ namespace Q_Platform.BLL
         public bool DoPipetting(Sample sample,bool bigToSmall, CancellationTokenSource cts)
         {
             double volume = sample.TechParams.ExtractVolume;
-
+            int tipId = 2 * sample.Id - 1;
+            if (!bigToSmall)
+            {
+                tipId += 48;
+            }
+            //需要修改  小管到大管  取放枪头位置
             Thread.Sleep(300);
             try
             {
@@ -2562,74 +2567,74 @@ namespace Q_Platform.BLL
                     _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"样品{ sample.Id}移液-{volume}ml");
-                    if (sample.PipettorStep == 1 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 1 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTipCoordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTipCoordinate(tipId), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                           throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep}");
+                           throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep++;
+                        sample.PipettorStep1++;
                     }
 
-                    if (sample.PipettorStep == 2 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep}");
+                            throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep++;
+                        sample.PipettorStep1++;
                     }
 
-                    if (sample.PipettorStep == 3 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 3 && !_globalStatus.IsStopped)
                     {
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTipCoordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTipCoordinate(tipId), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep}");
+                            throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep++;
+                        sample.PipettorStep1++;
                     }
 
-                    if (sample.PipettorStep == 4 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 4 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTipCoordinate(2 * sample.Id), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTipCoordinate(tipId+1), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep}");
+                            throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep++;
+                        sample.PipettorStep1++;
                     }
 
-                    if (sample.PipettorStep == 5 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep}");
+                            throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep++;
+                        sample.PipettorStep1++;
                     }
 
-                    if (sample.PipettorStep == 6 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep1 == 6 && !_globalStatus.IsStopped)
                     {
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTipCoordinate(2 * sample.Id), cts).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTipCoordinate(tipId + 1), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep}");
+                            throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep1}");
                         }
-                        sample.PipettorStep = 1;
+                        sample.PipettorStep1 = 1;
                         _currentMethodName = string.Empty;
                         return true;
                     }
-                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep}");
+                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep1}");
                 }
             }
             catch (OccupyMethodException)

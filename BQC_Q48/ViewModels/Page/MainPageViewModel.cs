@@ -34,7 +34,7 @@ namespace Q_Platform.ViewModels.Page
         /// <summary>
         /// 暂停按钮
         /// </summary>
-        public bool PauseBtnEnable { get; set; } = false;
+        public bool PauseBtnEnable { get; set; } = true;
 
         /// <summary>
         /// 停止按钮

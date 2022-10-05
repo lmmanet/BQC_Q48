@@ -152,7 +152,7 @@ namespace BQJX.Common
         public double Add_Mark_A { get; set; }
         
         /// <summary>
-        /// 加标B
+        /// 加标B 第二次农残加标
         /// </summary>
         public double Add_Mark_B { get; set; }
 

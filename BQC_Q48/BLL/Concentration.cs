@@ -188,7 +188,7 @@ namespace Q_Platform.BLL
                 
                 if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.Redissolve))
                 {
-                    result = Redissolve(volume, vel, time, cts);
+                    result = Redissolve(2,volume, vel, time, cts);
                     if (!result)
                     {
                         throw new Exception($"样品{sample.Id}复溶失败!");
@@ -218,13 +218,19 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 复溶
         /// </summary>
+        /// <param name="var">复溶溶剂种类1：DMSO  2：乙酸乙酯</param>
         /// <param name="volume">复溶加液量</param>
         /// <param name="vel">涡旋速度</param>
         /// <param name="time">涡旋时间</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool Redissolve(double volume, int vel, int time, CancellationTokenSource cts)
+        protected bool Redissolve(byte var,double volume, int vel, int time, CancellationTokenSource cts)
         {
+            byte port = 0x04;
+            if (var == 2)
+            {
+                port = 0x08;
+            }
 
             try
             {
@@ -239,7 +245,7 @@ namespace Q_Platform.BLL
                 }
 
                 //注射器加液
-                result = _syringTwo.AddSolve(0x02, volume, cts).GetAwaiter().GetResult();
+                result = _syringTwo.AddSolve(port, volume, cts).GetAwaiter().GetResult(); //乙酸乙酯
                 if (!result)
                 {
                     throw new Exception($"复溶加液失败!");
@@ -301,7 +307,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return Redissolve(volume,vel, time, cts);
+                        return Redissolve(var,volume, vel, time, cts);
                     }
 
                     return false;

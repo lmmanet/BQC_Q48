@@ -147,22 +147,24 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetSelingFromConcentrationToCapperFour(Sample sample, CancellationTokenSource cts);
 
+
         /// <summary>
         /// 从拧盖4搬运西林瓶到称重 并搬运回
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromCapperFourToWeightAndBack(Sample sample, Func<Sample, CancellationTokenSource, bool> addMarkFunc, CancellationTokenSource cts);
+        bool GetSelingFromCapperFourToWeightAndBack(Sample sample, int var,double volume, CancellationTokenSource cts);
 
         /// <summary>
         /// 从浓缩搬运西林瓶到称重 并搬运回
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="addMarkFunc"></param>
+        /// <param name="var">加标种类1~4 0：不加</param>
+        /// <param name="volume">加标量</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromConcentrationToWeight(Sample sample,Func<Sample, CancellationTokenSource, bool> addMarkFunc, CancellationTokenSource cts);
+        bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, CancellationTokenSource cts);
 
         //========================================进样小瓶=========================================================//
 
@@ -175,32 +177,8 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetBottleFromMaterialToCapperFive_One(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从小瓶架搬运小瓶到拧盖5
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetBottleFromMaterialToCapperFive_Two(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从拧盖5搬运小瓶到小瓶架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetBottleFromCapperFiveToMaterial_One(Sample sample, CancellationTokenSource cts);
 
-        /// <summary>
-        /// 从拧盖5搬运小瓶到小瓶架
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetBottleFromCapperFiveToMaterial_Two(Sample sample, CancellationTokenSource cts);
 
         //========================================移液=========================================================//
 
@@ -209,10 +187,11 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">  1:从净化管到小瓶  2:从西林瓶到小瓶</param>
-        /// <param name="func">小瓶上下料动作</param>
+        /// <param name="capperOn">小瓶装盖</param>
+        /// <param name="capperOff">小瓶拆盖</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoPipettingOne(Sample sample, int var, Func<Sample, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool DoPipettingOne(Sample sample, int var, Func<Sample, int,CancellationTokenSource, bool> capperOn, Func<Sample,int, CancellationTokenSource, bool> capperOff, CancellationTokenSource cts);
 
 
         /// <summary>
@@ -225,24 +204,6 @@ namespace Q_Platform.BLL
         bool DoPipettingTwo(Sample sample, int var, CancellationTokenSource cts);
 
       
-
-        //========================================加标=========================================================//
-
-        /// <summary>
-        /// 从取加标液位到称重位
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="var"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool AddMarkFromSourceToWeight(Sample sample,int var, CancellationTokenSource cts);
-
-
-       // bool AddMarkFromSourceToCapperFour(Sample sample,int var, CancellationTokenSource cts);
-
-
-
-
 
 
     }

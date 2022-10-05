@@ -33,6 +33,15 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         bool DoPipettingFromCapperFourToBottle(Sample sample, CancellationTokenSource cts);
+
+
+        /// <summary>
+        /// 拆盖  拧盖4调用
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool CapperOff(Sample sample, CancellationTokenSource cts);
     }
 
 }

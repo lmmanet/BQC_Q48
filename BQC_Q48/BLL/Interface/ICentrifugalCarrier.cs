@@ -9,7 +9,7 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task StartPipetting(Sample sample, Action<Sample, CancellationTokenSource> actionCallBack, CancellationTokenSource cts);
+        Task StartPipetting(Sample sample, string actionCallBack, CancellationTokenSource cts);
 
         Task StartConcentration(Sample sample, CancellationTokenSource cts);
 
@@ -144,22 +144,13 @@ namespace Q_Platform.BLL
 
         //==================================================================移液部分（兽药氮吹移液）大管到西林瓶  兽药======================================================================================//
 
-        /// <summary>
-        /// 从拧盖2取无盖试管到移栽      移液 =》 CentrifugalCarrier => CapperTwo（拆盖完）(传入动作) => CarrierOne(传入动作)
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="func"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromMaterialToTransfer(Sample sample, CancellationTokenSource cts);
-
-        /// <summary>
-        /// 从移栽取回无盖试管到拧盖2    移液 =》 CentrifugalCarrier => CapperTwo（拆盖完）(传入动作) => CarrierOne(传入动作)
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetPolishFromTransferToMaterial(Sample sample, CancellationTokenSource cts);
+        ///// <summary>
+        ///// 从移栽取回无盖试管到拧盖2    移液 =》 CentrifugalCarrier => CapperTwo（拆盖完）(传入动作) => CarrierOne(传入动作)
+        ///// </summary>
+        ///// <param name="sample"></param>
+        ///// <param name="cts"></param>
+        ///// <returns></returns>
+        //bool GetPolishFromTransferToMaterial(Sample sample, CancellationTokenSource cts);
 
 
 

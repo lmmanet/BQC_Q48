@@ -1,4 +1,5 @@
-﻿using BQJX.Core.Common;
+﻿using BQJX.Common.Interface;
+using BQJX.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,15 +25,15 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> CheckDone(ushort axisNo, CancellationTokenSource cts);
-
+        Task<bool> CheckDone(ushort axisNo,double? target, IGlobalStatus gs);  
+        
         /// <summary>
         /// 检测坐标系是否完成定位
         /// </summary>
         /// <param name="cardNo"></param>
         /// <param name="coordinate">坐标系号</param>
         /// <returns></returns>
-        Task<bool> CheckDoneMulti(ushort cardNo, ushort coordinate, CancellationTokenSource cts);
+        Task<bool> CheckDoneMulti(ushort cardNo, ushort coordinate, IGlobalStatus gs);
 
         /// <summary>
         /// 配置软限位
@@ -122,7 +123,7 @@ namespace BQJX.Core.Interface
         bool SetPositonToSystem(ushort axisNo, double pos);
         bool StopTorqueMove(ushort axisNo);
         bool TorqueMove(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity);
-        Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, CancellationTokenSource cts);
+        Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, IGlobalStatus gs);
 
 
 
@@ -162,7 +163,7 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode, CancellationTokenSource cts); 
+        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode, IGlobalStatus gs); 
         
         /// <summary>
         /// 回零
@@ -172,7 +173,7 @@ namespace BQJX.Core.Interface
         /// <param name="offset">回零偏移</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode,double offset, CancellationTokenSource cts);
+        Task<bool> GohomeWithCheckDone(ushort axisNo,ushort homeMode,double offset, IGlobalStatus gs);
 
         /// <summary>
         /// 2D直线插补
@@ -181,7 +182,7 @@ namespace BQJX.Core.Interface
         /// <param name="PositionArray"></param>
         /// <param name="velocity"></param>
         /// <returns></returns>
-        Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, CancellationTokenSource cts);
+        Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, IGlobalStatus gs);
 
         /// <summary>
         /// 点动
@@ -214,7 +215,7 @@ namespace BQJX.Core.Interface
         /// <param name="velocity"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts);
+        Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs);
 
         /// <summary>
         /// 相对运动
@@ -233,7 +234,7 @@ namespace BQJX.Core.Interface
         /// <param name="velocity"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts);
+        Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs);
 
         /// <summary>
         /// 复位轴报警

@@ -63,7 +63,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            var result = await CapperOn(30, 40, cts).ConfigureAwait(false);
+            var result = await CapperOn(25, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -115,7 +115,7 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 提取净化管样品液
+        /// 提取净化管  ===> 小瓶
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
@@ -128,21 +128,12 @@ namespace Q_Platform.BLL
                 {
                     bool result;
 
-                    if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractSample))
+                    result = _carrier.DoPipettingOne(sample, 1, CapOn, CapOff, cts);
+                    if (!result)
                     {
-                        result = DoPipetting(sample, 1, cts);
-                        if (!result)
-                        {
-                            throw new Exception();
-                        }
-                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.ExtractSample);
+                        throw new Exception($"样品小瓶{sample.Id}移液失败!");
                     }
-
-                    if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
-                    {
-                        return true;
-                    }
-                    throw new Exception("提取净化样品液失败!");
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -157,6 +148,11 @@ namespace Q_Platform.BLL
             }
         }
 
+
+
+
+
+
         /// <summary>
         /// 提取浓缩样品液
         /// </summary>
@@ -167,19 +163,83 @@ namespace Q_Platform.BLL
         {
             try
             {
+                if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
+                {
+                    return true;
+                }
                 lock (_lockObj)
                 {
                     bool result;
-
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
+                    //准备小瓶
+                    if (sample.BottleStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = DoPipetting(sample, 2, cts);
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖Y轴到接驳位出错!");
+                        }
+                        sample.BottleStep++;
+                    }
+
+                    //搬运小瓶到拧盖5 第一组
+                    if (sample.BottleStep == 1 && !_globalStatus.IsStopped)
+                    {
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
+                        {
+                            result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
+                            }
+                            sample.BottleStep++;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    //拆盖 第一组
+                    if (sample.BottleStep == 2 && !_globalStatus.IsStopped)
+                    {
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1ExtractDone))
+                        {
+                            if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+                            {
+                                result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                                if (!result)
+                                {
+                                    throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                                }
+                                SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
+                            }
+                        }
+                        sample.BottleStep++;
+                    }
+
+                    //两次移液
+                    if (sample.BottleStep == 3 && !_globalStatus.IsStopped)
+                    {
+                        result = _carrier.DoPipettingOne(sample, 2, CapOn, CapOff, cts);
                         if (!result)
                         {
                             throw new Exception();
                         }
+                        sample.BottleStep++;
                     }
-                    return true;
+
+                    if (sample.BottleStep == 4)
+                    {
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf)
+                            && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
+                        {
+                            sample.BottleStep = 0;
+                            return true;
+                        }
+                    }
+
+                    return false;
+
                 }
             }
             catch (Exception ex)
@@ -193,6 +253,31 @@ namespace Q_Platform.BLL
                 return false;
             }
         }
+
+        /// <summary>
+        /// 拆盖  拧盖4调用
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool CapperOff(Sample sample, CancellationTokenSource cts)
+        {
+            if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+            {
+                var result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                if (!result)
+                {
+                    throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                }
+                SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
+            }
+            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         #endregion
 
@@ -210,18 +295,18 @@ namespace Q_Platform.BLL
             bool result;
             lock (_lockObj)
             {
-                if (sample.SubStep ==0 && !_globalStatus.IsStopped)
+                if (sample.BottleStep == 0 && !_globalStatus.IsStopped)
                 {
                     result = MovePutGetPos(cts).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("拧盖Y轴到接驳位出错!");
                     }
-                    sample.SubStep++;
+                    sample.BottleStep++;
                 }
 
                 //搬运小瓶到拧盖5 第一组
-                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
+                if (sample.BottleStep == 1 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
                     {
@@ -230,12 +315,16 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
                         }
+                        sample.BottleStep++;
                     }
-                    sample.SubStep++;
+                    else
+                    {
+                        return false;
+                    }
                 }
 
                 //拆盖 第一组
-                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
+                if (sample.BottleStep == 2 && !_globalStatus.IsStopped)
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1ExtractDone))
                     {
@@ -249,56 +338,22 @@ namespace Q_Platform.BLL
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
                         }
                     }
-                    sample.SubStep++;
+                    sample.BottleStep++;
                 }
 
                 //两次移液
-                if (sample.SubStep == 3 && !_globalStatus.IsStopped)
+                if (sample.BottleStep == 3 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.DoPipettingOne(sample, var, GetNextBottle, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"样品小瓶{sample.Id}移液失败!");
-                    }
-                    sample.SubStep++;
+                   
+                    sample.BottleStep++;
                 }
 
-
-                //装盖
-                if (sample.SubStep == 4 && !_globalStatus.IsStopped)
+                if (sample.BottleStep == 4 )
                 {
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf) 
+                        && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
                     {
-                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2UnCapped);
-                    }
-                    sample.SubStep++;
-                }
-
-
-                //搬运小瓶到小瓶架
-                if (sample.SubStep == 5 && !_globalStatus.IsStopped)
-                {
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
-                    {
-                        result = _carrier.GetBottleFromCapperFiveToMaterial_Two(sample, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"搬运{sample.Id}样品小瓶到小瓶架失败!");
-                        }
-                    }
-                    sample.SubStep++;
-                }
-
-                if (sample.SubStep == 6 )
-                {
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
-                    {
-                        sample.SubStep = 0;
+                        sample.BottleStep = 0;
                         return true;
                     }
                 }
@@ -311,62 +366,87 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 取下第一组  上料第二组
+        /// 装盖
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="var">1:第一组</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool CapOn(Sample sample,int var ,CancellationTokenSource cts)
+        {
+            bool result;
+            //装盖
+            if (var == 1)
+            {
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
+                {
+                    result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle1UnCapped);
+                    return true;
+                }
+               
+            }
+            else if (var == 2)
+            {
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
+                {
+                    result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2UnCapped);
+                    return true;
+                }
+
+            }
+            return false;
+
+        }    
+        
+        /// <summary>
+        /// 第二组拆盖
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        private bool GetNextBottle(Sample sample,CancellationTokenSource cts)
+        private bool CapOff(Sample sample,int var,CancellationTokenSource cts)
         {
             bool result;
-            //装盖
-            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
-            {
-                result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
-                }
-                SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle1UnCapped);
-            }
-
-            //搬运小瓶到小瓶架
-            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InCapper))
-            {
-                result = _carrier.GetBottleFromCapperFiveToMaterial_One(sample, cts);
-                if (!result)
-                {
-                    throw new Exception($"搬运{sample.Id}样品小瓶到小瓶架失败!");
-                }
-            }
-
-            //搬运小瓶到拧盖5 第2组
-            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
-            {
-                result = _carrier.GetBottleFromMaterialToCapperFive_Two(sample, cts);
-                if (!result)
-                {
-                    throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
-                }
-            }
 
             //拆盖
-            if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
+            if (var ==1)
             {
-                result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
-                if (!result)
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                 {
-                    throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                    result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped); 
+                    return true;
                 }
-                SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2UnCapped);
+               
             }
-
-            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped)&& SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
+            else if(var == 2)
             {
-                return true;
+                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
+                {
+                    result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                    }
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2UnCapped);
+                    return true;
+                }
+             
             }
-
-
             return false;
 
         }

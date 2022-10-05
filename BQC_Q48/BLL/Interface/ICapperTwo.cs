@@ -73,7 +73,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+        Task<bool> GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
         /// 从拧盖2取回移液完后的样品管到试管架1

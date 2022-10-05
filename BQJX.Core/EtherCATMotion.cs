@@ -5,6 +5,7 @@ using BQJX.Core.Common;
 using BQJX.Core.Interface;
 using System.Collections.Generic;
 using System.Threading;
+using BQJX.Common.Interface;
 
 namespace BQJX.Core
 {
@@ -41,12 +42,16 @@ namespace BQJX.Core
             return _eleGearList;
         }
 
-        public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, CancellationTokenSource cts)
+        public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-            }
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
+            } 
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
             ushort mode = homeMode;
             double lowVel = 1;
@@ -66,14 +71,18 @@ namespace BQJX.Core
                 _logger.Error($"home_move err:{result}");
                 throw new EtherCATMotionException($"home_move err:{result}");
             }
-            return await CheckDone(axisNo, cts);
+            return await CheckDone(axisNo,null, gs);
         }
 
-        public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, double offset, CancellationTokenSource cts)
+        public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, double offset, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
             }
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
             ushort mode = homeMode;
@@ -93,16 +102,20 @@ namespace BQJX.Core
                 _logger.Error($"home_move err:{result}");
                 throw new EtherCATMotionException($"home_move err:{result}");
             }
-            return await CheckDone(axisNo, cts);
+            return await CheckDone(axisNo,null, gs);
 
         }
 
 
-        public async Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, CancellationTokenSource cts)
+        public async Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
             }
             ushort AxisNum = 2; //插补轴数
             ushort Crd = 0;//坐标系号
@@ -151,7 +164,7 @@ namespace BQJX.Core
                 throw new EtherCATMotionException($"InterPolation_2D_lineWithCheckDone err:{ret}");
             }
 
-            var result = await CheckDone(axisNo[0], cts).ConfigureAwait(false);
+            var result = await CheckDone(axisNo[0], targetPos[0],gs).ConfigureAwait(false);
             _coordinates.Remove(Crd);
             return result;
 
@@ -247,18 +260,23 @@ namespace BQJX.Core
             return true;
         }
 
-        public async Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts)
+        public async Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
             }
             var result = P2pMove(axisNo, offset, velocity);
             if (!result)
             {
                 return false;
             }
-            return await CheckDone(axisNo, cts);
+            AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
+            return await CheckDone(axisNo, offset * ele.EleGear,gs);
         }
 
         public bool RelativeMove(ushort axisNo, double offset, double velocity)
@@ -307,18 +325,22 @@ namespace BQJX.Core
             return true;
         }
 
-        public async Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, CancellationTokenSource cts)
+        public async Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
             }
             var result = RelativeMove(axisNo, offset, velocity);
             if (!result)
             {
                 return false;
             }
-            return await CheckDone(axisNo, cts);
+            return await CheckDone(axisNo, null, gs);
         }
 
         public bool VelocityMove(ushort axisNo, double velocity, ushort direction)
@@ -553,7 +575,7 @@ namespace BQJX.Core
             return true;
         }
 
-        public async Task<bool> CheckDone(ushort axisNo, CancellationTokenSource cts)
+        public async Task<bool> CheckDone(ushort axisNo, double? target, IGlobalStatus gs)
         {
             //double factor = 1; //编码器系数
             //int error = 1000;  //位置误差带 Pulse
@@ -563,32 +585,52 @@ namespace BQJX.Core
             return await Task.Run(() =>
             {
                 short status = 0;
+                Thread.Sleep(500);
                 do
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(200);
                     status = LTDMC.dmc_check_done(_CardID, axis);
                     if (status != 0) // 读取指定轴运动状态
                     {
-                        var ret = LTDMC.dmc_check_success_pulse(_CardID, axis);//检测指令到位
-                        //ret = LTDMC.dmc_check_success_encoder(_CardID, axis); // 检测编码器到位
-                        if (ret != 1)
+                        if (target == null)
                         {
-                            _logger?.Error($"CheckDone 指令未到位");
-                            break;
+                            var ret = LTDMC.dmc_check_success_pulse(_CardID, axis);//检测指令到位
+                            if (ret != 1)
+                            {
+                                _logger?.Error($"CheckDone 指令未到位");
+                                break;
+                            }
+                            return true;
                         }
-                        return true;
+                        else
+                        {
+
+                            double pos = 0;
+                            LTDMC.dmc_get_encoder_unit(_CardID, axis, ref pos); //读取指定轴指令位置值
+                            int d1 =(int)(pos*100);
+                            int d2 = (int)(target*100);
+                            if (d1 >=d2 - 2&& d1<= d2+2)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                _logger?.Error($"CheckDone 指令未到位-{d1}-{pos} !={d2}-{target}");
+                                break;
+                            }
+
+                        }
+
+
                     }
-                } while (cts?.IsCancellationRequested != true);
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
+                } while (gs?.IsStopped != true);
+
                 return false;
             }).ConfigureAwait(false);
 
         }
 
-        public async Task<bool> CheckDoneMulti(ushort cardNo, ushort coordinate, CancellationTokenSource cts)
+        public async Task<bool> CheckDoneMulti(ushort cardNo, ushort coordinate, IGlobalStatus gs)
         {
             return await Task.Run(() =>
             {
@@ -601,10 +643,10 @@ namespace BQJX.Core
                         return true;
                     }
                     Thread.Sleep(1000);
-                } while (cts?.IsCancellationRequested == false);
-                if (cts?.IsCancellationRequested == true)
+                } while (gs?.IsStopped != true);
+                if (gs?.IsStopped == true)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    throw new TaskCanceledException($"触发停止 gs:{gs.IsStopped}");
                 }
                 return false;
               
@@ -685,11 +727,15 @@ namespace BQJX.Core
             //0x6077
             throw new NotImplementedException();
         }
-        public async Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, CancellationTokenSource cts)
+        public async Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, IGlobalStatus gs)
         {
-            if (cts?.IsCancellationRequested == true)
+            while (gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                if (gs.IsStopped)
+                {
+                    return false;
+                }
+                await Task.Delay(1000).ConfigureAwait(false);
             }
             throw new NotImplementedException();
         }

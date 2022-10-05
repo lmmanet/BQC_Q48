@@ -81,7 +81,7 @@ namespace Q_Platform.BLL
                 _motion.ServoOn(_axisSyring);
             }
       
-            var result = await _motion.GohomeWithCheckDone(_axisSyring, 21, cts).ConfigureAwait(false);
+            var result = await _motion.GohomeWithCheckDone(_axisSyring, 21, _globalStatus).ConfigureAwait(false);
             if (!result)
             {
                 return false;
@@ -404,7 +404,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSelingFromCapperFourToWeightAndBack(Sample sample, Func<Sample, CancellationTokenSource, bool> addMarkFunc, CancellationTokenSource cts)
+        public bool GetSelingFromCapperFourToWeightAndBack(Sample sample,int var ,double volume, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -438,6 +438,15 @@ namespace Q_Platform.BLL
                             //读取称台值
                             sample.SeilingWeight1 = ReadWeight();
 
+                            if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
+                            {
+                                result = AddMarkFromSourceToWeight(var, volume, cts);
+                                if (result)
+                                {
+                                    throw new Exception("浓缩前加标失败!");
+                                }
+
+                            }
                             //搬运回
                             result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId - 1), cts);
                             if (!result)
@@ -459,14 +468,14 @@ namespace Q_Platform.BLL
                             //读取称台值
                             sample.SeilingWeight2 = ReadWeight();
 
-                            if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.AddMark1))
+                            if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.AddMark1) && var != 0)
                             {
-                                result = addMarkFunc?.Invoke(sample, cts) == false;
+                                result = AddMarkFromSourceToWeight(var,volume,cts);
                                 if (result)
                                 {
                                     throw new Exception("浓缩前加标失败!");
                                 }
-                                TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1);
+                                
                             }
 
                             //搬运回
@@ -491,7 +500,7 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromCapperFourToWeightAndBack(sample, addMarkFunc, cts);
+                return GetSelingFromCapperFourToWeightAndBack(sample, var,volume, cts);
             }
             catch (Exception ex)
             {
@@ -509,10 +518,11 @@ namespace Q_Platform.BLL
         /// 从浓缩搬运西林瓶到称重 并搬运回
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="addMarkFunc"></param>
+        /// <param name="var">加标种类1~4 0：不加</param>
+        /// <param name="volume">加标量</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSelingFromConcentrationToWeight(Sample sample, Func<Sample, CancellationTokenSource, bool> addMarkFunc, CancellationTokenSource cts)
+        public bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -555,10 +565,10 @@ namespace Q_Platform.BLL
                                 {
                                     _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
                                     //判断是否加标
-                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2))
+                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
-                                        result = addMarkFunc?.Invoke(sample, cts) == false;
-                                        if (result)
+                                        result = AddMarkFromSourceToWeight(var,volume, cts);
+                                        if (!result)
                                         {
                                             throw new Exception($"{sampleId}西林瓶加标失败");
                                         }
@@ -608,14 +618,13 @@ namespace Q_Platform.BLL
                                 {
                                     _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
                                     //判断是否加标
-                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1))
+                                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
-                                        result = addMarkFunc?.Invoke(sample, cts) == false;
-                                        if (result)
+                                        result = AddMarkFromSourceToWeight(var, volume, cts);
+                                        if (!result)
                                         {
                                             throw new Exception($"{sampleId}西林瓶加标失败");
                                         }
-                                        TechStatusHelper.ResetBit(sample.TechParams, TechStatus.AddMark1);
                                     }
                                 }
                                 else
@@ -651,7 +660,7 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromConcentrationToWeight(sample, addMarkFunc, cts);
+                return GetSelingFromConcentrationToWeight(sample, var,volume, cts);
             }
             catch (Exception ex)
             {
@@ -751,63 +760,46 @@ namespace Q_Platform.BLL
         /// <param name="isFirst">是否是第一个样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetBottleFromMaterialToCapperFive_Two(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromMaterialToCapperFive_Two(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
             ushort num = (ushort)(2 * sampleId);
-            Thread.Sleep(300);
+         
             try
             {
-                lock (_lockObj)
+                _logger?.Info($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5");
+                //试管在净化试管架
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        result = Get_GC_BottleFromMaterialToCapperFive(num, cts);
+                        if (!result)
                         {
-                            throw new OccupyMethodException();
+                            throw new Exception($"从气质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
                         }
+                        sample.BottleStatus = 1;
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-                    _logger?.Info($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5");
-                    //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
+                    if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
+                        result = Get_LC_BottleFromMaterialToCapperFive(num, cts);
+                        if (!result)
                         {
-                            result = Get_GC_BottleFromMaterialToCapperFive(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从气质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 1;
+                            throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
                         }
-                        if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = Get_LC_BottleFromMaterialToCapperFive(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2InShelf);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2InCapper);
+                        sample.BottleStatus = 0;
                     }
-
-                    //小瓶瓶在拧盖   
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
-                    {
-                        _currentMethodName = string.Empty;
-                        return true;
-                    }
-                    throw new Exception($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5 失败,SampleStatus-{sample.Status}");
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2InShelf);
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2InCapper);
                 }
-            }
-            catch (OccupyMethodException)
-            {
-                return GetBottleFromMaterialToCapperFive_Two(sample, cts);
+
+                //小瓶瓶在拧盖   
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
+                {
+                    return true;
+                }
+                throw new Exception($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5 失败,SampleStatus-{sample.Status}");
             }
             catch (Exception ex)
             {
@@ -828,63 +820,46 @@ namespace Q_Platform.BLL
         /// <param name="isFirst">是否是第一个样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetBottleFromCapperFiveToMaterial_One(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromCapperFiveToMaterial_One(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
             ushort num = (ushort)(2 * sampleId -1);
-            Thread.Sleep(300);
+         
             try
             {
-                lock (_lockObj)
+                _logger?.Info($"从拧盖5搬运{sampleId}小瓶到气质小瓶架");
+                //试管在净化试管架
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InCapper))
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
+                        if (!result)
                         {
-                            throw new OccupyMethodException();
+                            throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
                         }
+                        sample.BottleStatus = 1;
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-                    _logger?.Info($"从拧盖5搬运{sampleId}小瓶到气质小瓶架");
-                    //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InCapper))
+                    if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
+                        result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
+                        if (!result)
                         {
-                            result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 1;
+                            throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
                         }
-                        if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle1InCapper);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1InShelf);
+                        sample.BottleStatus = 0;
                     }
-
-                    //小瓶瓶在架子
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
-                    {
-                        _currentMethodName = string.Empty;
-                        return true;
-                    }
-                    throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败,SampleStatus-{sample.Status}");
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle1InCapper);
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1InShelf);
                 }
-            }
-            catch (OccupyMethodException)
-            {
-                return GetBottleFromCapperFiveToMaterial_One(sample, cts);
+
+                //小瓶瓶在架子
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
+                {
+                    return true;
+                }
+                throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败,SampleStatus-{sample.Status}");
             }
             catch (Exception ex)
             {
@@ -905,7 +880,7 @@ namespace Q_Platform.BLL
         /// <param name="isFirst">是否是第一个样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetBottleFromCapperFiveToMaterial_Two(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromCapperFiveToMaterial_Two(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -913,55 +888,38 @@ namespace Q_Platform.BLL
             Thread.Sleep(300);
             try
             {
-                lock (_lockObj)
+                _logger?.Info($"从拧盖5搬运{sampleId}小瓶到气质小瓶架");
+                //试管在净化试管架
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
+                        if (!result)
                         {
-                            throw new OccupyMethodException();
+                            throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
                         }
+                        sample.BottleStatus = 1;
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-                    _logger?.Info($"从拧盖5搬运{sampleId}小瓶到气质小瓶架");
-                    //试管在净化试管架
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InCapper))
+                    if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
+                        result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
+                        if (!result)
                         {
-                            result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 1;
+                            throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
                         }
-                        if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
-                            }
-                            sample.BottleStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2InCapper);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2InShelf);
+                        sample.BottleStatus = 0;
                     }
-
-                    //小瓶瓶在架子
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
-                    {
-                        _currentMethodName = string.Empty;
-                        return true;
-                    }
-                    throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败,SampleStatus-{sample.Status}");
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsBottle2InCapper);
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2InShelf);
                 }
-            }
-            catch (OccupyMethodException)
-            {
-                return GetBottleFromCapperFiveToMaterial_Two(sample, cts);
+
+                //小瓶瓶在架子
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2InShelf))
+                {
+                    return true;
+                }
+                throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败,SampleStatus-{sample.Status}");
             }
             catch (Exception ex)
             {
@@ -981,10 +939,10 @@ namespace Q_Platform.BLL
         /// 第一组移液  从净化管到小瓶  从西林瓶到小瓶
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="var"></param>
+        /// <param name="var">1:  2:</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool DoPipettingOne(Sample sample, int var,Func<Sample,CancellationTokenSource,bool> func, CancellationTokenSource cts)
+        public bool DoPipettingOne(Sample sample, int var,Func<Sample,int,CancellationTokenSource,bool> capperOn, Func<Sample, int,CancellationTokenSource, bool> capperOff, CancellationTokenSource cts)
         {
             double volume = sample.TechParams.ExtractSampleVolume;  //提取样品溶液量
             int tech_i = 1;
@@ -1007,118 +965,180 @@ namespace Q_Platform.BLL
                     _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"提取样品液{ sample.Id}移液-{volume}ml");
-                    if (_pipettingStep == 1 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
                     {
                         //取枪头
                         var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管取枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //第一个样品到气质小瓶
-                    if (_pipettingStep == 2 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //第一个样品到液质小瓶
-                    if (_pipettingStep == 3 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {  
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
                     //推枪头
-                    if (_pipettingStep == 4 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 4 && !_globalStatus.IsStopped)
                     { 
                         //退枪头
                         var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id -1 ), cts,30).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管放枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1ExtractDone);
                     }
 
-                    //小瓶上料下料动作
-
-                    if (_pipettingStep == 5 && !_globalStatus.IsStopped)
+                    //小瓶装盖
+                    if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
-                        var result = func(sample,cts);
+                        //装盖 
+                        var result = capperOn(sample,1,cts);
                         if (!result)
                         {
-                            throw new Exception($"小瓶上下料失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
+                    }
+
+                    //搬运小瓶到试管架  下料
+                    if (sample.PipettorStep2 == 6 && !_globalStatus.IsStopped)
+                    {
+                        //搬运下料 
+                        var result = GetBottleFromCapperFiveToMaterial_One(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"第一组小瓶搬运到试管架失败,pipettingStep-{sample.PipettorStep2}");
+                        }
+                        sample.PipettorStep2++;
+                    }
+
+                    //搬运第二组小瓶到拧盖5  上料
+                    if (sample.PipettorStep2 == 7 && !_globalStatus.IsStopped)
+                    {
+                        //搬运上料
+                        var result = GetBottleFromMaterialToCapperFive_Two(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"第二组小瓶搬运到拧盖5失败,pipettingStep-{sample.PipettorStep2}");
+                        }
+                        sample.PipettorStep2++;
+                    }
+
+                    //第二组小瓶拆盖
+                    if (sample.PipettorStep2 == 8 && !_globalStatus.IsStopped)
+                    {
+                        // 拆盖 
+                        var result = capperOff(sample,2, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"第二组小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
+                        }
+                        sample.PipettorStep2++;
                     }
 
                     //第二个样品移液
-                    if (_pipettingStep == 6 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 9 && !_globalStatus.IsStopped)
                     {
                         //取枪头
                         var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id ), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管取枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
                     //第2个样品到气质小瓶
-                    if (_pipettingStep == 7 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 10 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
                     //第2个样品到液质小瓶
-                    if (_pipettingStep == 8 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 11 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
-
-                    if (_pipettingStep == 9 && !_globalStatus.IsStopped)
+                    //第二组移液推枪头
+                    if (sample.PipettorStep2 == 12 && !_globalStatus.IsStopped)
                     {
                         //退枪头
                         var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id ), cts, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管放枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2ExtractDone);
-                        _pipettingStep = 1;
+                        sample.PipettorStep2++;
+                    }
+
+                    //小瓶装盖
+                    if (sample.PipettorStep2 == 13 && !_globalStatus.IsStopped)
+                    {
+                        //装盖 
+                        var result = capperOn(sample,2, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"第二组小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
+                        }
+                        sample.PipettorStep2++;
+                    }
+
+                    //第二组小瓶搬运到试管架
+                    if (sample.PipettorStep2 == 14 && !_globalStatus.IsStopped)
+                    {
+                        //搬运下料 
+                        var result = GetBottleFromCapperFiveToMaterial_Two(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"第二组小瓶搬运到试管架失败,pipettingStep-{sample.PipettorStep2}");
+                        }
+                        sample.PipettorStep2 = 1;
                         _currentMethodName = string.Empty;
                         return true;
+                      
                     }
-                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{_pipettingStep}");
+
+                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep2}");
                 }
             }
             catch (OccupyMethodException)
             {
-                return DoPipettingOne(sample,var,func, cts);
+                return DoPipettingOne(sample,var,capperOn, capperOff, cts);
             }
             catch (Exception ex)
             {
@@ -1158,79 +1178,79 @@ namespace Q_Platform.BLL
                     _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"提取浓缩液{ sample.Id}移液-{volume}ml");
-                    if (_pipettingStep == 1 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
                     {
                         //取枪头
                         var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管取枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //第一个样品到西林瓶1
-                    if (_pipettingStep == 2 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //推枪头
-                    if (_pipettingStep == 3 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {
                         //退枪头
                         var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), cts, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第一管放枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //第二个样品移液
-                    if (_pipettingStep == 4 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 4 && !_globalStatus.IsStopped)
                     {
                         //取枪头
                         var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id), cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管取枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //第2个样品到西林瓶2
-                    if (_pipettingStep == 5 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
                         var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管移液失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep++;
+                        sample.PipettorStep2++;
                     }
 
                     //推枪头
-                    if (_pipettingStep == 6 && !_globalStatus.IsStopped)
+                    if (sample.PipettorStep2 == 6 && !_globalStatus.IsStopped)
                     {
                         //退枪头
                         var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id), cts, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"第二管放枪头失败,pipettingStep-{_pipettingStep}");
+                            throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
-                        _pipettingStep = 1;
+                        sample.PipettorStep2 = 1;
                         _currentMethodName = string.Empty;
                         return true;
                     }
-                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{_pipettingStep}");
+                    throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep2}");
                 }
             }
             catch (OccupyMethodException)
@@ -1246,55 +1266,6 @@ namespace Q_Platform.BLL
 
     
         //========================================加标=========================================================//
-
-        /// <summary>
-        /// 从取加标液位到称重位
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="var"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool AddMarkFromSourceToWeight(Sample sample, int var, CancellationTokenSource cts)
-        {
-            double volume = sample.TechParams.Add_Mark_A;
-            if (var == 2)
-            {
-                volume = sample.TechParams.Add_Mark_B;
-            }
-
-            Thread.Sleep(300);
-            try
-            {
-                lock (_lockObj)
-                {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
-                    {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
-                        {
-                            throw new OccupyMethodException();
-                        }
-                    }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-                    var result = AddMarkFromSourceToWeight(var, volume, cts);
-                    if (!result)
-                    {
-                        throw new Exception("加标失败!");
-                    }
-                    _currentMethodName = string.Empty;
-                    return true;
-                }
-            }
-            catch (OccupyMethodException)
-            {
-                return AddMarkFromSourceToWeight(sample,var, cts);
-            }
-            catch (Exception ex)
-            {
-                _logger?.Error(ex.Message);
-                throw ex;
-            }
-        }
 
 
         /// <summary>
@@ -3046,7 +3017,7 @@ namespace Q_Platform.BLL
         /// 从取加标液位到称重位
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="var"></param>
+        /// <param name="var">加标种类1~4</param>
         /// <param name="cts"></param>
         /// <returns></returns>
         protected bool AddMarkFromSourceToWeight(int var,double volume, CancellationTokenSource cts)
@@ -3066,7 +3037,7 @@ namespace Q_Platform.BLL
                 }
                 Z_Cylinder_Down();
                 //吸液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, volume, _syringVel, cts).GetAwaiter().GetResult();
+                result = _motion.P2pMoveWithCheckDone(_axisSyring, volume, _syringVel, _globalStatus).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"注射器吸液失败-{volume}ul");
@@ -3089,7 +3060,7 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //吐液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, cts).GetAwaiter().GetResult();
+                result = _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, _globalStatus).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"注射器吐液失败");
@@ -3132,7 +3103,7 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //吸液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, 50, _syringVel, cts).GetAwaiter().GetResult();
+                result = _motion.P2pMoveWithCheckDone(_axisSyring, 50, _syringVel, _globalStatus).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"注射器清洗吸液失败-{50}ul");
@@ -3142,7 +3113,7 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //吐液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, cts).GetAwaiter().GetResult();
+                result = _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, _globalStatus).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"注射器吐液失败");

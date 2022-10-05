@@ -112,9 +112,19 @@ namespace BQJX.Common
         public int SubStep { get; set; }
 
         /// <summary>
-        /// 移液步骤
+        /// 搬运2移取上清液步骤
         /// </summary>
-        public int PipettorStep { get; set; } = 1;
+        public int BottleStep { get; set; }
+
+        /// <summary>
+        /// 移液步骤1
+        /// </summary>
+        public int PipettorStep1 { get; set; } = 1;  
+        
+        /// <summary>
+        /// 移液步骤2
+        /// </summary>
+        public int PipettorStep2 { get; set; } = 1;
 
         /// <summary>
         /// 回湿最终时间

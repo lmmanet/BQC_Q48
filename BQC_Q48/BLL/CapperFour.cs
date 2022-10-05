@@ -27,6 +27,9 @@ namespace Q_Platform.BLL
 
         private readonly ICapperFive _capperFive;
 
+        private readonly ICapperThree _capperThree;
+
+
         private readonly static object _lockObj = new object();
 
 
@@ -34,11 +37,12 @@ namespace Q_Platform.BLL
 
         #region Construtors
 
-        public CapperFour(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, IConcentration concentration, ICarrierTwo carrier, ICapperFive capperFive) : base(io, motion, globalStatus, dataAccess, logger)
+        public CapperFour(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, IConcentration concentration, ICarrierTwo carrier, ICapperFive capperFive,ICapperThree capperThree) : base(io, motion, globalStatus, dataAccess, logger)
         {
             this._concentration = concentration;
             this._carrier = carrier;
             this._capperFive = capperFive;
+            this._capperThree = capperThree;
 
             _axisY = 19;
             _axisC1 = 20;
@@ -219,7 +223,7 @@ namespace Q_Platform.BLL
                         //称重 判断结果  继续浓缩？
                         if (sample.MainStep == 18 && !_globalStatus.IsStopped)
                         {
-                            result = _carrier.GetSelingFromConcentrationToWeight(sample, AddMark_A, cts);
+                            result = _carrier.GetSelingFromConcentrationToWeight(sample, 1,sample.TechParams.Add_Mark_B, cts);
                             if (!result)
                             {
                                 return false;
@@ -299,7 +303,7 @@ namespace Q_Platform.BLL
                     //称重 判断结果  继续浓缩？
                     if (sample.MainStep == 18 && !_globalStatus.IsStopped)
                     {
-                        result = _carrier.GetSelingFromConcentrationToWeight(sample, null, cts);
+                        result = _carrier.GetSelingFromConcentrationToWeight(sample, 0,0, cts);
                         if (!result)
                         {
                             return false;
@@ -329,37 +333,112 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 农残移液
+        /// 农残移液  从净化管 ==》 西林瓶  从净化管==》小瓶
         /// </summary>
         /// <param name="sample"></param>
+        /// <param name="var">1:浓缩移液 2:提取样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool DoPipettingOne(Sample sample,CancellationTokenSource cts)
+        public bool DoPipettingOne(Sample sample, int var, CancellationTokenSource cts)
         {
-            return _carrier.DoPipettingTwo(sample, 1, cts); 
+            bool result;
+
+            if (var == 1)
+            {
+                //拧盖4  搬运搬运西林瓶到拧盖4  =》拆盖 ==》称重
+                if (sample.MainStep == 8 && !_globalStatus.IsStopped)
+                {
+                    result = GetSeilingAndWeight(sample, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("搬运西林到称重失败!");
+                    }
+                    sample.MainStep = 9;
+                }
+
+                //移液
+                lock (_lockObj)
+                {
+                    if (sample.MainStep == 9 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperThree.DoPipetting(sample, dosffa, cts);
+                        if (!result)
+                        {
+                            throw new Exception("从净化管移液到西林瓶失败!");
+                        }
+                        sample.MainStep = 13;
+                        return true;
+                    }
+                }
+
+            }
+
+            else if (var == 2)
+            {
+                if (sample.MainStep == 8 && !_globalStatus.IsStopped)
+                {
+                    sample.MainStep = 20;
+                }
+
+                //准备小瓶
+                if (sample.MainStep == 20 && !_globalStatus.IsStopped)
+                {
+                    //拧盖5  搬运小瓶到拧盖5
+                    //搬运小瓶到拧盖5 第一组
+                    if (sample.SubStep == 0 && !_globalStatus.IsStopped)
+                    {
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
+                        {
+                            result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
+                            }
+                            sample.SubStep++;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    //拆盖 第一组
+                    if (sample.SubStep == 1 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperFive.CapperOff(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
+                        }
+                        sample.SubStep = 0;
+                        sample.MainStep++;
+                    }
+                }
+
+                //移液
+                if (sample.MainStep == 21 && !_globalStatus.IsStopped)
+                {
+                    result = _capperThree.DoPipetting(sample, _capperFive.DoPipettingFromCapperThreeToBottle, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"净化管{sample.Id}提取样品液 失败!");
+                    }
+                    sample.SubStep = 0;
+                    return true;
+                }
+            }
+
+            
+
+            return false;
+
+        }
+        private bool dosffa(Sample sample,CancellationTokenSource  cts)
+        {
+            //净化管到西林瓶
+            return _carrier.DoPipettingTwo(sample, 1, cts);
         }
 
-        /// <summary>
-        /// 兽残移液
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool DoPipettingTwo(Sample sample,CancellationTokenSource cts)
-        {
-           return _carrier.DoPipettingTwo(sample, 2, cts);
-         }
-
-        /// <summary>
-        /// 从净化管移液到小瓶
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        public bool GetSampleFromPurify(Sample sample, CancellationTokenSource cts)
-        {
-            return _capperFive.DoPipettingFromCapperThreeToBottle(sample, cts);
-        }
 
         /// <summary>
         /// 获取西林瓶重量
@@ -406,7 +485,7 @@ namespace Q_Platform.BLL
                     if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
                         //搬运到称重称重
-                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, AddMark_B, cts);
+                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2,sample.TechParams.Add_Mark_B, cts);
                         if (!result)
                         {
                             throw new Exception($"西林瓶{sample.Id}称重失败!");
@@ -490,7 +569,7 @@ namespace Q_Platform.BLL
             //下料
             if (sample.MainStep == 22 && !_globalStatus.IsStopped)
             {
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSample))
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                 {
                     result = CapperOnAndGetSeilingBack(sample, cts);
                     if (!result)
@@ -548,35 +627,6 @@ namespace Q_Platform.BLL
 
             throw new Exception("样品复溶 提取样品 搬回空管失败 状态错误!");
         }
-
-        /// <summary>
-        /// 农残加标
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        private bool AddMark_A(Sample sample, CancellationTokenSource cts)
-        {
-            return _carrier.AddMarkFromSourceToWeight(sample, 1, cts);
-            //清洗
-        }
-
-        /// <summary>
-        /// 兽残加标
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        private bool AddMark_B(Sample sample,CancellationTokenSource cts)
-        {
-            return _carrier.AddMarkFromSourceToWeight(sample, 2, cts);
-            //清洗
-        }
-
-
-
-
-
 
 
 

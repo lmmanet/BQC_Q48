@@ -419,7 +419,7 @@ namespace Q_Platform.BLL
                 //X气缸移动到加固位
                 X_Cylinder_Left();
                 //伺服Y轴移动到指定位置
-                var result11 =  _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, cts).ConfigureAwait(false);
+                var result11 =  _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, _globalStatus).ConfigureAwait(false);
                 var result22 =  _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
 
                 if (!await result11)

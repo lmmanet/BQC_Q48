@@ -56,7 +56,11 @@ namespace Q_Platform.BLL
         public Task StartVibrationAndVortex(Sample sample, string methodAction, CancellationTokenSource cts)
         {
             //判断去重
-            GlobalCache.AddVibrationOneVortexKeyValue(sample, methodAction);
+            var dic = GlobalCache.Instance.VibrationOneDic;
+            if (!dic.ContainsKey(sample))
+            {
+                dic.Add(sample, methodAction);
+            }
 
             if (_vibrationOnevortexTask != null)
             {
@@ -68,11 +72,12 @@ namespace Q_Platform.BLL
 
             _vibrationOnevortexTask = Task.Run(() =>
             {
-                while (!_globalStauts.IsStopped && GlobalCache.GetVibrationOneVortexKeyValueCount() > 0)
+                while (!_globalStauts.IsStopped && GlobalCache.Instance.VibrationOneDic.Count > 0)
                 {
                     lock (_lockObj)
                     {
-                        KeyValuePair<Sample, string> item = GlobalCache.GetVibrationOneVortexKeyValues(0);
+                        var sampleDic = GlobalCache.Instance.VibrationOneDic;
+                        KeyValuePair<Sample, string> item = sampleDic.First();
                         var itemSample = item.Key;
 
                         try
@@ -223,7 +228,7 @@ namespace Q_Platform.BLL
                             MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
 
                             //移除当前项
-                            GlobalCache.RemoveVibrationOneVortexKeyValue(itemSample, item.Value);
+                            sampleDic.Remove(itemSample);
 
                         }
                         catch (Exception ex)

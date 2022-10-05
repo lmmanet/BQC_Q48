@@ -19,7 +19,7 @@ namespace BQJX.Common
         {
             Int64 value = sample.Status;
             Int64 temp = 1 << bit;
-            if (bit > 32)
+            if (bit >= 32)
             {
                 temp = 0x100000000 << (bit - 32);
             }
@@ -40,7 +40,7 @@ namespace BQJX.Common
         public static void SetBitOn(Sample sample, int bit)
         {
             Int64 temp = 1 << bit;
-            if (bit > 32)
+            if (bit >= 32)
             {
                 temp = 0x100000000 << (bit - 32);
             }
@@ -60,7 +60,7 @@ namespace BQJX.Common
         public static void ResetBit(Sample sample, int bit)
         {
             Int64 temp = ~(1 << bit); 
-            if (bit > 32)
+            if (bit >= 32)
             {
                 temp = ~(0x100000000 << (bit-32));
             }

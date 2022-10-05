@@ -71,7 +71,7 @@ namespace Q_Platform.BLL
                 }
 
                 //开始回零  Z相回零
-                bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, cts);
+                bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, _globalStauts);
                 if (!ret)
                 {
                     throw new Exception("振荡回零失败！");

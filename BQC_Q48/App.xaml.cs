@@ -53,11 +53,13 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<ICentrifugalCarrierPosDataAccess, CentrifugalCarrierPosDataAccess>();
             SimpleIoc.Default.Register<IVortexPosDataAccess, VortexPosDataAccess>();
             SimpleIoc.Default.Register<IConcentrationPosDataAccess, ConcentrationPosDataAccess>();
-            SimpleIoc.Default.Register<ICapperPosDataAccess, CapperPosDataAccess>(); 
+            SimpleIoc.Default.Register<ICapperPosDataAccess, CapperPosDataAccess>();
 
             #endregion
 
             #region 注册基础业务
+
+            SimpleIoc.Default.Register<IGlobalStatus, GlobalStatus>();
 
             SimpleIoc.Default.Register<ICardBase, CardBase>();
             SimpleIoc.Default.Register<IEtherCATMotion>(() => new EtherCATMotion(GetSevorAxisInfos(), logger));
@@ -73,7 +75,7 @@ namespace BQC_Q48
 
             SimpleIoc.Default.Register<ISyringTwo,SyringTwo>();
 
-            SimpleIoc.Default.Register<IGlobalStatus, GlobalStatus>();
+          
 
             #endregion
 

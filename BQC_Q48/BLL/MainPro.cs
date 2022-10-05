@@ -308,24 +308,57 @@ namespace Q_Platform.BLL
             _main = Task.Run(() =>
             {
 
-
+                //离心
                 for (int i = 0; i < 8; i++)
                 {
                     var sample = _workList[i];
-                    sample.Status = 0x10100101080;
-                    GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i+1));
+                    sample.Status = 0x11100101080;
+                    sample.TechParams.Tech = 0x3EFDE1AB;   //兽药
+                    sample.TechParams.cusuanan = 5;
+                    sample.TechParams.CentrifugalOneVelocity = new int[] { 1000,1000,1000};
+                    sample.TechParams.CentrifugalOneTime = new int[] {1,1,1 };
+                    GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i + 1));
                     sample.MainStep = 4;
                     Centrifugal(sample, cts);
                 }
 
-              
+
+                //浓缩测试  及  浓缩移液
+                //for (int i = 0; i < 8; i++)
+                //{
+                //    var sample = _workList[i];
+                //    sample.Status = 0x11100101080;
+                //    sample.TechParams.Tech = 0xF43EE00;   //E03EE00:农残取液   F03EE00：农残浓缩
+                //    sample.TechParams.ConcentrationTime = 1;
+                //    GlobalCache.Instance.ConcentrationList.Add(sample);
+                //    //sample.MainStep = 8;  浓缩/提取样品
+                //    sample.MainStep = 11;  //兽药浓缩
+                //    _centrifugalCarrier.StartConcentration(sample, cts);
+                //}
+
+
+                //左侧移液
+                //for (int i = 0; i < 8; i++)
+                //{
+                //    var sample = _workList[i];
+                //    sample.Status = 0x11100101001;
+                //    sample.TechParams.Tech = 0x3EFDE1AB;   //  //0x3EFDE1AB:兽药移液1   0xF45EE00:兽药移液2
+                //    sample.TechParams.cusuanan = 5;
+                //    sample.TechParams.ConcentrationTime = 1;
+                //    sample.TechParams.VibrationTwoTime = new int[] {30,30 };
+                //    sample.TechParams.VibrationTwoVel = new int[] { 300,300};
+
+
+                //    //GlobalCache.Instance.ConcentrationList.Add(sample);
+                //    //sample.MainStep = 8;  浓缩/提取样品
+                //    sample.MainStep = 8;  //兽药浓缩
+                //    //sample.MainStep = 5;  //兽药移液1
+                //    _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@test", cts);
+                //}
 
 
 
-
-
-
-                //正式程序
+                // 正式程序
                 //while (_workList.Count > 0 && !_globalStatus.IsStopped)
                 //{
                 //    var result = Ext(_workList[0]);
@@ -346,9 +379,8 @@ namespace Q_Platform.BLL
 
         public void StopPro()
         {
-            MySerialization.SerializeToXml<List<Sample>>(_sampleFile, _workList);
-            GlobalCache.SaveStatus();
-            cts?.Cancel();
+            GlobalCache.Save();
+            //MySerialization.SerializeToXml<List<Sample>>(_sampleFile, _workList);
             _globalStatus.StopProgram();
             Task.Run(() =>
             {
@@ -358,8 +390,9 @@ namespace Q_Platform.BLL
 
         public void PausePro(Expression<Func<bool>> pauseFlag)
         {
-            _globalStatus.PauseProgram();
+          
             pauseFlag.SetPropertyValue(true);
+            _globalStatus.PauseProgram();
         }
 
         public void ContinuePro()
@@ -371,10 +404,21 @@ namespace Q_Platform.BLL
             // _vibrationTask?.Start();
             //_centrifugalTask?.Start();
             //_pipettingTask?.Start();
+
+            if (_pipettingTask!=null)
+            {
+                var b = _pipettingTask.IsCompleted;
+                if (b)
+                {
+                    _pipettingTask = _centrifugalCarrier.StartPipetting(null, "Q_Platform.BLL.IMainPro@test", cts);
+                }
+            }
+            _pipettingTask = _centrifugalCarrier.StartPipetting(null, "Q_Platform.BLL.IMainPro@test", cts);
         }
 
         public void SwitchLight()
         {
+            GlobalCache.Load();
             if (!_io.ReadBit_DO(3))
             {
                 _io.WriteBit_DO(3, true);
@@ -457,7 +501,11 @@ namespace Q_Platform.BLL
             DateTime end = DateTime.Now + TimeSpan.FromMinutes(minutes);
             sample.WetBackEndTime = end;
 
-            GlobalCache.AddWetBack(sample);
+            var list1 = GlobalCache.Instance.WetBackSampleList;
+            if (!list1.Contains(sample))
+            {
+                list1.Add(sample);
+            }
 
             if (_wetBackTask != null)
             {
@@ -472,8 +520,8 @@ namespace Q_Platform.BLL
                 int count = 10;
                 while (count > 0 && !_globalStatus.IsStopped)
                 {
-                    var list = GlobalCache.GetWetBackList();
-                  
+                    var list = GlobalCache.Instance.WetBackSampleList;
+
                     for (int i = 0; i < list.Count; i++)
                     {
                         var itemSample = list[i];
@@ -518,13 +566,13 @@ namespace Q_Platform.BLL
             else if (sample.MainStep == 7)
             {
                 _logger.Info("净化振荡完成 下一步二次离心!");
-                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
+                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,1);
             }
             
             else if (sample.MainStep == 10)
             {
                 _logger.Info("萃取振荡完成 下一步三次离心!");
-                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,true);
+                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,2);
             }
             
         }
@@ -542,7 +590,7 @@ namespace Q_Platform.BLL
                 _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
             }
 
-            _pipettingTask = _centrifugalCarrier.StartPipetting(sample, Centrifugal, cts);
+            _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
         }
 
 
@@ -750,6 +798,8 @@ namespace Q_Platform.BLL
 
         }
 
+
+   
 
 
     }

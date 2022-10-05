@@ -9,7 +9,15 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, bool isInsert = false);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="actionCallBack"></param>
+        /// <param name="cts"></param>
+        /// <param name="var">离心试管种类0： 样品管 1：净化管 2：萃取管</param>
+        /// <returns></returns>
+        Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, int var = 0);
 
 
 

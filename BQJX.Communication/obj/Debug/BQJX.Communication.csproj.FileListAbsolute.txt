@@ -142,3 +142,12 @@ D:\项目\Q平台\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.cs
 D:\项目\Q平台\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CopyComplete
 D:\项目\Q平台\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.dll
 D:\项目\Q平台\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.pdb
+D:\App\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Communication.dll
+D:\App\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Communication.pdb
+D:\App\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Common.dll
+D:\App\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Common.pdb
+D:\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.AssemblyReference.cache
+D:\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CoreCompileInputs.cache
+D:\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CopyComplete
+D:\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.dll
+D:\App\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.pdb

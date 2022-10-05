@@ -108,18 +108,35 @@ namespace Q_Platform.BLL
         /// <param name="actionCallBack"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, bool isInsert = false)
+        public Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, int var = 0)
         {
-            if (isInsert)
+            var dicBig = GlobalCache.Instance.CentrifugalBig;   //大管
+            var dicSmall = GlobalCache.Instance.CentrifugalSmall;//小管
+            var dicPolish = GlobalCache.Instance.CentrifugalPolish;//萃取大管
+
+            if (var == 1)
             {
-                GlobalCache.InsertCentrifugalKeyValue(sample, actionCallBack);
+                if (!dicSmall.ContainsKey(sample))
+                {
+                    dicSmall.Add(sample, actionCallBack);
+                }
+            }
+            else if(var == 2)
+            {
+                if (!dicPolish.ContainsKey(sample))
+                {
+                    dicPolish.Add(sample, actionCallBack);
+                }
             }
             else
             {
-                GlobalCache.AddCentrifugalKeyValue(sample, actionCallBack);
+                if (!dicBig.ContainsKey(sample))
+                {
+                    dicBig.Add(sample, actionCallBack);
+                }
             }
-         
-   
+
+
             if (_centrifugalTask != null)
             {
                 if (!_centrifugalTask.IsCompleted)
@@ -130,9 +147,35 @@ namespace Q_Platform.BLL
 
             _centrifugalTask = Task.Run(() =>
             {
-                while (cts?.IsCancellationRequested != true && GlobalCache.GetCentrifugalKeyValueCount() > 0)
+                while (cts?.IsCancellationRequested != true)
                 {
-                    KeyValuePair<Sample, string> item = GlobalCache.GetCentrifugalKeyValues(0);
+                    var dicBig1 = GlobalCache.Instance.CentrifugalBig;   //大管
+                    var dicSmall1 = GlobalCache.Instance.CentrifugalSmall;//小管
+                    var dicPolish1 = GlobalCache.Instance.CentrifugalPolish;//萃取大管
+
+
+                    if (dicBig1.Count <= 0 && dicSmall1.Count <= 0 && dicPolish1.Count <= 0)
+                    {
+                        break;
+                    }
+
+                    KeyValuePair<Sample, string> item = dicPolish1.FirstOrDefault();
+
+                    if (item.Key ==null) //萃取列表无数据
+                    {
+                        item = dicSmall1.FirstOrDefault();
+                    }
+
+                    if (item.Key == null) //净化管列表无数据
+                    {
+                        item = dicBig1.FirstOrDefault();
+                    }
+
+                    if (item.Key == null) //样品大管无数据
+                    {
+                        break;
+                    }
+                   
                     var itemSample1 = item.Key;
 
                     try
@@ -156,8 +199,7 @@ namespace Q_Platform.BLL
                                     MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
 
                                     //样品和任务从列表移除
-
-                                    GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
+                                    dicBig1.Remove(itemSample1);
                                 }
                             }
 
@@ -167,46 +209,47 @@ namespace Q_Platform.BLL
                                 //二次离心
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2))
                                 {
-                                    var item2 = GlobalCache.GetCentrifugalKeyValues(1);
+                                    var item2 = dicBig1.FirstOrDefault();
                                     var itemSample2 = item2.Key;
-                                    //大小管一起离心
-                                    if (itemSample2.MainStep == 4 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal1))//一次离心
+                                    if (itemSample2 != null)
                                     {
-                                        var result = DoCentrifugalBigAndSmall(itemSample2, itemSample1, 1, cts);
-                                        if (!result)
+                                        //大小管一起离心
+                                        if (itemSample2.MainStep == 4 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal1))//一次离心
                                         {
-                                            throw new Exception("DoCentrifugal3 err");
+                                            var ret = DoCentrifugalBigAndSmall(itemSample2, itemSample1, 1, cts);
+                                            if (!ret)
+                                            {
+                                                throw new Exception("DoCentrifugal3 err");
+                                            }
+
+                                            itemSample1.MainStep++;
+                                            itemSample2.MainStep++;
+
+                                            //触发后续动作   取净化液  加入到移液列表
+                                            MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+                                            MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
+
+                                            //样品和任务从列表移除
+                                            dicSmall1.Remove(itemSample1);
+                                            dicBig1.Remove(itemSample2);
+                                            continue;
                                         }
-
-                                        itemSample1.MainStep++;
-                                        itemSample2.MainStep++;
-
-                                        //触发后续动作   取净化液  加入到移液列表
-                                        MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-                                        MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
-
-                                        //样品和任务从列表移除
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample2, item2.Value);
                                     }
                                     //单独小管离心
-                                    else
+                                    var result = DoCentrifugalSmall(itemSample1, cts);
+                                    if (!result)
                                     {
-                                        var result = DoCentrifugalSmall(itemSample1, cts);
-                                        if (!result)
-                                        {
-                                            throw new Exception("DoCentrifugal2 err");
-                                        }
-
-                                        itemSample1.MainStep++;
-
-                                        //触发后续动作   取净化液  加入到移液列表
-                                        MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-
-                                        //样品和任务从列表移除
-
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
+                                        throw new Exception("DoCentrifugal2 err");
                                     }
+
+                                    itemSample1.MainStep++;
+
+                                    //触发后续动作   取净化液  加入到移液列表
+                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+
+                                    //样品和任务从列表移除
+
+                                    dicSmall1.Remove(itemSample1);
                                 }
 
                             }
@@ -216,45 +259,46 @@ namespace Q_Platform.BLL
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3))
                                 {
-                                    var item2 = GlobalCache.GetCentrifugalKeyValues(1);
+                                    var item2 = dicSmall1.FirstOrDefault();
                                     var itemSample2 = item2.Key;
-                                    //大小管一起离心
-                                    if (itemSample2.MainStep == 7 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal2))
+                                    if (itemSample2 != null)
                                     {
-                                        var result = DoCentrifugalBigAndSmall(itemSample1, itemSample2, 2, cts);
-                                        if (!result)
+                                        //大小管一起离心
+                                        if (itemSample2.MainStep == 7 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal2))
                                         {
-                                            throw new Exception("DoCentrifugal4 err");
+                                            var ret = DoCentrifugalBigAndSmall(itemSample1, itemSample2, 2, cts);
+                                            if (!ret)
+                                            {
+                                                throw new Exception("DoCentrifugal4 err");
+                                            }
+
+                                            itemSample1.MainStep++;
+                                            itemSample2.MainStep++;
+
+                                            //触发后续动作   取净化液  加入到移液列表
+                                            MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+                                            MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
+
+                                            //样品和任务从列表移除
+                                            dicPolish1.Remove(itemSample1);
+                                            dicSmall1.Remove(itemSample2);
+                                            continue;
                                         }
-
-                                        itemSample1.MainStep++;
-                                        itemSample2.MainStep++;
-
-                                        //触发后续动作   取净化液  加入到移液列表
-                                        MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-                                        MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
-
-                                        //样品和任务从列表移除
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample2, item2.Value);
                                     }
-                                    else
+                                    var result = DoPolishCentrifugal(itemSample1, cts);
+                                    if (!result)
                                     {
-                                        var result = DoPolishCentrifugal(itemSample1, cts);
-                                        if (!result)
-                                        {
-                                            throw new Exception("DoCentrifugal3 err");
-                                        }
-
-                                        itemSample1.MainStep++;
-
-                                        //触发后续动作   取萃取液  加入移液列表
-                                        MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-
-                                        //样品和任务从列表移除
-
-                                        GlobalCache.RemoveCentrifugalKeyValue(itemSample1, item.Value);
+                                        throw new Exception("DoCentrifugal3 err");
                                     }
+
+                                    itemSample1.MainStep++;
+
+                                    //触发后续动作   取萃取液  加入移液列表
+                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+
+                                    //样品和任务从列表移除
+
+                                    dicPolish1.Remove(itemSample1);
 
                                 }
 
@@ -308,7 +352,13 @@ namespace Q_Platform.BLL
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal) && sample.SubStep == 1
                     && !_globalStatus.IsStopped)
                 {
-
+                    int time = sample.TechParams.CentrifugalOneTime[0];
+                    int vel = sample.TechParams.CentrifugalOneVelocity[0];
+                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("大管离心出错!");
+                    }
 
                     sample.SubStep++;
                 }
@@ -362,7 +412,13 @@ namespace Q_Platform.BLL
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal) && sample.SubStep == 1
                     && !_globalStatus.IsStopped)
                 {
-
+                    int time = sample.TechParams.CentrifugalOneTime[2];
+                    int vel = sample.TechParams.CentrifugalOneVelocity[2];
+                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("萃取管离心出错!");
+                    }
 
                     sample.SubStep++;
                 }
@@ -416,7 +472,13 @@ namespace Q_Platform.BLL
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal) && sample.SubStep==1
                     && !_globalStatus.IsStopped)
                 {
-
+                    int time = sample.TechParams.CentrifugalOneTime[1];
+                    int vel = sample.TechParams.CentrifugalOneVelocity[1];
+                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("小管离心出错!");
+                    }
 
                     sample.SubStep++;
                 }
@@ -471,7 +533,13 @@ namespace Q_Platform.BLL
                 if (sample1.SubStep == 2 && sample2.SubStep == 2
                 && !_globalStatus.IsStopped)
                 {
-
+                    int time = sample2.TechParams.CentrifugalOneTime[1];
+                    int vel = sample2.TechParams.CentrifugalOneVelocity[1];
+                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("大小管离心出错!");
+                    }
 
                     sample1.SubStep++;
                     sample2.SubStep++;
@@ -512,7 +580,7 @@ namespace Q_Platform.BLL
         /// <param name="vel"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task<bool> DoCentrifugal(int time,int vel, CancellationTokenSource cts)
+        private async Task<bool> DoCentrifugal(int time,int vel, CancellationTokenSource cts)
         {
             //关闭门
             CloseShadow();
@@ -525,8 +593,9 @@ namespace Q_Platform.BLL
                 return false;
             }
             //延时
-            DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
+            DateTime end = DateTime.Now + TimeSpan.FromMinutes(time);
             bool isDone = false;
+            await Task.Delay(1000).ConfigureAwait(false);
             while (true)
             {
                 Thread.Sleep(1000);
