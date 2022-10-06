@@ -121,7 +121,7 @@ namespace Q_Platform.BLL
                     dicSmall.Add(sample, actionCallBack);
                 }
             }
-            else if(var == 2)
+            else if(var == 2 )
             {
                 if (!dicPolish.ContainsKey(sample))
                 {
@@ -183,7 +183,7 @@ namespace Q_Platform.BLL
                         lock (_lockObj)
                         {  
                             //是否一次离心
-                            if (itemSample1.MainStep == 4)
+                            if (itemSample1.MainStep == 4 && !_globalStatus.IsStopped)
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1))
                                 {
@@ -204,7 +204,7 @@ namespace Q_Platform.BLL
                             }
 
                             //是否二次离心   净化管离心
-                            else if (itemSample1.MainStep == 7)
+                            else if (itemSample1.MainStep == 7 && !_globalStatus.IsStopped)
                             {
                                 //二次离心
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2))
@@ -255,7 +255,7 @@ namespace Q_Platform.BLL
                             }
 
                             //是否三次离心
-                            else if (itemSample1.MainStep == 10)
+                            else if (itemSample1.MainStep == 10 && !_globalStatus.IsStopped)
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3))
                                 {
@@ -338,46 +338,59 @@ namespace Q_Platform.BLL
             {
                 bool result;
                 //从冰浴搬运样品到离心机
-                if (!SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInCentrifugal) && sample.SubStep == 0)
+                if ( sample.SubStep == 0 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetSampleFromColdToCentrifugal(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                     {
-                        return false;
+                        result = _carrier.GetSampleFromColdToCentrifugal(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
+                   
                     sample.SubStep++;
                 }
              
                 ///离心
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal) && sample.SubStep == 1
-                    && !_globalStatus.IsStopped)
+                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                 {
-                    int time = sample.TechParams.CentrifugalOneTime[0];
-                    int vel = sample.TechParams.CentrifugalOneVelocity[0];
-                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                     {
-                        throw new Exception("大管离心出错!");
+                        int time = sample.TechParams.CentrifugalOneTime[0];
+                        int vel = sample.TechParams.CentrifugalOneVelocity[0];
+                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("大管离心出错!");
+                        }
                     }
-
                     sample.SubStep++;
                 }
 
                 //从离心机搬运离心完后的样品到试管架
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && sample.SubStep == 2)
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetSampleFromCentrifugalToMaterial(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        return false;
+                        result = _carrier.GetSampleFromCentrifugalToMaterial(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
                     sample.SubStep++;
+
                 }
                
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && !_globalStatus.IsStopped && sample.SubStep == 3)
+
+                if (sample.SubStep == 3)
                 {
-                    sample.SubStep = 0;
-                    return true;
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
+                    {
+                        sample.SubStep = 0;
+                        return true;
+                    }
                 }
 
                 return false;
@@ -397,48 +410,56 @@ namespace Q_Platform.BLL
             {
                 bool result;
                 //上料
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal) && sample.SubStep == 0)
+                if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetPolishFromColdToCentrifugal(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
                     {
-                        return false;
+                        result = _carrier.GetPolishFromColdToCentrifugal(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
                     sample.SubStep++;
                 }
            
-
                 ///离心
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal) && sample.SubStep == 1
-                    && !_globalStatus.IsStopped)
+                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                 {
-                    int time = sample.TechParams.CentrifugalOneTime[2];
-                    int vel = sample.TechParams.CentrifugalOneVelocity[2];
-                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
                     {
-                        throw new Exception("萃取管离心出错!");
+                        int time = sample.TechParams.CentrifugalOneTime[2];
+                        int vel = sample.TechParams.CentrifugalOneVelocity[2];
+                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("萃取管离心出错!");
+                        }
                     }
-
                     sample.SubStep++;
                 }
 
-
                 //取出试管
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf) && sample.SubStep == 2)
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetPolishFroCentrifugaToShelf(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        return false;
+                        result = _carrier.GetPolishFroCentrifugaToShelf(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
                     sample.SubStep++;
                 }
               
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf) && !_globalStatus.IsStopped && sample.SubStep == 3)
+                if (sample.SubStep == 3)
                 {
-                    sample.SubStep = 0;
-                    return true;
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        sample.SubStep = 0;
+                        return true;
+                    }
                 }
 
                 return false;
@@ -457,47 +478,57 @@ namespace Q_Platform.BLL
             lock (_lockObj)
             {
                 bool result;
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal) && sample.SubStep ==0)
+                if ( sample.SubStep ==0 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetPurifyFromMaterialToCentrifugal(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
                     {
-                        return false;
+                        result = _carrier.GetPurifyFromMaterialToCentrifugal(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
                     sample.SubStep++;
                 }
                    
-
                 ///离心
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal) && sample.SubStep==1
-                    && !_globalStatus.IsStopped)
+                if (sample.SubStep==1 && !_globalStatus.IsStopped)
                 {
-                    int time = sample.TechParams.CentrifugalOneTime[1];
-                    int vel = sample.TechParams.CentrifugalOneVelocity[1];
-                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
                     {
-                        throw new Exception("小管离心出错!");
+                        int time = sample.TechParams.CentrifugalOneTime[1];
+                        int vel = sample.TechParams.CentrifugalOneVelocity[1];
+                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("小管离心出错!");
+                        }
                     }
-
                     sample.SubStep++;
                 }
 
-                if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf) && sample.SubStep == 2)
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetPurifyFromCentrifugalToMaterial(sample, GoStation, cts);
-                    if (!result)
+                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
-                        return false;
+                        result = _carrier.GetPurifyFromCentrifugalToMaterial(sample, GoStation, cts);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
                     sample.SubStep++;
                 }
                     
 
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf) && !_globalStatus.IsStopped && sample.SubStep == 3)
+                if (sample.SubStep == 3)
                 {
-                    sample.SubStep = 0;
-                    return true;
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
+                    {
+                        sample.SubStep = 0;
+                        return true;
+                    }
+                   
                 }
 
                 return false;

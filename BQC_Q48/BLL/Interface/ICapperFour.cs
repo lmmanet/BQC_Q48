@@ -18,7 +18,6 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task StartConcentration(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
         /// 农残浓缩

@@ -2208,7 +2208,7 @@ namespace Q_Platform.BLL
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
                 //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece())
+                if (!await ClawIsGetchPiece(false))
                 {
                     //打开手爪到指定位置
                     var ret = await OpenClaw(clawOpenByte).ConfigureAwait(false);
@@ -2301,7 +2301,7 @@ namespace Q_Platform.BLL
                 }
 
                 //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece())
+                if (!await ClawIsGetchPiece(false))
                 {
                     throw new Exception("手爪上无试管");
                 }
@@ -2378,7 +2378,7 @@ namespace Q_Platform.BLL
             try
             {
                 //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece())
+                if (!await ClawIsGetchPiece(false))
                 {
                     //打开手爪到指定位置
                     var ret = await OpenClaw(clawOpenByte).ConfigureAwait(false);
@@ -2470,7 +2470,7 @@ namespace Q_Platform.BLL
                 }
 
                 //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece())
+                if (!await ClawIsGetchPiece(true))
                 {
                     throw new Exception("手爪上无试管");
                 }
@@ -2623,9 +2623,26 @@ namespace Q_Platform.BLL
         /// 手爪是否抓取到物件
         /// </summary>
         /// <returns>true:手爪上有物件 false:手爪上无物件</returns>
-        protected async Task<bool> ClawIsGetchPiece()
+        protected async Task<bool> ClawIsGetchPiece(bool isCheck,int timeout = 5)
         {
-            var status = await _claw.ClawGetchStatus(_clawId).ConfigureAwait(false);
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
+        s1: var status = await _claw.ClawGetchStatus(_clawId).ConfigureAwait(false);
+            if (isCheck)
+            {
+                var result = status == 2;
+                if (!result)
+                {
+                    _logger?.Debug($"手爪上无物件 - {status}");
+                }
+                if (status != 2)
+                {
+                    if (DateTime.Now < end)
+                    {
+                        goto s1;
+                    }
+                }
+            }
+           
             return status == 2;
         }
 

@@ -72,49 +72,69 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从试管架2搬运{sampleId}萃取管到移栽移液");
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
-                    }
-
-                    //搬运萃取管到拧盖2
-                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInShelf))
-                    {
-                        result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
                         if (!result)
                         {
-                            throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
+                    }
+                  
+
+                    //搬运萃取管到拧盖2 
+                    if (!_globalStatus.IsStopped)
+                    {
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                        {
+                            result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
+                            }
+                        }
+                    }
+                    
+
+                    //拆盖
+                    if (!_globalStatus.IsStopped)
+                    {
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped))
+                        {
+                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
+                            }
+                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+                        }
+                    }
+                    
+
+                    //移动到上下料位
+                    if (!_globalStatus.IsStopped)
+                    {
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
+                    }
+                 
+
+                    //搬运到移栽
+                    if (!_globalStatus.IsStopped)
+                    {
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
+                        {
+                            result = _carrier.GetPolishFromCapperTwoToTransfer(sample, func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从拧盖2搬运{ sampleId }萃取管到移栽失败!");
+                            }
                         }
                     }
                    
-                    //拆盖
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped))
-                    {
-                        result = CapperOffAsync(sample,cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
-                        }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
-                    }
-
-                    //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
-                    {
-                        throw new Exception("拧盖移动到上下料位 出错");
-                    }
-
-                    //搬运到移栽
-                    if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInCapper))
-                    {
-                        result = _carrier.GetPolishFromCapperTwoToTransfer(sample, func, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"从拧盖2搬运{ sampleId }萃取管到移栽失败!");
-                        }
-                    }
 
                     if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsPolishInTransfer))
                     {
@@ -127,11 +147,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从试管架2搬运{sampleId}萃取管到移栽移液 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -156,29 +171,33 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从移栽搬运{sampleId}萃取管到拧盖2");
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
                     }
+                 
 
                     //搬运萃取管到拧盖2
-                    result = _carrier.GetPolishFromTransferToCapperTwo(sample,func, cts);
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception($"从移栽搬运{ sampleId }萃取管到拧盖2失败!");
+                        result = _carrier.GetPolishFromTransferToCapperTwo(sample, func, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从移栽搬运{ sampleId }萃取管到拧盖2失败!");
+                        }
+                        _isOccupy = false;
+                        return true;
                     }
-                    _isOccupy = false;
-                    return true;
+
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从试管架2搬运{sampleId}萃取管到移栽移液 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -202,40 +221,49 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从拧盖2搬运{sampleId}萃取管到试管架");
 
                     //装盖
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
+                    if (!_globalStatus.IsStopped)
                     {
-                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                         {
-                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
+                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishUnCapped);
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishUnCapped);
                     }
+
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
+
                     }
 
+
                     //搬运到移栽
-                    result = _carrier.GetPolishFromCapperTwoToMaterial(sample, cts);
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception($"从拧盖2搬运{ sampleId }萃取管到试管架2失败!");
+                        result = _carrier.GetPolishFromCapperTwoToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从拧盖2搬运{ sampleId }萃取管到试管架2失败!");
+                        }
+                        _isOccupy = false;
+                        return true;
                     }
-                    _isOccupy = false;
-                    return true;
+
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从拧盖2搬运{sampleId}萃取管到试管架 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -259,40 +287,47 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从拧盖2搬运{sampleId}萃取管到冰浴");
 
                     //装盖
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
+                    if (!_globalStatus.IsStopped)
                     {
-                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                         {
-                            throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
+                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品萃取管装盖 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
                         }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+
                     }
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
                     }
 
                     //搬运到冰浴
-                    result = _carrier.GetPolishFromCapperTwoToCold(sample, cts);
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception($"从拧盖2搬运{sampleId}萃取管到冰浴失败!");
+                        result = _carrier.GetPolishFromCapperTwoToCold(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"从拧盖2搬运{sampleId}萃取管到冰浴失败!");
+                        }
+                        _isOccupy = false;
+                        return true;
                     }
-                    _isOccupy = false;
-                    return true;
+
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从拧盖2搬运{sampleId}萃取管到冰浴 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -316,47 +351,57 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从试管架2搬运{sampleId}萃取管到拧盖2");
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
                     }
 
                     //搬运萃取管到拧盖2
-                    result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
-                    }  
-                    
-                    //拆盖
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped))
-                    {
-                        result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                        result = _carrier.GetPolishFromMaterialToCapperTwo(sample, cts);
                         if (!result)
                         {
-                            throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
+                            throw new Exception($"从试管架2搬运{ sampleId }萃取管到拧盖2失败!");
                         }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+
+                    }
+
+                    //拆盖
+                    if (!_globalStatus.IsStopped)
+                    {
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishUnCapped))
+                        {
+                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
+                            }
+                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+                        }
                     }
 
                     //移动到上下料位
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖移动到上下料位 出错");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖移动到上下料位 出错");
+                        }
+                        _isOccupy = false;
+                        return true;
                     }
-                    _isOccupy = false;
-                    return true;
+
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从试管架2搬运{sampleId}萃取管到拧盖2 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -385,50 +430,62 @@ namespace Q_Platform.BLL
                         _logger?.Info($"从试管架1搬运{sampleId}样品管到拧盖2");
 
                         //移动到上下料位
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (!_globalStatus.IsStopped)
                         {
-                            throw new Exception("拧盖移动到上下料位 出错");
+                            result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception("拧盖移动到上下料位 出错");
+                            }
+
                         }
 
                         //搬运样品管到拧盖2
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
+                        if (!_globalStatus.IsStopped)
                         {
-                            result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
-                            if (!result)
+                            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                             {
-                                throw new Exception($"从试管架2搬运{ sampleId }样品管到拧盖2失败!");
+                                result = _carrier.GetSampleFromMaterialToCapperTwo(sample, cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从试管架2搬运{ sampleId }样品管到拧盖2失败!");
+                                }
                             }
                         }
+
 
                         //拆盖
-                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
+                        if (!_globalStatus.IsStopped)
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
-                            if (!result)
+                            if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                             {
-                                throw new Exception($"{sample.Id}样品管拆盖 失败!");
+                                result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                                if (!result)
+                                {
+                                    throw new Exception($"{sample.Id}样品管拆盖 失败!");
+                                }
+                                SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                             }
-                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
                         }
 
+
                         //移动到上下料位
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (!_globalStatus.IsStopped)
                         {
-                            throw new Exception("拧盖移动到上下料位 出错");
+                            result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception("拧盖移动到上下料位 出错");
+                            }
+                            _isOccupy = false;
+                            return true;
                         }
-                        _isOccupy = false;
-                        return true;
+
+                        return false;
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (cts?.IsCancellationRequested != false)
-                    {
-                        _logger?.Info($"从试管架1搬运{sampleId}样品管到拧盖2 停止");
-                        return false;
-                    }
                     _logger?.Warn(ex.Message);
                     return false;
                 }
@@ -458,45 +515,52 @@ namespace Q_Platform.BLL
                         _logger?.Info($"从拧盖2搬运{sampleId}样品管到试管架1");
 
                         //装盖
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                        if (!_globalStatus.IsStopped)
                         {
-                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                            if (!result)
+                            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                             {
-                                throw new Exception($"{sample.Id}样品管装盖 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+                                result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                                if (!result)
+                                {
+                                    throw new Exception($"{sample.Id}样品管装盖 失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+                                }
+                                SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
                             }
-                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsUnCapped);
                         }
 
                         //移动到上下料位
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (!_globalStatus.IsStopped)
                         {
-                            throw new Exception("拧盖移动到上下料位 出错");
+                            result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception("拧盖移动到上下料位 出错");
+                            }
                         }
 
                         //搬运到试管架1
-                        if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInCapperTwo))
+                        if (!_globalStatus.IsStopped)
                         {
-                            result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
-                            if (!result)
+                            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInCapperTwo))
                             {
-                                throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
+                                result = _carrier.GetSampleFromCapperTwoToMaterial(sample, cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从拧盖2搬运{ sampleId }样品管到试管架1失败!");
+                                }
                             }
+                            _isOccupy = false;
+                            return true;
+
                         }
-                        _isOccupy = false;
-                        return true;
+
+                        return false;
                     }
                 });
               
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从拧盖2搬运{sampleId}样品管到试管架1 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -513,7 +577,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
 
             if (!result)
             {
@@ -526,7 +590,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -543,7 +607,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await base.CapperOn(80, 40, cts).ConfigureAwait(false);
+            s1: var result = await base.CapperOn(80, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -556,7 +620,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }

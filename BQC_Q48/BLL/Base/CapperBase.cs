@@ -164,7 +164,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
+            s1: var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -177,7 +177,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -194,7 +194,7 @@ namespace Q_Platform.BLL
         public virtual async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -207,7 +207,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -228,42 +228,31 @@ namespace Q_Platform.BLL
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
                 //复位抱夹
                 OpenHolding();
 
                 //Y轴移动到上下料位置
-                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+              s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
+              
                     throw new Exception("Y轴移动到上下料位失败!");
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await MovePutGetPos(cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -291,24 +280,57 @@ namespace Q_Platform.BLL
                 CloseHolding();
 
                 //Y轴移动到拧盖位
-                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
+                s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception("Y轴运动出错！");
                 }
 
                 //Z轴下降到位
-                result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
+               s2: result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception("Z轴运动出错！");
                 }
 
                 //开始拧紧
-                var result1 =  _motion.TorqueMoveWithCheckDone(_axisC1, _cMoveVel, torque, timeout,cts).ConfigureAwait(false);
+               s3: var result1 =  _motion.TorqueMoveWithCheckDone(_axisC1, _cMoveVel, torque, timeout,cts).ConfigureAwait(false);
                 var result2 = _motion.TorqueMoveWithCheckDone(_axisC2, _cMoveVel, torque, timeout, cts).ConfigureAwait(false);
                 if (!await result1 || !await result2)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                    }
                     //拧盖失败异常
                     throw new Exception("拧盖失败！");
                 }
@@ -316,16 +338,38 @@ namespace Q_Platform.BLL
                 //手爪松开
                 OpenClaw();
                 //Z轴上升到位
-                result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _zMoveVel, cts).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _zMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                    }
                     throw new Exception("Z轴运动出错！");
                 }
 
                 //Y轴移动到上下料位
-                result = await MovePutGetPos(cts).ConfigureAwait(false);
+               s5: result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s5;
+                        }
+                    }
                     throw new Exception("Y轴运动出错！");
                 }
 
@@ -335,25 +379,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await CapperOn(torque,timeout,cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -378,72 +403,109 @@ namespace Q_Platform.BLL
                 CloseHolding();
 
                 //Y轴移动到位
-                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
+               s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.CapperPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception("Y轴运动出错！");
                 }
 
                 //手爪打开
                 OpenClaw();
                 //Z轴下降到位
-                result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
+                s2: result = await _motion.P2pMoveWithCheckDone(_axisZ, _posData.CapperPos_Z, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception("Z轴运动出错！");
                 }
 
                 //手爪夹紧
                 CloseClaw();
                 //开始松开
-                var result1 =  _motion.RelativeMoveWithCheckDone(_axisC1, offset, 50, cts).ConfigureAwait(false);
+               s3: var result1 =  _motion.RelativeMoveWithCheckDone(_axisC1, offset, 50, cts).ConfigureAwait(false);
                 var result2 =  _motion.RelativeMoveWithCheckDone(_axisC2, offset, 50, cts).ConfigureAwait(false);
 
                 if (!await result1 || !await result2)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                    }
                     throw new Exception("拆盖失败！");
                 }
 
                 //Z轴上升到位
-                result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
+                s4: result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                    }
                     throw new Exception("Z轴运动出错！");
                 }
 
                 //Y轴移动到上下料位
-                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+                s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s5;
+                        }
+                    }
                     throw new Exception("Y轴运动出错！");
                 }
                 //抱夹松开
                 OpenHolding();
                 _haveCapper = true;
+                
                 return true;
 
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return await CapperOff(cts,offset);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }

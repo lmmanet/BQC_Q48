@@ -585,12 +585,16 @@ namespace Q_Platform.BLL
             {
                 _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
             }
-            if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate3) && sample.MainStep == 11)
+
+            else if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate3) && sample.MainStep == 11)
             {
                 _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
             }
+            else
+            {
+                _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
 
-            _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
+            }
         }
 
 

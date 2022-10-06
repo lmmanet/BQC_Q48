@@ -78,9 +78,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-
-            var result = await CapperOn(30, 40, cts).ConfigureAwait(false);
-
+            s1: var result = await CapperOn(30, 40, cts).ConfigureAwait(false);
             if (!result)
             {
                 if (_globalStatus.IsPause)
@@ -92,7 +90,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -109,7 +107,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts, -1.5).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -1.5).ConfigureAwait(false);
 
             if (!result)
             {
@@ -122,62 +120,12 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
 
             return result;
-        }
-
-
-        public Task StartConcentration(Sample sample,CancellationTokenSource cts)
-        {
-            var ret = GlobalCache.Instance.ConcentrationList.Contains(sample);
-            if (!ret)
-            {
-                GlobalCache.Instance.ConcentrationList.Add(sample);
-            }
-
-            if (ConcentrationTask != null)
-            {
-                if (!ConcentrationTask.IsCompleted)
-                {
-                    return ConcentrationTask;
-                }
-            }
-
-
-            ConcentrationTask = Task.Run(() =>
-            {
-                while (GlobalCache.Instance.ConcentrationList.Count>0 && !_globalStatus.IsStopped)
-                {
-                    var itemSample = GlobalCache.Instance.ConcentrationList[0];
-
-                    if (TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.ExtractPurify))
-                    {
-                        _logger?.Info($"开始浓缩 -- {itemSample.Id}");
-                    }
-
-                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractPurify)&& !TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractSupernate3)
-                    && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractSample)
-                    )
-                    {
-                        _logger?.Info($"开始提取样品液 -- {itemSample.Id}");
-                    }
-
-                    if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractSupernate3))
-                    {
-                        _logger?.Info($"开始提取萃取液并浓缩 -- {itemSample.Id}");
-                    }
-
-                    GlobalCache.Instance.ConcentrationList.Remove(itemSample);
-                }
-             
-
-            });
-
-            return ConcentrationTask;
         }
 
 
@@ -196,44 +144,49 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //开始移取浓缩液 浓缩
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
+                    if (sample.MainStep == 16 && !_globalStatus.IsStopped)
                     {
-                        //搬运到浓缩
-                        if (sample.MainStep == 16 && !_globalStatus.IsStopped)
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
                         {
-                            result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
-                            if (!result)
+                            //搬运到浓缩
+                            if (sample.MainStep == 16 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"西林瓶{sample.Id}搬运到浓缩失败!");
+                                result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"西林瓶{sample.Id}搬运到浓缩失败!");
+                                }
+                                sample.MainStep++;
                             }
-                            sample.MainStep++;
+
+                            //开始浓缩
+                            if (sample.MainStep == 17 && !_globalStatus.IsStopped)
+                            {
+                                result = _concentration.DoConcentration(sample, cts);
+                                if (!result)
+                                {
+                                    return false;
+                                }
+                                sample.MainStep++;
+                            }
+
+                            //称重 判断结果  继续浓缩？
+                            if (sample.MainStep == 18 && !_globalStatus.IsStopped)
+                            {
+                                result = _carrier.GetSelingFromConcentrationToWeight(sample, 1, sample.TechParams.Add_Mark_B, cts);
+                                if (!result)
+                                {
+                                    return false;
+                                }
+                                sample.MainStep++;
+                            }
                         }
 
-                        //开始浓缩
-                        if (sample.MainStep == 17 && !_globalStatus.IsStopped)
-                        {
-                            result = _concentration.DoConcentration(sample, cts);
-                            if (!result)
-                            {
-                                return false;
-                            }
-                            sample.MainStep++;
-                        }
-
-                        //称重 判断结果  继续浓缩？
-                        if (sample.MainStep == 18 && !_globalStatus.IsStopped)
-                        {
-                            result = _carrier.GetSelingFromConcentrationToWeight(sample, 1,sample.TechParams.Add_Mark_B, cts);
-                            if (!result)
-                            {
-                                return false;
-                            }
-                            sample.MainStep++;
-                        }
-                   
+                        sample.MainStep = 19;
                     }
+                 
 
-                    //取样
+                    //复溶 取样
                     if (sample.MainStep >= 19 && !_globalStatus.IsStopped)
                     {
                         result = RedissolveAndGetSampleToBottle(sample, cts);
@@ -241,20 +194,16 @@ namespace Q_Platform.BLL
                         {
                             return false;
                         }
+                        return true;
                     }
 
                     //完成
-                    return true;
+                    return false;
                 }
 
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Error(ex.Message);
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
 
@@ -319,10 +268,11 @@ namespace Q_Platform.BLL
                         {
                             return false;
                         }
+                        return true;
                     }
-                                
+
                     //完成
-                    return true;
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -343,7 +293,7 @@ namespace Q_Platform.BLL
         {
             bool result;
 
-            if (var == 1)
+            if (var == 1 && !_globalStatus.IsStopped)
             {
                 //拧盖4  搬运搬运西林瓶到拧盖4  =》拆盖 ==》称重
                 if (sample.MainStep == 8 && !_globalStatus.IsStopped)
@@ -373,7 +323,7 @@ namespace Q_Platform.BLL
 
             }
 
-            else if (var == 2)
+            else if (var == 2 && !_globalStatus.IsStopped)
             {
                 if (sample.MainStep == 8 && !_globalStatus.IsStopped)
                 {
@@ -455,50 +405,65 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     bool result;
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (!_globalStatus.IsStopped)
                     {
-                        throw new Exception("拧盖Y轴移动到接驳位出错!");
+                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("拧盖Y轴移动到接驳位出错!");
+                        }
                     }
+
 
                     //搬运西林瓶到拧盖4
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInShelf))
+                    if (!_globalStatus.IsStopped)
                     {
-                        result = _carrier.GetSelingFromMaterialToCapperFour(sample, cts);
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInShelf))
                         {
-                            throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
+                            result = _carrier.GetSelingFromMaterialToCapperFour(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
+                            }
                         }
                     }
 
-                    if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
+                    if (!_globalStatus.IsStopped)
                     {
-                        //拆盖
-                        result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
                         {
-                            throw new Exception($"西林瓶{sample.Id}拆盖失败!");
-                        }
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsSelingUnCapped);
-                    }
-
-                    if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
-                    {
-                        //搬运到称重称重
-                        result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2,sample.TechParams.Add_Mark_B, cts);
-                        if (!result)
-                        {
-                            throw new Exception($"西林瓶{sample.Id}称重失败!");
+                            //拆盖
+                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"西林瓶{sample.Id}拆盖失败!");
+                            }
+                            SampleStatusHelper.SetBitOn(sample, SampleStatus.IsSelingUnCapped);
                         }
                     }
 
-                    return true;
+                    if (!_globalStatus.IsStopped)
+                    {
+                        if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
+                        {
+                            //搬运到称重称重
+                            result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2, sample.TechParams.Add_Mark_B, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"西林瓶{sample.Id}称重失败!");
+                            }
+                        }
+                        return true;
+                    }
+
+                    return false;
+                 
                 }
             }
             catch (Exception ex)
             {
-
-                throw;
+                _logger?.Warn(ex.Message);
+                return false;
             }
 
 
@@ -509,9 +474,6 @@ namespace Q_Platform.BLL
 
 
         #region Private Methods
-
-
-
 
 
         /// <summary>
@@ -526,7 +488,8 @@ namespace Q_Platform.BLL
             //复溶
             if (sample.MainStep == 19 && !_globalStatus.IsStopped)
             {
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInConcentration) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Redissolve))
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInConcentration) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Redissolve)
+                    && !sample.ConcentrationFailure)
                 {
                     result = _concentration.Redissolve(sample, cts);
                     if (!result)
@@ -554,7 +517,7 @@ namespace Q_Platform.BLL
             //提取样品液
             if (sample.MainStep == 21 && !_globalStatus.IsStopped)
             {
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper) && !sample.ConcentrationFailure)
                 {
                     result = _capperFive.DoPipettingFromCapperFourToBottle(sample, cts);
                     if (!result)
@@ -600,7 +563,7 @@ namespace Q_Platform.BLL
         {
             bool result;
             //装盖
-            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingUnCapped))
+            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingUnCapped) && !_globalStatus.IsStopped)
             {
                 result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
                 if (!result)
@@ -611,7 +574,7 @@ namespace Q_Platform.BLL
             }
 
             //下料
-            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingInCapper)&&!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
+            if (SampleStatusHelper.BitIsOn(sample,SampleStatus.IsSelingInCapper)&&!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped) && !_globalStatus.IsStopped)
             {
                 result = _carrier.GetSelingFromCapperFourToMaterial(sample, cts);
                 if (!result)
@@ -625,7 +588,11 @@ namespace Q_Platform.BLL
                 return true;
             }
 
-            throw new Exception("样品复溶 提取样品 搬回空管失败 状态错误!");
+            if (!_globalStatus.IsStopped)
+            {
+                throw new Exception("样品复溶 提取样品 搬回空管失败 状态错误!");
+            }
+            return false;
         }
 
 

@@ -106,7 +106,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
+           s1: var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -119,7 +119,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -136,7 +136,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
 
             if (!result)
             {
@@ -149,7 +149,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -177,14 +177,10 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (cts?.IsCancellationRequested == true)
-                    {
-                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                    }
                     bool result;
 
                     //加溶剂 + 加盐
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2))
+                    if (sample.SubStep < 2 && !_globalStatus.IsStopped)
                     {
                         result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, cts).GetAwaiter().GetResult();
                         if (!result)
@@ -194,7 +190,8 @@ namespace Q_Platform.BLL
                         sample.SubStep = 2;
                     }
                    
-                    if (sample.SubStep == 2)
+                    //是否装盖
+                    if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
                         result = MoveOut(sample, cts).GetAwaiter().GetResult();
@@ -205,8 +202,8 @@ namespace Q_Platform.BLL
                         sample.SubStep++;
                     }
                    
-
-                    if (sample.SubStep == 3)
+                    //下料到试管架
+                    if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         //下料到试管架
                         result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
@@ -216,21 +213,18 @@ namespace Q_Platform.BLL
                         }
                         sample.SubStep++;
                     }
-                  
-                    //完成
-                    return true;
-                }
 
-              
+                    //完成
+                    if (sample.SubStep == 4)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
 
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    Console.WriteLine("触发停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -257,40 +251,43 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (cts?.IsCancellationRequested == true)
-                    {
-                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                    }
-
                     bool result;
 
                     //加溶剂 
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && sample.SubStep == 0)
+                    if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = AddSolve(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
                         {
-                            return false;
+                            result = AddSolve(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                return false;
+                            }
                         }
+                      
                         sample.SubStep++;
                     }
 
                     //加盐
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1) && sample.SubStep == 1)
+                    if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                     {
-                        //加固重量
-                        var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
+                        {
+                            //加固重量
+                            var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
                         sample.TechParams.Solid_D[1], sample.TechParams.Solid_E[1],sample.TechParams.Solid_F[1] };
 
-                        result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            return false;
+                            result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                return false;
+                            }
                         }
                         sample.SubStep++;
                     }
 
-                    if (sample.SubStep == 2)
+                    //是否装盖
+                    if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
                         result = MoveOut(sample, cts).GetAwaiter().GetResult();
@@ -301,8 +298,8 @@ namespace Q_Platform.BLL
                         sample.SubStep++;
                     }
                    
-
-                    if (sample.SubStep == 3)
+                    //下料到试管架
+                    if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         ////下料到试管架
                         result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
@@ -313,10 +310,12 @@ namespace Q_Platform.BLL
                         sample.SubStep++;
                     }
 
-                  
-
                     //完成
-                    return true;
+                    if (sample.SubStep == 4)
+                    {
+                        return true;
+                    }
+                    return false;
                 }
 
             
@@ -324,11 +323,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    Console.WriteLine("触发停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -357,37 +351,42 @@ namespace Q_Platform.BLL
                 {
                     bool result;
 
-                    if (cts?.IsCancellationRequested == true)
-                    {
-                        throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                    }
                     //加水  
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater) && sample.SubStep == 0)
+                    if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = AddWater(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
                         {
-                            return false;
+                            result = AddWater(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                return false;
+                            }
                         }
+                        
                         sample.SubStep = 1;
                     }
 
                     //加固
-                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo) && sample.SubStep == 1)
+                    if ( sample.SubStep == 1 && !_globalStatus.IsStopped)
                     {
-                        //加固重量
-                        var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0],
+                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
+                        {
+                            //加固重量
+                            var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0],
                         sample.TechParams.Solid_D[0], sample.TechParams.Solid_E[0],sample.TechParams.Solid_F[0] };
 
-                        result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
-                        if (!result)
-                        {
-                            return false;
+                            result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                return false;
+                            }
                         }
+                       
                         sample.SubStep = 2;
                     }
 
-                    if (sample.SubStep == 2)
+                    //是否装盖  =》 到上下料位
+                    if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
                         result = MoveOut(sample, cts).GetAwaiter().GetResult();
@@ -398,7 +397,8 @@ namespace Q_Platform.BLL
                         sample.SubStep = 3;
                     }
 
-                    if (sample.SubStep == 3)
+                    //下料到试管架
+                    if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         ////下料到试管架
                         result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
@@ -406,21 +406,20 @@ namespace Q_Platform.BLL
                         {
                             return false;
                         }
-                        sample.SubStep = 4;
+                        sample.SubStep++;
                     }
 
                     //完成
-                    return true;
+                    if (sample.SubStep == 4)
+                    {
+                        return true;
+                    }
+                    return false;
                 }
 
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    Console.WriteLine("触发停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -441,10 +440,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
+
                 ushort sampleId = sample.Id;
                 _logger?.Info($"样品{sampleId}加液");
                 //拧盖移动到上下料位

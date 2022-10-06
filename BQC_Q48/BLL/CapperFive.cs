@@ -63,7 +63,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            var result = await CapperOn(25, 40, cts).ConfigureAwait(false);
+            s1: var result = await CapperOn(25, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -76,7 +76,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts, -2).ConfigureAwait(false);
+           s1: var result = await CapperOff(cts, -2).ConfigureAwait(false);
 
             if (!result)
             {
@@ -106,7 +106,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -138,19 +138,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Error(ex.Message) ;
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
         }
-
-
-
-
 
 
         /// <summary>
@@ -195,7 +186,7 @@ namespace Q_Platform.BLL
                         }
                         else
                         {
-                            return false;
+                           throw new Exception("步骤状态错误!");
                         }
                     }
 
@@ -244,11 +235,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Error(ex.Message);
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -264,6 +250,7 @@ namespace Q_Platform.BLL
         {
             if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
             {
+                //内部已有拆盖暂停判断
                 var result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
@@ -376,7 +363,7 @@ namespace Q_Platform.BLL
         {
             bool result;
             //装盖
-            if (var == 1)
+            if (var == 1 && !_globalStatus.IsStopped)
             {
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                 {
@@ -390,7 +377,7 @@ namespace Q_Platform.BLL
                 }
                
             }
-            else if (var == 2)
+            else if (var == 2 && !_globalStatus.IsStopped)
             {
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
                 {
@@ -419,7 +406,7 @@ namespace Q_Platform.BLL
             bool result;
 
             //拆盖
-            if (var ==1)
+            if (var ==1 && !_globalStatus.IsStopped)
             {
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                 {
@@ -433,7 +420,7 @@ namespace Q_Platform.BLL
                 }
                
             }
-            else if(var == 2)
+            else if(var == 2 && !_globalStatus.IsStopped)
             {
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
                 {

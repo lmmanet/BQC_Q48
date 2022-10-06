@@ -561,7 +561,7 @@ namespace Q_Platform.BLL
                             if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                             {  //读取称台值
                                 var weitht = ReadWeight();
-                                if (weitht <= sample.SeilingWeight1 + 0.5)
+                                if (weitht <= sample.SeilingWeight1 + 0.5 && !sample.ConcentrationFailure)
                                 {
                                     _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
                                     //判断是否加标
@@ -614,7 +614,7 @@ namespace Q_Platform.BLL
                             if (sample.SubStep == 4 && !_globalStatus.IsStopped)
                             {
                                 var weitht = ReadWeight();
-                                if (weitht <= sample.SeilingWeight2 + 0.5)
+                                if (weitht <= sample.SeilingWeight2 + 0.5 && !sample.ConcentrationFailure)
                                 {
                                     _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
                                     //判断是否加标

@@ -111,7 +111,7 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            var result = await CapperOn(50, 40, cts).ConfigureAwait(false);
+           s1: var result = await CapperOn(50, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
@@ -124,7 +124,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOnAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -141,7 +141,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            var result = await CapperOff(cts, -1.3).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -1.3).ConfigureAwait(false);
 
             if (!result)
             {
@@ -154,7 +154,7 @@ namespace Q_Platform.BLL
 
                     if (!_globalStatus.IsStopped)
                     {
-                        return await CapperOffAsync(sample, cts);
+                        goto s1;
                     }
                 }
             }
@@ -204,6 +204,11 @@ namespace Q_Platform.BLL
                             }
                             sample.SubStep++;
                         }
+                        else
+                        {
+                            throw new Exception($"从拧盖3搬运净化管到移栽步骤号错误 subStep-{sample.SubStep}!");
+                        }
+                       
                     }
 
                     //拆盖
@@ -218,6 +223,10 @@ namespace Q_Platform.BLL
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                             sample.SubStep++;
+                        }
+                        else
+                        {
+                            throw new Exception($"从拧盖3搬运净化管到移栽步骤号错误 subStep-{sample.SubStep}!");
                         }
                     }
 
@@ -323,11 +332,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -388,6 +392,10 @@ namespace Q_Platform.BLL
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                             sample.SubStep++;
                         }
+                        else
+                        {
+                            throw new Exception($"从拧盖3搬运净化管到振荡步骤号错误 subStep-{sample.SubStep}!");
+                        }
                     }
 
                     //搬运到移栽
@@ -401,6 +409,10 @@ namespace Q_Platform.BLL
                                 throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ PurifyStatus-{sample.PurifyStatus}");
                             }
                             sample.SubStep++;
+                        }
+                        else
+                        {
+                            throw new Exception($"从拧盖3搬运净化管到振荡步骤号错误 subStep-{sample.SubStep}!");
                         }
                     }
 
@@ -419,11 +431,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    _logger?.Info($"从移栽取出{sample.Id}样品（50ml）空管 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -469,11 +476,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从移栽取{sample.Id}样品净化管到拧盖3 停止");
-                    return false;
-                }
+
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -503,14 +506,17 @@ namespace Q_Platform.BLL
                     }
                   
                     //装盖
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && sample.SubStep == 16)
+                    if (!_globalStatus.IsStopped && sample.SubStep == 16)
                     {
-                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            throw new Exception($"{sample.Id}样品净化管装盖 失败!");
+                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品净化管装盖 失败!");
+                            }
+                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
                         sample.SubStep++;
                     }
 
@@ -555,11 +561,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从拧盖3取{sampleId}样品净化管到试管架 停止");
-                    return false;
-                }
+
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -575,14 +577,18 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     //装盖
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && sample.SubStep == 16)
+                    if (!_globalStatus.IsStopped && sample.SubStep == 16)
                     {
-                        result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            throw new Exception($"{sample.Id}样品净化管装盖 失败!");
+                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品净化管装盖 失败!");
+                            }
+                            SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
                         }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPurfyUnCapped);
+                     
                         sample.SubStep++;
                     }
 
@@ -617,11 +623,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"从拧盖3取{sampleId}样品净化管到试管架 停止");
-                    return false;
-                }
+
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -732,11 +734,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    _logger?.Info($"从试管架取{sample.Id}样品净化管移液 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -779,17 +776,39 @@ namespace Q_Platform.BLL
                 _io.WriteBit_DO(_holding, true);
 
                 //Y轴移动到加液位
-                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, cts).ConfigureAwait(false);
+               s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
+                    throw new Exception("Y轴移动到加液位失败!");
                 }
 
                 //开始加液
-                result = await _syring.AddSolve(solve, volume, cts).ConfigureAwait(false);
+                s2: result = await _syring.AddSolve(solve, volume, cts).ConfigureAwait(false);
                 if (!result)
                 {
-                    return false;
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
+                    throw new Exception("加液失败!");
                 }
 
                 return true;
@@ -797,8 +816,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message);
-                throw ex;
+                _logger?.Warn(ex.Message);
+                return false; ;
             }
         }
 

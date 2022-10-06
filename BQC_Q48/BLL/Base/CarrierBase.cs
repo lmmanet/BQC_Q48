@@ -226,7 +226,7 @@ namespace Q_Platform.BLL
                   
                 }
 
-                if (!await ClawIsGetchPiece())
+                if (!await ClawIsGetchPiece(false))
                 {
                     //打开手爪到指定位置
                     var ret = await OpenClaw(clawOpenByte).ConfigureAwait(false);
@@ -1179,7 +1179,7 @@ namespace Q_Platform.BLL
         /// <param name="coordinate"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<Task<bool>> func,CancellationTokenSource cts)
+        protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<bool,int,Task<bool>> func,CancellationTokenSource cts)
         {
             _logger?.Debug($"CarrierMoveTo");
             try
@@ -1223,7 +1223,7 @@ namespace Q_Platform.BLL
 
                 if (func != null)
                 {
-                    var funResult = await func.Invoke().ConfigureAwait(false);
+                    var funResult = await func.Invoke(true,5).ConfigureAwait(false);
                     if (!funResult)
                     {
                         throw new Exception("手爪上无试管");
@@ -1374,10 +1374,27 @@ namespace Q_Platform.BLL
         /// 手爪是否抓取到物件
         /// </summary>
         /// <returns>true:手爪上有物件 false:手爪上无物件</returns>
-        protected async Task<bool> ClawIsGetchPiece()
+        protected async Task<bool> ClawIsGetchPiece(bool isCheck,int timeout = 5)
         {
-            var status = await _claw.ClawGetchStatus(_clawSlaveId).ConfigureAwait(false);
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
+        s1: var status = await _claw.ClawGetchStatus(_clawSlaveId).ConfigureAwait(false);
+            if (isCheck)
+            {
+                var result = status == 2;
+                if (!result)
+                {
+                    _logger?.Debug($"手爪上无物件 - {status}");
+                }
+                if (status != 2)
+                {
+                    if (DateTime.Now < end)
+                    {
+                        goto s1;
+                    }
+                }
+            }
             return status == 2;
+
         }
 
 
