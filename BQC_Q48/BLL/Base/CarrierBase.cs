@@ -647,7 +647,7 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume, CancellationTokenSource cts)
+        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume,double airColumn, CancellationTokenSource cts)
         {
             try
             {
@@ -783,7 +783,7 @@ namespace Q_Platform.BLL
                 }
                
                 //吸取空气柱
-               s5: result = await _motion.P2pMoveWithCheckDone(_axisP, volume + 0.1, _syringVel, _globalStatus).ConfigureAwait(false);
+               s5: result = await _motion.P2pMoveWithCheckDone(_axisP, volume + airColumn, _syringVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)

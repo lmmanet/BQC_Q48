@@ -9,9 +9,14 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task StartPipetting(Sample sample, string actionCallBack, CancellationTokenSource cts);
+        void AddSampleToPipettingList(Sample sample, string actionCallBack);
+        void AddSampleToConcentrationList(Sample sample);
 
-        Task StartConcentration(Sample sample, CancellationTokenSource cts);
+
+
+        Task StartPipetting(CancellationTokenSource cts);
+
+        Task StartConcentration(CancellationTokenSource cts);
 
         //==================================================================离心移栽部分======================================================================================//
 

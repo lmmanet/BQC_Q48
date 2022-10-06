@@ -101,6 +101,39 @@ namespace Q_Platform.BLL
             return true;
         }
 
+        public void AddSampleToCentrifugalList(Sample sample, string actionCallBack, int var = 0)
+        {
+            if (sample != null)
+            {
+                var dicBig = GlobalCache.Instance.CentrifugalBig;   //大管
+                var dicSmall = GlobalCache.Instance.CentrifugalSmall;//小管
+                var dicPolish = GlobalCache.Instance.CentrifugalPolish;//萃取大管
+
+                if (var == 1)
+                {
+                    if (!dicSmall.ContainsKey(sample))
+                    {
+                        dicSmall.Add(sample, actionCallBack);
+                    }
+                }
+                else if (var == 2)
+                {
+                    if (!dicPolish.ContainsKey(sample))
+                    {
+                        dicPolish.Add(sample, actionCallBack);
+                    }
+                }
+                else
+                {
+                    if (!dicBig.ContainsKey(sample))
+                    {
+                        dicBig.Add(sample, actionCallBack);
+                    }
+                }
+            }
+
+        }
+
         /// <summary>
         /// 启动离心机任务
         /// </summary>
@@ -108,35 +141,8 @@ namespace Q_Platform.BLL
         /// <param name="actionCallBack"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, int var = 0)
+        public Task StartCentrifugal(CancellationTokenSource cts)
         {
-            var dicBig = GlobalCache.Instance.CentrifugalBig;   //大管
-            var dicSmall = GlobalCache.Instance.CentrifugalSmall;//小管
-            var dicPolish = GlobalCache.Instance.CentrifugalPolish;//萃取大管
-
-            if (var == 1)
-            {
-                if (!dicSmall.ContainsKey(sample))
-                {
-                    dicSmall.Add(sample, actionCallBack);
-                }
-            }
-            else if(var == 2 )
-            {
-                if (!dicPolish.ContainsKey(sample))
-                {
-                    dicPolish.Add(sample, actionCallBack);
-                }
-            }
-            else
-            {
-                if (!dicBig.ContainsKey(sample))
-                {
-                    dicBig.Add(sample, actionCallBack);
-                }
-            }
-
-
             if (_centrifugalTask != null)
             {
                 if (!_centrifugalTask.IsCompleted)
@@ -423,7 +429,7 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
            
-                ///离心
+                //离心
                 if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
@@ -491,7 +497,7 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
                    
-                ///离心
+                //离心
                 if (sample.SubStep==1 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
@@ -551,7 +557,7 @@ namespace Q_Platform.BLL
                 bool result;
 
                 //搬运大小管到离心机
-                if (sample1.SubStep < 2 || sample2.SubStep < 2)
+                if ((sample1.SubStep < 2 && !_globalStatus.IsStopped) || (sample2.SubStep < 2 && !_globalStatus.IsStopped))
                 {
                     result = _carrier.GetBigAndSmallToCentrifugal(sample1, sample2, var, GoStation, cts);
                     if (!result)
@@ -561,8 +567,7 @@ namespace Q_Platform.BLL
                 }
               
                 ///离心
-                if (sample1.SubStep == 2 && sample2.SubStep == 2
-                && !_globalStatus.IsStopped)
+                if (sample1.SubStep == 2 && sample2.SubStep == 2 && !_globalStatus.IsStopped)
                 {
                     int time = sample2.TechParams.CentrifugalOneTime[1];
                     int vel = sample2.TechParams.CentrifugalOneVelocity[1];
@@ -577,7 +582,7 @@ namespace Q_Platform.BLL
                 }
 
                 //搬运大小管下料
-                if (sample1.SubStep >= 3 && sample2.SubStep >= 3)
+                if (sample1.SubStep >= 3 && sample2.SubStep >= 3 && !_globalStatus.IsStopped)
                 {
                     result = _carrier.GetBigAndSmallToToMarterial(sample1,sample2,var, GoStation, cts);
                     if (!result)
@@ -635,7 +640,7 @@ namespace Q_Platform.BLL
                     isDone = true;
                     break;
                 }
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped)
                 {
                     isDone = false;
                     break;
@@ -740,76 +745,6 @@ namespace Q_Platform.BLL
             } while (!result);
         }
            
-        /// <summary>
-        /// 旋转到指定工位
-        /// </summary>
-        /// <param name="num">1:初始位 2：90°位 3：180°位 4：270°位</param>
-        protected async Task<bool> GoStation1(ushort num)
-        {
-            //判断离心机是否停止
-            var cv = Math.Abs(Math.Round(_motion.GetCurrentVel(_axisCentrigugal), 1));
-            if (cv > 0.2)
-            {
-                _logger?.Error($"离心机未停止 速度：{cv}");
-                throw new Exception("离心机未停止");
-            }
-
-            //打开护罩
-            OpenShadow();
-
-
-            //离心机回零
-
-            var status = _motion.GetMotionStatus(_axisCentrigugal);
-            if ((status & 4) != 4)
-            {
-                _motion.ServoOn(_axisCentrigugal);
-            }
-
-            var result = await _motion.GohomeWithCheckDone(_axisCentrigugal, _homeMode, null).ConfigureAwait(false);
-            if (!result)
-            {
-                _logger?.Error($"离心机回零出错");
-                throw new Exception("离心机回零出错");
-            }
-
-
-            //离心机移动到指定位置
-            if (num != 1)
-            {
-                double offset = 0;
-                if (num == 2)
-                {
-                    offset = 0.25;
-                }
-                else if (num == 3)
-                {
-                    offset = 0.5;
-                }
-                else if (num == 4)
-                {
-                    offset = 0.75;
-                }
-                else
-                {
-                    throw new Exception($"指定位置编号不存在 num：{num}");
-                }
-
-                result = await _motion.P2pMoveWithCheckDone(_axisCentrigugal, offset, 1, null).ConfigureAwait(false);
-                if (!result)
-                {
-                    _logger?.Error($"离心机转到指定位置出错");
-                    throw new Exception("离心机转到指定位置出错");
-                }
-
-                return true;
-            }
-            else
-            {
-                return true;
-            }
-        }      
-        
         /// <summary>
         /// 旋转到指定工位
         /// </summary>

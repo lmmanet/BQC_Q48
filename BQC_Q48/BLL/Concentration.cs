@@ -16,7 +16,6 @@ namespace Q_Platform.BLL
     public class Concentration : IConcentration
     {
 
-
         #region Private Members
 
         private readonly IIoDevice _io;
@@ -161,7 +160,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped)
                 {
                     _logger?.Error(ex.Message);
                     return false;
@@ -199,7 +198,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped)
                 {
                     _logger?.Error(ex.Message);
                     return false;
@@ -238,23 +237,59 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动到加液
-                var result = _motion.P2pMoveWithCheckDone(_axisY, GetAddLiquidPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+                s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetAddLiquidPos(), _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception($"浓缩Y轴移动到复溶位失败!");
                 }
 
                 //注射器加液
-                result = _syringTwo.AddSolve(port, volume, cts).GetAwaiter().GetResult(); //乙酸乙酯
+               s2: result = _syringTwo.AddSolve(port, volume, cts).GetAwaiter().GetResult(); //乙酸乙酯
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception($"复溶加液失败!");
                 }
 
                 //Y轴移动到浓缩位
-                result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                    }
                     throw new Exception($"浓缩Y轴移动到浓缩位失败!");
                 }
 
@@ -284,34 +319,27 @@ namespace Q_Platform.BLL
 
                 //完成
                 //Y轴移动到上下位
-                result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s4: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                    }
                     throw new Exception("浓缩Y轴移动到上下料位失败!");
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return Redissolve(var,volume, vel, time, cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -333,9 +361,21 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动到浓缩位
-                var result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s1;
+                        }
+                    }
                     throw new Exception("浓缩Y轴移动到浓缩位失败!");
                 }
 
@@ -349,9 +389,23 @@ namespace Q_Platform.BLL
                 OpenVaccume();
 
                 //检查真空
-                result = CheckVaccumeSensor(30);
+               s4: result = CheckVaccumeSensor(30);
                 if (!result)
                 {
+                    _globalStatus.PauseProgram();
+                    _logger?.Warn("浓缩真空度未到达！");
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s4;
+                        }
+                    }
                     throw new Exception("浓缩真空度未到达！");
                 }
 
@@ -377,9 +431,21 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动一小步 
-                result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos() + 5, _yMoveVel, cts).GetAwaiter().GetResult();
+              s2: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos() + 5, _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s2;
+                        }
+                    }
                     throw new Exception("浓缩Y轴移动到浓缩位失败!");
                 }
 
@@ -387,9 +453,21 @@ namespace Q_Platform.BLL
                 Thread.Sleep(1000);
 
                 //Y轴移动到上下位
-                result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
                 if (!result)
                 {
+                    if (_globalStatus.IsPause)
+                    {
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
+                        if (!_globalStatus.IsStopped)
+                        {
+                            goto s3;
+                        }
+                    }
                     throw new Exception("浓缩Y轴移动到上下料位失败!");
                 }
 
@@ -398,25 +476,6 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-
-                if (_globalStatus.IsPause)
-                {
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(2000);
-                    }
-
-                    if (!_globalStatus.IsStopped)
-                    {
-                        return DoConcentration(vel,time, cts);
-                    }
-
-                    return false;
-                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -435,14 +494,38 @@ namespace Q_Platform.BLL
             _io.WriteByte_DA(4, value);
             _io.WriteByte_DA(5, value);
 
-            var result1 = _io.WriteBit_DO(_rotateMotion1, true);
+            s1: var result1 = _io.WriteBit_DO(_rotateMotion1, true);
             var result2= _io.WriteBit_DO(_rotateMotion2, true);
             if (!result1)
             {
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(1000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        goto s1;
+                    }
+                }
                 throw new Exception("浓缩电机1启动出错！");
             }
             if (!result2)
             {
+                if (_globalStatus.IsPause)
+                {
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(1000);
+                    }
+
+                    if (!_globalStatus.IsStopped)
+                    {
+                        goto s1;
+                    }
+                }
                 throw new Exception("浓缩电机2启动出错！");
             }
         }

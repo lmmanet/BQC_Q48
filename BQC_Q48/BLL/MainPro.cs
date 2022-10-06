@@ -399,21 +399,10 @@ namespace Q_Platform.BLL
         {
             _globalStatus.ContinueProgram();
 
-            //启动任务  如果已经完成  重新实例再启动？   
-            // _wetBackTask?.Start();
-            // _vibrationTask?.Start();
-            //_centrifugalTask?.Start();
-            //_pipettingTask?.Start();
-
-            if (_pipettingTask!=null)
-            {
-                var b = _pipettingTask.IsCompleted;
-                if (b)
-                {
-                    _pipettingTask = _centrifugalCarrier.StartPipetting(null, "Q_Platform.BLL.IMainPro@test", cts);
-                }
-            }
-            _pipettingTask = _centrifugalCarrier.StartPipetting(null, "Q_Platform.BLL.IMainPro@test", cts);
+            _centrifugalCarrier.StartConcentration(cts);
+            _centrifugalCarrier.StartPipetting(cts);
+            _centrifugal.StartCentrifugal(cts);
+            _vibrationOne.StartVibrationAndVortex(cts);
         }
 
         public void SwitchLight()
@@ -451,7 +440,8 @@ namespace Q_Platform.BLL
                     return false;
                 }
                 //把样品加入到振荡涡旋列表  并启动程序
-                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@WetBack", cts);
+                _vibrationOne.AddSampleToVibrationList(sample, "Q_Platform.BLL.IMainPro@WetBack");
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex( cts);
             }
 
             if (sample.MainStep == 2 && !_globalStatus.IsStopped)
@@ -465,7 +455,8 @@ namespace Q_Platform.BLL
 
                 //把样品加入到振荡涡旋列表  并启动程序
                 //_vibrationOne.StartVibrationAndVortex(sample, AddSalt,cts);
-                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@AddSalt", cts);
+                _vibrationOne.AddSampleToVibrationList(sample, "Q_Platform.BLL.IMainPro@AddSalt");
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex(cts);
                 //Thread.Sleep(500);
             }
 
@@ -480,8 +471,8 @@ namespace Q_Platform.BLL
 
                 //把样品加入到振荡涡旋列表  并启动程序
                 //_vibrationOne.StartVibrationAndVortex(sample, Centrifugal,cts);
-
-                _vibrationTask = _vibrationOne.StartVibrationAndVortex(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
+                _vibrationOne.AddSampleToVibrationList(sample, "Q_Platform.BLL.IMainPro@Centrifugal");
+                _vibrationTask = _vibrationOne.StartVibrationAndVortex( cts);
 
                 //Thread.Sleep(500);
             }
@@ -561,18 +552,21 @@ namespace Q_Platform.BLL
             if (sample.MainStep ==4)
             {
                 _logger.Info("振荡完成 下一步一次离心!");
-                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts);
+                _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack");
+                _centrifugalTask = _centrifugal.StartCentrifugal(cts);
             }
             else if (sample.MainStep == 7)
             {
                 _logger.Info("净化振荡完成 下一步二次离心!");
-                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,1);
+                _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack",1);
+                _centrifugalTask = _centrifugal.StartCentrifugal(cts);
             }
             
             else if (sample.MainStep == 10)
             {
                 _logger.Info("萃取振荡完成 下一步三次离心!");
-                _centrifugalTask = _centrifugal.StartCentrifugal(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", cts,2);
+                _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack",2);
+                _centrifugalTask = _centrifugal.StartCentrifugal(cts);
             }
             
         }
@@ -583,16 +577,19 @@ namespace Q_Platform.BLL
         {
             if (sample.MainStep == 8 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
             {
-                _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
+                _centrifugalCarrier.AddSampleToConcentrationList(sample);
+                _concentrationTask = _centrifugalCarrier.StartConcentration(cts);
             }
 
             else if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate3) && sample.MainStep == 11)
             {
-                _concentrationTask = _centrifugalCarrier.StartConcentration(sample, cts);
+                _centrifugalCarrier.AddSampleToConcentrationList(sample);
+                _concentrationTask = _centrifugalCarrier.StartConcentration(cts);
             }
             else
             {
-                _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
+                _centrifugalCarrier.AddSampleToPipettingList(sample, "Q_Platform.BLL.IMainPro@Centrifugal");
+                _pipettingTask = _centrifugalCarrier.StartPipetting(cts);
 
             }
         }

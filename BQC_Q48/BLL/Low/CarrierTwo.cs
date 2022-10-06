@@ -980,7 +980,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -992,7 +992,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {  
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1075,7 +1075,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 10 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1086,7 +1086,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 11 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1193,7 +1193,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1229,7 +1229,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -3138,12 +3138,12 @@ namespace Q_Platform.BLL
 
         #region Protected Methods 移液部分
 
-        protected override async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume, CancellationTokenSource cts)
+        protected override async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume,double airColumn, CancellationTokenSource cts)
         {
             //移液1ml
             if (volume <= 1 && !_globalStatus.IsStopped)
             {
-                return await base.DoPipettingAsync(sourcePos, targetPos, volume, cts).ConfigureAwait(false);
+                return await base.DoPipettingAsync(sourcePos, targetPos, volume, airColumn, cts).ConfigureAwait(false);
             }
 
             //移液1~2ml
@@ -3151,7 +3151,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3160,7 +3160,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3175,7 +3175,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3184,7 +3184,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3193,7 +3193,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 2, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 2, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3208,7 +3208,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3217,7 +3217,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3226,7 +3226,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3235,7 +3235,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 3 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 3, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 3, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3250,7 +3250,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3259,7 +3259,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3268,7 +3268,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3277,7 +3277,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 3 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3286,7 +3286,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 4 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 4, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 4, airColumn, cts).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3752,7 +3752,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(500);
                 if (DateTime.Now > end)
                 {
-                    throw new Exception("等待称台稳定超时 10S");
+                    //throw new Exception("等待称台稳定超时 10S");
                 }
             }
             //读取称台值

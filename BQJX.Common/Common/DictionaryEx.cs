@@ -19,6 +19,10 @@ namespace BQJX.Common.Common
 
         public void ReadXml(XmlReader reader)
         {
+            if (reader.IsEmptyElement)
+            {
+                return;
+            }
             reader.Read();
             XmlSerializer KeySerializer = new XmlSerializer(typeof(TKey));
             XmlSerializer ValueSerializer = new XmlSerializer(typeof(TValue));

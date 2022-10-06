@@ -9,6 +9,8 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        void AddSampleToCentrifugalList(Sample sample, string actionCallBack, int var = 0);
+
         /// <summary>
         /// 
         /// </summary>
@@ -17,7 +19,7 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <param name="var">离心试管种类0： 样品管 1：净化管 2：萃取管</param>
         /// <returns></returns>
-        Task StartCentrifugal(Sample sample, string actionCallBack, CancellationTokenSource cts, int var = 0);
+        Task StartCentrifugal(CancellationTokenSource cts);
 
 
 

@@ -2581,7 +2581,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume,0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -2614,7 +2614,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, 0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep1}");

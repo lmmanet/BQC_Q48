@@ -46,6 +46,19 @@ namespace Q_Platform.BLL
         #endregion
 
 
+        public void AddSampleToVibrationList(Sample sample, string methodAction)
+        {
+            //判断去重
+            if (sample != null)
+            {
+                var dic = GlobalCache.Instance.VibrationOneDic;
+                if (!dic.ContainsKey(sample))
+                {
+                    dic.Add(sample, methodAction);
+                }
+            }
+        }
+
         /// <summary>
         /// 振荡涡旋提取
         /// </summary>
@@ -53,15 +66,8 @@ namespace Q_Platform.BLL
         /// <param name="actionCallBack">振荡涡旋执行完成后回调</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public Task StartVibrationAndVortex(Sample sample, string methodAction, CancellationTokenSource cts)
+        public Task StartVibrationAndVortex(CancellationTokenSource cts)
         {
-            //判断去重
-            var dic = GlobalCache.Instance.VibrationOneDic;
-            if (!dic.ContainsKey(sample))
-            {
-                dic.Add(sample, methodAction);
-            }
-
             if (_vibrationOnevortexTask != null)
             {
                 if (!_vibrationOnevortexTask.IsCompleted)

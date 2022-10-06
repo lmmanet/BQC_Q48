@@ -580,12 +580,13 @@ namespace BQJX.Core
             //double factor = 1; //编码器系数
             //int error = 1000;  //位置误差带 Pulse
             //LTDMC.dmc_set_factor_error(_CardID,axisNo, factor,error);
-      
+
             ushort axis = axisNo; //轴号
             return await Task.Run(() =>
             {
                 short status = 0;
-                Thread.Sleep(500);
+                int attemp = 0;
+            s1: Thread.Sleep(500);
                 do
                 {
                     Thread.Sleep(200);
@@ -607,14 +608,19 @@ namespace BQJX.Core
 
                             double pos = 0;
                             LTDMC.dmc_get_encoder_unit(_CardID, axis, ref pos); //读取指定轴指令位置值
-                            int d1 =(int)(pos*100);
-                            int d2 = (int)(target*100);
-                            if (d1 >=d2 - 2&& d1<= d2+2)
+                            int d1 = (int)(pos * 100);
+                            int d2 = (int)(target * 100);
+                            if (d1 >= d2 - 2 && d1 <= d2 + 2)
                             {
                                 return true;
                             }
                             else
                             {
+                                attemp++;
+                                if (attemp < 5 && gs?.IsStopped != true)
+                                {
+                                    goto s1;
+                                }
                                 _logger?.Error($"CheckDone 指令未到位-{d1}-{pos} !={d2}-{target}");
                                 break;
                             }
