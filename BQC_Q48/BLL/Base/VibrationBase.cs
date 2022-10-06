@@ -17,7 +17,7 @@ namespace Q_Platform.BLL
 
         protected readonly IEtherCATMotion _motion;
         protected readonly IIoDevice _io;
-        protected readonly IGlobalStatus _globalStauts;
+        protected readonly IGlobalStatus _globalStatus;
         protected readonly ILogger _logger;
 
         #endregion
@@ -39,9 +39,9 @@ namespace Q_Platform.BLL
         {
             this._motion = motion;
             this._io = io;
-            this._globalStauts = globalStauts;
+            this._globalStatus = globalStauts;
             this._logger = logger;
-            _globalStauts.StopProgramEventArgs += StopMove;
+            _globalStatus.StopProgramEventArgs += StopMove;
         }
 
         #endregion
@@ -71,7 +71,7 @@ namespace Q_Platform.BLL
                 }
 
                 //开始回零  Z相回零
-                bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, _globalStauts);
+                bool ret = await _motion.GohomeWithCheckDone(_axisNo, 33, _globalStatus);
                 if (!ret)
                 {
                     throw new Exception("振荡回零失败！");
@@ -84,7 +84,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStauts.IsStopped)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }
@@ -126,7 +126,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStauts.IsStopped)
+                if (_globalStatus.IsStopped)
                 {
                     return false;
                 }

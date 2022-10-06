@@ -320,11 +320,18 @@ namespace Q_Platform.BLL
                     }
                     catch (Exception ex)
                     {
-                        _logger?.Warn(ex.Message);
                         _globalStatus.PauseProgram();
+                        _logger?.Warn(ex.Message);
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                            if (_globalStatus.IsStopped)
+                            {
+                                return;
+                            }
+                        }
                         return;
                     }
-
                 }
             });
 

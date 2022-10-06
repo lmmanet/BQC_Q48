@@ -45,24 +45,27 @@ namespace Q_Platform.BLL
 
         //涡旋振荡部分
         public DictionaryEx<Sample, string> VibrationOneDic = new DictionaryEx<Sample, string>();
-
-        //回湿列表
-        public List<Sample> WetBackSampleList = new List<Sample>();
-
         //离心机部分
         public DictionaryEx<Sample, string> CentrifugalBig = new DictionaryEx<Sample, string>();
         public DictionaryEx<Sample, string> CentrifugalSmall = new DictionaryEx<Sample, string>();
         public DictionaryEx<Sample, string> CentrifugalPolish = new DictionaryEx<Sample, string>();
-
+        //移液部分
+        public DictionaryEx<Sample, string> PipettorDic = new DictionaryEx<Sample, string>();
         //冰浴字典
         public DictionaryEx<Sample, ushort> ColdDic = new DictionaryEx<Sample, ushort>();
 
-        //浓缩部分
-        public List<Sample> ConcentrationList = new List<Sample>();   //浓缩列表
+        //回湿列表
+        public List<Sample> WetBackSampleList = new List<Sample>();
+        //浓缩列表
+        public List<Sample> ConcentrationList = new List<Sample>();
+        //提取列表
+        public List<Sample> ExtractList = new List<Sample>();
 
-        //移液部分
-        public DictionaryEx<Sample, string> PipettorDic = new DictionaryEx<Sample, string>();
 
+        /// <summary>
+        /// 拧盖3占用中 （移液）
+        /// </summary>
+        public bool IsCapperThreeOccupy { get; set; }
 
 
     }

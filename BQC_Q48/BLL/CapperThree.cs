@@ -178,6 +178,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GlobalCache.Instance.IsCapperThreeOccupy = true;
                     _logger?.Info($"从试管架取{sample.Id}样品移液管");
                     bool result;
 
@@ -351,6 +352,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GlobalCache.Instance.IsCapperThreeOccupy = true;
                     _logger?.Info($"从试管架取{sample.Id}样品移液管");
                     bool result;
 
@@ -450,6 +452,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GlobalCache.Instance.IsCapperThreeOccupy = true;
                     _logger?.Info($"从移栽取{sample.Id}样品净化管到拧盖3");
 
                     //拧盖移动到上下料位
@@ -496,6 +499,7 @@ namespace Q_Platform.BLL
                 bool result;
                 lock (_lockObj)
                 {
+                    GlobalCache.Instance.IsCapperThreeOccupy = true;
                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))//有净化振荡过程
                     {
                         _logger?.Info($"从拧盖3取{sampleId}样品净化管到振荡 振荡");
@@ -550,6 +554,7 @@ namespace Q_Platform.BLL
                 //在试管架
                 if (!_globalStatus.IsStopped && sample.SubStep == 22)
                 {
+                    GlobalCache.Instance.IsCapperThreeOccupy = false;  // 释放占用拧盖3资源
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
                         return true;
@@ -611,7 +616,7 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception("从拧盖3取试管到试管架 出错");
                         }
-
+                        GlobalCache.Instance.IsCapperThreeOccupy = false; //释放占用拧盖3资源
                         sample.SubStep++;
                         return true;
                     }
@@ -642,9 +647,19 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public bool DoPipetting(Sample sample, Func<Sample, CancellationTokenSource,bool> func, CancellationTokenSource cts)
         {
-            ushort sampleId = sample.Id;
+            s1: ushort sampleId = sample.Id;
+            Thread.Sleep(1000); //等待获取锁间隔
             try
             {
+                if (GlobalCache.Instance.IsCapperThreeOccupy)
+                {
+                    if (_globalStatus.IsStopped)
+                    {
+                        return false;
+                    }
+                    goto s1;
+                }
+
                 lock (_lockObj)
                 {
                     _logger?.Info($"从试管架取{sampleId}净化管");

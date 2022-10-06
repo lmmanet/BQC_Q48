@@ -59,7 +59,7 @@ namespace Q_Platform.BLL
                     _logger?.Info($"样品{sampleId}净化管开始振荡-{time}s-{vel}rpm");
                     bool result;
                     //振荡回零
-                    if (sample.SubStep == 18 && !_globalStauts.IsStopped)
+                    if (sample.SubStep == 18 && !_globalStatus.IsStopped)
                     {
                         result = GoHome(cts).GetAwaiter().GetResult();
                         if (!result)
@@ -70,7 +70,7 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运  从拧盖3搬运净化管到振荡
-                    if (sample.SubStep == 19 && !_globalStauts.IsStopped)
+                    if (sample.SubStep == 19 && !_globalStatus.IsStopped)
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                         {
@@ -84,7 +84,7 @@ namespace Q_Platform.BLL
                     }
 
                     //开始振荡
-                    if (sample.SubStep == 20 && !_globalStauts.IsStopped)
+                    if (sample.SubStep == 20 && !_globalStatus.IsStopped)
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))
                         {
@@ -98,7 +98,7 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运净化管到试管架
-                    if (sample.SubStep == 21 && !_globalStauts.IsStopped)
+                    if (sample.SubStep == 21 && !_globalStatus.IsStopped)
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
@@ -113,7 +113,7 @@ namespace Q_Platform.BLL
 
 
                     //完成
-                    if (sample.SubStep == 22 && !_globalStauts.IsStopped)
+                    if (sample.SubStep == 22 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {

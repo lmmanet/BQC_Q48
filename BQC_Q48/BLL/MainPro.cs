@@ -27,12 +27,6 @@ namespace Q_Platform.BLL
         Task _centrifugalTask;
         Task _pipettingTask;
         Task _concentrationTask;
-        //任务列表
-
-        List<Sample> _workList;
-
-
-        private string _sampleFile = Environment.CurrentDirectory + "\\Sample.xml";
 
         #region Private Members
 
@@ -205,7 +199,8 @@ namespace Q_Platform.BLL
 
         public void StartPro()
         {
-            if (_workList == null)
+            var _workList = GlobalCache.Instance.ExtractList;
+            if (_workList.Count == 0)
             {
                 /// GB23200.113-2018 果蔬    0xF43EE00
                 /// GB23200.113-2018 坚果    0xF43EE19
@@ -296,18 +291,71 @@ namespace Q_Platform.BLL
             }
 
 
+        
+        }
+
+        public void StopPro()
+        {
+            GlobalCache.Save();
+            //MySerialization.SerializeToXml<List<Sample>>(_sampleFile, _workList);
+            _globalStatus.StopProgram();
+            Task.Run(() =>
+            {
+
+            }).ConfigureAwait(false);
+        }
+
+        public void PausePro(Expression<Func<bool>> pauseFlag)
+        {
+            pauseFlag.SetPropertyValue(true);
+            _globalStatus.PauseProgram();
+        }
+
+        public void ContinuePro()
+        {
+            _globalStatus.ContinueProgram();
+
+            _centrifugalCarrier.StartConcentration(cts);
+            _centrifugalCarrier.StartPipetting(cts);
+            _centrifugal.StartCentrifugal(cts);
+            _vibrationOne.StartVibrationAndVortex(cts);
+
+            StartTask();//启动提取
+        }
+
+        public void SwitchLight()
+        {
+            GlobalCache.Load();
+            if (!_io.ReadBit_DO(3))
+            {
+                _io.WriteBit_DO(3, true);
+                _io.WriteBit_DO(34, true);
+                _io.WriteBit_DO(68, true);
+            }
+            else
+            {
+                _io.WriteBit_DO(3, false);
+                _io.WriteBit_DO(34, false);
+                _io.WriteBit_DO(68, false);
+            }
+        }
+
+        #endregion
 
 
+        #region Protected Methods
+        private Task StartTask()
+        {
             if (_main != null)
             {
                 if (!_main.IsCompleted)
                 {
-                    return;
+                    return _main;
                 }
             }
             _main = Task.Run(() =>
             {
-
+                var _workList = GlobalCache.Instance.ExtractList;
                 //离心
                 for (int i = 0; i < 8; i++)
                 {
@@ -315,8 +363,8 @@ namespace Q_Platform.BLL
                     sample.Status = 0x11100101080;
                     sample.TechParams.Tech = 0x3EFDE1AB;   //兽药
                     sample.TechParams.cusuanan = 5;
-                    sample.TechParams.CentrifugalOneVelocity = new int[] { 1000,1000,1000};
-                    sample.TechParams.CentrifugalOneTime = new int[] {1,1,1 };
+                    sample.TechParams.CentrifugalOneVelocity = new int[] { 1000, 1000, 1000 };
+                    sample.TechParams.CentrifugalOneTime = new int[] { 1, 1, 1 };
                     GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i + 1));
                     sample.MainStep = 4;
                     Centrifugal(sample, cts);
@@ -375,57 +423,8 @@ namespace Q_Platform.BLL
 
                 //}
             });
+            return _main;
         }
-
-        public void StopPro()
-        {
-            GlobalCache.Save();
-            //MySerialization.SerializeToXml<List<Sample>>(_sampleFile, _workList);
-            _globalStatus.StopProgram();
-            Task.Run(() =>
-            {
-
-            }).ConfigureAwait(false);
-        }
-
-        public void PausePro(Expression<Func<bool>> pauseFlag)
-        {
-          
-            pauseFlag.SetPropertyValue(true);
-            _globalStatus.PauseProgram();
-        }
-
-        public void ContinuePro()
-        {
-            _globalStatus.ContinueProgram();
-
-            _centrifugalCarrier.StartConcentration(cts);
-            _centrifugalCarrier.StartPipetting(cts);
-            _centrifugal.StartCentrifugal(cts);
-            _vibrationOne.StartVibrationAndVortex(cts);
-        }
-
-        public void SwitchLight()
-        {
-            GlobalCache.Load();
-            if (!_io.ReadBit_DO(3))
-            {
-                _io.WriteBit_DO(3, true);
-                _io.WriteBit_DO(34, true);
-                _io.WriteBit_DO(68, true);
-            }
-            else
-            {
-                _io.WriteBit_DO(3, false);
-                _io.WriteBit_DO(34, false);
-                _io.WriteBit_DO(68, false);
-            }
-        }
-
-        #endregion
-
-
-        #region Protected Methods
 
         protected bool Ext(Sample sample)
         {
@@ -477,7 +476,7 @@ namespace Q_Platform.BLL
                 //Thread.Sleep(500);
             }
 
-            _workList.Remove(sample);
+            GlobalCache.Instance.ExtractList.Remove(sample);
             return true;
         }
 
@@ -521,7 +520,7 @@ namespace Q_Platform.BLL
                             itemSample.SubStep = 0;
                             itemSample.MainStep = 2;
                             //插入列表首位
-                            _workList.Insert(1, itemSample);
+                            GlobalCache.Instance.ExtractList.Insert(1, itemSample);
                             list.Remove(itemSample);
                         }
                     }
@@ -540,7 +539,7 @@ namespace Q_Platform.BLL
         /// <param name="workList">任务列表</param>
         public void AddSalt(Sample sample, CancellationTokenSource cts)
         {
-            _workList.Insert(1, sample);
+            GlobalCache.Instance.ExtractList.Insert(1, sample);
         }
 
 
@@ -600,6 +599,10 @@ namespace Q_Platform.BLL
 
 
         #endregion
+
+
+       
+
 
 
         private void TechParamDemo()

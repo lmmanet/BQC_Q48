@@ -298,6 +298,7 @@ namespace Q_Platform.BLL
                 //拧盖4  搬运搬运西林瓶到拧盖4  =》拆盖 ==》称重
                 if (sample.MainStep == 8 && !_globalStatus.IsStopped)
                 {
+                    //内部已经加锁
                     result = GetSeilingAndWeight(sample, cts).GetAwaiter().GetResult();
                     if (!result)
                     {

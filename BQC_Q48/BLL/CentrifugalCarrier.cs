@@ -1358,36 +1358,6 @@ namespace Q_Platform.BLL
         //================================================================拧盖3 移栽配合部分=====================================================================//
 
 
-        public bool GetSampleFromCapperThreeToTransfer(Sample sample, CancellationTokenSource cts)
-        {
-            try
-            {
-                lock (_lockObj)
-                {
-                    _logger?.Info($"取{sample.Id}样品净化管到移栽");
-
-                    //取净化管到移栽
-                    var result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"取{sample.Id}样品净化管到移栽 失败");
-                    }
-
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"取{sample.Id}样品净化管到移栽 停止");
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
-        }
 
         public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts)
         {
@@ -1450,8 +1420,6 @@ namespace Q_Platform.BLL
                 }
             }
         }
-
-     
 
         /// <summary>
         /// 移液 提取上清液 或者 提取萃取液
@@ -1546,6 +1514,14 @@ namespace Q_Platform.BLL
                     {
                         _globalStatus.PauseProgram();
                         _logger?.Warn(ex.Message);
+                        while (_globalStatus.IsPause)
+                        {
+                            Thread.Sleep(1000);
+                            if (_globalStatus.IsStopped)
+                            {
+                                return;
+                            }
+                        }
                         return;
                     }
                    
@@ -1725,7 +1701,15 @@ namespace Q_Platform.BLL
                 catch (Exception ex)
                 {
                     _globalStatus.PauseProgram();
-                    _logger?.Warn(ex.Message);
+                    _logger?.Warn(ex.Message); 
+                    while (_globalStatus.IsPause)
+                    {
+                        Thread.Sleep(1000);
+                        if (_globalStatus.IsStopped)
+                        {
+                            return;
+                        }
+                    }
                     return;
                 }
         

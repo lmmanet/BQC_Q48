@@ -78,7 +78,7 @@ namespace Q_Platform.BLL
 
             _vibrationOnevortexTask = Task.Run(() =>
             {
-                while (!_globalStauts.IsStopped && GlobalCache.Instance.VibrationOneDic.Count > 0)
+                while (!_globalStatus.IsStopped && GlobalCache.Instance.VibrationOneDic.Count > 0)
                 {
                     lock (_lockObj)
                     {
@@ -89,7 +89,7 @@ namespace Q_Platform.BLL
                         try
                         {
                             //加水振荡 涡旋
-                            if (itemSample.MainStep == 1 && !_globalStauts.IsStopped)
+                            if (itemSample.MainStep == 1 && !_globalStatus.IsStopped)
                             {
                                 //振荡 
                                 if (itemSample.SubStep == 4)
@@ -100,7 +100,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
 
-                                    if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration) && !_globalStauts.IsStopped)
+                                    if (TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vibration) && !_globalStatus.IsStopped)
                                     {
                                         var result = StartVibration(itemSample, 0, cts);
                                         if (!result)
@@ -122,7 +122,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
                                     //是否涡旋
-                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.Vortex))
                                     {
                                         var result = _vortex.StartVortex(itemSample, 0, cts);
                                         if (!result)
@@ -137,7 +137,7 @@ namespace Q_Platform.BLL
                             }
 
                             //加溶剂振荡 涡旋
-                            if (itemSample.MainStep == 2 && !_globalStauts.IsStopped)
+                            if (itemSample.MainStep == 2 && !_globalStatus.IsStopped)
                             {
                                 if (itemSample.SubStep == 4)
                                 {
@@ -146,7 +146,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
 
-                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration1))
                                     {
                                         var result = StartVibration(itemSample, 1, cts);
                                         if (!result)
@@ -165,7 +165,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
 
-                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex1))
                                     {
                                         var result = _vortex.StartVortex(itemSample, 1, cts);
                                         if (!result)
@@ -180,7 +180,7 @@ namespace Q_Platform.BLL
                             }
 
                             //加盐振荡 涡旋
-                            if (itemSample.MainStep == 3 && !_globalStauts.IsStopped)
+                            if (itemSample.MainStep == 3 && !_globalStatus.IsStopped)
                             {
                                 if (itemSample.SubStep == 4)
                                 {
@@ -189,7 +189,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
 
-                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration2))
                                     {
                                         var result = StartVibration(itemSample, 2, cts);
                                         if (!result)
@@ -210,7 +210,7 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
 
-                                    if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVortex2))
                                     {
                                         var result = _vortex.StartVortex(itemSample, 2, cts);
                                         if (!result)
@@ -229,7 +229,6 @@ namespace Q_Platform.BLL
                                 itemSample.SubStep = 0;
                             }
 
-
                             //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
                             MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
 
@@ -239,9 +238,16 @@ namespace Q_Platform.BLL
                         }
                         catch (Exception ex)
                         {
-                            _globalStauts.PauseProgram();
-
-                            _logger?.Warn(ex.Message);
+                            _globalStatus.PauseProgram();
+                            _logger?.Warn(ex.Message); 
+                            while (_globalStatus.IsPause)
+                            {
+                                Thread.Sleep(1000);
+                                if (_globalStatus.IsStopped)
+                                {
+                                    return;
+                                }
+                            }
                             return;
                         }
                     }
@@ -267,9 +273,9 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     //萃取振荡 涡旋
-                    if (sample.MainStep == 9 && !_globalStauts.IsStopped)
+                    if (sample.MainStep == 9 && !_globalStatus.IsStopped)
                     {
-                        if (sample.SubStep == 0 && !_globalStauts.IsStopped)
+                        if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                         {
                             //从拧盖2搬运萃取管到振荡
                             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
@@ -277,7 +283,7 @@ namespace Q_Platform.BLL
                                 sample.SubStep++;
                             }
 
-                            if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
+                            if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
                             {
                                 var result = StartVibration(sample, 3, cts);
                                 if (!result)
@@ -291,14 +297,14 @@ namespace Q_Platform.BLL
                         }
 
                         //判断是否涡旋
-                        if (sample.SubStep == 1 && !_globalStauts.IsStopped)
+                        if (sample.SubStep == 1 && !_globalStatus.IsStopped)
                         {
                             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
                             {
                                 sample.SubStep++;
                             }
 
-                            if (!_globalStauts.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
+                            if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
                             {
                                 var result = _vortex.StartVortex(sample, 3, cts);
                                 if (!result)
