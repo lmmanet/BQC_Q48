@@ -46,8 +46,7 @@ namespace Q_Platform.BLL
 
         protected double _xOffset;
 
-        protected bool _haveCapper = false;  //手爪上有盖
-
+        //protected bool _haveCapper = false;  //手爪上有盖
 
         protected CapperPosData _posData;
 
@@ -268,13 +267,14 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"CapperOn-{torque}-{timeout} haveCapper{_haveCapper}");
+               // _logger?.Debug($"CapperOn-{torque}-{timeout} haveCapper{_haveCapper}");
+                _logger?.Debug($"CapperOn-{torque}-{timeout}");
 
                 //判断手爪是否有盖
-                if (!_haveCapper)
-                {
-                    return true;
-                }
+                //if (!_haveCapper)
+                //{
+                //    return true;
+                //}
 
                 //抱夹夹紧
                 CloseHolding();
@@ -373,7 +373,7 @@ namespace Q_Platform.BLL
                     throw new Exception("Y轴运动出错！");
                 }
 
-                _haveCapper = false;
+                //_haveCapper = false;
                 return true;
 
             }
@@ -392,12 +392,13 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"CapperOff haveCapper{_haveCapper}");
+                //_logger?.Debug($"CapperOff haveCapper{_haveCapper}");
+                _logger?.Debug($"CapperOff haveCapper");
                 //判断手爪是否有盖
-                if (_haveCapper)
-                {
-                    return true;
-                }
+                //if (_haveCapper)
+                //{
+                //    return true;
+                //}
 
                 //抱夹夹紧
                 CloseHolding();
@@ -499,7 +500,7 @@ namespace Q_Platform.BLL
                 }
                 //抱夹松开
                 OpenHolding();
-                _haveCapper = true;
+               // _haveCapper = true;
                 
                 return true;
 
@@ -525,6 +526,7 @@ namespace Q_Platform.BLL
             }
             if (!checkSensor)
             {
+                Thread.Sleep(500);
                 return ;
             }
             int temp = 0;
@@ -544,7 +546,7 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 打开抱夹
         /// </summary>
-        protected virtual void OpenHolding(bool checkSensor = true)
+        protected virtual void OpenHolding(bool checkSensor = false)
         {
             _logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹释放
@@ -556,6 +558,7 @@ namespace Q_Platform.BLL
 
             if (!checkSensor)
             {
+                Thread.Sleep(500);
                 return;
             }
 

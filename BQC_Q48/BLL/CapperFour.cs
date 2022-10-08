@@ -310,6 +310,7 @@ namespace Q_Platform.BLL
                 //移液
                 lock (_lockObj)
                 {
+                    //内部子步骤已经完成
                     if (sample.MainStep == 9 && !_globalStatus.IsStopped)
                     {
                         result = _capperThree.DoPipetting(sample, dosffa, cts);
@@ -406,18 +407,19 @@ namespace Q_Platform.BLL
                 lock (_lockObj)
                 {
                     bool result;
-                    if (!_globalStatus.IsStopped)
+                    if (sample.SeilingStep == 0 && !_globalStatus.IsStopped)
                     {
                         result = MovePutGetPos(cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖Y轴移动到接驳位出错!");
                         }
+                        sample.SeilingStep++;
                     }
 
 
                     //搬运西林瓶到拧盖4
-                    if (!_globalStatus.IsStopped)
+                    if (sample.SeilingStep == 1 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInShelf))
                         {
@@ -427,9 +429,10 @@ namespace Q_Platform.BLL
                                 throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
                             }
                         }
+                        sample.SeilingStep++;
                     }
 
-                    if (!_globalStatus.IsStopped)
+                    if (sample.SeilingStep == 2 && !_globalStatus.IsStopped)
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingUnCapped))
                         {
@@ -441,13 +444,14 @@ namespace Q_Platform.BLL
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsSelingUnCapped);
                         }
+                        sample.SeilingStep++;
                     }
 
-                    if (!_globalStatus.IsStopped)
+                    if (sample.SeilingStep == 3 && !_globalStatus.IsStopped)
                     {
                         if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                         {
-                            //搬运到称重称重
+                            //搬运到称重称重  内部已经把步骤置零
                             result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2, sample.TechParams.Add_Mark_B, cts);
                             if (!result)
                             {
@@ -464,6 +468,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
                 _logger?.Warn(ex.Message);
+                _globalStatus.PauseProgram();
                 return false;
             }
 

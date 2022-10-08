@@ -430,62 +430,104 @@ namespace Q_Platform.BLL
                         if (sample.SeilingStatus == 0 && sample.SeilingWeight1 == 0 && !_globalStatus.IsStopped)
                         {
                             //搬运到称重
-                            result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId - 1), cts);
-                            if (!result)
+                            if (sample.SeilingStep == 3 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
-                            }
-                            //读取称台值
-                            sample.SeilingWeight1 = ReadWeight();
-
-                            if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
-                            {
-                                result = AddMarkFromSourceToWeight(var, volume, cts);
-                                if (result)
+                                result = WeightClear();
+                                if (!result)
                                 {
-                                    throw new Exception("浓缩前加标失败!");
+                                    throw new Exception("称台清零出错!");
                                 }
 
-                            }
-                            //搬运回
-                            result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId - 1), cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId - 1), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SeilingStep++;
                             }
 
+                            //读取称台值
+                            if (sample.SeilingStep == 4 && !_globalStatus.IsStopped)
+                            {
+                                sample.SeilingWeight1 = ReadWeight();
+                                sample.SeilingStep++;
+                            }
+                         
+                            if (sample.SeilingStep == 5 && !_globalStatus.IsStopped)
+                            {
+                                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
+                                {
+                                    result = AddMarkFromSourceToWeight(var, volume, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("浓缩前加标失败!");
+                                    }
+                                }
+                                sample.SeilingStep++;
+                            }
+                            //搬运回
+                            if (sample.SeilingStep == 6 && !_globalStatus.IsStopped)
+                            {
+                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId - 1), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SeilingStep++;
+                            }
                             sample.SeilingStatus = 1;
                         }
 
                         if (sample.SeilingStatus == 1 && sample.SeilingWeight2 == 0 && !_globalStatus.IsStopped)
                         {
                             //搬运到称重
-                            result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId), cts);
-                            if (!result)
+                            if (sample.SeilingStep == 7 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
-                            }
-                            //读取称台值
-                            sample.SeilingWeight2 = ReadWeight();
-
-                            if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.AddMark1) && var != 0)
-                            {
-                                result = AddMarkFromSourceToWeight(var,volume,cts);
-                                if (result)
+                                result = WeightClear();
+                                if (!result)
                                 {
-                                    throw new Exception("浓缩前加标失败!");
+                                    throw new Exception("称台清零出错!");
                                 }
-                                
+
+                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SeilingStep++;
+                            }
+
+                            //读取称台值
+                            if (sample.SeilingStep == 8 && !_globalStatus.IsStopped)
+                            {
+                                sample.SeilingWeight2 = ReadWeight();
+                                sample.SeilingStep++;
+                            }
+
+                            if (sample.SeilingStep == 9 && !_globalStatus.IsStopped)
+                            {
+                                if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
+                                {
+                                    result = AddMarkFromSourceToWeight(var, volume, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("浓缩前加标失败!");
+                                    }
+                                }
+                                sample.SeilingStep++;
                             }
 
                             //搬运回
-                            result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId), cts);
-                            if (!result)
+                            if (sample.SeilingStep == 10 && !_globalStatus.IsStopped)
                             {
-                                throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId), cts);
+                                if (!result)
+                                {
+                                    throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
+                                }
+                                sample.SeilingStatus = 0;
+                                sample.SeilingStep++;
                             }
-
-                            sample.SeilingStatus = 0;
                         }
                     }
 
@@ -493,6 +535,7 @@ namespace Q_Platform.BLL
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
                         _currentMethodName = string.Empty;
+                        sample.SeilingStep = 0;
                         return true;
                     }
                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称重 失败,SampleStatus-{sample.Status}");
@@ -550,6 +593,12 @@ namespace Q_Platform.BLL
                             //搬运到称重
                             if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                             {
+                                result = WeightClear();
+                                if (!result)
+                                {
+                                    throw new Exception("称台清零出错!");
+                                }
+
                                 result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId - 1), cts);
                                 if (!result)
                                 {
@@ -602,6 +651,12 @@ namespace Q_Platform.BLL
                             //搬运到称重
                             if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                             {
+                                result = WeightClear();
+                                if (!result)
+                                {
+                                    throw new Exception("称台清零出错!");
+                                }
+
                                 result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId), cts);
                                 if (!result)
                                 {
@@ -3757,6 +3812,12 @@ namespace Q_Platform.BLL
             }
             //读取称台值
             return _weight.ReadWeight(_weithtId).GetAwaiter().GetResult();
+        }
+
+        private bool WeightClear()
+        {
+            return true;
+         //  return _weight.Clear(_weithtId).GetAwaiter().GetResult();
         }
 
 

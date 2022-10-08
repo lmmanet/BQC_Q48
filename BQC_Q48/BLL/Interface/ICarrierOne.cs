@@ -62,6 +62,15 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetSampleFromMaterialToCapperOne(Sample sample, CancellationTokenSource cts);
 
+
+        /// <summary>
+        /// 从试管架取试管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
         /// <summary>
         /// 从振荡1取试管到试管架
         /// </summary>
@@ -176,6 +185,16 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetPolishFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
 
+
+        /// <summary>
+        /// 从试管架取萃取管到振荡1  振荡
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromMaterialToVibration(Sample sample, CancellationTokenSource cts);
+
+
         /// <summary>
         /// 从拧盖2取无盖萃取管到移栽
         /// </summary>
@@ -213,6 +232,9 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
+        bool GetPolishFromVibrationToMaterial(Sample sample, CancellationTokenSource cts);
+
+        bool GetPolishFromVortexToMaterial(Sample sample, CancellationTokenSource cts);
         /// <summary>
         /// 从拧盖2取萃取管到振荡
         /// </summary>
@@ -228,6 +250,14 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+
+        /// <summary>
+        /// 从试管架搬运萃取管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从离心移栽取出离心完后的萃取管到试管架

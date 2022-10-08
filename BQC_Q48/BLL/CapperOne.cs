@@ -136,7 +136,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            s1: var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -0.85).ConfigureAwait(false);
 
             if (!result)
             {
@@ -169,7 +169,6 @@ namespace Q_Platform.BLL
             //判断是否有加盐工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
             {
-                sample.MainStep = 4;
                 return true;
             }
 
@@ -551,10 +550,14 @@ namespace Q_Platform.BLL
                 }
 
                 //加溶剂A   内部判断是否有盖  需要修改
-                if (sample.TechParams.Solvent_A != 0)
+                if (sample.TechParams.AddWater != 0)
                 {
                     double volume = sample.TechParams.AddWater;  //加水量
                     result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
+                    if (!result)
+                    {
+                        return false;
+                    }
                 }
 
                 //判断是否有后续动作

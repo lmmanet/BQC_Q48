@@ -25,5 +25,7 @@ namespace Q_Platform.BLL
         void WetBack(Sample sample, CancellationTokenSource cts);
         void AddSalt(Sample sample, CancellationTokenSource cts);
         void CentrifugalCallBack(Sample sample, CancellationTokenSource cts);
+
+        void PipettingCallBack(Sample sample, CancellationTokenSource cts);
     }
 }

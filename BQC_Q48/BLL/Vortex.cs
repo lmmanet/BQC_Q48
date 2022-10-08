@@ -133,7 +133,7 @@ namespace Q_Platform.BLL
 
         public bool StartVortex(Sample sample, int step, CancellationTokenSource cts)
         {
-            int vel = sample.TechParams.VortexVel[step] / 60;
+            int vel = sample.TechParams.VortexVel[step];
             int time = sample.TechParams.VortexTime[step];
             try
             {
@@ -150,10 +150,44 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运
-                    result = _carrier.GetSampleToVortex(sample, cts);
-                    if (!result)
+                    if (step == 3)   //萃取管涡旋
                     {
-                        throw new Exception($"搬运{sample.Id}样品到涡旋失败!");
+                        //上一步是振荡的情况
+                        if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
+                        {
+                            //从振荡搬运萃取管到试管架  并返回完成
+                            result = _carrier.GetPolishFromVibrationToMaterial(sample, cts);
+                            if (!result)
+                            {
+                                throw new Exception("从振荡搬运萃取管到试管架失败!");
+                            }
+                           //返回无下一步
+                            return true;
+                        }
+                        //上一步没有振荡的情况
+                        else if(!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
+                        {
+                            //从试管架搬运试管到涡旋
+
+
+                            //继续下一步
+                        }
+                        else
+                        {
+                            result = _carrier.GetPolishFromVibrationToVortex(sample, null, null, cts);
+                            if (!result)
+                            {
+                                throw new Exception("从振荡搬运萃取管到涡旋失败!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        result = _carrier.GetSampleToVortex(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception($"搬运{sample.Id}样品到涡旋失败!");
+                        }
                     }
 
                     //开始涡旋
@@ -164,13 +198,26 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运到试管架
-                    result = _carrier.GetSampleFromVortexToMaterial(sample, cts);
-                    if (!result)
+                    if (step == 3)
                     {
-                        throw new Exception("搬运样品到试管架失败");
+                        //从涡旋搬运萃取管到试管架
+                        result = _carrier.GetPolishFromVortexToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception("从涡旋搬运萃取管到试管架失败!");
+                        }
+                        return true;
                     }
+                    else
+                    {
+                        result = _carrier.GetSampleFromVortexToMaterial(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运样品到试管架失败");
+                        }
 
-                    return true;
+                        return true;
+                    }
 
                 }
             }

@@ -44,7 +44,8 @@ namespace Q_Platform.BLL
 
         #region Variable
 
-        protected double _moveVel = 80;
+        protected double _xyMoveVel = 200;
+        protected double _zMoveVel = 80;
         protected double _absorbVel = 2;
         protected double _syringVel = 5;
 
@@ -388,7 +389,7 @@ namespace Q_Platform.BLL
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] posArray = new double[2] { pos[0], pos[1] };
-                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, _globalStatus).ConfigureAwait(false);
+                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -425,7 +426,7 @@ namespace Q_Platform.BLL
                 }
               
                 //Z2轴下降到指定位置
-                s3: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _moveVel, _globalStatus).ConfigureAwait(false);
+                s3: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2], _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -447,7 +448,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(1000);
 
                 //Z2轴上升到安全位置
-                s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
+                s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -504,7 +505,7 @@ namespace Q_Platform.BLL
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] posArray = new double[2] { pos[0], pos[1] };
-               s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _moveVel, _globalStatus).ConfigureAwait(false);
+               s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, posArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -532,7 +533,7 @@ namespace Q_Platform.BLL
                 }
                 
                 //Z2轴下降到指定位置
-               s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2] - putOffset, _moveVel, _globalStatus).ConfigureAwait(false);
+               s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, pos[2] - putOffset, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -597,7 +598,7 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //Z2轴上升到安全位置
-               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -668,7 +669,7 @@ namespace Q_Platform.BLL
                 #region 去吸取溶液
 
                 //XY轴移动到取液位置
-                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _moveVel, _globalStatus).ConfigureAwait(false);
+                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -696,7 +697,7 @@ namespace Q_Platform.BLL
                 }
 
                 //Z2轴下降到取位置
-                s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourcePos[2], _moveVel, _globalStatus).ConfigureAwait(false);
+                s2: result = await _motion.P2pMoveWithCheckDone(_axisZ2, sourcePos[2], _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -755,7 +756,7 @@ namespace Q_Platform.BLL
                 _syringHaveLiquid = true;
 
                 //Z2轴上升到安全位置
-               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -821,7 +822,7 @@ namespace Q_Platform.BLL
                 double[] poses = GetPipettingSafePos();
                 if (poses!=null)
                 {
-                   s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, poses, _moveVel, _globalStatus).ConfigureAwait(false);
+                   s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, poses, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                     if (!result)
                     {
                         if (_globalStatus.IsPause)
@@ -851,7 +852,7 @@ namespace Q_Platform.BLL
                 }
 
                 //XY轴移动到吐液位置
-               s7: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, targetPosArray, _moveVel, _globalStatus).ConfigureAwait(false);
+               s7: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, targetPosArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -880,7 +881,7 @@ namespace Q_Platform.BLL
              
 
                 //Z2轴下降到取位置
-               s8: result = await _motion.P2pMoveWithCheckDone(_axisZ2, targetPos[2], _moveVel, _globalStatus).ConfigureAwait(false);
+               s8: result = await _motion.P2pMoveWithCheckDone(_axisZ2, targetPos[2], _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -1021,7 +1022,7 @@ namespace Q_Platform.BLL
             _logger?.Debug($"CheckAxisZInSafePos");
             if (!AxisIsInSafePos(_axisZ1))
             {
-               s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _moveVel, _globalStatus).ConfigureAwait(false);
+               s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -1050,7 +1051,7 @@ namespace Q_Platform.BLL
 
             if (!AxisIsInSafePos(_axisZ2))
             {
-                s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, _globalStatus).ConfigureAwait(false);
+                s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -1194,7 +1195,7 @@ namespace Q_Platform.BLL
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
-               s1: var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, _globalStatus).ConfigureAwait(false);
+               s1: var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!ret)
                 {
                     if (_globalStatus.IsPause)
@@ -1231,7 +1232,7 @@ namespace Q_Platform.BLL
                 }
 
                 //Z轴下降到取料位置
-               s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _moveVel, _globalStatus).ConfigureAwait(false);
+               s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, z, _zMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -1291,7 +1292,7 @@ namespace Q_Platform.BLL
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
-              s1:  var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _moveVel, _globalStatus).ConfigureAwait(false);
+              s1:  var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!ret)
                 {
                     if (_globalStatus.IsPause)

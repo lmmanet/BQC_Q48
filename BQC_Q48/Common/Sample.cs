@@ -117,6 +117,16 @@ namespace BQJX.Common
         public int BottleStep { get; set; }
 
         /// <summary>
+        /// 搬运西林瓶步骤
+        /// </summary>
+        public int SeilingStep { get; set; }
+
+        /// <summary>
+        /// 离心搬运步骤
+        /// </summary>
+        public int CenCarrierStep { get; set; }
+
+        /// <summary>
         /// 移液步骤1
         /// </summary>
         public int PipettorStep1 { get; set; } = 1;  

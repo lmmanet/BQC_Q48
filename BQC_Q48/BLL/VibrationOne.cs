@@ -46,15 +46,36 @@ namespace Q_Platform.BLL
         #endregion
 
 
-        public void AddSampleToVibrationList(Sample sample, string methodAction)
+        public void AddSampleToVibrationList(Sample sample, string methodAction, CancellationTokenSource cts)
         {
             //判断去重
             if (sample != null)
             {
-                var dic = GlobalCache.Instance.VibrationOneDic;
-                if (!dic.ContainsKey(sample))
+                //不存在振荡涡旋工艺  直接进行下一步
+                if (!TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractVibration2)
+                    && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex2)
+                    && sample.MainStep == 3)
                 {
-                    dic.Add(sample, methodAction);
+                    sample.MainStep++;
+                    MethodHelper.ExcuteMethod(methodAction,sample, cts);
+                    return;
+                }
+
+                if (sample.MainStep == 9 && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
+                {
+                    var dic = GlobalCache.Instance.VibrationOneDicPolish;
+                    if (!dic.ContainsKey(sample))
+                    {
+                        dic.Add(sample, methodAction);
+                    }
+                }
+                else
+                {
+                    var dic = GlobalCache.Instance.VibrationOneDic;
+                    if (!dic.ContainsKey(sample))
+                    {
+                        dic.Add(sample, methodAction);
+                    }
                 }
             }
         }
@@ -78,11 +99,23 @@ namespace Q_Platform.BLL
 
             _vibrationOnevortexTask = Task.Run(() =>
             {
-                while (!_globalStatus.IsStopped && GlobalCache.Instance.VibrationOneDic.Count > 0)
+                while (!_globalStatus.IsStopped)
                 {
+                    var dic1 = GlobalCache.Instance.VibrationOneDic;
+                    var dic2 = GlobalCache.Instance.VibrationOneDicPolish;
+
+                    if (dic1.Count <=0 && dic2.Count<=0)
+                    {
+                        break;
+                    }
+
                     lock (_lockObj)
                     {
-                        var sampleDic = GlobalCache.Instance.VibrationOneDic;
+                        var sampleDic = dic2;
+                        if (sampleDic.Count<=0)
+                        {
+                            sampleDic = dic1;
+                        }
                         KeyValuePair<Sample, string> item = sampleDic.First();
                         var itemSample = item.Key;
 
@@ -222,18 +255,66 @@ namespace Q_Platform.BLL
                                 }
                             }
 
-                            //程序完成 
-                            if (itemSample.MainStep != 1 && itemSample.SubStep == 6)
+                            //萃取振荡 涡旋
+                            if (itemSample.MainStep == 9 && !_globalStatus.IsStopped)
                             {
-                                itemSample.MainStep++;
-                                itemSample.SubStep = 0;
+                                if (itemSample.SubStep == 0 && !_globalStatus.IsStopped)
+                                {
+                                    //从拧盖2搬运萃取管到振荡
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration3))
+                                    {
+                                        itemSample.SubStep++;
+                                    }
+
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration3))
+                                    {
+                                        var result = StartVibration(itemSample, 3, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVibration err");
+                                        }
+
+                                        itemSample.SubStep++;
+                                    }
+
+                                }
+
+                                //判断是否涡旋  在涡旋内部判断
+                                if (itemSample.SubStep == 1 && !_globalStatus.IsStopped)
+                                {
+                                    if (!_globalStatus.IsStopped)
+                                    {
+                                        var result = _vortex.StartVortex(itemSample, 3, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVortex err");
+                                        }
+                                        itemSample.SubStep++;
+                                    }
+                                }
+
+                                if (itemSample.SubStep == 2)
+                                {
+                                    itemSample.SubStep = 6;
+                                }
                             }
 
-                            //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
-                            MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
+                            //程序完成 
+                            if (itemSample.SubStep == 6)
+                            {
+                                //回湿执行完成信号
+                                if (itemSample.MainStep != 1)
+                                {
+                                    itemSample.MainStep++;
+                                    itemSample.SubStep = 0;
+                                }
+                              
+                                //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
+                                MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
 
-                            //移除当前项
-                            sampleDic.Remove(itemSample);
+                                //移除当前项
+                                sampleDic.Remove(itemSample);
+                            }
 
                         }
                         catch (Exception ex)
@@ -356,11 +437,23 @@ namespace Q_Platform.BLL
                     }
 
                     //搬运
-                    result = _carrier.GetSampleToVibration(sample, cts);
-                    if (!result)
+                    if (step == 3)  //萃取管振荡
                     {
-                        throw new Exception("搬运样品到振荡失败!");
+                        result = _carrier.GetPolishFromMaterialToVibration(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运样品到振荡失败!");
+                        }
                     }
+                    else
+                    {
+                        result = _carrier.GetSampleToVibration(sample, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运样品到振荡失败!");
+                        }
+                    }
+                  
 
                     //开始振荡
                     result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
@@ -377,6 +470,10 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception("搬运样品到冰浴失败!");
                         }
+                    }
+                    else if (step == 3)
+                    {
+                        return true;
                     }
                     else
                     {

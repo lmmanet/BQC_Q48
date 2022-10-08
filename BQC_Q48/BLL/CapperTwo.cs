@@ -577,7 +577,7 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-            s1: var result = await CapperOff(cts, -0.75).ConfigureAwait(false);
+            s1: var result = await CapperOff(cts, -0.85).ConfigureAwait(false);
 
             if (!result)
             {

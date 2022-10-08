@@ -213,6 +213,84 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
+        /// 从试管架取试管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+            Thread.Sleep(300);
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
+                    _logger?.Info($"搬运{sampleId}样品到离心移栽");
+
+                    //试管在试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
+                    {
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+                            }
+                            sample.SampleTubeStatus = 1;
+                        }
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
+                            }
+                            sample.SampleTubeStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    }
+
+                    //试管在移栽
+
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromMaterialToTransfer(sample, func, cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+        /// <summary>
         /// 从振荡1搬运样品管到试管架1
         /// </summary>
         /// <param name="sample"></param>
@@ -1834,53 +1912,129 @@ namespace Q_Platform.BLL
             Thread.Sleep(300);
             try
             {
-                if (!string.IsNullOrEmpty(_currentMethodName))
+                lock (_lockObj)
                 {
-                    if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                    if (!string.IsNullOrEmpty(_currentMethodName))
                     {
-                        throw new OccupyMethodException();
-                    }
-                }
-                _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-
-                _logger?.Info($"从试管架2取{sample.Id}样品萃取管到拧盖2");
-
-                //试管在试管架2
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
-                {
-                    if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
-                    {
-                        var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 47), cts);
-                        if (!result)
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
                         {
-                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
+                            throw new OccupyMethodException();
                         }
-                        sample.PolishStatus = 1;
                     }
-                    if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
-                    {
-                        var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 48), cts);
-                        if (!result)
-                        {
-                            throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
-                        }
-                        sample.PolishStatus = 0;
-                    }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCapper);
-                }
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
-                {
-                    _currentMethodName = string.Empty;
-                    return true;
-                }
-                throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
+
+                    _logger?.Info($"从试管架2取{sample.Id}样品萃取管到拧盖2");
+
+                    //试管在试管架2
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 47), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
+                        }
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            var result = GetSampleFromMaterialToCapperTwo((ushort)(2 * sampleId + 48), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCapper);
+                    }
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
+                }
             }
             catch (OccupyMethodException)
             {
                 return GetPolishFromMaterialToCapperTwo(sample, cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+
+        } 
+        
+        /// <summary>
+        /// 搬运萃取管到振荡 
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromMaterialToVibration(Sample sample, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            Thread.Sleep(300);
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+
+                    _logger?.Info($"从试管架2取{sample.Id}样品萃取管到振荡");
+
+                    //试管在试管架2
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 47), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架2取{sample.Id}样品萃取管振荡 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
+                        }
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 48), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架2取{sample.Id}样品萃取管到振荡 失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInVibration);
+                    }
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从试管架2取{sample.Id}样品萃取管到振荡失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromMaterialToVibration(sample, cts);
             }
             catch (Exception ex)
             {
@@ -2182,26 +2336,22 @@ namespace Q_Platform.BLL
                 throw ex;
             }
         }
-
+        
         /// <summary>
-        /// 从振荡1取萃取管到涡旋
+        /// 从涡旋取萃取管到试管架
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="func1"></param>
-        /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
+        public bool GetPolishFromVortexToMaterial(Sample sample, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
-            ushort posNum = 0;
-
             Thread.Sleep(300);
             try
             {
-                //萃取管在冰浴
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
+                //萃取管在试管架
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                 {
                     return true;
                 }
@@ -2216,59 +2366,198 @@ namespace Q_Platform.BLL
                     }
                     _currentMethodName = MethodBase.GetCurrentMethod().Name;
 
+                    _logger.Info($"从涡旋搬运{ sample.Id}萃取管到试管架");
 
-                    DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-                attemp: for (int i = 1; i < 9; i++)
+                    //萃取管在涡旋 
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
                     {
-                        if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            continue;
+                            result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId + 47), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
                         }
-                        else
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            posNum = (ushort)i;
-                            break;
+                            result = GetSampleFromVortexToMaterial((ushort)(2 * sampleId + 48),cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从涡旋搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVortexed);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInShelf);
+                    }
+
+                    //萃取管在试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从涡旋搬运{ sample.Id}萃取管到试管架失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromVortexToMaterial(sample,  cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+        
+        /// <summary>
+        /// 从涡旋取萃取管到试管架
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromVibrationToMaterial(Sample sample, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+            Thread.Sleep(300);
+            try
+            {
+                //萃取管在冰浴
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                {
+                    return true;
+                }
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
                         }
                     }
-                    if (posNum == 0)
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger.Info($"从振荡搬运{ sample.Id}萃取管到试管架");
+
+                    //萃取管在涡旋 
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
-                        if (DateTime.Now > end)
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            throw new Exception("冰浴试管已满！ 等待超时");
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId + 47),null,null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
                         }
-                        Thread.Sleep(10000);
-                        goto attemp;
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId + 48), null, null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVibration);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInShelf);
                     }
 
-                    _logger.Info($"从振荡1搬运{ sample.Id}萃取管到冰浴");
+                    //萃取管在冰浴
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromVibrationToMaterial(sample,  cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 从振荡1取萃取管到涡旋
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="func1"></param>
+        /// <param name="func2"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+
+            Thread.Sleep(300);
+            try
+            {
+                //萃取管在冰浴
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
+                {
+                    return true;
+                }
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger.Info($"从振荡1搬运{ sample.Id}萃取管到涡旋");
 
                     //萃取管在拧盖2   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
                         if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 47), (ushort)(2 * posNum - 1), null, null, cts);
+                            result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId + 47), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到涡旋 失败！PolishStatus-{sample.PolishStatus}");
                             }
                             sample.PolishStatus = 1;
                         }
                         if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCold((ushort)(2 * sampleId + 48), (ushort)(2 * posNum), null, null, cts);
+                            result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId + 48), null, null, cts);
                             if (!result)
                             {
-                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴！PolishStatus-{sample.PolishStatus}");
+                                throw new Exception($"从振荡1搬运{ sample.Id}萃取管到涡旋 失败！PolishStatus-{sample.PolishStatus}");
                             }
                             sample.PolishStatus = 0;
                         }
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVibration);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInVortexed);
                     }
 
                     //萃取管在冰浴
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
                     {
                         _currentMethodName = string.Empty;
                         return true;
@@ -2457,6 +2746,84 @@ namespace Q_Platform.BLL
                 throw ex;
             }
         }
+
+        /// <summary>
+        /// 从试管架搬运萃取管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+            Thread.Sleep(300);
+            try
+            {
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    {
+                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger?.Info($"搬运{sampleId}萃取管到离心移栽");
+
+                    //试管在试管架
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId +47), func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
+                        }
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId +48),func, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从试管架搬运{sampleId}萃取管到离心移栽失败！ PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
+                    }
+
+                    //萃取管在移栽
+
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
+                    {
+                        _currentMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromMaterialToTransfer(sample,func, cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+
 
         /// <summary>
         /// 从离心移栽取出离心完后的萃取管到试管架
@@ -2790,7 +3157,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转指定角度</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected bool GetSampleFromMaterialToTransfer(ushort num, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts)
+        protected bool GetSampleFromMaterialToTransfer(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             byte clawOpenByte = 40;
 
@@ -2799,6 +3166,10 @@ namespace Q_Platform.BLL
                 throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
             }
             _logger.Debug($"GetSampleFromMaterialToTransfer-{num},clawOpenByte-{clawOpenByte}");
+
+            //旋转到指定位置
+            var ret1 = func.Invoke(num, cts);
+
             //取料
             var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
@@ -2813,9 +3184,8 @@ namespace Q_Platform.BLL
                 return false;
             }
 
-            //旋转到指定位置
-            result = func.Invoke(num,cts);
-            if (!result)
+            //旋转到指定位置   检查是否到位
+            if (!ret1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }

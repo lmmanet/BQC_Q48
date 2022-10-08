@@ -45,6 +45,7 @@ namespace Q_Platform.BLL
 
         //涡旋振荡部分
         public DictionaryEx<Sample, string> VibrationOneDic = new DictionaryEx<Sample, string>();
+        public DictionaryEx<Sample, string> VibrationOneDicPolish = new DictionaryEx<Sample, string>();
         //离心机部分
         public DictionaryEx<Sample, string> CentrifugalBig = new DictionaryEx<Sample, string>();
         public DictionaryEx<Sample, string> CentrifugalSmall = new DictionaryEx<Sample, string>();
@@ -61,11 +62,22 @@ namespace Q_Platform.BLL
         //提取列表
         public List<Sample> ExtractList = new List<Sample>();
 
+        //任务列表
+        public List<Sample> WorkList = new List<Sample>();
 
         /// <summary>
         /// 拧盖3占用中 （移液）
         /// </summary>
         public bool IsCapperThreeOccupy { get; set; }
+
+
+        public bool[] IshaveCapper { get; set; } = new bool[5];
+
+
+        /// <summary>
+        /// 离心机当前执行样品
+        /// </summary>
+        public Sample CenRunningSample { get; set; }
 
 
     }

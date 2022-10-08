@@ -170,6 +170,13 @@ namespace Q_Platform.BLL
 
         //================================================================离心机搬运部分=====================================================================//
 
+        /// <summary>
+        /// 弄残一次离心从冰浴取料   或兽药一次离心从试管架取料
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="GoStation"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
         public bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
             try
@@ -178,21 +185,34 @@ namespace Q_Platform.BLL
                 {
                     bool result;
                     //移栽上料
-                    if (_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 0 && !_globalStatus.IsStopped)
                     {
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
+                        //大管农残一次离心  
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold) && !TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractSupernate2))
                         {
                             result = GetSampleFromColdToTransfer(sample, cts);
                             if (!result)
                             {
                                 return false;
                             }
+                            sample.CenCarrierStep++;
                         }
-                       
+                        //大管兽药一次离心
+                        else if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
+                        {
+                            result = GetSampleFromMaterialToTransfer(sample, cts);
+                            if (!result)
+                            {
+                                return false;
+                            }
+                            sample.CenCarrierStep++;
+                        }
+                        //抛出异常
+
                     }
 
-                    ///放试管进离心机
-                    if (!_globalStatus.IsStopped)
+                    //放试管进离心机
+                    if (sample.CenCarrierStep == 1 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                         {
@@ -202,7 +222,12 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
-                        return true;
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
+                        {
+                            sample.CenCarrierStep++;
+                            return true;
+                        }
+                        
                     }
                     return false;
                 }
@@ -224,7 +249,7 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //取出试管
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 2 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                         {
@@ -234,10 +259,11 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                     }
 
                     ///移栽下料
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 3 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                         {
@@ -247,6 +273,7 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep = 0;
                         return true;
                     }
 
@@ -261,7 +288,7 @@ namespace Q_Platform.BLL
             }
         }
 
-        public bool GetPolishFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
+        public bool GetPolishFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
             try
             {
@@ -270,20 +297,21 @@ namespace Q_Platform.BLL
 
                     bool result;
                     //移栽上料
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 0 && !_globalStatus.IsStopped)
                     {
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                         {
-                            result = GetPolishFromColdToTransfer(sample, cts);
+                            result = GetPolishFromMaterialToTransfer(sample, cts);
                             if (!result)
                             {
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                     }
 
                     //放试管进离心机
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 1 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                         {
@@ -293,6 +321,7 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                         return true;
                     }
                     return false;
@@ -314,7 +343,7 @@ namespace Q_Platform.BLL
                 {
                     bool result;
                     //取出试管
-                    if (!_globalStatus.IsStopped)     //&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal3)
+                    if (sample.CenCarrierStep == 2 && !_globalStatus.IsStopped)     //&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal3)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
                         {
@@ -324,10 +353,11 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                     }
 
                     //移栽下料
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 3 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                         {
@@ -337,6 +367,7 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep = 0;
                         return true;
                     }
                     return false;
@@ -361,7 +392,7 @@ namespace Q_Platform.BLL
                 {
                     bool result;
                     //搬运2从净化管架上料
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 0 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
@@ -371,11 +402,11 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
-                      
+                        sample.CenCarrierStep++;
                     }
 
                     //放试管进离心机
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 1 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                         {
@@ -385,6 +416,7 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                         return true;
                     }
 
@@ -410,7 +442,7 @@ namespace Q_Platform.BLL
                 {
                     bool result;
                     //取出试管
-                    if (!_globalStatus.IsStopped ) 
+                    if (sample.CenCarrierStep == 2 && !_globalStatus.IsStopped ) 
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
                         {
@@ -420,10 +452,11 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep++;
                     }
 
                     //移栽下料
-                    if (!_globalStatus.IsStopped)
+                    if (sample.CenCarrierStep == 3 && !_globalStatus.IsStopped)
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                         {
@@ -433,6 +466,7 @@ namespace Q_Platform.BLL
                                 return false;
                             }
                         }
+                        sample.CenCarrierStep = 0;
                         return true;
                     }
 
@@ -497,7 +531,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsPolishInCold))
                             {
-                                result = GetPolishFromColdToTransfer(sample1, cts);
+                                result = GetPolishFromMaterialToTransfer(sample1, cts);
                                 if (!result)
                                 {
                                     return false;
@@ -1140,26 +1174,67 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 从冰浴搬运萃取管到移栽
+        /// 从试管架取样品管到移栽离心
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        private bool GetPolishFromColdToTransfer(Sample sample, CancellationTokenSource cts)
+        private bool GetSampleFromMaterialToTransfer(Sample sample,CancellationTokenSource cts)
+        {
+            try
+            {
+                _logger?.Info($"取{sample.Id}样品到移栽");
+
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && !_globalStatus.IsStopped)
+                {
+                    var result = _carrierOne.GetSampleFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{ sample.Id }样品到移栽 失败");
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                }
+
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"取{sample.Id}样品到移栽 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 从试管架搬运萃取管到移栽
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool GetPolishFromMaterialToTransfer(Sample sample, CancellationTokenSource cts)
         {
             try
             {
                 _logger?.Info($"取{sample.Id}样品到移栽");
 
 
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold) && !_globalStatus.IsStopped)
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf) && !_globalStatus.IsStopped)
                 {
-                    var result = _carrierOne.GetPolishFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetPolishFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }样品到移栽 失败");
                     }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCold);
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
                 }
 
@@ -1514,14 +1589,6 @@ namespace Q_Platform.BLL
                     {
                         _globalStatus.PauseProgram();
                         _logger?.Warn(ex.Message);
-                        while (_globalStatus.IsPause)
-                        {
-                            Thread.Sleep(1000);
-                            if (_globalStatus.IsStopped)
-                            {
-                                return;
-                            }
-                        }
                         return;
                     }
                    
@@ -1673,6 +1740,7 @@ namespace Q_Platform.BLL
                                 //从净化管移液到西林瓶
                                 if (itemSample.MainStep >= 8 && itemSample.MainStep < 16 && !_globalStatus.IsStopped)
                                 {
+                                    //内部步骤 8 ~ 13
                                     result = _capperFour.DoPipettingOne(itemSample,1, cts);//农残移液浓缩
                                     if (!result)
                                     {
@@ -1702,14 +1770,6 @@ namespace Q_Platform.BLL
                 {
                     _globalStatus.PauseProgram();
                     _logger?.Warn(ex.Message); 
-                    while (_globalStatus.IsPause)
-                    {
-                        Thread.Sleep(1000);
-                        if (_globalStatus.IsStopped)
-                        {
-                            return;
-                        }
-                    }
                     return;
                 }
         
@@ -2389,8 +2449,30 @@ namespace Q_Platform.BLL
                 //判断Z轴是否在原点
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
-                //X轴移动到位置1  //C轴旋转到大小试管位   //离心机旋转到指定位1 
-               s1: var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, pos[0], _stepMoveVel, cts).ConfigureAwait(false);
+                //C轴回零
+                if (pos[1] == 0)
+                {
+                s0: var ret1 = await _stepMotion.GoHomeWithCheckDone(_axisC, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        if (_globalStatus.IsPause)
+                        {
+                            while (_globalStatus.IsPause)
+                            {
+                                Thread.Sleep(1000);
+                            }
+                            if (!_globalStatus.IsStopped)
+                            {
+                                goto s0;
+                            }
+                        }
+                        throw new Exception("旋转轴回零失败!");
+                    }
+                }
+          
+
+            //X轴移动到位置1  //C轴旋转到大小试管位   //离心机旋转到指定位1 
+            s1: var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, pos[0], _stepMoveVel, cts).ConfigureAwait(false);
                 var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
                 //Y气缸移动到位
                 Y_Cylinder_Get();
@@ -2474,9 +2556,29 @@ namespace Q_Platform.BLL
                 //判断Z轴是否在原点
                 await CheckAxisZInSafePos(cts).ConfigureAwait(false);
 
+                //C轴回零
+                if (pos[1] == 0)
+                {
+                s0: var ret1 = await _stepMotion.GoHomeWithCheckDone(_axisC, cts).ConfigureAwait(false);
+                    if (!ret1)
+                    {
+                        if (_globalStatus.IsPause)
+                        {
+                            while (_globalStatus.IsPause)
+                            {
+                                Thread.Sleep(1000);
+                            }
+                            if (!_globalStatus.IsStopped)
+                            {
+                                goto s0;
+                            }
+                        }
+                        throw new Exception("旋转轴回零失败!");
+                    }
+                }
 
-                //X轴移动到位置1  //C轴旋转到大小试管位   //离心机旋转到指定位1 
-               s1: var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, pos[0], _stepMoveVel, cts).ConfigureAwait(false);
+            //X轴移动到位置1  //C轴旋转到大小试管位   //离心机旋转到指定位1 
+            s1: var result1 = _stepMotion.P2pMoveWithCheckDone(_axisX, pos[0], _stepMoveVel, cts).ConfigureAwait(false);
                 var result2 = _stepMotion.P2pMoveWithCheckDone(_axisC, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
                 //Y气缸移动到位
                 Y_Cylinder_Get();
