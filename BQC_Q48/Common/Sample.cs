@@ -145,5 +145,28 @@ namespace BQJX.Common
         /// 浓缩失败
         /// </summary>
         public bool ConcentrationFailure { get; set; }
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// 回调方法
+        /// </summary>
+        public string ActionCallBack { get; set; }
+
+        /// <summary>
+        /// 冰浴ID
+        /// </summary>
+        public ushort ColdId { get; set; }
+
+
+
+
     }
 }

@@ -44,16 +44,17 @@ namespace Q_Platform.BLL
     {
 
         //涡旋振荡部分
-        public DictionaryEx<Sample, string> VibrationOneDic = new DictionaryEx<Sample, string>();
-        public DictionaryEx<Sample, string> VibrationOneDicPolish = new DictionaryEx<Sample, string>();
+        public List<Sample> VibrationOneDic = new List<Sample>();
+        public List<Sample> VibrationOneDicPolish = new List<Sample>();
         //离心机部分
-        public DictionaryEx<Sample, string> CentrifugalBig = new DictionaryEx<Sample, string>();
-        public DictionaryEx<Sample, string> CentrifugalSmall = new DictionaryEx<Sample, string>();
-        public DictionaryEx<Sample, string> CentrifugalPolish = new DictionaryEx<Sample, string>();
+        public List<Sample> CentrifugalBig = new List<Sample>();
+        public List<Sample> CentrifugalSmall = new List<Sample>();
+        public List<Sample> CentrifugalPolish = new List<Sample>();
         //移液部分
-        public DictionaryEx<Sample, string> PipettorDic = new DictionaryEx<Sample, string>();
+        public List<Sample> PipettorDic = new List<Sample>();
         //冰浴字典
-        public DictionaryEx<Sample, ushort> ColdDic = new DictionaryEx<Sample, ushort>();
+        //public List<Sample> ColdDic = new DictionaryEx<Sample, ushort>();
+        public List<Sample> ColdDic = new List<Sample>();
 
         //回湿列表
         public List<Sample> WetBackSampleList = new List<Sample>();

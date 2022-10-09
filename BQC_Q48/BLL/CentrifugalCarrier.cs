@@ -1476,10 +1476,11 @@ namespace Q_Platform.BLL
             //判断去重
             if (sample != null)
             {
+                sample.ActionCallBack = actionCallBack;
                 var dic1 = GlobalCache.Instance.PipettorDic;
-                if (!dic1.ContainsKey(sample))
+                if (!dic1.Contains(sample))
                 {
-                    dic1.Add(sample, actionCallBack);
+                    dic1.Add(sample);
                 }
             }
         }
@@ -1524,12 +1525,7 @@ namespace Q_Platform.BLL
                         break;
                     }
 
-                    var kvPair = pDic.FirstOrDefault();
-                    if (kvPair.Key == null)
-                    {
-                        break;
-                    }
-                    var itemSample1 = kvPair.Key;
+                    var itemSample1 = pDic[0];
 
                     try
                     {   //==========================不能加锁  锁在子方法内部=============================//
@@ -1549,7 +1545,7 @@ namespace Q_Platform.BLL
                                 itemSample1.MainStep = 7;
 
                                 //触发后续动作   振荡净化 提取样品液  振荡涡旋
-                                MethodHelper.ExcuteMethod(kvPair.Value, itemSample1, cts);
+                                MethodHelper.ExcuteMethod(itemSample1, cts);
                                 //样品和任务从列表移除
                                 pDic.Remove(itemSample1);
                             }
@@ -1574,7 +1570,7 @@ namespace Q_Platform.BLL
                             }
 
                             //触发后续动作   振荡净化 提取样品液  振荡涡旋
-                            MethodHelper.ExcuteMethod(kvPair.Value, itemSample1, cts);
+                            MethodHelper.ExcuteMethod(itemSample1, cts);
                             //样品和任务从列表移除
                             pDic.Remove(itemSample1);
                         }

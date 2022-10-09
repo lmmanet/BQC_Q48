@@ -1524,24 +1524,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\admin\\.nuget\\packages\\": {},
+    "C:\\Users\\86186\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\App\\BQC_Q48\\BQC_Q48\\BQC-Q48.csproj",
+      "projectUniqueName": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQC_Q48\\BQC-Q48.csproj",
       "projectName": "BQC-Q48",
-      "projectPath": "D:\\App\\BQC_Q48\\BQC_Q48\\BQC-Q48.csproj",
-      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "D:\\App\\BQC_Q48\\BQC_Q48\\obj\\",
+      "projectPath": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQC_Q48\\BQC-Q48.csproj",
+      "packagesPath": "C:\\Users\\86186\\.nuget\\packages\\",
+      "outputPath": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQC_Q48\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\86186\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1550,19 +1550,19 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "D:\\Lib\\packages": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net48": {
           "projectReferences": {
-            "D:\\App\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj": {
-              "projectPath": "D:\\App\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj"
+            "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj": {
+              "projectPath": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj"
             },
-            "D:\\App\\BQC_Q48\\BQJX.Communication\\BQJX.Communication.csproj": {
-              "projectPath": "D:\\App\\BQC_Q48\\BQJX.Communication\\BQJX.Communication.csproj"
+            "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Communication\\BQJX.Communication.csproj": {
+              "projectPath": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Communication\\BQJX.Communication.csproj"
             },
-            "D:\\App\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj": {
-              "projectPath": "D:\\App\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj"
+            "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj": {
+              "projectPath": "D:\\项目\\Q平台\\App\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj"
             }
           }
         }

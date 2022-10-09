@@ -175,7 +175,7 @@ namespace BQC_Q48
                 new StepAxisEleGear{ AxisName="加盐Y轴",SlaveId=1,EleGear = 88.2,HomeHigh = 10 ,UpdateParams = true,JogVel =10,JogAccDec =50},   //1r ==113.097 //88.42
                 new StepAxisEleGear{ AxisName="加盐C1轴",SlaveId=3,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="加盐C2轴",SlaveId=2,EleGear = 10000},
-                new StepAxisEleGear{ AxisName="提取加液轴",SlaveId=4,EleGear = 12000,HomeOffset =-3000,HomeMode = 2},         //1r =5/6ml    10000p/r
+                new StepAxisEleGear{ AxisName="提取加液轴",SlaveId=4,EleGear = 12000},         //1r =5/6ml    10000p/r //HomeOffset =-3000,HomeMode = 2
                 new StepAxisEleGear{ AxisName="拧盖1 Y轴",SlaveId=5,EleGear = 787.40},         //1r == 12.7mm   10000p/r
                 new StepAxisEleGear{ AxisName="拧盖1 C1轴",SlaveId=6,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="拧盖1 C2轴",SlaveId=7,EleGear = 10000},

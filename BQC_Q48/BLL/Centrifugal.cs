@@ -105,29 +105,31 @@ namespace Q_Platform.BLL
         {
             if (sample != null)
             {
+                sample.ActionCallBack = actionCallBack;
                 var dicBig = GlobalCache.Instance.CentrifugalBig;   //大管
                 var dicSmall = GlobalCache.Instance.CentrifugalSmall;//小管
                 var dicPolish = GlobalCache.Instance.CentrifugalPolish;//萃取大管
 
                 if (var == 1)
                 {
-                    if (!dicSmall.ContainsKey(sample))
+                    if (!dicSmall.Contains(sample))
                     {
-                        dicSmall.Add(sample, actionCallBack);
+
+                        dicSmall.Add(sample);
                     }
                 }
                 else if (var == 2)
                 {
-                    if (!dicPolish.ContainsKey(sample))
+                    if (!dicPolish.Contains(sample))
                     {
-                        dicPolish.Add(sample, actionCallBack);
+                        dicPolish.Add(sample);
                     }
                 }
                 else
                 {
-                    if (!dicBig.ContainsKey(sample))
+                    if (!dicBig.Contains(sample))
                     {
-                        dicBig.Add(sample, actionCallBack);
+                        dicBig.Add(sample);
                     }
                 }
             }
@@ -168,50 +170,31 @@ namespace Q_Platform.BLL
                                 break;
                             }
 
-                            KeyValuePair<Sample, string> item = dicPolish1.FirstOrDefault();
-
-                            if (item.Key == null) //萃取列表无数据
+                            Sample itemSample1 = null;
+                            if (dicPolish1.Count > 0)
                             {
-                                item = dicSmall1.FirstOrDefault();
+                                itemSample1 = dicPolish1[0];
                             }
-
-                            if (item.Key == null) //净化管列表无数据
+                            else if(dicSmall1.Count > 0)
                             {
-                                item = dicBig1.FirstOrDefault();
+                                itemSample1 = dicSmall1[0];
                             }
-
-                            if (item.Key == null) //样品大管无数据
+                            else
                             {
-                                break;
+                                itemSample1 = dicBig1[0];
                             }
 
                             var runSample = GlobalCache.Instance.CenRunningSample;
                             if (runSample != null)
                             {
-                                var targetSample = dicBig1.FirstOrDefault(kv => kv.Key.Id == runSample.Id);
-                                if (targetSample.Key == null)
-                                {
-                                    targetSample = dicSmall1.FirstOrDefault(kv => kv.Key.Id == runSample.Id);
-                                }
-                                if (targetSample.Key == null)
-                                {
-                                    targetSample = dicPolish1.FirstOrDefault(kv => kv.Key.Id == runSample.Id);
-                                }
-                                if (targetSample.Key == null)
-                                {
-                                    throw new Exception("当前列表不存在该样品!");
-                                }
-                                item = targetSample;
+                                itemSample1 = runSample;
                             }
                             else
                             {
-                                runSample = item.Key;
+                                runSample = itemSample1;
                             }
 
-                            var itemSample1 = item.Key;
-
-
-
+                 
                             //是否一次离心
                             if (itemSample1.MainStep == 4 && !_globalStatus.IsStopped)
                             {
@@ -227,7 +210,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取上清液  加入移液列表
-                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, cts);
 
                                     //样品和任务从列表移除
                                     dicBig1.Remove(itemSample1);
@@ -242,10 +225,10 @@ namespace Q_Platform.BLL
                                 //二次离心
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal2))
                                 {
-                                    var item2 = dicBig1.FirstOrDefault();
-                                    var itemSample2 = item2.Key;
-                                    if (itemSample2 != null)
+                                    if (dicBig1.Count >0)
                                     {
+                                        var itemSample2 = dicBig1[0];
+                                      
                                         //大小管一起离心
                                         if (itemSample2.MainStep == 4 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal1))//一次离心
                                         {
@@ -260,8 +243,8 @@ namespace Q_Platform.BLL
                                             itemSample2.MainStep++;
 
                                             //触发后续动作   取净化液  加入到移液列表
-                                            MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-                                            MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
+                                            MethodHelper.ExcuteMethod(itemSample1, cts);
+                                            MethodHelper.ExcuteMethod(itemSample2, cts);
 
                                             //样品和任务从列表移除
                                             dicSmall1.Remove(itemSample1);
@@ -269,7 +252,9 @@ namespace Q_Platform.BLL
                                             runSample = null;
                                             continue;
                                         }
+                                        
                                     }
+                                  
                                     //单独小管离心
                                     _logger?.Debug("三次离心 小管单独离心");
                                     var result = DoCentrifugalSmall(itemSample1, cts);
@@ -281,7 +266,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取净化液  加入到移液列表
-                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, cts);
 
                                     //样品和任务从列表移除
 
@@ -296,10 +281,9 @@ namespace Q_Platform.BLL
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal3))
                                 {
-                                    var item2 = dicSmall1.FirstOrDefault();
-                                    var itemSample2 = item2.Key;
-                                    if (itemSample2 != null)
+                                    if (dicSmall1.Count > 0)
                                     {
+                                        var itemSample2 = dicSmall1[0];
                                         //大小管一起离心
                                         if (itemSample2.MainStep == 7 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal2))
                                         {
@@ -314,8 +298,8 @@ namespace Q_Platform.BLL
                                             itemSample2.MainStep++;
 
                                             //触发后续动作   取净化液  加入到移液列表
-                                            MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
-                                            MethodHelper.ExcuteMethod(item2.Value, itemSample2, cts);
+                                            MethodHelper.ExcuteMethod(itemSample1, cts);
+                                            MethodHelper.ExcuteMethod(itemSample2, cts);
 
                                             //样品和任务从列表移除
                                             dicPolish1.Remove(itemSample1);
@@ -334,7 +318,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取萃取液  加入移液列表
-                                    MethodHelper.ExcuteMethod(item.Value, itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, cts);
 
                                     //样品和任务从列表移除
 

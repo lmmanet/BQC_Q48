@@ -13,9 +13,9 @@ namespace Q_Platform.Common
     public static class MethodHelper
     {
 
-        public static object ExcuteMethod(string methodInfo, Sample sample, CancellationTokenSource cts)
+        public static object ExcuteMethod(Sample sample, CancellationTokenSource cts)
         {
-            var strs = methodInfo.Split('@');
+            var strs = sample.ActionCallBack.Split('@');
             string interfaceName = strs[0];
             string methodName = strs[1];
             //接口名字

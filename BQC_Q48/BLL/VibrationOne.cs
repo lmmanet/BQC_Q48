@@ -51,30 +51,31 @@ namespace Q_Platform.BLL
             //判断去重
             if (sample != null)
             {
+                sample.ActionCallBack = methodAction;
                 //不存在振荡涡旋工艺  直接进行下一步
                 if (!TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractVibration2)
                     && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex2)
                     && sample.MainStep == 3)
                 {
                     sample.MainStep++;
-                    MethodHelper.ExcuteMethod(methodAction,sample, cts);
+                    MethodHelper.ExcuteMethod(sample, cts);
                     return;
                 }
 
                 if (sample.MainStep == 9 && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
                 {
                     var dic = GlobalCache.Instance.VibrationOneDicPolish;
-                    if (!dic.ContainsKey(sample))
+                    if (!dic.Contains(sample))
                     {
-                        dic.Add(sample, methodAction);
+                        dic.Add(sample);
                     }
                 }
                 else
                 {
                     var dic = GlobalCache.Instance.VibrationOneDic;
-                    if (!dic.ContainsKey(sample))
+                    if (!dic.Contains(sample))
                     {
-                        dic.Add(sample, methodAction);
+                        dic.Add(sample);
                     }
                 }
             }
@@ -83,8 +84,6 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 振荡涡旋提取
         /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="actionCallBack">振荡涡旋执行完成后回调</param>
         /// <param name="cts"></param>
         /// <returns></returns>
         public Task StartVibrationAndVortex(CancellationTokenSource cts)
@@ -111,13 +110,15 @@ namespace Q_Platform.BLL
 
                     lock (_lockObj)
                     {
-                        var sampleDic = dic2;
-                        if (sampleDic.Count<=0)
+                        Sample itemSample = null;
+                        if (dic2.Count > 0)
                         {
-                            sampleDic = dic1;
+                            itemSample = dic2[0];
                         }
-                        KeyValuePair<Sample, string> item = sampleDic.First();
-                        var itemSample = item.Key;
+                        else if(dic1.Count > 0)
+                        {
+                            itemSample = dic1[0];
+                        }
 
                         try
                         {
@@ -310,10 +311,17 @@ namespace Q_Platform.BLL
                                 }
                               
                                 //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
-                                MethodHelper.ExcuteMethod(item.Value, itemSample, cts);
+                                MethodHelper.ExcuteMethod(itemSample, cts);
 
                                 //移除当前项
-                                sampleDic.Remove(itemSample);
+                                if (itemSample.MainStep == 10)
+                                {
+                                    dic2.Remove(itemSample);
+                                }
+                                else
+                                {
+                                    dic1.Remove(itemSample);
+                                } 
                             }
 
                         }
@@ -321,14 +329,6 @@ namespace Q_Platform.BLL
                         {
                             _globalStatus.PauseProgram();
                             _logger?.Warn(ex.Message); 
-                            while (_globalStatus.IsPause)
-                            {
-                                Thread.Sleep(1000);
-                                if (_globalStatus.IsStopped)
-                                {
-                                    return;
-                                }
-                            }
                             return;
                         }
                     }

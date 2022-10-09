@@ -633,7 +633,7 @@ namespace Q_Platform.BLL
 
                 attemp: for (int i = 1; i < 9; i++)
                     {
-                        if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists(s=>s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -783,7 +783,8 @@ namespace Q_Platform.BLL
                             sample.SampleTubeStatus = 0;
                         }
 
-                        GlobalCache.Instance.ColdDic.Add(sample, posNum);
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
 
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
@@ -1128,11 +1129,12 @@ namespace Q_Platform.BLL
         {
             //查询冰浴字典
             ushort posNum = 0;
-            var b = GlobalCache.Instance.ColdDic.TryGetValue(sample, out posNum);
+            var b = GlobalCache.Instance.ColdDic.Contains(sample);
             if (!b)
             {
                 throw new Exception($"冰浴中不存在该样品-{sample.Id}！");
             }
+            posNum = sample.ColdId;
 
             ushort sampleId = sample.Id;
             bool result;
@@ -1677,7 +1679,7 @@ namespace Q_Platform.BLL
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
-                        if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -1720,6 +1722,8 @@ namespace Q_Platform.BLL
                             }
                             sample.PolishStatus = 0;
                         }
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCapper);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
                     }
@@ -2160,7 +2164,7 @@ namespace Q_Platform.BLL
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
-                        if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists(s=>s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -2203,6 +2207,10 @@ namespace Q_Platform.BLL
                             }
                             sample.PolishStatus = 0;
                         }
+
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
+
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVibration);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
                     }
@@ -2266,7 +2274,7 @@ namespace Q_Platform.BLL
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                 attemp: for (int i = 1; i < 9; i++)
                     {
-                        if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists( s=>s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -2309,6 +2317,10 @@ namespace Q_Platform.BLL
                             }
                             sample.PolishStatus = 0;
                         }
+
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
+
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInVortexed);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInCold);
                     }
@@ -2672,12 +2684,12 @@ namespace Q_Platform.BLL
         {
             //查询冰浴字典
             ushort posNum = 0;
-            var b = GlobalCache.Instance.ColdDic.TryGetValue(sample, out posNum);
+            var b = GlobalCache.Instance.ColdDic.Contains(sample);
             if (!b)
             {
                 throw new Exception($"冰浴中不存在该萃取管-{sample.Id}！");
             }
-
+            posNum = sample.ColdId;
             ushort sampleId = sample.Id;
             bool result;
             Thread.Sleep(300);
@@ -2914,8 +2926,10 @@ namespace Q_Platform.BLL
         {
             double volume = sample.TechParams.ExtractVolume;
             int tipId = 2 * sample.Id - 1;
+            double deep = 10; //取液10ml
             if (!bigToSmall)
             {
+                deep = 40;  //取液10ml
                 tipId += 48;
             }
             //需要修改  小管到大管  取放枪头位置
@@ -2948,7 +2962,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume,0.1, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, deep,0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -2981,7 +2995,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, 0.1, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, deep, 0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -4506,7 +4520,8 @@ namespace Q_Platform.BLL
             DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
         attemp: for (int i = 1; i < 9; i++)
             {
-                if (GlobalCache.Instance.ColdDic.ContainsValue((ushort)i))
+               
+                if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
                 {
                     continue;
                 }
@@ -4543,8 +4558,8 @@ namespace Q_Platform.BLL
                           
                             sample.SampleTubeStatus = 0;
                         }
-
-                        GlobalCache.Instance.ColdDic.Add(sample, posNum);
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
 
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);

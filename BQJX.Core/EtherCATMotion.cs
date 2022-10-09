@@ -138,6 +138,7 @@ namespace BQJX.Core
            
 
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo[0]);
+            AxisEleGear ele2 = _eleGearList.Find(P => P.AxisNo == axisNo[1]);
             double Tacc = ele.Tacc;
             double Tdec = ele.Tdec;
             double StopVel = 0;
@@ -154,7 +155,7 @@ namespace BQJX.Core
             double[] targetPos = new double[2]
             {
                 PositionArray[0]*ele.EleGear,
-                PositionArray[1]*ele.EleGear
+                PositionArray[1]*ele2.EleGear
             };
 
             ret = LTDMC.dmc_line_unit(_CardID, Crd, AxisNum, axisNo, targetPos, 1);

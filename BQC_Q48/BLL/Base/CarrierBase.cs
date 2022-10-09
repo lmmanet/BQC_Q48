@@ -644,11 +644,14 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 开始移液器
         /// </summary>
-        /// <param name="num"></param>
+        /// <param name="sourcePos">移液取液位</param>
+        /// <param name="targetPos">移液吐液位</param>
         /// <param name="volume"></param>
+        /// <param name="deep">移液液位深度</param>
+        /// <param name="airColumn">吸取空气柱</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume,double airColumn, CancellationTokenSource cts)
+        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume, double deep,double airColumn, CancellationTokenSource cts)
         {
             try
             {
@@ -725,7 +728,10 @@ namespace Q_Platform.BLL
                 }
 
                 //开始吸液
-               s3: result = await _motion.P2pMoveWithCheckDone(_axisP, volume, _absorbVel, _globalStatus).ConfigureAwait(false);
+                ushort[] axes2 = new ushort[2] { _axisZ2, _axisP };
+                double[] targetPosArray2 = new double[2] { sourcePos[2] +deep, volume };
+
+            s3: result = await _motion.InterPolation_2D_lineWithCheckDone(axes2, targetPosArray2, _absorbVel*50, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -1124,7 +1130,7 @@ namespace Q_Platform.BLL
         {
             int attemp = 0;
             _logger?.Debug($"CloseClaw-{closePos}-attemp-{attemp}");
-            var result = await _claw.SendCommand(_clawSlaveId, closePos, 255, 255).ConfigureAwait(false);
+           s1: var result = await _claw.SendCommand(_clawSlaveId, closePos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
                 _logger?.Error("_claw.SendCommand err!");
@@ -1142,16 +1148,17 @@ namespace Q_Platform.BLL
                 }
                 if (status == 3)
                 {
-                    if (attemp<2)
+                    if (attemp<5)
                     {
-                        return await CloseClaw(closePos);
+                        attemp++;
+                        goto s1;
                     }
                     throw new Exception("手爪未抓取到物料！");
                 }
                 Thread.Sleep(300);
                 if (DateTime.Now > end)
                 {
-                    throw new TimeoutException("离心机手爪动作超时！");
+                    throw new TimeoutException("手爪动作超时！");
                 }
 
             } while (status == 0);
