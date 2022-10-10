@@ -128,6 +128,11 @@ namespace BQC_Q48
             //  {
             new MainWindow().ShowDialog();
             // }
+
+            //保存状态数据
+            GlobalCache.Save();
+
+
             Application.Current.Shutdown(0);
 
         }

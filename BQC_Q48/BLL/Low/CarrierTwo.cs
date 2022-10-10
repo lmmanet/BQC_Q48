@@ -26,8 +26,6 @@ namespace Q_Platform.BLL
 
         private readonly static object _lockObj = new object();
 
-        private string _currentMethodName = string.Empty;
-
         private CarrierTwoPosData _posData;
 
         private ICarrierTwoDataAccess _dataAccess;
@@ -113,14 +111,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从西林瓶架搬运{sampleId}西林瓶到拧盖4");
                     //试管在净化试管架
@@ -151,7 +149,7 @@ namespace Q_Platform.BLL
                     //西林瓶在拧盖   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从西林瓶架搬运{sampleId}西林瓶到拧盖4失败,SampleStatus-{sample.Status}");
@@ -188,14 +186,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖4搬运{sampleId}西林瓶到西林瓶架");
                     //试管在净化试管架
@@ -226,7 +224,7 @@ namespace Q_Platform.BLL
                     //西林瓶在架子
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到西林瓶架 失败,SampleStatus-{sample.Status}");
@@ -263,14 +261,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖4搬运{sampleId}西林瓶到浓缩");
                     //试管在净化试管架
@@ -301,7 +299,7 @@ namespace Q_Platform.BLL
                     //在浓缩
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInConcentration))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从从拧盖4搬运{sampleId}西林瓶到浓缩 失败,SampleStatus-{sample.Status}");
@@ -338,14 +336,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从浓缩搬运{sampleId}西林瓶到拧盖4");
                     //试管在净化试管架
@@ -376,7 +374,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖3   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从浓缩搬运{sampleId}西林瓶到拧盖4 失败,SampleStatus-{sample.Status}");
@@ -413,14 +411,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖4搬运{sampleId}西林瓶到称重");
 
@@ -534,7 +532,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖3   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         sample.SeilingStep = 0;
                         return true;
                     }
@@ -574,14 +572,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从浓缩搬运{sampleId}西林瓶到称重");
 
@@ -705,7 +703,7 @@ namespace Q_Platform.BLL
                             {
                                 sample.SubStep = 0;
                                 sample.SeilingStatus = 0;
-                                _currentMethodName = string.Empty;
+                                GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                                 return true;
                             }
                         }
@@ -748,14 +746,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5");
                     //试管在净化试管架
@@ -786,7 +784,7 @@ namespace Q_Platform.BLL
                     //小瓶瓶在拧盖   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从小瓶瓶架搬运{sampleId}小瓶到拧盖5 失败,SampleStatus-{sample.Status}");
@@ -994,31 +992,33 @@ namespace Q_Platform.BLL
         /// 第一组移液  从净化管到小瓶  从西林瓶到小瓶
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="var">1:  2:</param>
+        /// <param name="var">1:净化管到小瓶  2:西林瓶到小瓶</param>
         /// <param name="cts"></param>
         /// <returns></returns>
         public bool DoPipettingOne(Sample sample, int var,Func<Sample,int,CancellationTokenSource,bool> capperOn, Func<Sample, int,CancellationTokenSource, bool> capperOff, CancellationTokenSource cts)
         {
             double volume = sample.TechParams.ExtractSampleVolume;  //提取样品溶液量
             int tech_i = 1;
-            double deep = 1;
+            double deep = 3;
+            double liquidHigh = sample.TechParams.ExtractDeepOffset[2]; // 农残 净化到小瓶
             if (var == 2)
             {
                 tech_i = 2;
+                liquidHigh = sample.TechParams.ExtractDeepOffset[4];  //农残西林到小  兽药西林到小瓶
             }
             Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"提取样品液{ sample.Id}移液-{volume}ml");
                     if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
@@ -1036,7 +1036,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i,liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1048,7 +1048,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {  
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1131,7 +1131,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 10 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1142,7 +1142,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 11 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1184,7 +1184,7 @@ namespace Q_Platform.BLL
                             throw new Exception($"第二组小瓶搬运到试管架失败,pipettingStep-{sample.PipettorStep2}");
                         }
                         sample.PipettorStep2 = 1;
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                       
                     }
@@ -1215,24 +1215,26 @@ namespace Q_Platform.BLL
         {
             double volume = sample.TechParams.ConcentrationVolume;  //提取样品浓缩量
             int tech_i = 3;
-            double deep = 1; //液面深度
+            double deep = 3; //液面深度
+            double liquidHigh = sample.TechParams.ExtractDeepOffset[3];  //净化管到西林瓶 农残
             if (var == 2)
             {
                 tech_i = 4;
+                liquidHigh = sample.TechParams.ExtractDeepOffset[3];  //萃取到西林 兽药
             }
             Thread.Sleep(300);
             try
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"提取浓缩液{ sample.Id}移液-{volume}ml");
                     if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
@@ -1250,7 +1252,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1286,7 +1288,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1304,7 +1306,7 @@ namespace Q_Platform.BLL
                             throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep2}");
                         }
                         sample.PipettorStep2 = 1;
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep2}");
@@ -1341,14 +1343,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}净化管到拧盖3");
                     //试管在净化试管架
@@ -1379,7 +1381,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖3   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}净化管到拧盖3失败,SampleStatus-{sample.Status}");
@@ -1412,14 +1414,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖3搬运{sampleId}净化管到振荡");
 
@@ -1451,7 +1453,7 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖3搬运{sampleId}净化管到振荡失败,SampleStatus-{sample.Status}");
@@ -1484,14 +1486,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从振荡搬运{sampleId}净化管到拧盖3");
 
@@ -1523,7 +1525,7 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡搬运{sampleId}净化管到拧盖3失败,SampleStatus-{sample.Status}");
@@ -1556,14 +1558,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从振荡搬运{sampleId}净化管到试管架");
 
@@ -1595,7 +1597,7 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡搬运{sampleId}净化管到试管架失败,SampleStatus-{sample.Status}");
@@ -1630,14 +1632,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}净化管到拧盖3");
                     //试管在净化试管架
@@ -1696,7 +1698,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖3   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}净化管到拧盖3失败,SampleStatus-{sample.Status}");
@@ -1735,14 +1737,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖3搬运{sampleId}净化管到移栽");
                     //净化管在拧盖3
@@ -1773,7 +1775,7 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.PurifyStatus}");
@@ -1806,14 +1808,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖3搬运{sampleId}净化管到净化管架");
                     //净化管在拧盖3
@@ -1844,7 +1846,7 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败,SampleStatus-{sample.PurifyStatus}");
@@ -1879,14 +1881,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从移栽搬运{sampleId}净化管到拧盖3");
                     //试管在移栽
@@ -1917,7 +1919,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖3   
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从移栽搬运{sampleId}净化管到拧盖3失败,SampleStatus-{sample.Status}");
@@ -1956,14 +1958,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}净化管到移栽");
                     //试管在净化试管架
@@ -1994,7 +1996,7 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.Status}");
@@ -2033,14 +2035,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从移栽搬运{sampleId}净化管到试管架");
                     //试管在净化试管架
@@ -2071,7 +2073,7 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败,SampleStatus-{sample.Status}");
@@ -2107,14 +2109,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}净化管到移栽");
                     //试管在净化试管架
@@ -2195,7 +2197,7 @@ namespace Q_Platform.BLL
                     //试管在移栽
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}净化管到移栽失败,SampleStatus-{sample.Status}");
@@ -2782,7 +2784,7 @@ namespace Q_Platform.BLL
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetConcentrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2814,7 +2816,7 @@ namespace Q_Platform.BLL
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetWeightCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2838,7 +2840,7 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetConcentrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2868,13 +2870,13 @@ namespace Q_Platform.BLL
                 throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
             }
             //取料
-            var result = base.GetTubeAsync(GetConcentrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetWeightCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2898,7 +2900,7 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetWeightCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2928,13 +2930,13 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            var result = base.GetTubeAsync(GetWeightCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetConcentrationCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3562,8 +3564,9 @@ namespace Q_Platform.BLL
         /// 获取浓缩位置坐标
         /// </summary>
         /// <param name="tubeId"></param>
+        /// <param name="isGetPos">是否为取料位</param>
         /// <returns></returns>
-        private double[] GetConcentrationCoordinate(int tubeId)
+        private double[] GetConcentrationCoordinate(int tubeId,bool isGetPos)
         {
             double x = _posData.ConcentrationPos[0];
             double y = _posData.ConcentrationPos[1];
@@ -3572,19 +3575,39 @@ namespace Q_Platform.BLL
             int i = (tubeId - 1) % 2;
             if (i == 1)  //单数
             {
+                if (!isGetPos)
+                {
+                    return new double[] { x + 45, y, z - 3 };
+                }
                 return new double[] { x + 45, y, z };
             }
-            return new double[] { x, y, z };
+            else
+            {
+                if (!isGetPos)
+                {
+                    return new double[] { x, y, z - 3 };
+                }
+                return new double[] { x, y, z };
+            }
+          
         }
 
         /// <summary>
         /// 获取称重位置坐标
         /// </summary>
         /// <param name="tubeId"></param>
+        /// <param name="isGetPos">是否为取料位</param>
         /// <returns></returns>
-        private double[] GetWeightCoordinate(int tubeId)
+        private double[] GetWeightCoordinate(int tubeId,bool isGetPos)
         {
-            return _posData.WeightPos;
+            if (isGetPos)
+            {
+               return new double[] { _posData.WeightPos[0], _posData.WeightPos[1], _posData.WeightPos[2] };
+            }
+            else
+            {
+               return new double[] { _posData.WeightPos[0], _posData.WeightPos[1], _posData.WeightPos[2] - 3 };
+            }
         }
 
 
@@ -3684,7 +3707,7 @@ namespace Q_Platform.BLL
         /// <param name="sampleId">单双数</param>
         /// <param name="tech_i">1:净化管（2ml）==》小瓶 2:西林瓶  ==》 小瓶 3:净化管（2ml） ==》西林瓶 4:大管==》西林瓶 </param>
         /// <returns></returns>
-        private double[] GetPipettorSourceCoordinate(int sampleId ,int tech_i)
+        private double[] GetPipettorSourceCoordinate(int sampleId ,int tech_i,double offset)
         {
             //净化管（2ml）==》小瓶  浓缩西林瓶  ==》 小瓶  净化管（2ml） ==》西林瓶    大管==》西林瓶  
             double[] poss = new double[3];
@@ -3711,16 +3734,16 @@ namespace Q_Platform.BLL
             {
                 if (tech_i == 4)
                 {
-                    return new double[] { poss[0] + 45, poss[1], poss[2] };
+                    return new double[] { poss[0] + 45, poss[1], poss[2] + offset };
                 }
                 else
                 {
-                    return new double[] { poss[0] + 60, poss[1], poss[2] };
+                    return new double[] { poss[0] + 60, poss[1], poss[2] + offset };
                 }
             }
             else
             {
-                return poss;
+                return new double[] { poss[0], poss[1], poss[2] + offset };
             }
 
 
@@ -3744,7 +3767,7 @@ namespace Q_Platform.BLL
                     break;
                 case 3: //西林瓶 拧盖4处
                 case 4: //西林瓶 拧盖4处
-                    poss = new double[] { _posData.PipettingTargetPos2[0], _posData.PipettingTargetPos2[1], _posData.PipettingTargetPos2[2] -35 };
+                    poss = new double[] { _posData.PipettingTargetPos2[0], _posData.PipettingTargetPos2[1], _posData.PipettingTargetPos2[2] + 20 };
                     break;
                 default:
                     throw new InvalidOperationException($"移液工艺错误 err:{tech_i}");

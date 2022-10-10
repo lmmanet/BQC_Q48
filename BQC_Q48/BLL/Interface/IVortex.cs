@@ -22,5 +22,18 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         bool StartVortex(Sample sample, int step, CancellationTokenSource cts);
+
+
+
+
+
+        //==============================================涡旋单独用===================================================//
+        void AddSampleToVortexList(Sample sample, CancellationTokenSource cts);
+        Task StartVortex(CancellationTokenSource cts);
+
+
+
+
+
     }
 }

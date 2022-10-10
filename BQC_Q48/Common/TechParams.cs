@@ -117,13 +117,25 @@ namespace BQJX.Common
         public int[] CentrifugalOneTime { get; set; } = new int[3];
 
         /// <summary>
+        /// 移液深度偏移(取液偏移起始点)
+        /// 1;样品管到净化管 （农残/兽药）
+        /// 2:净化管到萃取管/净化管到小瓶
+        /// 3:萃取管到西林瓶/净化管到西林瓶
+        /// 4:西林瓶到小瓶   （农残/兽药)
+        /// </summary>
+        public double[] ExtractDeepOffset { get; set; } = new double[4];
+
+        /// <summary>
         /// 上清液提取量
         /// </summary>
         public double ExtractVolume { get; set; }
 
         public double cusuanan { get; set; }//醋酸铵加入量
 
-        public double Extract { get; set; }   //完全倾倒
+        /// <summary>
+        /// 完全倾倒
+        /// </summary>
+        public double Extract { get; set; }   
 
 
          /// <summary>

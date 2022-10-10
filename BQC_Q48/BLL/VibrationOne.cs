@@ -24,6 +24,8 @@ namespace Q_Platform.BLL
 
         Task _vibrationOnevortexTask; //振荡1 涡旋
 
+        Task _vibrationTask; //振荡1 
+
         #region Private Members
 
         private readonly ICarrierOne _carrier;
@@ -118,6 +120,16 @@ namespace Q_Platform.BLL
                         else if(dic1.Count > 0)
                         {
                             itemSample = dic1[0];
+                        }
+
+                        var runSample = GlobalCache.Instance.VibRunningSample;
+                        if (runSample != null)
+                        {
+                            itemSample = runSample;
+                        }
+                        else
+                        {
+                            runSample = itemSample;
                         }
 
                         try
@@ -321,7 +333,9 @@ namespace Q_Platform.BLL
                                 else
                                 {
                                     dic1.Remove(itemSample);
-                                } 
+                                }
+
+                                runSample = null;
                             }
 
                         }
@@ -413,6 +427,111 @@ namespace Q_Platform.BLL
         }
 
 
+        //============================================================振荡分离出来单独用=========================================================================//
+        public void AddSampleToVibrationList(Sample sample,CancellationTokenSource cts)
+        {
+            //判断去重
+            if (sample != null)
+            {
+                //不存在加水振荡工艺  直接跳过  无需进入列表  == >  进入回湿程序
+                if (sample.MainStep == 1 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Vibration))
+                {
+                    sample.SubStep++;
+                    _vortex.AddSampleToVortexList(sample, cts);
+                    return;
+                }
+                //不存在加溶剂振荡工艺 直接跳过  无需进入列表
+                if (sample.MainStep == 2 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration1))
+                {
+                    sample.SubStep++;
+                    _vortex.AddSampleToVortexList(sample, cts);
+                    return;
+                }
+                //不存在加溶剂振荡工艺 直接跳过  无需进入列表
+                if (sample.MainStep == 3 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration2))
+                {
+                    sample.SubStep++;
+                    _vortex.AddSampleToVortexList(sample, cts);
+                    return;
+                }
+                //不存在振荡工艺 直接跳过  无需进入列表
+                if (sample.MainStep == 9 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
+                {
+                    sample.SubStep++; 
+                    _vortex.AddSampleToVortexList(sample, cts);
+                    return;
+                }
+
+                //加入到列表
+                var list = GlobalCache.Instance.VibrationList;
+                if (!list.Contains(sample))
+                {
+                    list.Add(sample);
+                }
+            }
+        }
+
+        public Task StartVibration(CancellationTokenSource cts)
+        {
+            if (_vibrationTask != null)
+            {
+                if (!_vibrationTask.IsCompleted)
+                {
+                    return _vibrationTask;
+                }
+            }
+
+            _vibrationTask = Task.Run(() =>
+            {
+                while (!_globalStatus.IsStopped)
+                {
+                    var list = GlobalCache.Instance.VibrationList;
+
+                    if (list == null || list.Count <= 0)
+                    {
+                        break;
+                    }
+
+                    lock (_lockObj)
+                    { 
+                        //找出优先级高的样品
+                        var workSample = FindHighPrioritySample(list);
+
+                        try
+                        {
+                            //振荡 
+                            if (workSample.MainStep == 1 && !_globalStatus.IsStopped)
+                            {
+                                //振荡 
+                                if (workSample.SubStep == 4 && !_globalStatus.IsStopped)
+                                {
+                                    var result = StartVibration(workSample, cts);
+                                    if (!result)
+                                    {
+                                        throw new Exception("StartVibration err");
+                                    }
+                                    list.Remove(workSample);
+                                    GlobalCache.Instance.VortexCurrentSample = null;
+                                    workSample.SubStep++;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _globalStatus.PauseProgram();
+                            _logger?.Warn(ex.Message);
+                            return;
+                        }
+                    }
+                    Thread.Sleep(1000);
+                }
+            });
+
+            return _vibrationTask;
+        }
+
+
+
 
         #region Private Methods
 
@@ -491,21 +610,176 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"样品{sampleId}开始振荡-{time}s-{vel}rpm 停止");
-                    return false;
-                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
         }
 
-       
+
 
 
         #endregion
 
+        //未完成
+        private bool StartVibration(Sample sample,CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            int step = 0;
+            double vel = sample.TechParams.VibrationOneVel[step] / 60;
+            int time = sample.TechParams.VibrationOneTime[step];
+            try
+            {
+                lock (_lockObj)
+                {
+                    _logger?.Info($"样品{sampleId}开始振荡-{time}s-{vel}rpm");
 
+                    //振荡回零
+                    var result = GoHome(cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("振荡回零失败!");
+                    }
+
+                    //搬运
+                    result = GetSampleFromMaterialToVibration(sample, cts);
+                    if (!result)
+                    {
+                        throw new Exception("搬运样品到振荡失败!");
+                    }
+
+
+                    //开始振荡
+                    result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("样品振荡失败!");
+                    }
+
+                    //搬运下料
+                    if (sample.MainStep == 9)
+                    {
+                        result = GetSampleFromVibrationToMaterial(sample, 3, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运样品到冰浴失败!");
+                        }
+                    }
+                    else
+                    {
+                        result = GetSampleFromVibrationToMaterial(sample, 2, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运样品到冰浴失败!");
+                        }
+                    }
+                   
+
+                    //完成
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// 找出列表优先级高的样品
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        private Sample FindHighPrioritySample(List<Sample> list)
+        {
+            var sample = list[0];
+
+            //判断当前样品是否完成
+            if (GlobalCache.Instance.VibrationCurrentSample != null)
+            {
+                sample = GlobalCache.Instance.VibrationCurrentSample;
+            }
+            //萃取管振荡
+            else if (list.Exists(s => s.MainStep == 9))
+            {
+                sample = list.Find(s => s.MainStep == 9);
+            }
+            //加盐振荡
+            else if (list.Exists(s => s.MainStep == 3))
+            {
+                sample = list.Find(s => s.MainStep == 3);
+            }
+            //加液振荡
+            else if (list.Exists(s => s.MainStep == 2))
+            {
+                sample = list.Find(s => s.MainStep == 2);
+            }
+            //加水振荡
+            else if (list.Exists(s => s.MainStep == 1))
+            {
+                sample = list.Find(s => s.MainStep == 1);
+            }
+
+            GlobalCache.Instance.VibrationCurrentSample = sample;
+
+            return sample;
+        }
+
+
+        /// <summary>
+        /// 从振荡搬运试管到试管架1 试管架2  冰浴
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="var">1;到试管架1 2:到试管架2 3:样品管到冰浴 4;萃取管到冰浴</param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool GetSampleFromVibrationToMaterial(Sample sample, int var, CancellationTokenSource cts)
+        {
+            if (var == 1)
+            {
+                //样品管从振荡到试管架
+                return _carrier.GetSampleFromVibrationToMaterial(sample, cts);
+            }
+            else if (var == 2)
+            {
+                //从振荡搬运萃取管到试管架
+                return _carrier.GetPolishFromVibrationToMaterial(sample, cts);
+            }
+            else if (var == 3)
+            {
+                //从振荡搬运试管到冰浴
+                return _carrier.GetSampleFromVibrationToCold(sample, cts);
+            }
+            else if (var == 4)
+            {
+                //从振荡搬运萃取管到冰浴
+                return _carrier.GetPolishFromVibrationToCold(sample, cts);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 从试管架搬运试管到振荡
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        private bool GetSampleFromMaterialToVibration(Sample sample, CancellationTokenSource cts)
+        {
+            //从试管架2搬运萃取管到振荡
+            if (sample.MainStep == 9)
+            {
+                return _carrier.GetPolishFromMaterialToVibration(sample, cts);
+            }
+            //从试管架1搬运试管到振荡
+            else
+            {
+                return _carrier.GetSampleToVibration(sample, cts);
+            }
+
+
+        }
     }
 }

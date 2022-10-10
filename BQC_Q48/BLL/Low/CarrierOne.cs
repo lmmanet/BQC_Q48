@@ -19,9 +19,7 @@ namespace Q_Platform.BLL
         #region Private Members
 
         private readonly static object _lockObj = new object();
-
-        private string _currentMethodName = string.Empty;
-
+            
         private ICarrierOneDataAccess _dataAccess;
 
         private CarrierOnePosData _posData;
@@ -73,14 +71,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}样品到拧盖1");
              
@@ -112,7 +110,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖1
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        _currentMethodName = string.Empty;  
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到拧盖1失败,SampleStatus-{sample.Status}");
@@ -150,14 +148,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从试管架搬运{sampleId}样品到拧盖1");
 
@@ -189,7 +187,7 @@ namespace Q_Platform.BLL
                     //试管在拧盖1
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperOne))
                     {
-                        _currentMethodName = string.Empty;  
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到拧盖1失败,SampleStatus-{sample.Status}");
@@ -228,14 +226,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
@@ -269,7 +267,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
@@ -305,14 +303,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
                 
@@ -345,7 +343,7 @@ namespace Q_Platform.BLL
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
                         
-                        _currentMethodName = string.Empty;  
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -381,14 +379,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
 
@@ -421,7 +419,7 @@ namespace Q_Platform.BLL
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
                            
-                        _currentMethodName = string.Empty;  
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -430,6 +428,123 @@ namespace Q_Platform.BLL
             catch (OccupyMethodException)
             {
                 return GetSampleFromVortexToMaterial(sample, cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// 从涡旋搬运试管到冰浴
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetSampleFromVortexToCold(Sample sample, CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+            ushort posNum = 0;
+
+            Thread.Sleep(300);
+            try
+            {
+
+                //试管在冰浴
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
+                {
+                    return true;
+                }
+
+                DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
+
+            attemp: lock (_lockObj)
+                {
+                    for (int i = 1; i < 9; i++)
+                    {
+                        if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            posNum = (ushort)i;
+                            break;
+                        }
+                    }
+                    if (posNum == 0)
+                    {
+                        if (DateTime.Now > end)
+                        {
+                            throw new Exception("冰浴试管已满！ 等待超时");
+                        }
+                        _logger?.Debug("GetSampleFromVortexToCold - 等待冰浴空位!");
+                        Thread.Sleep(10000);
+
+                        goto attemp;
+                    }
+
+
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger.Info($"从涡旋搬运-{ sample.Id}-样品到冰浴-{posNum}-位");
+
+                    //试管在涡旋
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
+                    {
+                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromVortexToCold((ushort)(2 * sampleId - 1), (ushort)(2 * posNum - 1), cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从涡旋处搬运试管到冰浴失败！SampleTubeStatus-{sample.SampleTubeStatus}");
+                            }
+                            sample.SampleTubeStatus = 1;
+                        }
+                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromVortexToCold((ushort)(2 * sampleId), (ushort)(2 * posNum),cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从涡旋处搬运试管到冰浴失败！SampleTubeStatus-{sample.SampleTubeStatus}");
+                            }
+                            sample.SampleTubeStatus = 0;
+                        }
+
+                        sample.ColdId = posNum;
+                        GlobalCache.Instance.ColdDic.Add(sample);
+
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVortexed);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
+                    }
+
+
+                    //试管在冰浴
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
+                    {
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从涡旋搬运{ sample.Id}样品到冰浴失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetSampleFromVortexToCold(sample, cts);
             }
             catch (Exception ex)
             {
@@ -457,14 +572,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到加固");
@@ -496,7 +611,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInAddSolid))
                     {
-                        _currentMethodName = string.Empty;   
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;   
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到加固失败,SampleStatus-{sample.Status}");
@@ -533,14 +648,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到振荡1");
@@ -572,7 +687,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        _currentMethodName = string.Empty; 
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty; 
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到振荡1失败,SampleStatus-{sample.Status}");
@@ -619,19 +734,9 @@ namespace Q_Platform.BLL
 
                 DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
          
-                lock (_lockObj)
-                {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
-                    {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
-                        {
-                            throw new OccupyMethodException();
-                        }
-                    }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-
-                attemp: for (int i = 1; i < 9; i++)
+                attemp: lock (_lockObj)
+                {  
+                    for (int i = 1; i < 9; i++)
                     {
                         if (GlobalCache.Instance.ColdDic.Exists(s=>s.ColdId == (ushort)i))
                         {
@@ -652,6 +757,18 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
+
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+
+
+          
 
                     _logger.Info($"搬运-{ sample.Id}-样品到冰浴-{posNum}-位");
 
@@ -794,7 +911,7 @@ namespace Q_Platform.BLL
                     //试管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
                     {
-                        _currentMethodName = string.Empty;  
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;  
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到冰浴失败,SampleStatus-{sample.Status}");
@@ -829,14 +946,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从试管架取{sample.Id}样品离心管到拧盖2");
@@ -867,7 +984,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
-                        _currentMethodName = string.Empty;    
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;    
                         return true;
                     }
                     throw new Exception($"从试管架取{sample.Id}样品样品离心管到拧盖2失败,SampleStatus-{sample.Status}");
@@ -907,14 +1024,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从离心移栽搬运{sampleId}试管到拧盖2");
@@ -944,7 +1061,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
                     {
-                        _currentMethodName = string.Empty;   
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;   
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}试管到拧盖2失败,SampleStatus-{sample.Status}");
@@ -980,14 +1097,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
@@ -1020,7 +1137,7 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -1056,14 +1173,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
@@ -1095,7 +1212,7 @@ namespace Q_Platform.BLL
                     //试管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{ sample.Id}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -1143,14 +1260,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
@@ -1185,7 +1302,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
@@ -1222,14 +1339,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
 
@@ -1262,7 +1379,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
@@ -1299,14 +1416,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从离心移栽搬运{sampleId}样品到试管架");   //试管在试管架 //试管在拧盖1 //试管在加固 //试管在涡旋 //试管在拧盖2   //试管在振荡 //试管在冰浴 
@@ -1336,7 +1453,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -1373,14 +1490,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"搬运{sampleId}样品到涡旋");
@@ -1467,7 +1584,7 @@ namespace Q_Platform.BLL
                     //试管在涡旋
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到涡旋失败,SampleStatus-{sample.Status}");
@@ -1504,14 +1621,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"搬运{sampleId}样品到振荡1");
@@ -1620,7 +1737,7 @@ namespace Q_Platform.BLL
                     //试管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到振荡1失败,SampleStatus-{sample.Status}");
@@ -1664,20 +1781,10 @@ namespace Q_Platform.BLL
                 {
                     return true;
                 }
-                lock (_lockObj)
-                {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
-                    {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
-                        {
-                            throw new OccupyMethodException();
-                        }
-                    }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-                attemp: for (int i = 1; i < 9; i++)
+            attemp: lock (_lockObj)
+                {
+                    for (int i = 1; i < 9; i++)
                     {
                         if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
                         {
@@ -1698,6 +1805,15 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
+
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从拧盖2搬运{ sample.Id}萃取管到冰浴");
 
@@ -1731,7 +1847,7 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
@@ -1770,14 +1886,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从移栽搬运{sampleId}样品萃取管到拧盖2");
 
@@ -1808,7 +1924,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从移栽搬运{sampleId}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
@@ -1844,14 +1960,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从拧盖2搬运{sampleId}样品萃取管到试管架2");
@@ -1883,7 +1999,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到试管架2失败,SampleStatus-{sample.Status}");
@@ -1918,14 +2034,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从试管架2取{sample.Id}样品萃取管到拧盖2");
@@ -1956,7 +2072,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCapper))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从试管架2取{sample.Id}样品萃取管到拧盖2失败,SampleStatus-{sample.Status}");
@@ -1992,14 +2108,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
 
                     _logger?.Info($"从试管架2取{sample.Id}样品萃取管到振荡");
@@ -2009,7 +2125,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 47), cts);
+                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 48), cts);
                             if (!result)
                             {
                                 throw new Exception($"从试管架2取{sample.Id}样品萃取管振荡 失败！ PolishStatus-{sample.PolishStatus}");
@@ -2018,7 +2134,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 48), cts);
+                            var result = GetSampleFromMaterialToVibration((ushort)(2 * sampleId + 47), cts);
                             if (!result)
                             {
                                 throw new Exception($"从试管架2取{sample.Id}样品萃取管到振荡 失败！ PolishStatus-{sample.PolishStatus}");
@@ -2030,7 +2146,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从试管架2取{sample.Id}样品萃取管到振荡失败,SampleStatus-{sample.Status}");
@@ -2068,14 +2184,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从拧盖2搬运{sampleId}样品萃取管到离心移栽");
 
@@ -2106,7 +2222,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{sampleId}样品萃取管到离心移栽失败,SampleStatus-{sample.Status}");
@@ -2135,7 +2251,7 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetPolishFromVibrationToCold(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
+        public bool GetPolishFromVibrationToCold(Sample sample,CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -2149,22 +2265,12 @@ namespace Q_Platform.BLL
                 {
                     return true;
                 }
-                lock (_lockObj)
+                 DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
+            attemp: lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    for (int i = 1; i < 9; i++)
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
-                        {
-                            throw new OccupyMethodException();
-                        }
-                    }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-
-                    DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-                attemp: for (int i = 1; i < 9; i++)
-                    {
-                        if (GlobalCache.Instance.ColdDic.Exists(s=>s.ColdId == (ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -2183,6 +2289,15 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
+
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从振荡1搬运{ sample.Id}萃取管到冰浴");
 
@@ -2218,7 +2333,7 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
@@ -2226,7 +2341,7 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetPolishFromVibrationToCold(sample,func1, func2, cts);
+                return GetPolishFromVibrationToCold(sample, cts);
             }
             catch (Exception ex)
             {
@@ -2259,22 +2374,12 @@ namespace Q_Platform.BLL
                 {
                     return true;
                 }
-                lock (_lockObj)
-                {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
-                    {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
-                        {
-                            throw new OccupyMethodException();
-                        }
-                    }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
-
-
                     DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-                attemp: for (int i = 1; i < 9; i++)
+            attemp: lock (_lockObj)
+                {
+                    for (int i = 1; i < 9; i++)
                     {
-                        if (GlobalCache.Instance.ColdDic.Exists( s=>s.ColdId == (ushort)i))
+                        if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
                         {
                             continue;
                         }
@@ -2293,6 +2398,15 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
+
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从涡旋搬运{ sample.Id}萃取管到冰浴");
 
@@ -2328,7 +2442,7 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从涡旋搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
@@ -2369,14 +2483,14 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从涡旋搬运{ sample.Id}萃取管到试管架");
 
@@ -2408,7 +2522,7 @@ namespace Q_Platform.BLL
                     //萃取管在试管架
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从涡旋搬运{ sample.Id}萃取管到试管架失败,SampleStatus-{sample.Status}");
@@ -2449,18 +2563,18 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从振荡搬运{ sample.Id}萃取管到试管架");
 
-                    //萃取管在涡旋 
+                    //萃取管在振荡 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
                         if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
@@ -2488,7 +2602,7 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架失败,SampleStatus-{sample.Status}");
@@ -2507,6 +2621,87 @@ namespace Q_Platform.BLL
                 _logger?.Error(ex.Message);
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// 从试管架取萃取管到涡旋
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        public bool GetPolishFromMaterialToVortex(Sample sample,CancellationTokenSource cts)
+        {
+            ushort sampleId = sample.Id;
+            bool result;
+            Thread.Sleep(300);
+            try
+            {
+                //萃取管在涡旋
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
+                {
+                    return true;
+                }
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            throw new OccupyMethodException();
+                        }
+                    }
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger.Info($"从试管架搬运{ sample.Id}萃取管到涡旋");
+
+                    //萃取管在涡旋 
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
+                    {
+                        if (sample.PolishStatus == 0 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId + 47), null, null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 1;
+                        }
+                        if (sample.PolishStatus == 1 && !_globalStatus.IsStopped)
+                        {
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId + 48), null, null, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"从振荡搬运{ sample.Id}萃取管到试管架 失败！PolishStatus-{sample.PolishStatus}");
+                            }
+                            sample.PolishStatus = 0;
+                        }
+                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
+                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInVortexed);
+                    }
+
+                    //萃取管在涡旋
+                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
+                    {
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
+                        return true;
+                    }
+                    throw new Exception($"从试管架搬运{ sample.Id}萃取管到涡旋失败,SampleStatus-{sample.Status}");
+                }
+            }
+            catch (OccupyMethodException)
+            {
+                return GetPolishFromMaterialToVortex(sample, cts);
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped)
+                {
+                    return false;
+                }
+                _logger?.Error(ex.Message);
+                throw ex;
+            }
+
         }
 
         /// <summary>
@@ -2532,14 +2727,14 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从振荡1搬运{ sample.Id}萃取管到涡旋");
 
@@ -2571,7 +2766,7 @@ namespace Q_Platform.BLL
                     //萃取管在冰浴
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVortexed))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从振荡1搬运{ sample.Id}萃取管到冰浴失败,SampleStatus-{sample.Status}");
@@ -2613,14 +2808,14 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"从拧盖2搬运{ sample.Id}萃取管到振荡");
 
@@ -2652,7 +2847,7 @@ namespace Q_Platform.BLL
                     //萃取管在振荡
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInVibration))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从拧盖2搬运{ sample.Id}萃取管到振荡失败,SampleStatus-{sample.Status}");
@@ -2697,14 +2892,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}萃取管到离心移栽");
 
@@ -2738,7 +2933,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
@@ -2774,14 +2969,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"搬运{sampleId}萃取管到离心移栽");
 
@@ -2814,7 +3009,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInTransfer))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心移栽失败,SampleStatus-{sample.Status}");
@@ -2853,14 +3048,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger?.Info($"从离心移栽搬运{sampleId}萃取管到试管架");   //试管在试管架 //试管在拧盖1 //试管在加固 //试管在涡旋 //试管在拧盖2   //试管在振荡 //试管在冰浴 
                     //试管在移栽
@@ -2889,7 +3084,7 @@ namespace Q_Platform.BLL
                     }
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"从离心移栽搬运{sampleId}样品到试管架失败,SampleStatus-{sample.Status}");
@@ -2926,11 +3121,14 @@ namespace Q_Platform.BLL
         {
             double volume = sample.TechParams.ExtractVolume;
             int tipId = 2 * sample.Id - 1;
-            double deep = 10; //取液10ml
+            double deep = 5 ; //取液10ml  大管1ml/2mm进给   净化管 1ml/6.5mm 进给
+            double liquidHigh = sample.TechParams.ExtractDeepOffset[0];
             if (!bigToSmall)
             {
-                deep = 40;  //取液10ml
-                tipId += 48;
+                volume = sample.TechParams.Extract;
+                tipId += 48; 
+                deep = 40;
+                liquidHigh = sample.TechParams.ExtractDeepOffset[1];
             }
             //需要修改  小管到大管  取放枪头位置
             Thread.Sleep(300);
@@ -2938,14 +3136,14 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    if (!string.IsNullOrEmpty(_currentMethodName))
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (_currentMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    _currentMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
 
                     _logger.Info($"样品{ sample.Id}移液-{volume}ml");
                     if (sample.PipettorStep1 == 1 && !_globalStatus.IsStopped)
@@ -2962,7 +3160,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, deep,0.1, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall,liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, deep,0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -2995,7 +3193,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, deep, 0.1, cts).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall, liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, deep, 0.1, cts).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -3012,7 +3210,7 @@ namespace Q_Platform.BLL
                             throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep1}");
                         }
                         sample.PipettorStep1 = 1;
-                        _currentMethodName = string.Empty;
+                        GlobalCache.Instance.CarrierOneMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"样品{ sample.Id}移液-{volume}ml失败,pipettingStep-{sample.PipettorStep1}");
@@ -4418,17 +4616,20 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 获取移液取液位坐标
         /// </summary>
+        /// <param name="tubeId">位置编号</param>
+        /// <param name="bigToSmall">从大管到小管</param>
+        /// <param name="offset">移液偏移（液面到试管口高度）</param>
         /// <returns></returns>
-        private double[] GetPipettorSourceCoordinate(int tubeId,bool bigToSmall)
+        private double[] GetPipettorSourceCoordinate(int tubeId,bool bigToSmall,double offset)
         {
             bool b = tubeId % 2 == 0;
             if (!b) //第一个
             {
                 if (bigToSmall)
                 {
-                    return _posData.PipettingSourcePos;
+                    return new double[] { _posData.PipettingSourcePos[0], _posData.PipettingSourcePos[1], _posData.PipettingSourcePos[2] + offset };
                 }
-                return _posData.PipettingSourcePos2;
+                return new double[] { _posData.PipettingSourcePos2[0], _posData.PipettingSourcePos2[1], _posData.PipettingSourcePos2[2] + offset } ;
             }
             else
             {
@@ -4438,14 +4639,14 @@ namespace Q_Platform.BLL
                     {
                         _posData.PipettingSourcePos[0] +60,
                         _posData.PipettingSourcePos[1],
-                        _posData.PipettingSourcePos[2]
+                        _posData.PipettingSourcePos[2]+ offset
                     };
                 }
                 return new double[]
                    {
                         _posData.PipettingSourcePos2[0] + 44,
                         _posData.PipettingSourcePos2[1],
-                        _posData.PipettingSourcePos2[2]
+                        _posData.PipettingSourcePos2[2]+ offset
                    };
             }
           
@@ -4468,7 +4669,7 @@ namespace Q_Platform.BLL
                     {   //大管取液位置 小管到大管
                         _posData.PipettingSourcePos[0],
                         _posData.PipettingSourcePos[1],
-                        _posData.PipettingSourcePos[2] -30,
+                        _posData.PipettingSourcePos[2] +30,
                     };
 
             }
@@ -4487,7 +4688,7 @@ namespace Q_Platform.BLL
                 {   //大管取液位置 小管到大管
                     _posData.PipettingSourcePos[0] + 60,
                     _posData.PipettingSourcePos[1],
-                    _posData.PipettingSourcePos[2] -30,
+                    _posData.PipettingSourcePos[2] +30,
                 };
             }
           
@@ -4501,90 +4702,6 @@ namespace Q_Platform.BLL
         {
             return GetSampleTubeCoordinate(73);
         }
-
-
-
-
-        public bool Test(Sample sample, CancellationTokenSource cts)
-        {
-            ushort sampleId = sample.Id;
-            bool result;
-            ushort posNum = 0;
-
-            //试管在冰浴
-            if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
-            {
-                return true;
-            }
-
-            DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-        attemp: for (int i = 1; i < 9; i++)
-            {
-               
-                if (GlobalCache.Instance.ColdDic.Exists(s => s.ColdId == (ushort)i))
-                {
-                    continue;
-                }
-                else
-                {
-                    posNum = (ushort)i;
-                    break;
-                }
-            }
-            if (posNum == 0)
-            {
-                if (DateTime.Now > end)
-                {
-                    throw new Exception("冰浴试管已满！ 等待超时");
-                }
-                Thread.Sleep(10000);
-                goto attemp;
-            }
-
-            try
-            {
-                lock (_lockObj)
-                {
-                    //试管在振荡
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
-                    {
-                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                          
-                            sample.SampleTubeStatus = 1;
-                        }
-                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                          
-                            sample.SampleTubeStatus = 0;
-                        }
-                        sample.ColdId = posNum;
-                        GlobalCache.Instance.ColdDic.Add(sample);
-
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInCold);
-                    }
-
-
-                    //试管在冰浴
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold))
-                    {
-                        return true;
-                    }
-                    throw new Exception($"搬运{ sample.Id}样品到冰浴失败,SampleStatus-{sample.Status}");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (_globalStatus.IsStopped)
-                {
-                    return false;
-                }
-                _logger?.Error(ex.Message);
-                throw ex;
-            }
-        }
-
 
 
     }

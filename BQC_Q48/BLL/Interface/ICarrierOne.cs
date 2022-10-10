@@ -88,6 +88,14 @@ namespace Q_Platform.BLL
         bool GetSampleFromVortexToMaterial(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
+        /// 从涡旋搬运试管到冰浴
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetSampleFromVortexToCold(Sample sample, CancellationTokenSource cts);
+
+        /// <summary>
         /// 从振荡1取样品管到冰浴
         /// </summary>
         /// <param name="sample"></param>
@@ -212,7 +220,7 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromVibrationToCold(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
+        bool GetPolishFromVibrationToCold(Sample sample, CancellationTokenSource cts);
 
         /// <summary>
         /// 从涡旋取萃取管到冰浴
@@ -233,6 +241,8 @@ namespace Q_Platform.BLL
         bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
         bool GetPolishFromVibrationToMaterial(Sample sample, CancellationTokenSource cts);
+
+        bool GetPolishFromMaterialToVortex(Sample sample, CancellationTokenSource cts);
 
         bool GetPolishFromVortexToMaterial(Sample sample, CancellationTokenSource cts);
         /// <summary>

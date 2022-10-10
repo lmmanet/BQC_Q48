@@ -171,7 +171,7 @@ namespace Q_Platform.BLL
         //================================================================离心机搬运部分=====================================================================//
 
         /// <summary>
-        /// 弄残一次离心从冰浴取料   或兽药一次离心从试管架取料
+        /// 农残一次离心从冰浴取料   或兽药一次离心从试管架取料
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="GoStation"></param>
@@ -190,7 +190,7 @@ namespace Q_Platform.BLL
                         //大管农残一次离心  
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold) && !TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractSupernate2))
                         {
-                            result = GetSampleFromColdToTransfer(sample, cts);
+                            result = GetSampleToTransfer(sample, cts);
                             if (!result)
                             {
                                 return false;
@@ -200,7 +200,7 @@ namespace Q_Platform.BLL
                         //大管兽药一次离心
                         else if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
                         {
-                            result = GetSampleFromMaterialToTransfer(sample, cts);
+                            result = GetSampleToTransfer(sample, cts);
                             if (!result)
                             {
                                 return false;
@@ -506,7 +506,7 @@ namespace Q_Platform.BLL
                         sample2.SubStep++;
                     }
 
-                    //搬运大管到移栽
+                    //搬运样品大管到移栽
                     if (var == 1 && !_globalStatus.IsStopped)
                     {
                         //移栽上料
@@ -514,7 +514,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsInCold))
                             {
-                                result = GetSampleFromColdToTransfer(sample1, cts);
+                                result = GetSampleToTransfer(sample1, cts);
                                 if (!result)
                                 {
                                     return false;
@@ -562,6 +562,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsInTransfer))
                             {
+                                //样品管
                                 result = GetTubeInCentrifugal(sample1, GoStation, 1, cts);
                                 if (!result)
                                 {
@@ -575,6 +576,7 @@ namespace Q_Platform.BLL
                     {
                         if ( !_globalStatus.IsStopped && sample1.SubStep == 1)
                         {
+                            //萃取管
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsPolishInTransfer))
                             {
                                 result = GetTubeInCentrifugal(sample1, GoStation, 3, cts);
@@ -636,6 +638,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsInCentrifugal))
                             {
+                                //样品管
                                 result = GetTubeOutCentrifugal(sample1, GoStation, 1, cts);
                                 if (!result)
                                 {
@@ -651,6 +654,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsPolishInCentrifugal))
                             {
+                                //萃取管
                                 result = GetTubeOutCentrifugal(sample1, GoStation, 3, cts);
                                 if (!result)
                                 {
@@ -682,6 +686,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsInTransfer))
                             {
+                                //样品管
                                 result = GetSampleFromTransferToMarterial(sample1, cts);
                                 if (!result)
                                 {
@@ -697,6 +702,7 @@ namespace Q_Platform.BLL
                         {
                             if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsPolishInTransfer))
                             {
+                                //萃取管
                                 result = GetPolishFromTransferToMarterial(sample1, cts);
                                 if (!result)
                                 {
@@ -734,7 +740,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="isBig"></param>
+        /// <param name="varTube">1:样品管 2:净化小管 3:萃取管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
         public bool GetTubeInCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, CancellationTokenSource cts)
@@ -1131,26 +1137,36 @@ namespace Q_Platform.BLL
         //================================================================搬运1 离心机调用部分=====================================================================//
        
         /// <summary>
-        /// 从冰浴搬运试管到移栽
+        /// 搬运样品试管到移栽  从冰浴或者试管架1
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        private bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts)
+        private bool GetSampleToTransfer(Sample sample, CancellationTokenSource cts)
         {
             try
             {
                 _logger?.Info($"取{sample.Id}样品到移栽");
 
+                //在冰浴情况
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCold) && !_globalStatus.IsStopped)
                 {
                     var result = _carrierOne.GetSampleFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
-                        throw new Exception($"取{ sample.Id }样品到移栽 失败");
+                        throw new Exception($"从冰浴取{ sample.Id }样品到移栽 失败");
                     }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCold);
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                    //SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCold);
+                    //SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
+                }
+                //在试管架情况
+                else if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && !_globalStatus.IsStopped)
+                {
+                    var result = _carrierOne.GetSampleFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"从试管架取{ sample.Id }样品到移栽 失败");
+                    }
                 }
 
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
@@ -1171,47 +1187,6 @@ namespace Q_Platform.BLL
             }
 
             
-        }
-
-        /// <summary>
-        /// 从试管架取样品管到移栽离心
-        /// </summary>
-        /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        private bool GetSampleFromMaterialToTransfer(Sample sample,CancellationTokenSource cts)
-        {
-            try
-            {
-                _logger?.Info($"取{sample.Id}样品到移栽");
-
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf) && !_globalStatus.IsStopped)
-                {
-                    var result = _carrierOne.GetSampleFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
-                    if (!result)
-                    {
-                        throw new Exception($"取{ sample.Id }样品到移栽 失败");
-                    }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsInShelf);
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInTransfer);
-                }
-
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInTransfer))
-                {
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                if (cts?.IsCancellationRequested != false)
-                {
-                    _logger?.Info($"取{sample.Id}样品到移栽 停止");
-                    return false;
-                }
-                _logger?.Warn(ex.Message);
-                return false;
-            }
         }
 
         /// <summary>

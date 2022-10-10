@@ -583,7 +583,7 @@ namespace Q_Platform.BLL
                     }
                 }
               
-                ///离心
+                //离心
                 if (sample1.SubStep == 2 && sample2.SubStep == 2 && !_globalStatus.IsStopped)
                 {
                     int time = sample2.TechParams.CentrifugalOneTime[1];

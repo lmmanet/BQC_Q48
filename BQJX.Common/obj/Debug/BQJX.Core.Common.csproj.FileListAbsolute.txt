@@ -71,4 +71,3 @@ D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.dll
 D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.pdb
 D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.AssemblyReference.cache
 D:\AppV12\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.AssemblyReference.cache
-D:\项目\Q平台\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csprojAssemblyReference.cache
