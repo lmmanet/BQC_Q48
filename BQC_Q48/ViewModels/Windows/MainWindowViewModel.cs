@@ -98,8 +98,7 @@ namespace Q_Platform.ViewModels.Windows
                 }
 
                 (o as MainWindow).Close();
-                var p = System.Diagnostics.Process.GetCurrentProcess();
-                p.Kill();
+
             }
         }
 

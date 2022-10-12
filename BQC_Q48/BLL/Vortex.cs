@@ -293,21 +293,26 @@ namespace Q_Platform.BLL
         {
             try
             {
+                PressUp();
+
                 //Y轴移动到涡旋位置
+                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
+                if (!result)
+                {
+                    return false;
+                }
+                //下压气缸动作
+                PressDown();
+
+                //备用
                 if (GlobalCache.Instance.VortexStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
-                    if (!result)
-                    {
-                        return false;
-                    }
                     GlobalCache.Instance.VortexStep++;
                 }
 
-                //下压气缸动作
+                //备用
                 if (GlobalCache.Instance.VortexStep == 1 && !_globalStatus.IsStopped)
                 {
-                    PressDown();
                     GlobalCache.Instance.VortexStep++;
                 }
 
@@ -319,12 +324,7 @@ namespace Q_Platform.BLL
 
                     _io.WriteBit_DO(_vortexMotion1, true);
                     _io.WriteBit_DO(_vortexMotion2, true);
-                    GlobalCache.Instance.VortexStep++;
-                }
 
-                //开始定时
-                if (GlobalCache.Instance.VortexStep == 3 && !_globalStatus.IsStopped)
-                {
                     DateTime end = DateTime.Now + TimeSpan.FromSeconds(time);
                     do
                     {
@@ -333,7 +333,7 @@ namespace Q_Platform.BLL
                         {
                             break;
                         }
-                        if (cts?.IsCancellationRequested == true)
+                        if (_globalStatus.IsStopped)
                         {
                             _io.WriteBit_DO(_vortexMotion1, false);
                             _io.WriteBit_DO(_vortexMotion2, false);
@@ -344,6 +344,13 @@ namespace Q_Platform.BLL
                         }
                     } while (true);
 
+                    GlobalCache.Instance.VortexStep++;
+
+                 
+                }
+
+                if (GlobalCache.Instance.VortexStep == 3 && !_globalStatus.IsStopped)
+                {
                     GlobalCache.Instance.VortexStep++;
                 }
                
@@ -360,7 +367,7 @@ namespace Q_Platform.BLL
                 //Y轴移动到上下料位置
                 if (GlobalCache.Instance.VortexStep == 5 && !_globalStatus.IsStopped)
                 {
-                    var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(cts).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;

@@ -117,6 +117,7 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IMainPro,MainPro>();
         }
 
+      
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -129,10 +130,11 @@ namespace BQC_Q48
             new MainWindow().ShowDialog();
             // }
 
-            //保存状态数据
+            //保存数据
             GlobalCache.Save();
 
-
+            //var p = System.Diagnostics.Process.GetCurrentProcess();
+            //p.Kill();
             Application.Current.Shutdown(0);
 
         }
@@ -260,6 +262,7 @@ namespace BQC_Q48
 
 
         #endregion
+
 
     }
 

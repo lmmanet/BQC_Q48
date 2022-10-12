@@ -171,7 +171,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample ,Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             try
@@ -304,25 +304,11 @@ namespace Q_Platform.BLL
                         }
                         sample.SubStep++;
                     }
-
-                    //搬运到移栽
+                    
+                    //判断完成
                     if (sample.SubStep == 10 && !_globalStatus.IsStopped)
                     {
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
-                        {
-                            result = _carrier.GetSampleFromCapperThreeToTransfer(sample, func, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ PurifyStatus-{sample.PurifyStatus}");
-                            }
-                            sample.SubStep++;
-                        }
-                    }
-
-                    //判断完成
-                    if (sample.SubStep == 11 && !_globalStatus.IsStopped)
-                    {
-                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInTransfer))
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                         {
                             return true;
                         }

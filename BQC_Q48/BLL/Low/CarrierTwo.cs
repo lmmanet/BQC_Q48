@@ -1004,7 +1004,7 @@ namespace Q_Platform.BLL
             if (var == 2)
             {
                 tech_i = 2;
-                liquidHigh = sample.TechParams.ExtractDeepOffset[4];  //农残西林到小  兽药西林到小瓶
+                liquidHigh = sample.TechParams.ExtractDeepOffset[3];  //农残西林到小  兽药西林到小瓶
             }
             Thread.Sleep(300);
             try

@@ -209,112 +209,37 @@ namespace Q_Platform.BLL
                     Sample sample = new Sample() { Id = (ushort)i, Status = 1172527124481
                         //,MainStep =3,
                         , MainStep = 1,//兽药
-                                       //    TechParams = new TechParams()  //113-2018 果蔬
-                                       //{
-                                       //    //AddWater = 0,
-                                       //    AddWater = 5,   //兽药
-                                       //    //Solvent_A = 10,    //ACE
-                                       //    //Solvent_B = 0,
-                                       //    //Solvent_C = 0,
-                                       //    Solvent_C = 6,  //兽药
-                                       //    WetTime = 0,
-                                       //    //AddHomo = new double[3] { 0, 0, 1 },    //均质子
-                                       //    AddHomo = new double[3] { 1, 0, 0 },      //兽药均质子
-                                       //    //Solid_B = new double[3] { 0, 0, 4 },    //硫酸镁
-                                       //    //Solid_C = new double[3] { 0, 0, 1 },    //氯化钠
-                                       //    //Solid_D = new double[3] { 0, 0, 1 },    //柠檬酸钠
-                                       //    //Solid_E = new double[3] { 0, 0, 0.5 },  //氢二钠
-                                       //    //Solid_F = new double[3] { 0, 0, 0 },    //
-                                       //    VibrationOneTime = new int[] { 0, 0, 60, 0 },
-                                       //    VibrationOneVel = new int[] { 0, 0, 400, 0 },
-                                       //    VibrationTwoTime = new int[] { 60, 0 },
-                                       //    VibrationTwoVel = new int[] { 400, 0 },
-                                       //    VortexTime = new int[] { 0, 0, 0 },
-                                       //    VortexVel = new int[] { 0, 0, 0 },
-                                       //    CentrifugalOneTime = new int[] { 5, 5, 0 },
-                                       //    CentrifugalOneVelocity = new int[] { 4200, 4200, 0 },
-                                       //    ExtractVolume = 6,
-                                       //    ConcentrationVolume = 2,
-                                       //    ConcentrationTime = 5,
-                                       //    ConcentrationVel = 10000,
-                                       //    Redissolve = 1,                             //乙酸乙酯
-                                       //    Add_Mark_B = 20,                            //加标20uL
-                                       //    ExtractSampleVolume = 1,                     //最终样品1ml
-
-                        //    Tech = 0x3EFDE1AB,                         //工艺农残带浓缩     //兽药 0x3EFDE1AB
-
-                        //}
-
                         TechParams = new TechParams()  //兽药
                         {
                             AddWater = 1,
-                            //Solvent_A = 0,    //ACE
-                            //Solvent_B = 0,    //乙腈醋酸
                             Solvent_C = 10,    //甲酸乙腈溶液
                             WetTime = 0,
-                            AddHomo = new double[3] { 2, 0, 0 },    //均质子
-                                                                    //Solid_B = new double[3] { 0, 0, 0 },    //硫酸镁
-                                                                    //Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
-                                                                    //Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
-                                                                    //Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
-                                                                    //Solid_F = new double[3] { 0, 0, 0 },    //
+                            AddHomo = new double[3] { 0, 0, 0 },    //均质子   new double[3] { 2, 0, 0 }           
                             VibrationOneTime = new int[] { 0, 100, 0, 100 },
-                            VibrationOneVel = new int[] { 0, 500, 0, 500 },
+                            VibrationOneVel = new int[] { 0, 300, 0, 300 },
                             VortexTime = new int[] { 200, 200, 200, 200 },
-                            VortexVel = new int[] { 2000, 2000, 2000, 2000 },
+                            VortexVel = new int[] { 1000, 1000, 1000, 1000 },
                             VibrationTwoTime = new int[] { 300, 300 },
-                            VibrationTwoVel = new int[] { 500, 500 },
+                            VibrationTwoVel = new int[] { 300, 300 },
                             CentrifugalOneTime = new int[] { 5, 5, 5 },
                             CentrifugalOneVelocity = new int[] { 4020, 4020, 4020 },
-                            ExtractVolume = 5,
-                            cusuanan = 5,                           //醋酸铵
-                            Extract = 10,   //完全倾倒
-                            ConcentrationVolume = 2,
-                            ConcentrationTime = 5,
-                            ConcentrationVel = 10000,
-                            Redissolve = 0.95,                             //乙腈水溶液
-                            Add_Mark_A = 50,                            //加标50uL                           
-                            ExtractSampleVolume = 1,                     //最终样品1ml
-                            ExtractDeepOffset = new double[] {82,55,90,44 },    //兽药
-                             Tech = 0x3DFDE1AB,                         //工艺  3DFDE1AB
+                            ExtractVolume = 5,                                  //提取上清液量 一次离心
+                            cusuanan = 5,                                       //醋酸铵
+                            Extract = 10,                                       //完全倾倒   二次离心提取量
+                            ConcentrationVolume = 2,                            //浓缩提取量
+                            ConcentrationTime = 5,                              //浓缩时间
+                            ConcentrationVel = 10000,                           //浓缩速度
+                            Redissolve = 0.95,                                  //乙腈水溶液
+                            Add_Mark_A = 50,                                    //加标50uL                           
+                            ExtractSampleVolume = 1,                            //最终样品1ml
+                            ExtractDeepOffset = new double[] {82,55,90,44 },    //兽药移液高度
+                            Tech = 0x3DFDE1AB,                                  //工艺  3DFDE1AB
                          }
 
                     };
                     _workList.Add(sample);
                     i++;
-
-                    //Sample sample1 = new Sample()
-                    //{
-                    //    Id = (ushort)i,
-                    //    Status = 1172527124481, MainStep =1
-                    //    TechParams = new TechParams()
-                    //    {
-                    //        AddWater = 8,
-                    //        Solvent_A = 3,
-                    //        Solvent_B = 7,
-                    //        Solvent_C = 6,
-                    //        ExtractVolume = 8,
-                    //        AddHomo = new double[3] { 0, 1, 0 },
-                    //        Solid_B = new double[3] { 1, 0, 0 },
-                    //        Solid_C = new double[3] { 0, 1, 0 },
-                    //        Solid_D = new double[3] { 0, 0, 1 },
-                    //        Solid_E = new double[3] { 1, 0, 0 },
-                    //        Solid_F = new double[3] { 0, 1, 0 },
-                    //        VibrationOneTime = new int[] { 30, 30, 30 },
-                    //        VibrationOneVel = new int[] { 400, 400, 400 },
-                    //        VortexTime = new int[] { 40, 40, 40 },
-                    //        VortexVel = new int[] { 1000, 1000, 1000 },
-                    //        Tech = 0x1F43EE19,
-                    //       
-                    //    }
-                    //};
-                    //_workList.Add(sample1);
-                    //i++;
                 }
-
-                //调试
-                //_workList[0].Status = 1172527144961;
-                //_workList[0].TechParams.Tech = 0xD03EEF9;//D03EEF9
 
             }
 
@@ -356,7 +281,7 @@ namespace Q_Platform.BLL
             _centrifugal.StartCentrifugal(cts);
             _vibrationOne.StartVibrationAndVortex(cts);
 
-           // StartTask();//启动提取
+            StartTask();//启动提取
 
             foreach (var item in GlobalCache.Instance.WorkList)
             {
@@ -367,7 +292,7 @@ namespace Q_Platform.BLL
 
         public void SwitchLight()
         {
-            //GlobalCache.Load();
+            GlobalCache.Load();
             if (!_io.ReadBit_DO(3))
             {
                 _io.WriteBit_DO(3, true);
@@ -403,104 +328,29 @@ namespace Q_Platform.BLL
             _main = Task.Run(() =>
             {
                 var _workList = GlobalCache.Instance.ExtractList;
-            //离心
-            //var sample = _workList[0];
-            //sample.Status = 0x11100101080;
-            //sample.TechParams.Tech = 0x3EFDE1AB;   //兽药
-            //sample.TechParams.cusuanan = 5;
-            //sample.TechParams.CentrifugalOneVelocity = new int[] { 1000, 1000, 1000 };
-            //sample.TechParams.CentrifugalOneTime = new int[] { 1, 1, 1 };
-            //GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i + 1));
-            //sample.MainStep = 10;
-
-            //Centrifugal(sample, cts);
-
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    var sample = _workList[i];
-
-            //    sample.MainStep = 8;
-
-            //    _centrifugalCarrier.AddSampleToPipettingList(sample, "Q_Platform.BLL.IMainPro@PipettingCallBack");
-            //    _centrifugalCarrier.StartPipetting(cts);
-            //}
-
-
-
-            //浓缩测试  及  浓缩移液
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    var sample = _workList[i];
-            //    sample.Status = 0x11100101080;
-            //    sample.TechParams.Tech = 0xF43EE00;   //E03EE00:农残取液   F03EE00：农残浓缩
-            //    sample.TechParams.ConcentrationTime = 1;
-            //    GlobalCache.Instance.ConcentrationList.Add(sample);
-            //    //sample.MainStep = 8;  浓缩/提取样品
-            //    sample.MainStep = 11;  //兽药浓缩
-            //    _centrifugalCarrier.StartConcentration(sample, cts);
-            //}
-
-
-            //左侧移液
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    var sample = _workList[i];
-            //    sample.Status = 0x11100101001;
-            //    sample.TechParams.Tech = 0x3EFDE1AB;   //  //0x3EFDE1AB:兽药移液1   0xF45EE00:兽药移液2
-            //    sample.TechParams.cusuanan = 5;
-            //    sample.TechParams.ConcentrationTime = 1;
-            //    sample.TechParams.VibrationTwoTime = new int[] {30,30 };
-            //    sample.TechParams.VibrationTwoVel = new int[] { 300,300};
-
-
-            //    //GlobalCache.Instance.ConcentrationList.Add(sample);
-            //    //sample.MainStep = 8;  浓缩/提取样品
-            //    sample.MainStep = 8;  //兽药浓缩
-            //    //sample.MainStep = 5;  //兽药移液1
-            //    _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@test", cts);
-            //}
-
-            //
-
-            if (_workList != null && _workList.Count > 0)
-            {
-                var samplevar = _workList[0];
-                samplevar.MainStep = 11; ///调试
-                if (samplevar != null)
+                //正式程序
+                while (!_globalStatus.IsStopped)
                 {
-                        _centrifugalCarrier.AddSampleToConcentrationList(samplevar);
-                        _centrifugalCarrier.StartConcentration(cts);
-
-                    //    _centrifugalCarrier.AddSampleToPipettingList(samplevar, "Q_Platform.BLL.IMainPro@PipettingCallBack");
-                    //_centrifugalCarrier.StartPipetting(cts);
+                    if (_workList != null && _workList.Count > 0)
+                    {
+                        var samplevar = _workList[0];
+                        if (samplevar != null)
+                        {
+                            var result = Ext(samplevar);
+                            if (!result)
+                            {
+                                while (_globalStatus.IsPause)
+                                {
+                                    Thread.Sleep(2000);
+                                    if (!_globalStatus.IsPause)
+                                        continue;
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    Thread.Sleep(1000);
                 }
-            }
-
-
-
-                // 正式程序
-                //while (!_globalStatus.IsStopped)
-                //{
-                //    if (_workList != null && _workList.Count > 0)
-                //    {
-                //        var samplevar = _workList[0];
-                //        if (samplevar != null)
-                //        {
-                //            var result = Ext(samplevar);
-                //            if (!result)
-                //            {
-                //                while (_globalStatus.IsPause)
-                //                {
-                //                    Thread.Sleep(2000);
-                //                    if (!_globalStatus.IsPause)
-                //                        continue;
-                //                }
-                //                return;
-                //            }
-                //        }
-                //    }
-                //    Thread.Sleep(1000);
-                //}
             });
             return _main;
         }
@@ -906,7 +756,79 @@ namespace Q_Platform.BLL
         }
 
 
-   
+
+        //离心
+        //var sample = _workList[0];
+        //sample.Status = 0x11100101080;
+        //sample.TechParams.Tech = 0x3EFDE1AB;   //兽药
+        //sample.TechParams.cusuanan = 5;
+        //sample.TechParams.CentrifugalOneVelocity = new int[] { 1000, 1000, 1000 };
+        //sample.TechParams.CentrifugalOneTime = new int[] { 1, 1, 1 };
+        //GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i + 1));
+        //sample.MainStep = 10;
+
+        //Centrifugal(sample, cts);
+
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    var sample = _workList[i];
+
+        //    sample.MainStep = 8;
+
+        //    _centrifugalCarrier.AddSampleToPipettingList(sample, "Q_Platform.BLL.IMainPro@PipettingCallBack");
+        //    _centrifugalCarrier.StartPipetting(cts);
+        //}
+
+
+
+        //浓缩测试  及  浓缩移液
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    var sample = _workList[i];
+        //    sample.Status = 0x11100101080;
+        //    sample.TechParams.Tech = 0xF43EE00;   //E03EE00:农残取液   F03EE00：农残浓缩
+        //    sample.TechParams.ConcentrationTime = 1;
+        //    GlobalCache.Instance.ConcentrationList.Add(sample);
+        //    //sample.MainStep = 8;  浓缩/提取样品
+        //    sample.MainStep = 11;  //兽药浓缩
+        //    _centrifugalCarrier.StartConcentration(sample, cts);
+        //}
+
+
+        //左侧移液
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    var sample = _workList[i];
+        //    sample.Status = 0x11100101001;
+        //    sample.TechParams.Tech = 0x3EFDE1AB;   //  //0x3EFDE1AB:兽药移液1   0xF45EE00:兽药移液2
+        //    sample.TechParams.cusuanan = 5;
+        //    sample.TechParams.ConcentrationTime = 1;
+        //    sample.TechParams.VibrationTwoTime = new int[] {30,30 };
+        //    sample.TechParams.VibrationTwoVel = new int[] { 300,300};
+
+
+        //    //GlobalCache.Instance.ConcentrationList.Add(sample);
+        //    //sample.MainStep = 8;  浓缩/提取样品
+        //    sample.MainStep = 8;  //兽药浓缩
+        //    //sample.MainStep = 5;  //兽药移液1
+        //    _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@test", cts);
+        //}
+
+        //
+
+        //if (_workList != null && _workList.Count > 0)
+        //{
+        //    var samplevar = _workList[0];
+        //    samplevar.MainStep = 11; ///调试
+        //    if (samplevar != null)
+        //    {
+        //            _centrifugalCarrier.AddSampleToConcentrationList(samplevar);
+        //            _centrifugalCarrier.StartConcentration(cts);
+
+        //        //    _centrifugalCarrier.AddSampleToPipettingList(samplevar, "Q_Platform.BLL.IMainPro@PipettingCallBack");
+        //        //_centrifugalCarrier.StartPipetting(cts);
+        //    }
+        //}
 
 
     }

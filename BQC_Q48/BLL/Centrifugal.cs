@@ -372,11 +372,11 @@ namespace Q_Platform.BLL
                         }
                     }
                    
-                    sample.SubStep++;
+                    sample.SubStep = 2;
                 }
              
-                ///离心
-                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
+                //离心
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                     {
@@ -392,7 +392,7 @@ namespace Q_Platform.BLL
                 }
 
                 //从离心机搬运离心完后的样品到试管架
-                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
@@ -402,12 +402,12 @@ namespace Q_Platform.BLL
                             return false;
                         }
                     }
-                    sample.SubStep++;
+                    sample.SubStep = 5;
 
                 }
                
 
-                if (sample.SubStep == 3)
+                if (sample.SubStep == 5)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
@@ -443,11 +443,11 @@ namespace Q_Platform.BLL
                             return false;
                         }
                     }
-                    sample.SubStep++;
+                    sample.SubStep = 2;
                 }
            
                 //离心
-                if (sample.SubStep == 1 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
                     {
@@ -463,7 +463,7 @@ namespace Q_Platform.BLL
                 }
 
                 //取出试管
-                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
@@ -473,10 +473,10 @@ namespace Q_Platform.BLL
                             return false;
                         }
                     }
-                    sample.SubStep++;
+                    sample.SubStep = 5;
                 }
               
-                if (sample.SubStep == 3)
+                if (sample.SubStep == 5)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
@@ -511,11 +511,11 @@ namespace Q_Platform.BLL
                             return false;
                         }
                     }
-                    sample.SubStep++;
+                    sample.SubStep = 2;
                 }
                    
                 //离心
-                if (sample.SubStep==1 && !_globalStatus.IsStopped)
+                if (sample.SubStep==2 && !_globalStatus.IsStopped)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
                     {
@@ -530,7 +530,7 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
 
-                if (sample.SubStep == 2 && !_globalStatus.IsStopped)
+                if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
@@ -540,11 +540,11 @@ namespace Q_Platform.BLL
                             return false;
                         }
                     }
-                    sample.SubStep++;
+                    sample.SubStep = 5;
                 }
                     
 
-                if (sample.SubStep == 3)
+                if (sample.SubStep == 5)
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {

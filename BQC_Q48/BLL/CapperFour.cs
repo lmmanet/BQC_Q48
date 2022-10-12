@@ -313,7 +313,7 @@ namespace Q_Platform.BLL
                     //内部子步骤已经完成
                     if (sample.MainStep == 9 && !_globalStatus.IsStopped)
                     {
-                        result = _capperThree.DoPipetting(sample, dosffa, cts);
+                        result = _capperThree.DoPipetting(sample, DoPipettingOneSub, cts);
                         if (!result)
                         {
                             throw new Exception("从净化管移液到西林瓶失败!");
@@ -385,7 +385,7 @@ namespace Q_Platform.BLL
             return false;
 
         }
-        private bool dosffa(Sample sample,CancellationTokenSource  cts)
+        private bool DoPipettingOneSub(Sample sample,CancellationTokenSource  cts)
         {
             //净化管到西林瓶
             return _carrier.DoPipettingTwo(sample, 1, cts);
@@ -452,7 +452,7 @@ namespace Q_Platform.BLL
                         if ((sample.SeilingWeight1 == 0 || sample.SeilingWeight2 == 0) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper))
                         {
                             //搬运到称重称重  内部已经把步骤置零
-                            result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2, sample.TechParams.Add_Mark_B, cts);
+                            result = _carrier.GetSelingFromCapperFourToWeightAndBack(sample, 2, sample.TechParams.Add_Mark_A, cts);
                             if (!result)
                             {
                                 throw new Exception($"西林瓶{sample.Id}称重失败!");

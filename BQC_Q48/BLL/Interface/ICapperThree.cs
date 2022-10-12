@@ -29,7 +29,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToTransfer(Sample sample,Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
 
         /// <summary>
         /// 从拧盖3取净化管到移栽 无振荡加液  

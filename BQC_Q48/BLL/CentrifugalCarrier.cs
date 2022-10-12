@@ -509,16 +509,13 @@ namespace Q_Platform.BLL
                     //搬运样品大管到移栽
                     if (var == 1 && !_globalStatus.IsStopped)
                     {
-                        //移栽上料
+                        //移栽上料  两种情况
                         if (sample1.SubStep == 0 && !_globalStatus.IsStopped)
                         {
-                            if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsInCold))
+                            result = GetSampleToTransfer(sample1, cts);
+                            if (!result)
                             {
-                                result = GetSampleToTransfer(sample1, cts);
-                                if (!result)
-                                {
-                                    return false;
-                                }
+                                return false;
                             }
                             sample1.SubStep++;
                         }
@@ -526,16 +523,13 @@ namespace Q_Platform.BLL
                     }
                     else if (var == 2 && !_globalStatus.IsStopped)
                     {
-                        //移栽上料
+                        //移栽上料  两种情况
                         if (sample1.SubStep == 0 && !_globalStatus.IsStopped)
                         {
-                            if (SampleStatusHelper.BitIsOn(sample1, SampleStatus.IsPolishInCold))
+                            result = GetPolishFromMaterialToTransfer(sample1, cts);
+                            if (!result)
                             {
-                                result = GetPolishFromMaterialToTransfer(sample1, cts);
-                                if (!result)
-                                {
-                                    return false;
-                                }
+                                return false;
                             }
                             sample1.SubStep++;
                         }
@@ -1137,7 +1131,7 @@ namespace Q_Platform.BLL
         //================================================================搬运1 离心机调用部分=====================================================================//
        
         /// <summary>
-        /// 搬运样品试管到移栽  从冰浴或者试管架1
+        /// 搬运样品试管到移栽  两种情况从冰浴或者试管架1
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
@@ -1190,7 +1184,7 @@ namespace Q_Platform.BLL
         }
 
         /// <summary>
-        /// 从试管架搬运萃取管到移栽
+        /// 从试管架搬运萃取管到移栽 两种情况 在试管架 在冰浴
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
@@ -1201,7 +1195,7 @@ namespace Q_Platform.BLL
             {
                 _logger?.Info($"取{sample.Id}样品到移栽");
 
-
+                //在试管架情况
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf) && !_globalStatus.IsStopped)
                 {
                     var result = _carrierOne.GetPolishFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
@@ -1210,6 +1204,17 @@ namespace Q_Platform.BLL
                         throw new Exception($"取{ sample.Id }样品到移栽 失败");
                     }
                     SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
+                }
+                //在冰浴情况
+                else if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold) && !_globalStatus.IsStopped)
+                {
+                    var result = _carrierOne.GetPolishFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"取{ sample.Id }样品到移栽 失败");
+                    }
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCold);
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
                 }
 
@@ -1407,8 +1412,6 @@ namespace Q_Platform.BLL
 
         //================================================================拧盖3 移栽配合部分=====================================================================//
 
-
-
         public bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts)
         {
             try
@@ -1441,7 +1444,6 @@ namespace Q_Platform.BLL
                 return false;
             }
         }
-
 
 
         //================================================================移液部分=====================================================================//
@@ -1758,19 +1760,33 @@ namespace Q_Platform.BLL
         {
             try
             {
+                _logger?.Info($"{sample.Id}样品开始移上清液-Volume-{sample.TechParams.ExtractVolume}ml");
+                bool result;
+                //搬运净化管到拧盖3 ==> 拆盖 ==>搬运无盖试管到移栽
+                if (sample.SubStep <= 10 && !_globalStatus.IsStopped)
+                {
+                    result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                    if (!result)
+                    {
+                        throw new Exception($"{sample.Id}样品取净化管移液 失败");
+                    }
+                    sample.SubStep++;
+                }
+
                 lock (_lockObj)   //锁定移栽占用部分
                 {
-                    _logger?.Info($"{sample.Id}样品开始移上清液-Volume-{sample.TechParams.ExtractVolume}ml");
-                    bool result;
-                    //搬运净化管到拧盖3 ==> 拆盖 ==>搬运无盖试管到移栽
-                    if (sample.SubStep <= 11 && !_globalStatus.IsStopped)
+                    //搬运到移栽
+                    if (sample.SubStep == 11 && !_globalStatus.IsStopped)
                     {
-                        result = _capperThree.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
-                        if (!result)
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                         {
-                            throw new Exception($"{sample.Id}样品取净化管移液 失败");
+                            result = _carrierTwo.GetSampleFromCapperThreeToTransfer(sample, TransferMoveRightPutGetPos, cts);
+                            if (!result)
+                            {
+                                throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ PurifyStatus-{sample.PurifyStatus}");
+                            }
+                            sample.SubStep++;
                         }
-                        sample.SubStep++;
                     }
 
                     //移栽移动到移液位
