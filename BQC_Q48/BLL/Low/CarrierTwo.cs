@@ -3686,7 +3686,7 @@ namespace Q_Platform.BLL
             //获取参考点坐标
             double[] xyz = _posData.NeedlePos1;
          
-            return base.GetCoordinate(tubeId , 8, 12, -10, 20, xyz);
+            return base.GetCoordinate(tubeId , 8, 12, -20, 20, xyz);
         }
 
         /// <summary>
@@ -3698,7 +3698,7 @@ namespace Q_Platform.BLL
         {
             //获取参考点坐标
             double[] xyz = _posData.NeedlePos2;
-            return base.GetCoordinate(tubeId, 8, 12, -10, 20, xyz);
+            return base.GetCoordinate(tubeId, 8, 12, -20, 20, xyz);
         }
 
         /// <summary>

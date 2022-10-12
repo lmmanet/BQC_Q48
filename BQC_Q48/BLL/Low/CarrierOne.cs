@@ -2166,8 +2166,9 @@ namespace Q_Platform.BLL
                 throw ex;
             }
 
-        }
-
+        } 
+        
+   
         /// <summary>
         /// 从拧盖2搬运试管到移栽  兽药移液
         /// </summary>

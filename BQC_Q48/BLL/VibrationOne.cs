@@ -305,12 +305,52 @@ namespace Q_Platform.BLL
                                         itemSample.SubStep++;
                                     }
                                 }
+                            }
+
+                            //萃取振荡 涡旋
+                            if (itemSample.MainStep == 9 && !_globalStatus.IsStopped)
+                            {
+                                if (itemSample.SubStep == 0 && !_globalStatus.IsStopped)
+                                {
+                                    //从拧盖2搬运萃取管到振荡
+                                    if (!TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration3))
+                                    {
+                                        itemSample.SubStep++;
+                                    }
+
+                                    if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample.TechParams, TechStatus.ExtractVibration3))
+                                    {
+                                        var result = StartVibration(itemSample, 3, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVibration err");
+                                        }
+
+                                        itemSample.SubStep++;
+                                    }
+
+                                }
+
+                                //判断是否涡旋  在涡旋内部判断
+                                if (itemSample.SubStep == 1 && !_globalStatus.IsStopped)
+                                {
+                                    if (!_globalStatus.IsStopped)
+                                    {
+                                        var result = _vortex.StartVortex(itemSample, 3, cts);
+                                        if (!result)
+                                        {
+                                            throw new Exception("StartVortex err");
+                                        }
+                                        itemSample.SubStep++;
+                                    }
+                                }
 
                                 if (itemSample.SubStep == 2)
                                 {
                                     itemSample.SubStep = 6;
                                 }
                             }
+
 
                             //程序完成 
                             if (itemSample.SubStep == 6)

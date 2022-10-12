@@ -1209,12 +1209,12 @@ namespace Q_Platform.BLL
                 //在冰浴情况
                 else if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCold) && !_globalStatus.IsStopped)
                 {
-                    var result = _carrierOne.GetPolishFromColdToTransfer(sample, TransferMoveLeftPutGetPos, cts);
+                    var result = _carrierOne.GetPolishFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, cts);
                     if (!result)
                     {
                         throw new Exception($"取{ sample.Id }样品到移栽 失败");
                     }
-                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInCold);
+                    SampleStatusHelper.ResetBit(sample, SampleStatus.IsPolishInShelf);
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishInTransfer);
                 }
 
