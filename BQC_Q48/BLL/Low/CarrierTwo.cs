@@ -3835,7 +3835,7 @@ namespace Q_Platform.BLL
         {
             //等待称台稳定
             bool isStatic = false;
-            DateTime end = DateTime.Now + TimeSpan.FromSeconds(10);
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(3);
             while (!isStatic)
             {
                 isStatic = _weight.ReadIsStatic(_weithtId).GetAwaiter().GetResult();
@@ -3843,6 +3843,7 @@ namespace Q_Platform.BLL
                 if (DateTime.Now > end)
                 {
                     //throw new Exception("等待称台稳定超时 10S");
+                    break;
                 }
             }
             //读取称台值
