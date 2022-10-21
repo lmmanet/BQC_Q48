@@ -57,6 +57,26 @@ namespace Q_Platform.BLL
 
         #endregion
 
+        #region Properties
+
+        public bool IsVortexTaskDone 
+        {
+            get
+            {
+                if (_vortexTask!= null)
+                {
+                    return _vortexTask.IsCompleted;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+
+        #endregion
+
         #region Constructors
 
         public Vortex(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, IVortexPosDataAccess dataAccess,ICarrierOne carrier)

@@ -14,6 +14,14 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        /// <summary>
+        /// 判断涡旋任务是否结束
+        /// </summary>
+        bool IsVortexTaskDone { get; }
+
+        /// <summary>
+        /// 更新涡旋位置数据
+        /// </summary>
         void UpdatePosData();
 
         /// <summary>
@@ -24,10 +32,6 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         bool StartVortex(Sample sample, int step, CancellationTokenSource cts);
-
-
-
-
 
         //==============================================涡旋单独用===================================================//
         void AddSampleToVortexList(Sample sample, CancellationTokenSource cts);

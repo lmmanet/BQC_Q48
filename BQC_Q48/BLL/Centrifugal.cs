@@ -41,6 +41,25 @@ namespace Q_Platform.BLL
 
         #endregion
 
+        #region Properties
+
+        public bool IsCentrifugalTaskDone
+        {
+            get
+            {
+                if (_centrifugalTask != null)
+                {
+                    return _centrifugalTask.IsCompleted;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        #endregion
+
         #region Construtors
 
         public Centrifugal(IEtherCATMotion motion, IIoDevice io, ICentrifugalCarrier carrier,IGlobalStatus globalStatus)

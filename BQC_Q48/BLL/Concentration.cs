@@ -536,6 +536,9 @@ namespace Q_Platform.BLL
 
         private void StopRotate()
         {
+            _io.WriteByte_DA(4, 0.0);
+            _io.WriteByte_DA(5, 0.0);
+            Thread.Sleep(1000);
             var result1 = _io.WriteBit_DO(_rotateMotion1, false); 
             var result2 = _io.WriteBit_DO(_rotateMotion2, false);
             if (!result1)

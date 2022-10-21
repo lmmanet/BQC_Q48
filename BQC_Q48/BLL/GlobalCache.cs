@@ -82,6 +82,9 @@ namespace Q_Platform.BLL
         //任务列表
         public List<Sample> WorkList = new List<Sample>();
 
+        //离心机中存在试管
+        public List<ushort> TubeInCentrifugal = new List<ushort>();   
+
         /// <summary>
         /// 拧盖3占用中 （移液）
         /// </summary>
@@ -110,6 +113,11 @@ namespace Q_Platform.BLL
         /// 搬运2方法名称
         /// </summary>
         public string CarrierTwoMethodName { get; set; }
+
+        /// <summary>
+        /// 离心机搬运当执行方法名称
+        /// </summary>
+        public string CentrifugalCarrierMethodName { get; set; }
 
 
 

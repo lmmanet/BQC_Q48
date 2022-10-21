@@ -21,7 +21,7 @@ namespace Q_Platform.BLL
 
         private int _pipStep;    //移液步骤
 
-   
+        private readonly ISyringTwo _syring;
 
         #region Private Members
 
@@ -43,11 +43,12 @@ namespace Q_Platform.BLL
 
         private readonly ushort _zCylinderUpSensor = 51;//I1.3
 
+        private readonly ushort _drainPump = 57;    //排液泵 Q2.1
 
         #endregion
 
         #region Construtors
-        public CarrierTwo(IEtherCATMotion motion, IIoDevice io, IEPG26 claw, IGlobalStatus globalStatus, ICarrierTwoDataAccess dataAccess, IWeight weight) : base(motion, claw, globalStatus, logger)
+        public CarrierTwo(IEtherCATMotion motion, IIoDevice io, IEPG26 claw, IGlobalStatus globalStatus, ICarrierTwoDataAccess dataAccess, IWeight weight,ISyringTwo syring) : base(motion, claw, globalStatus, logger)
         {
             _axisX = 9;
             _axisY = 10;
@@ -59,7 +60,7 @@ namespace Q_Platform.BLL
             this._dataAccess = dataAccess;
             this._weight = weight;
             this._io = io;
-
+            this._syring = syring;
             _posData = _dataAccess.GetPosData();
         }
 
@@ -93,6 +94,9 @@ namespace Q_Platform.BLL
             {
                 return false;
             }
+
+            //排空残留
+            _io.WriteBit_DO_Delay_Reverse(_drainPump, 20);
 
             return await base.GoHome(cts);
         }
@@ -2099,8 +2103,6 @@ namespace Q_Platform.BLL
             }
         }
 
-
-
         /// <summary>
         /// 搬运试管到移栽
         /// </summary>
@@ -2227,6 +2229,81 @@ namespace Q_Platform.BLL
                 return false;
             }
         }
+
+        /// <summary>
+        /// 清洗加标注射器
+        /// </summary>
+        /// <returns></returns>
+        public bool WashSyring(CancellationTokenSource cts)
+        {
+           s0: try
+            {
+                lock (_lockObj)
+                {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierTwoMethodName))
+                    {
+                        if (GlobalCache.Instance.CarrierTwoMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CarrierTwoMethodName = MethodBase.GetCurrentMethod().Name;
+
+                    _logger?.Info($"清洗加标注射器");
+
+                    //加入清水
+                    var result2 = _syring.AddSolve(1, 2, cts);
+                    //气缸上升
+                    Z_Cylinder_Up();
+                    //移动到清洗位
+                    var result = CarrierMoveToSafePos(GetSyringWashCoordinate(),cts);
+
+                    if (!result.GetAwaiter().GetResult())
+                    {
+                        _io.WriteBit_DO_Delay_Reverse(_drainPump, 20);
+                        throw new Exception("移动到清洗位失败!");
+                    }  
+                    
+                    //气缸下降
+                    Z_Cylinder_Down();
+
+                    //判断注射器加液完成
+                    if (!result2.GetAwaiter().GetResult())
+                    {
+                        Z_Cylinder_Up();
+                        throw new Exception("注射器加水失败!");
+                    }
+                    //注射器抽打
+                    _motion.P2pMoveWithCheckDone(_axisSyring, 50, _syringVel, _globalStatus).GetAwaiter().GetResult();
+                    _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, _globalStatus).GetAwaiter().GetResult();
+                    _motion.P2pMoveWithCheckDone(_axisSyring, 50, _syringVel, _globalStatus).GetAwaiter().GetResult();
+                    _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, _globalStatus).GetAwaiter().GetResult();
+
+                    //气缸上升抬起
+                    Z_Cylinder_Up();
+                    //排空
+                    _io.WriteBit_DO_Delay_Reverse(_drainPump, 20);
+
+                    //完成清洗
+                    GlobalCache.Instance.CarrierTwoMethodName = string.Empty;
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (cts?.IsCancellationRequested != false)
+                {
+                    _logger?.Info($"清洗加标注射器 停止");
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+         
+
+
+        }
+
 
         #endregion
 
@@ -3148,59 +3225,6 @@ namespace Q_Platform.BLL
                 throw ex;
             }
         } 
-
-        /// <summary>
-        /// 注射器清洗
-        /// </summary>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        protected bool WashSyring(CancellationTokenSource cts)
-        {
-            try
-            {
-                Z_Cylinder_Up();
-                //Xy移动到取液位
-                var result = CarrierMoveToSafePos(GetSyringWashCoordinate(), cts).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception("XY轴移动到加标取液位 失败!");
-                }
-                Z_Cylinder_Down();
-                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-                {
-                    Thread.Sleep(2000);
-                }
-                //吸液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, 50, _syringVel, _globalStatus).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception($"注射器清洗吸液失败-{50}ul");
-                }
-                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-                {
-                    Thread.Sleep(2000);
-                }
-                //吐液
-                result = _motion.P2pMoveWithCheckDone(_axisSyring, 0, _syringVel, _globalStatus).GetAwaiter().GetResult();
-                if (!result)
-                {
-                    throw new Exception($"注射器吐液失败");
-                }
-                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-                {
-                    Thread.Sleep(2000);
-                }
-                //上升
-                Z_Cylinder_Up();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger?.Error(ex.Message);
-                throw ex;
-            }
-        }
 
         #endregion
 

@@ -17,6 +17,6 @@ namespace BQJX.Common.Interface
 
         void ContinueProgram();
         void PauseProgram();
-        void StopProgram();
+        void StopProgram(Func<bool> stopDoneFunc);
     }
 }

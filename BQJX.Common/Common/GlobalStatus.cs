@@ -19,13 +19,26 @@ namespace BQJX.Common.Common
 
         public event Func<bool> ContinueProgramEventArgs;
 
+
+
         public bool IsStopped { get { return _stop; } }
         public bool IsPause { get { return _pause; } }
-        public void StopProgram()
+        public void StopProgram(Func<bool> stopDoneFunc)
         {
             _stop = true;
             _pause = true;
             StopProgramEventArgs?.Invoke();
+
+            Task.Run(() =>
+            {
+                var result = stopDoneFunc?.Invoke() == true;
+                if (result)
+                {
+                    _stop = false;
+                    _pause = false;
+                }
+            });
+          
         }
         public void PauseProgram()
         {

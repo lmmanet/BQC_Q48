@@ -377,6 +377,9 @@ namespace Q_Platform.BLL
                     throw new Exception("Z轴运动出错！");
                 }
 
+                //检测有盖
+
+
                 //Y轴移动到上下料位
                s5: result = await MovePutGetPos(cts).ConfigureAwait(false);
                 if (!result)
@@ -503,6 +506,8 @@ namespace Q_Platform.BLL
                     throw new Exception("Z轴运动出错！");
                 }
 
+                //检测无盖
+
                 //Y轴移动到上下料位
                 s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
                 if (!result)
@@ -628,8 +633,57 @@ namespace Q_Platform.BLL
             }
         }
 
+        /// <summary>
+        /// 检查有盖
+        /// </summary>
+        /// <returns></returns>
+        protected bool CheckHaveCapper(CancellationTokenSource cts)
+        {
+            var result = _motion.P2pMoveWithCheckDone(_axisY, GetCapperSensorCoordinate(), _yMoveVel, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                throw new Exception("Y轴运动出错！");
+            }
+            if (_io.ReadBit_DI(_capperSensor))
+            {
+                return true;
+            }
+            throw new Exception("检测无盖！");
+        }
+
+        /// <summary>
+        /// 检查无盖
+        /// </summary>
+        /// <returns></returns>
+        protected bool CheckUnCapper(CancellationTokenSource cts)
+        {
+            var result = _motion.P2pMoveWithCheckDone(_axisY, GetCapperSensorCoordinate(), _yMoveVel, cts).GetAwaiter().GetResult();
+            if (!result)
+            {
+                throw new Exception("Y轴运动出错！");
+            }
+            if (!_io.ReadBit_DI(_capperSensor))
+            {
+                return true;
+            }
+            throw new Exception("检测有盖！");
+        }
+
+        /// <summary>
+        /// 获取检测盖子传感器坐标
+        /// </summary>
+        /// <returns></returns>
+        protected double GetCapperSensorCoordinate()
+        {
+            return _posData.CapperPos + 80;
+        }
+
+
         #endregion
 
         
+
+
+
     }
 }

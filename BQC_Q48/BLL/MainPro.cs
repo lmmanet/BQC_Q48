@@ -261,7 +261,7 @@ namespace Q_Platform.BLL
 
         public void StopPro()
         {
-            _globalStatus.StopProgram();
+            _globalStatus.StopProgram(StopDone);
 
         }
 
@@ -595,7 +595,25 @@ namespace Q_Platform.BLL
         #endregion
 
 
-
+        private bool StopDone()
+        {
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(5);
+            while (DateTime.Now < end)
+            {
+                if (_vortex.IsVortexTaskDone                          // 涡旋任务结束
+                    && _centrifugalCarrier.IsConcentrationTaskDone    // 浓缩任务结束
+                    && _centrifugalCarrier.IsPipttorTaskDone          // 移液任务结束
+                    && _centrifugal.IsCentrifugalTaskDone             // 离心任务结束
+                    && _vibrationOne.IsVibrationTaskDone              // 振荡任务结束
+                    && _main?.IsCompleted == true                     // 提取任务结束
+                    && _wetBackTask?.IsCompleted == true)             // 回湿任务结束
+                {
+                    return true;
+                }
+                
+            }
+            return false;
+        }
 
 
 

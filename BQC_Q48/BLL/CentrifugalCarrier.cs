@@ -8,6 +8,7 @@ using Q_Platform.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +19,8 @@ namespace Q_Platform.BLL
     {
         //运行参数
         private Task _pipttorTask;            //移液提取 （包括离心搬运 拧盖2 拧盖3）
-        private Task ConcentrationTask;
+        private Task _concentrationTask;
+        
 
         #region Private Members
         private readonly static object _lockObj = new object();
@@ -57,6 +59,41 @@ namespace Q_Platform.BLL
         private ushort _clawId = 2;              //电爪485地址
         private double _stepMoveVel = 80;        //步进电机移动速度
         private double _sevorMoveVel = 80;       //伺服电机移动速度
+        #endregion
+
+        #region Properties
+
+        public bool IsPipttorTaskDone
+        {
+            get
+            {
+                if (_pipttorTask != null)
+                {
+                    return _pipttorTask.IsCompleted;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        public bool IsConcentrationTaskDone
+        {
+            get
+            {
+                if (_concentrationTask != null)
+                {
+                    return _concentrationTask.IsCompleted;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+
         #endregion
 
         #region Construtors
@@ -138,6 +175,12 @@ namespace Q_Platform.BLL
                 //气缸回零
                 Y_Cylinder_Put();
 
+                if (GlobalCache.Instance.TubeInCentrifugal.Count >0)
+                {
+                    GlobalCache.Instance.TubeInCentrifugal.ForEach(t => _logger?.Warn($"离心机工位-{t}-存在试管"));
+                    return false;
+                }
+
                 return true;
             }
             //catch (CommunicationException cmex)
@@ -168,6 +211,22 @@ namespace Q_Platform.BLL
             return true;
         }
 
+        /// <summary>
+        /// 从离心机中清出试管
+        /// </summary>
+        public void ClearTubeOut()
+        {
+            var list = new List<ushort>();
+            foreach (var item in GlobalCache.Instance.TubeInCentrifugal)
+            {
+                list.Add(item);
+            }
+            foreach (var item in list)
+            {
+                GlobalCache.Instance.TubeInCentrifugal.Remove(item);
+            }
+        }
+
         //================================================================离心机搬运部分=====================================================================//
 
         /// <summary>
@@ -179,10 +238,19 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+          s0:  try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
                     //移栽上料
                     if (sample.CenCarrierStep == 0 && !_globalStatus.IsStopped)
@@ -225,6 +293,7 @@ namespace Q_Platform.BLL
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                         {
                             sample.CenCarrierStep++;
+                            GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                             return true;
                         }
                         
@@ -242,10 +311,19 @@ namespace Q_Platform.BLL
 
         public bool GetSampleFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+          s0:  try
             {
                 lock(_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
 
                     //取出试管
@@ -274,6 +352,7 @@ namespace Q_Platform.BLL
                             }
                         }
                         sample.CenCarrierStep = 0;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -290,10 +369,18 @@ namespace Q_Platform.BLL
 
         public bool GetPolishFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+           s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
 
                     bool result;
                     //移栽上料
@@ -322,6 +409,7 @@ namespace Q_Platform.BLL
                             }
                         }
                         sample.CenCarrierStep++;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
                     return false;
@@ -337,10 +425,19 @@ namespace Q_Platform.BLL
         
         public bool GetPolishFroCentrifugaToShelf(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+            s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
                     //取出试管
                     if (sample.CenCarrierStep == 2 && !_globalStatus.IsStopped)     //&& !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Centrifugal3)
@@ -368,6 +465,7 @@ namespace Q_Platform.BLL
                             }
                         }
                         sample.CenCarrierStep = 0;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
                     return false;
@@ -386,10 +484,19 @@ namespace Q_Platform.BLL
 
         public bool GetPurifyFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+            s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
                     //搬运2从净化管架上料
                     if (sample.CenCarrierStep == 0 && !_globalStatus.IsStopped)
@@ -417,6 +524,7 @@ namespace Q_Platform.BLL
                             }
                         }
                         sample.CenCarrierStep++;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -436,10 +544,19 @@ namespace Q_Platform.BLL
         
         public bool GetPurifyFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+            s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
                     //取出试管
                     if (sample.CenCarrierStep == 2 && !_globalStatus.IsStopped ) 
@@ -467,6 +584,7 @@ namespace Q_Platform.BLL
                             }
                         }
                         sample.CenCarrierStep = 0;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -486,10 +604,19 @@ namespace Q_Platform.BLL
 
         public bool GetBigAndSmallToCentrifugal(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+            s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
 
                     //搬运净化管到移栽
@@ -586,6 +713,7 @@ namespace Q_Platform.BLL
                     //判断大小管放进了离心机
                     if (sample1.SubStep == 2 && sample2.SubStep == 2)
                     {
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -605,10 +733,19 @@ namespace Q_Platform.BLL
 
         public bool GetBigAndSmallToToMarterial(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts)
         {
-            try
+           s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     bool result;
 
                     //从离心机取出净化管
@@ -711,6 +848,7 @@ namespace Q_Platform.BLL
                     //判断大小管放到了试管架
                     if (sample1.SubStep == 5 && sample2.SubStep == 5)
                     {
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -775,10 +913,19 @@ namespace Q_Platform.BLL
                 isInCentrigugal = 47;
             }
 
-            try
+          s0:  try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"搬运{sampleId}样品到离心机");
                     if (SampleStatusHelper.BitIsOn(sample, isInTransfer))
                     {
@@ -912,6 +1059,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, isInCentrigugal))
                     {
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
                     throw new Exception($"搬运{sampleId}样品到离心机失败,SampleStatus-{sample.Status}");
@@ -973,10 +1121,19 @@ namespace Q_Platform.BLL
                 isInCentrigugal = 47;
             }
 
-            try
+           s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
                     _logger?.Info($"从离心机搬运{sampleId}样品到移栽");
                     if (SampleStatusHelper.BitIsOn(sample, isInCentrigugal))
                     {
@@ -1107,6 +1264,7 @@ namespace Q_Platform.BLL
 
                     if (SampleStatusHelper.BitIsOn(sample, isInTransfer))
                     {
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -1580,15 +1738,15 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public Task StartConcentration(CancellationTokenSource cts)
         {
-            if (ConcentrationTask != null)
+            if (_concentrationTask != null)
             {
-                if (!ConcentrationTask.IsCompleted)
+                if (!_concentrationTask.IsCompleted)
                 {
-                    return ConcentrationTask;
+                    return _concentrationTask;
                 }
             }
 
-            ConcentrationTask = Task.Run(() =>
+            _concentrationTask = Task.Run(() =>
             {
                 try
                 {
@@ -1603,8 +1761,18 @@ namespace Q_Platform.BLL
                             var result1 = _capperFour.GetSeilingAndWeight(itemSample, cts);
                            
                             //加入锁 移液过程
-                            lock (_lockObj) 
+                          s0:  lock (_lockObj) 
                             {
+                                if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                                {
+                                    if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                                    {
+                                        goto s0;
+                                    }
+                                }
+                                GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                                 //占用拧盖2
                                 lock (_lockCapperTwo)
                                 {
@@ -1667,6 +1835,7 @@ namespace Q_Platform.BLL
                                             throw new Exception("从拧盖2搬运萃取管到试管架失败!");
                                         }
                                         itemSample.MainStep++;
+                                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                                     }
                                   
                                 }
@@ -1754,7 +1923,7 @@ namespace Q_Platform.BLL
                 }
         
             });
-            return ConcentrationTask;   
+            return _concentrationTask;   
         }
 
         /// <summary>
@@ -1780,8 +1949,18 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
 
-                lock (_lockObj)   //锁定移栽占用部分
+               s0: lock (_lockObj)   //锁定移栽占用部分
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     //搬运到移栽
                     if (sample.SubStep == 11 && !_globalStatus.IsStopped)
                     {
@@ -1839,6 +2018,7 @@ namespace Q_Platform.BLL
                             throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
                         }
                         sample.SubStep++;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                     }
                 }
 
@@ -1902,10 +2082,20 @@ namespace Q_Platform.BLL
         private bool DoPipettingTwo(Sample sample,CancellationTokenSource cts)
         {
             //净化管到大管
-            try
+            s0: try
             {
                 lock (_lockObj)
                 {
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+
+
                     _logger?.Info($"{sample.Id}净化管开始移液-Volume-{sample.TechParams.ExtractVolume}ml");
                     bool result;
 
@@ -1990,6 +2180,7 @@ namespace Q_Platform.BLL
                             throw new Exception($"搬运{sample.Id}净化管到试管架 失败");
                         }
                         sample.SubStep = 0;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                         return true;
                     }
 
@@ -2315,6 +2506,15 @@ namespace Q_Platform.BLL
                     throw new Exception("手爪夹紧出错");
                 }
 
+                _motion.P2pMoveWithCheckDone(_axisZ,0, _sevorMoveVel, _globalStatus).ConfigureAwait(false);
+
+                //存在试管移除列表
+                if (GlobalCache.Instance.TubeInCentrifugal.Contains(pos))
+                {
+                    GlobalCache.Instance.TubeInCentrifugal.Remove(pos);
+                }
+               
+
                 return true;
             }
             catch (Exception ex)
@@ -2392,6 +2592,8 @@ namespace Q_Platform.BLL
                     }
                     throw new Exception("Z轴到放料位出错！");
                 }
+
+                GlobalCache.Instance.TubeInCentrifugal.Add(pos);
 
                 //手爪打开
                 result = await OpenClaw(clawOpenByte).ConfigureAwait(false);
@@ -2823,7 +3025,6 @@ namespace Q_Platform.BLL
         } 
 
         #endregion
-
 
         #region Private Methods
 

@@ -9,6 +9,8 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        bool IsCentrifugalTaskDone { get; }
+
         void AddSampleToCentrifugalList(Sample sample, string actionCallBack, int var = 0);
 
         /// <summary>

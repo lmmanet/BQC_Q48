@@ -9,11 +9,15 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        bool IsPipttorTaskDone { get; }
+
+        bool IsConcentrationTaskDone { get; }
+
         void UpdatePosData();
         void AddSampleToPipettingList(Sample sample, string actionCallBack);
         void AddSampleToConcentrationList(Sample sample);
 
-
+        void ClearTubeOut();
 
         Task StartPipetting(CancellationTokenSource cts);
 
@@ -140,7 +144,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts);
+        //bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts);
 
         //==================================================================移液部分（兽药氮吹移液）大管到西林瓶  兽药======================================================================================//
 
