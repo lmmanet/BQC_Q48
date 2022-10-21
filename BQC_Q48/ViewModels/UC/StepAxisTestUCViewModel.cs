@@ -25,11 +25,8 @@ namespace Q_Platform.ViewModels.UC
     {
         #region Private Members
 
-        private readonly ILS_Motion iLS_Motion;
+        private readonly ILS_Motion _iLS_Motion;
         private readonly ILogger _logger;
-        private Task _refreshTask;
-        private bool _stopRefresh;
-        private bool _refresh;
 
 
         #endregion
@@ -172,11 +169,12 @@ namespace Q_Platform.ViewModels.UC
 
         #region Constructors
 
-        public StepAxisTestUCViewModel()
+        public StepAxisTestUCViewModel(ILS_Motion iLS_Motion, ILogger logger)
         {
-            iLS_Motion = SimpleIoc.Default.GetInstance<ILS_Motion>();
+            this._iLS_Motion = iLS_Motion;
+            this._logger = logger;
             AxisNo = 1;
-            ListAxisInfo = iLS_Motion?.GetAxisInfos();
+            ListAxisInfo = _iLS_Motion?.GetAxisInfos();
             GetAxisPosInfo(ListAxisInfo[0]);
             _refreshTask = Task.Run(() =>
             {
@@ -184,15 +182,11 @@ namespace Q_Platform.ViewModels.UC
                 {
                     try
                     {
-                        MotionStatus = iLS_Motion.GetMotionIoStatus(AxisNo).GetAwaiter().GetResult();
-                        CurrentPos = iLS_Motion.GetCurrentPos(AxisNo).GetAwaiter().GetResult();
+                        MotionStatus = _iLS_Motion.GetMotionIoStatus(AxisNo).GetAwaiter().GetResult();
+                        CurrentPos = _iLS_Motion.GetCurrentPos(AxisNo).GetAwaiter().GetResult();
                         if (_stopRefresh)
                         {
                             break;
-                        }
-                        while (_refresh)
-                        {
-                            Thread.Sleep(1000);
                         }
                         Thread.Sleep(1000);
                     }
@@ -338,7 +332,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-            iLS_Motion.RelativeMoveWithCheckDone(AxisNo, -2, 50, null);
+            _iLS_Motion.RelativeMoveWithCheckDone(AxisNo, -2, 50, null);
 
             }
             catch (Exception ex)
@@ -353,19 +347,19 @@ namespace Q_Platform.ViewModels.UC
             {
                 if (AxisNo == 17 || AxisNo == 18)  //拧盖3
                 {
-                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                    _iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
                 }
                 else if (AxisNo == 20 || AxisNo == 21) //拧盖4
                 {
-                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                    _iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
                 }
                 else if (AxisNo == 23 || AxisNo == 24) //拧盖5
                 {
-                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
+                    _iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 30, 30, 0, null);
                 }
                 else
                 {
-                    iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50, 0, null);
+                    _iLS_Motion.TorqueMoveWithCheckDone(AxisNo, 50, 50, 0, null);
                 }
             }
             catch (Exception ex)
@@ -568,7 +562,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.StopMove(AxisNo);
+                _iLS_Motion.StopMove(AxisNo);
 
             }
             catch (Exception ex)
@@ -581,7 +575,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.Emg_stop(AxisNo);
+                _iLS_Motion.Emg_stop(AxisNo);
 
             }
             catch (Exception ex)
@@ -594,7 +588,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.ResetAxisAlm(AxisNo);
+                _iLS_Motion.ResetAxisAlm(AxisNo);
 
             }
             catch (Exception ex)
@@ -609,7 +603,7 @@ namespace Q_Platform.ViewModels.UC
             {
                 await RunCommandAsync(() => AbsMoveBusy, async () =>
                 {
-                    AbsMoveDone = await iLS_Motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                    AbsMoveDone = await _iLS_Motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
                 });
 
             }
@@ -629,7 +623,7 @@ namespace Q_Platform.ViewModels.UC
             {
                 await RunCommandAsync(() => RelativeMoveBusy, async () =>
                 {
-                    RelativeMoveDone = await iLS_Motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                    RelativeMoveDone = await _iLS_Motion.RelativeMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
                 });
 
             }
@@ -648,7 +642,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.VelocityMove(AxisNo, TargetVel);
+                _iLS_Motion.VelocityMove(AxisNo, TargetVel);
 
             }
             catch (Exception ex)
@@ -667,12 +661,12 @@ namespace Q_Platform.ViewModels.UC
             {
                 if (AxisNo == 12 || AxisNo == 13 || AxisNo == 27 || AxisNo == 28 || AxisNo == 29)
                 {//12 13 27 28 29
-                    iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null);
+                    _iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null);
                 }
                 else
                 {
 
-                    iLS_Motion.GoHomeWithCheckDone(AxisNo, null);
+                    _iLS_Motion.GoHomeWithCheckDone(AxisNo, null);
                 }
 
 
@@ -691,7 +685,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.ServoOn(AxisNo);
+                _iLS_Motion.ServoOn(AxisNo);
 
             }
             catch (Exception ex)
@@ -708,7 +702,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.ServeOff(AxisNo);
+                _iLS_Motion.ServeOff(AxisNo);
 
             }
             catch (Exception ex)
@@ -727,7 +721,7 @@ namespace Q_Platform.ViewModels.UC
             try
             {
                 double jogVel = TargetVel > 100 ? 100 : TargetVel;
-                iLS_Motion.JogF(AxisNo);
+                _iLS_Motion.JogF(AxisNo);
 
             }
             catch (Exception ex)
@@ -746,7 +740,7 @@ namespace Q_Platform.ViewModels.UC
             try
             {
                 double jogVel = TargetVel > 100 ? 100 : TargetVel;
-                iLS_Motion.JogR(AxisNo);
+                _iLS_Motion.JogR(AxisNo);
             }
             catch (Exception ex)
             {
@@ -763,7 +757,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.StopMove(AxisNo);
+                _iLS_Motion.StopMove(AxisNo);
             }
             catch (Exception ex)
             {
@@ -782,7 +776,7 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                iLS_Motion.GoHomeWithCheckDone(AxisNo, 32, null);
+                _iLS_Motion.GoHomeWithCheckDone(AxisNo, 32, null);
             }
             catch (Exception ex)
             {
@@ -798,8 +792,8 @@ namespace Q_Platform.ViewModels.UC
 
         public override void Cleanup()
         {
-            base.Cleanup();
             _stopRefresh = true;
+            base.Cleanup();
 
         }
 

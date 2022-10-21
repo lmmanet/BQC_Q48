@@ -62,6 +62,14 @@ namespace Q_Platform.Logger
             };
 
             Messenger.Default.Send<WorkLog>(log, "logWorkLog");
+
+            AlarmMessage alarm = new AlarmMessage()
+            {
+                Message = msg.ToString(),
+                DateTime = DateTime.Now,
+                State = 0
+            };
+            Messenger.Default.Send<AlarmMessage>(alarm, "AlarmNotification");
         }
 
         public void Trace(object msg)
@@ -72,6 +80,13 @@ namespace Q_Platform.Logger
         public void Error(object msg)
         {
             _logger.Error(msg);
+            AlarmMessage alarm = new AlarmMessage()
+            {
+                Message = msg.ToString(),
+                DateTime = DateTime.Now,
+                State = 0
+            };
+            Messenger.Default.Send<AlarmMessage>(alarm, "AlarmNotification");
         }
 
 

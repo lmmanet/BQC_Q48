@@ -462,7 +462,7 @@ namespace Q_Platform.BLL
             catch (Exception ex)
             {
 
-                throw;
+                throw ex;
             }
         }
 
@@ -478,6 +478,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep++;
                     _vortex.AddSampleToVortexList(sample, cts);
+                    _vortex.StartVortex(cts);
                     return;
                 }
                 //不存在加溶剂振荡工艺 直接跳过  无需进入列表
@@ -485,6 +486,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep++;
                     _vortex.AddSampleToVortexList(sample, cts);
+                    _vortex.StartVortex(cts);
                     return;
                 }
                 //不存在加溶剂振荡工艺 直接跳过  无需进入列表
@@ -492,6 +494,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep++;
                     _vortex.AddSampleToVortexList(sample, cts);
+                    _vortex.StartVortex(cts);
                     return;
                 }
                 //不存在振荡工艺 直接跳过  无需进入列表
@@ -499,6 +502,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep++; 
                     _vortex.AddSampleToVortexList(sample, cts);
+                    _vortex.StartVortex(cts);
                     return;
                 }
 
@@ -540,20 +544,20 @@ namespace Q_Platform.BLL
                         try
                         {
                             //振荡 
-                            if (workSample.MainStep == 1 && !_globalStatus.IsStopped)
+                            if (workSample.SubStep == 4 && !_globalStatus.IsStopped)
                             {
-                                //振荡 
-                                if (workSample.SubStep == 4 && !_globalStatus.IsStopped)
+                                var result = StartVibration(workSample, cts);
+                                if (!result)
                                 {
-                                    var result = StartVibration(workSample, cts);
-                                    if (!result)
-                                    {
-                                        throw new Exception("StartVibration err");
-                                    }
-                                    list.Remove(workSample);
-                                    GlobalCache.Instance.VortexCurrentSample = null;
-                                    workSample.SubStep++;
+                                    throw new Exception("StartVibration err");
                                 }
+                                workSample.SubStep++;
+
+                                _vortex.AddSampleToVortexList(workSample, cts);
+                                _vortex.StartVortex(cts);
+
+                                list.Remove(workSample);
+                                GlobalCache.Instance.VibrationCurrentSample = null;
                             }
                         }
                         catch (Exception ex)
@@ -660,11 +664,28 @@ namespace Q_Platform.BLL
 
         #endregion
 
-        //未完成
+   
         private bool StartVibration(Sample sample,CancellationTokenSource cts)
         {
             ushort sampleId = sample.Id;
             int step = 0;
+            if (sample.MainStep == 1)
+            {
+                step = 0;
+            }
+            else if (sample.MainStep == 2)
+            {
+                step = 1;
+            }
+            else if (sample.MainStep == 3)
+            {
+                step = 2;
+            }
+            else if (sample.MainStep == 9)
+            {
+                step = 3;
+            }
+
             double vel = sample.TechParams.VibrationOneVel[step] / 60;
             int time = sample.TechParams.VibrationOneTime[step];
             try
@@ -698,18 +719,30 @@ namespace Q_Platform.BLL
                     //搬运下料
                     if (sample.MainStep == 9)
                     {
+                        //从振荡搬运萃取管到试管架
+                        result = GetSampleFromVibrationToMaterial(sample, 2, cts);
+                        if (!result)
+                        {
+                            throw new Exception("搬运萃取管到试管架2失败!");
+                        }
+                    }
+                    //农残 第三步到冰浴
+                    else if (sample.MainStep == 3 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex2))//  //ExtractSupernate2
+                    {
+                        //从振荡搬运试管到冰浴
                         result = GetSampleFromVibrationToMaterial(sample, 3, cts);
                         if (!result)
                         {
                             throw new Exception("搬运样品到冰浴失败!");
                         }
                     }
-                    else
-                    {
-                        result = GetSampleFromVibrationToMaterial(sample, 2, cts);
+                    else   //if(sample.MainStep == 1 || sample.MainStep == 2 || sample.MainStep == 3 )
+                    { 
+                        //样品管从振荡到试管架
+                        result = GetSampleFromVibrationToMaterial(sample, 1, cts);
                         if (!result)
                         {
-                            throw new Exception("搬运样品到冰浴失败!");
+                            throw new Exception("搬运样品到试管架1失败!");
                         }
                     }
                    

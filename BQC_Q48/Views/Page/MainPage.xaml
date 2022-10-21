@@ -269,9 +269,9 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="冰浴温度:" />
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="样品小瓶温度:" />
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="标准品温度:" />
-                                <TextBox Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
-                                <TextBox Grid.Row="1" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
-                                <TextBox Grid.Row="2" Grid.Column="1" BorderThickness="0,0,0,1" Text="12.0" />
+                                <TextBox Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue1}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue2}" />
+                                <TextBox Grid.Row="2" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue3}" />
 
                             </Grid>
                         </Border>
@@ -327,6 +327,7 @@
                 <Button Width="140" Command="{Binding StopTaskCommand}" Content="停止序列" IsEnabled="{Binding StopBtnEnable}" />
                 <Button Width="140" Command="{Binding ContinueCommand}" Content="继续序列" IsEnabled="{Binding ContinueBtnEnable}" />
                 <Button Width="140" Command="{Binding InitialSysCommand}" Content="系统初始化" IsEnabled="{Binding InitBtnEnable}" />
+                <Button Width="140" Command="{Binding ResetAlmCommand}" Content="报警复位"  />
             </UniformGrid>
 
         </Border>

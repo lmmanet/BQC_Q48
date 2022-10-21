@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="Q_Platform.Views.UC.Base.SingleClawUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cv="clr-namespace:BQJX.Converts"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Q_Platform.Views.UC.Base"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="550"
+             mc:Ignorable="d">
+
+    <Border Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="手爪状态：" />
+                    <TextBox Width="200" VerticalAlignment="Center" IsEnabled="False" Text="{Binding ClawStatus, Mode=TwoWay, Converter={cv:ClawStatusConverter}}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1" />
+
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="位置：" />
+                    <TextBox x:Name="tbPos" Width="100" Text="{Binding ClawTargetPos}" />
+                    <TextBlock Text="速度：" />
+                    <TextBox Width="100" Text="{Binding ClawTargetVel}" />
+                    <TextBlock Text="夹持力：" />
+                    <TextBox Width="100" Text="{Binding ClawTargetTorque}" />
+                    <Button Width=" 80" Margin="20,0,0,0" Command="{Binding ExcuteUserCommand}" Content="执行" />
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Padding="50"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        BorderThickness="1"
+                        CornerRadius="10">
+
+                    <UniformGrid Width="300"
+                                 Height="150"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top"
+                                 Columns="3" Rows="3">
+                        <Button Height="40" Command="{Binding EnableCommand}" Content="激活" />
+                        <Border />
+                        <Button Height="40" Command="{Binding DisableCommand}" Content="禁用" />
+                        <Border />
+                        <Border />
+                        <Border />
+                        <Button Height="40" Command="{Binding OpenClawCommand}" Content="打开手爪" CommandParameter="{Binding ElementName=tbPos,Path=Text}" />
+                        <Border />
+                        <Button Height="40" Command="{Binding CloseClawCommand}" Content="关闭手爪" />
+                    </UniformGrid>
+                </Border>
+            </Grid>
+
+        </Grid>
+    </Border>
+
+</UserControl>

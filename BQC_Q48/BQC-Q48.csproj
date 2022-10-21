@@ -17,6 +17,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -95,7 +95,9 @@
     <Compile Include="BLL\CapperThree.cs" />
     <Compile Include="BLL\CapperTwo.cs" />
     <Compile Include="BLL\GlobalCache.cs" />
+    <Compile Include="BLL\Interface\ISyringOne.cs" />
     <Compile Include="BLL\Interface\ISyringTwo.cs" />
+    <Compile Include="BLL\Interface\IRunService.cs" />
     <Compile Include="BLL\Low\CarrierOne.cs" />
     <Compile Include="BLL\Low\CarrierTwo.cs" />
     <Compile Include="BLL\Centrifugal.cs" />
@@ -118,12 +120,17 @@
     <Compile Include="BLL\Interface\IVibrationOne.cs" />
     <Compile Include="BLL\Interface\IVibrationTwo.cs" />
     <Compile Include="BLL\MainPro.cs" />
+    <Compile Include="BLL\RunService.cs" />
     <Compile Include="BLL\SyringOne.cs" />
     <Compile Include="BLL\SyringTwo.cs" />
     <Compile Include="BLL\VibrationOne.cs" />
     <Compile Include="BLL\VibrationTwo.cs" />
     <Compile Include="BLL\Vortex.cs" />
+    <Compile Include="Common\CapperInfo.cs" />
+    <Compile Include="Common\CarrierInfo.cs" />
     <Compile Include="Common\MethodHelper.cs" />
+    <Compile Include="Common\SampleInfo.cs" />
+    <Compile Include="Common\TechParamsInfo.cs" />
     <Compile Include="Common\TechStatusHelper.cs" />
     <Compile Include="Common\SampleStatusHelper.cs" />
     <Compile Include="Common\SampleStatus.cs" />
@@ -138,6 +145,7 @@
     <Compile Include="Converts\Base\BaseValueConverter.cs" />
     <Compile Include="Converts\BooleanToVisiblityConverter.cs" />
     <Compile Include="Converts\BoolToVisiblityConvert.cs" />
+    <Compile Include="Converts\ClawStatusConverter.cs" />
     <Compile Include="Converts\IntToVisibilityConverter.cs" />
     <Compile Include="Converts\IoBitConverter.cs" />
     <Compile Include="Converts\MotionConvert.cs" />
@@ -152,6 +160,10 @@
     <Compile Include="DAL\Interface\ICentrifugalCarrierPosDataAccess.cs" />
     <Compile Include="DAL\Interface\IConcentrationPosDataAccess.cs" />
     <Compile Include="DAL\Interface\IVortexPosDataAccess.cs" />
+    <Compile Include="DAL\Interface\ITechParamsDataAccess.cs" />
+    <Compile Include="DAL\Interface\ISampleDataAccess.cs" />
+    <Compile Include="DAL\SampleDataAccess.cs" />
+    <Compile Include="DAL\TechParamsDataAccess.cs" />
     <Compile Include="DAL\VortexPosDataAccess.cs" />
     <Compile Include="DAL\ConcentrationPosDataAccess.cs" />
     <Compile Include="DAL\CentrifugalCarrierPosDataAccess.cs" />
@@ -174,9 +186,45 @@
     <Compile Include="Models\TechPosModel.cs" />
     <Compile Include="Models\Tech\VeterinaryTechParamsModel.cs" />
     <Compile Include="Models\WorkLog.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="ViewModels\Base\CapperViewModelBase.cs" />
+    <Compile Include="ViewModels\Base\CarrierViewModelBase.cs" />
     <Compile Include="ViewModels\Base\MyViewModelBase.cs" />
+    <Compile Include="ViewModels\Base\VibrationViewModelBase.cs" />
     <Compile Include="ViewModels\Base\ViewModelLocator.cs" />
     <Page Include="Resources\Styles\CheckBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\AddSaltUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\CapperUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\CarrierUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\CenCarrierUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\CentrifugalUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\ConcentrationUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\VibrationUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Module\VortexUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -216,7 +264,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UC\Base\ServoStatusUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UC\Base\SingleClawUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UC\Base\StatusUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UC\Base\StepStatusUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -232,7 +292,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UC\ClawTestUC.xaml">
+    <Page Include="Views\UC\Base\ClawUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -264,6 +324,20 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ViewModels\Module\AddSaltUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\Capper\CapperFourUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\Capper\CapperFiveUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\Capper\CapperThreeUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\Capper\CapperTwoUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\Capper\CapperOneUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\CarrierOneUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\CarrierTwoUCViewModel.cs" />
+    <Compile Include="ViewModels\Module\CenCarrierViewModel.cs" />
+    <Compile Include="ViewModels\Module\CentrifugalViewModel.cs" />
+    <Compile Include="ViewModels\Module\ConcentrationViewModel.cs" />
+    <Compile Include="ViewModels\Module\VibrationTwoViewModel.cs" />
+    <Compile Include="ViewModels\Module\VibrationOneViewModel.cs" />
+    <Compile Include="ViewModels\Module\VortexViewModel.cs" />
     <Compile Include="ViewModels\Page\TechManagePageViewModel.cs" />
     <Compile Include="ViewModels\Page\SampleManagePageViewModel.cs" />
     <Compile Include="ViewModels\Page\MainPageViewModel.cs" />
@@ -277,6 +351,30 @@
     <Compile Include="ViewModels\UC\SampleStatusMonitorViewModel.cs" />
     <Compile Include="ViewModels\UC\StepAxisTestUCViewModel.cs" />
     <Compile Include="ViewModels\Windows\MainWindowViewModel.cs" />
+    <Compile Include="Views\Module\AddSaltUC.xaml.cs">
+      <DependentUpon>AddSaltUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\CapperUC.xaml.cs">
+      <DependentUpon>CapperUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\CarrierUC.xaml.cs">
+      <DependentUpon>CarrierUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\CenCarrierUC.xaml.cs">
+      <DependentUpon>CenCarrierUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\CentrifugalUC.xaml.cs">
+      <DependentUpon>CentrifugalUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\ConcentrationUC.xaml.cs">
+      <DependentUpon>ConcentrationUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\VibrationUC.xaml.cs">
+      <DependentUpon>VibrationUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Module\VortexUC.xaml.cs">
+      <DependentUpon>VortexUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Page\AlarmPage.xaml.cs">
       <DependentUpon>AlarmPage.xaml</DependentUpon>
     </Compile>
@@ -304,8 +402,17 @@
     <Compile Include="Views\UC\Base\IoUC.xaml.cs">
       <DependentUpon>IoUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UC\Base\ServoStatusUC.xaml.cs">
+      <DependentUpon>ServoStatusUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UC\Base\SingleClawUC.xaml.cs">
+      <DependentUpon>SingleClawUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UC\Base\StatusUC.xaml.cs">
       <DependentUpon>StatusUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UC\Base\StepStatusUC.xaml.cs">
+      <DependentUpon>StepStatusUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UC\Base\TechPosUC.xaml.cs">
       <DependentUpon>TechPosUC.xaml</DependentUpon>
@@ -316,8 +423,8 @@
     <Compile Include="Views\UC\Base\TubePos.xaml.cs">
       <DependentUpon>TubePos.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UC\ClawTestUC.xaml.cs">
-      <DependentUpon>ClawTestUC.xaml</DependentUpon>
+    <Compile Include="Views\UC\Base\ClawUC.xaml.cs">
+      <DependentUpon>ClawUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UC\FieldBusTestUC.xaml.cs">
       <DependentUpon>FieldBusTestUC.xaml</DependentUpon>

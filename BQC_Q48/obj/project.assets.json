@@ -219,7 +219,6 @@
       "BQJX.Communication/1.0.0": {
         "type": "project",
         "dependencies": {
-          "BQJX.Core": "1.0.0",
           "BQJX.Core.Common": "1.0.0"
         },
         "compile": {
@@ -469,7 +468,6 @@
       "BQJX.Communication/1.0.0": {
         "type": "project",
         "dependencies": {
-          "BQJX.Core": "1.0.0",
           "BQJX.Core.Common": "1.0.0"
         },
         "compile": {
@@ -719,7 +717,6 @@
       "BQJX.Communication/1.0.0": {
         "type": "project",
         "dependencies": {
-          "BQJX.Core": "1.0.0",
           "BQJX.Core.Common": "1.0.0"
         },
         "compile": {
@@ -969,7 +966,6 @@
       "BQJX.Communication/1.0.0": {
         "type": "project",
         "dependencies": {
-          "BQJX.Core": "1.0.0",
           "BQJX.Core.Common": "1.0.0"
         },
         "compile": {

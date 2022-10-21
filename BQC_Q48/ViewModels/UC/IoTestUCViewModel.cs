@@ -20,9 +20,6 @@ namespace Q_Platform.ViewModels.UC
 
         private readonly IIoDevice _io;
         private readonly ILogger _logger;
-        private Task _refreshTask;
-        private bool _stopRefresh;
-        private bool _refresh;
 
         #endregion
 
@@ -71,7 +68,7 @@ namespace Q_Platform.ViewModels.UC
 
         #region Constructor
 
-        public IoTestUCViewModel(IIoDevice io, IEtherCATMotion motion, ILogger logger)
+        public IoTestUCViewModel(IIoDevice io,ILogger logger)
         {
             _logger = logger;
             _io = io;
@@ -91,15 +88,11 @@ namespace Q_Platform.ViewModels.UC
                         {
                             break;
                         }
-                        while (_refresh)
-                        {
-                            Thread.Sleep(1000);
-                        }
                         Thread.Sleep(1000);
                     }
                     catch (Exception ex)
                     {
-                        logger?.Error($"_refreshTask err:{ex.Message}");
+                        _logger?.Error($"_refreshTask err:{ex.Message}");
                     }
 
                 }

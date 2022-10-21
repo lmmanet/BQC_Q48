@@ -1,5 +1,17 @@
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.dll
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.pdb
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.CoreCompileInputs.cache
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.dll
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.pdb
+D:\项目\Q平台\流程\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csprojAssemblyReference.cache
+D:\App\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.dll
+D:\App\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.pdb
+D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.CoreCompileInputs.cache
+D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.dll
+D:\App\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.pdb
 D:\AppV12\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.dll
 D:\AppV12\BQC_Q48\BQJX.Common\bin\Debug\BQJX.Common.pdb
 D:\AppV12\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.CoreCompileInputs.cache
 D:\AppV12\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.dll
 D:\AppV12\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Common.pdb
+D:\AppV12\BQC_Q48\BQJX.Common\obj\Debug\BQJX.Core.Common.csproj.AssemblyReference.cache

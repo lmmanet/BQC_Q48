@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,6 +84,9 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
 
+        void UpdatePosData();
+
+        CapperInfo GetCapperInfo();
 
     }
 

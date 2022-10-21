@@ -1,5 +1,6 @@
 ﻿using BQC_Q48.Views;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using Q_Platform.Logger;
 using Q_Platform.ViewModels.Base;
 using System;
@@ -21,9 +22,11 @@ namespace Q_Platform.ViewModels.Windows
 
         #region Properties
 
-        public FrameworkElement CurrentPage { get; set; }
+        public FrameworkElement CurrentPage { get; set; } = new MainPage();
 
+        public Visibility IsAlmVisibility { get; set; } = Visibility.Hidden;
 
+        public string AlmMsg { get; set; }
 
         #endregion
 
@@ -50,10 +53,32 @@ namespace Q_Platform.ViewModels.Windows
                     await Task.Delay(1000);
                 }
             });
+            Messenger.Default.Register<string>(this, "AlmOccu", OnAlm);
+            Messenger.Default.Register<string>(this, "ResetAlm", ResetAlm);
+            
+        }
+
+        private void ResetAlm(object obj)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsAlmVisibility = Visibility.Collapsed;
+                AlmMsg = "";
+            });
+         
+        }
+
+        private void OnAlm(object obj)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsAlmVisibility = Visibility.Visible;
+                AlmMsg = obj.ToString();
+            });
+          
         }
 
         #endregion
-
 
         #region Private Methods
 
@@ -130,7 +155,6 @@ namespace Q_Platform.ViewModels.Windows
 
 
         #endregion
-
 
         #region Public Methods
 

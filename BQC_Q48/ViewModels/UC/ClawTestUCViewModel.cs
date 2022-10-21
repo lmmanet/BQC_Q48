@@ -21,9 +21,7 @@ namespace Q_Platform.ViewModels.UC
 
         private readonly IEPG26 _clawInstance;
         private readonly ILogger _logger;
-        private Task _refreshTask;
-        private bool _stopRefresh;
-        private bool _refresh;
+
         #endregion
 
         #region Properties
@@ -108,10 +106,6 @@ namespace Q_Platform.ViewModels.UC
                         {
                             break;
                         }
-                        while (_refresh)
-                        {
-                            Thread.Sleep(1000);
-                        }
                         Thread.Sleep(1000);
                     }
                     catch (Exception ex)
@@ -181,7 +175,7 @@ namespace Q_Platform.ViewModels.UC
 
         public override void Cleanup()
         {
-            _refresh = true;
+            _stopRefresh = true;
             base.Cleanup();
         }
 

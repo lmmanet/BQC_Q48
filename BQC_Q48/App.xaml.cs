@@ -55,6 +55,12 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IConcentrationPosDataAccess, ConcentrationPosDataAccess>();
             SimpleIoc.Default.Register<ICapperPosDataAccess, CapperPosDataAccess>();
 
+
+            SimpleIoc.Default.Register<ITechParamsDataAccess, TechParamsDataAccess>();
+            SimpleIoc.Default.Register<ISampleDataAccess, SampleDataAccess>();
+
+
+
             #endregion
 
             #region 注册基础业务
@@ -73,6 +79,7 @@ namespace BQC_Q48
             SimpleIoc.Default.Register<IEPG26>(() => new EPG26(SimpleIoc.Default.GetInstance<IModbusBase>("Claw"), logger));
             SimpleIoc.Default.Register<IWeight>(() => new Weight(SimpleIoc.Default.GetInstance<IModbusBase>("Balance"), logger));
 
+            SimpleIoc.Default.Register<ISyringOne,SyringOne>();
             SimpleIoc.Default.Register<ISyringTwo,SyringTwo>();
 
           
@@ -115,6 +122,7 @@ namespace BQC_Q48
             #endregion
 
             SimpleIoc.Default.Register<IMainPro,MainPro>();
+            SimpleIoc.Default.Register<IRunService,RunService>();
         }
 
       

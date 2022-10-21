@@ -1674,7 +1674,7 @@ namespace Q_Platform.BLL
                             }
 
                             //移液后的  浓缩步骤
-                            if (itemSample.MainStep >= 16 && !_globalStatus.IsStopped)
+                            if (itemSample.MainStep >= 16 && itemSample.MainStep < 30 && !_globalStatus.IsStopped)
                             {
                                 result = _capperFour.DoConcentrationTwo(itemSample, cts);//兽残浓缩
                                 if (!result)
@@ -1684,9 +1684,11 @@ namespace Q_Platform.BLL
 
                             }
 
-                            //样品和任务从列表移除
-                            GlobalCache.Instance.ConcentrationList.Remove(itemSample);
-
+                            if (itemSample.MainStep == 30)//完成
+                            {
+                                //样品和任务从列表移除
+                                GlobalCache.Instance.ConcentrationList.Remove(itemSample);
+                            }
                         }
 
                         //提取净化管 净化液   ==》有/无浓缩
@@ -1695,7 +1697,7 @@ namespace Q_Platform.BLL
                             //不占用移栽   占用拧盖3
                             if (!TechStatusHelper.BitIsOn(itemSample.TechParams,TechStatus.Concentration))
                             {
-                                if (itemSample.MainStep == 8 && !_globalStatus.IsStopped)
+                                if (itemSample.MainStep >= 8 && itemSample.MainStep < 30 &&!_globalStatus.IsStopped)
                                 {
                                     result = _capperFour.DoPipettingOne(itemSample, 2, cts); //直接提取样品液
                                     if (!result)
@@ -1703,9 +1705,11 @@ namespace Q_Platform.BLL
                                         throw new Exception("提取样品液失败!");
                                     }
                                 }
-
-                                //样品和任务从列表移除
-                                GlobalCache.Instance.ConcentrationList.Remove(itemSample);
+                                if (itemSample.MainStep == 30)//完成
+                                {
+                                    //样品和任务从列表移除
+                                    GlobalCache.Instance.ConcentrationList.Remove(itemSample);
+                                }
                             }
                             else
                             {
@@ -1723,7 +1727,7 @@ namespace Q_Platform.BLL
                                 }
 
                                 //开始浓缩
-                                if (itemSample.MainStep >= 16 && !_globalStatus.IsStopped)
+                                if (itemSample.MainStep >= 16 && itemSample.MainStep < 30 && !_globalStatus.IsStopped)
                                 {
                                     result = _capperFour.DoConcentrationOne(itemSample, cts);
                                     if (!result)
@@ -1731,9 +1735,12 @@ namespace Q_Platform.BLL
                                         throw new Exception("浓缩失败!");
                                     }
                                 }
-                               
-                                //样品和任务从列表移除
-                                GlobalCache.Instance.ConcentrationList.Remove(itemSample);
+
+                                if (itemSample.MainStep == 30)//完成
+                                {
+                                    //样品和任务从列表移除
+                                    GlobalCache.Instance.ConcentrationList.Remove(itemSample);
+                                }
                             }
                         }
 
@@ -2026,7 +2033,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2043,7 +2050,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2082,7 +2089,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2099,7 +2106,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2140,7 +2147,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2156,7 +2163,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2195,7 +2202,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2211,7 +2218,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2271,7 +2278,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2289,7 +2296,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2339,11 +2346,6 @@ namespace Q_Platform.BLL
 
                 }
 
-                //判断手爪是否抓取物件 在指定打开位置
-                if (!await ClawIsGetchPiece(true))
-                {
-                    throw new Exception("手爪上无试管");
-                }
 
                 //离心机转到指定位置
                s1: var result3 = func(pos).ConfigureAwait(false);
@@ -2356,7 +2358,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2368,13 +2370,18 @@ namespace Q_Platform.BLL
                     throw new Exception("离心机转到指定位出错");
                 }
 
+                //判断手爪是否抓取物件 在指定打开位置
+                if (!await ClawIsGetchPiece(true))
+                {
+                    throw new Exception("手爪上无试管");
+                }
                 //Z轴下降到放料位
                s2: var result = await _motion.P2pMoveWithCheckDone(_axisZ, GetZCentrifugalCoordinate(false), _sevorMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2444,7 +2451,7 @@ namespace Q_Platform.BLL
                     {
                         if (_globalStatus.IsPause)
                         {
-                            while (_globalStatus.IsPause)
+                            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                             {
                                 Thread.Sleep(1000);
                             }
@@ -2469,7 +2476,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2485,7 +2492,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2551,7 +2558,7 @@ namespace Q_Platform.BLL
                     {
                         if (_globalStatus.IsPause)
                         {
-                            while (_globalStatus.IsPause)
+                            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                             {
                                 Thread.Sleep(1000);
                             }
@@ -2575,7 +2582,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2591,7 +2598,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -2702,7 +2709,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }

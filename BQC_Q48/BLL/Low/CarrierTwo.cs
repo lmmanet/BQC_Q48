@@ -2,6 +2,7 @@
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Common;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
@@ -65,6 +66,14 @@ namespace Q_Platform.BLL
         public override void UpdatePosData()
         {
             _posData = _dataAccess.GetPosData();
+        }
+
+        public override CarrierInfo GetCarrierInfo()
+        {
+            var result = base.GetCarrierInfo();
+            result.CarrierName = "ICarrierTwo";
+            result.CarrierId = 2;
+            return result;
         }
 
         #endregion
@@ -1000,7 +1009,7 @@ namespace Q_Platform.BLL
             double volume = sample.TechParams.ExtractSampleVolume;  //提取样品溶液量
             int tech_i = 1;
             double deep = 3;
-            double liquidHigh = sample.TechParams.ExtractDeepOffset[2]; // 农残 净化到小瓶
+            double liquidHigh = sample.TechParams.ExtractDeepOffset[1]; // 农残 净化到小瓶
             if (var == 2)
             {
                 tech_i = 2;
@@ -2450,7 +2459,7 @@ namespace Q_Platform.BLL
             }
             //Z轴上升
             CheckAxisZInSafePos(cts).GetAwaiter().GetResult();
-            while (_globalStatus.IsPause)
+            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
             }
@@ -3090,7 +3099,7 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception("XY轴移动到加标取液位 失败!");
                 }
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3103,7 +3112,7 @@ namespace Q_Platform.BLL
                 }
                 //上升
                 Z_Cylinder_Up();
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3114,7 +3123,7 @@ namespace Q_Platform.BLL
                     throw new Exception("XY轴移动到加标吐液位 失败!");
                 }
                 Z_Cylinder_Down();
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3124,7 +3133,7 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception($"注射器吐液失败");
                 }
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3157,7 +3166,7 @@ namespace Q_Platform.BLL
                     throw new Exception("XY轴移动到加标取液位 失败!");
                 }
                 Z_Cylinder_Down();
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3167,7 +3176,7 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception($"注射器清洗吸液失败-{50}ul");
                 }
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3177,7 +3186,7 @@ namespace Q_Platform.BLL
                 {
                     throw new Exception($"注射器吐液失败");
                 }
-                while (_globalStatus.IsPause)
+                while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
                 }
@@ -3716,13 +3725,13 @@ namespace Q_Platform.BLL
             {
                 case 1:
                 case 3:  //净化管（2ml）  拧盖3处
-                    Array.Copy(_posData.PipettingSourcePos,poss,3);
+                    Array.Copy(_posData.PipettingSourcePos,poss,3);//净化管取液
                     break;
                 case 2:  //西林瓶
-                    Array.Copy(_posData.PipettingTargetPos2, poss, 3);
+                    Array.Copy(_posData.PipettingSourcePos1, poss, 3);//西林瓶取液
                     break;
                 case 4:  //移栽大管
-                    Array.Copy(_posData.PipettingSourcePos2, poss, 3);
+                    Array.Copy(_posData.PipettingSourcePos2, poss, 3);//移栽萃取管取液
                     break;
                 default:
                     throw new InvalidOperationException($"移液工艺错误 err:{tech_i}");

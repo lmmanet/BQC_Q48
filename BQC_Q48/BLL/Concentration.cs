@@ -51,6 +51,7 @@ namespace Q_Platform.BLL
         protected ushort _vaccum2 = 53;            //Q1.5
         protected ushort _rotateMotion1 = 66;      //Q3.2
         protected ushort _rotateMotion2 = 67;      //Q3.3
+        protected ushort _blow = 54;               //Q1.6 浓缩吹气控制
 
 
         protected double _xOffset = 50;    //浓缩X偏移量
@@ -242,7 +243,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -261,7 +262,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -280,7 +281,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -324,7 +325,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -366,7 +367,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -396,7 +397,7 @@ namespace Q_Platform.BLL
                     _logger?.Warn("浓缩真空度未到达！");
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -411,6 +412,7 @@ namespace Q_Platform.BLL
 
                 ///延时
                 DateTime end = DateTime.Now + TimeSpan.FromMinutes(time);
+                OpenBlow();//打开吹气
                 while (true)
                 {
                     Thread.Sleep(10000);
@@ -424,6 +426,7 @@ namespace Q_Platform.BLL
                     }
                 }
 
+                CloseBlow();//关闭吹气
                 CloseVaccume();
                 StopRotate();
                 Thread.Sleep(1000);
@@ -436,7 +439,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -458,7 +461,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -476,6 +479,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                CloseBlow();//关闭吹气
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -500,7 +504,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(1000);
                     }
@@ -516,7 +520,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(1000);
                     }
@@ -672,16 +676,56 @@ namespace Q_Platform.BLL
             }
         }
 
+        /// <summary>
+        /// 打开吹气
+        /// </summary>
+        private void OpenBlow()
+        {
+            _logger?.Debug($"OpenBlow");
+            var result = _io.WriteBit_DO(_blow, true);
+            if (!result)
+            {
+                throw new Exception("打开吹气失败!");
+            }
+        }
+
+        /// <summary>
+        /// 关闭吹气
+        /// </summary>
+        private void CloseBlow()
+        {
+            _logger?.Debug($"OpenBlow");
+            var result = _io.WriteBit_DO(_blow, false);
+            if (!result)
+            {
+                throw new Exception("关闭吹气失败!");
+            }
+        }
+
+
+
+        /// <summary>
+        /// 获取浓缩Y轴坐标
+        /// </summary>
+        /// <returns></returns>
         private double GetConcenPos()
         {
             return _posData.ConcPos;
         }
 
+        /// <summary>
+        /// 获取浓缩接驳位Y轴坐标
+        /// </summary>
+        /// <returns></returns>
         private double GetPutGetPos()
         {
             return _posData.PutGetPos;
         }
         
+        /// <summary>
+        /// 获取浓缩加液Y轴坐标
+        /// </summary>
+        /// <returns></returns>
         private double GetAddLiquidPos()
         {
             return _posData.ConcPos + 30;

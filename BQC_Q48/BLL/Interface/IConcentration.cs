@@ -13,6 +13,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        void UpdatePosData();
         /// <summary>
         /// 样品浓缩
         /// </summary>

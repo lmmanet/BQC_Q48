@@ -6,6 +6,7 @@ using System.Threading;
 using BQJX.Common;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
+using Q_Platform.Common;
 
 namespace Q_Platform.BLL
 {
@@ -16,7 +17,7 @@ namespace Q_Platform.BLL
 
         private static ILogger logger = new MyLogger(typeof(CapperOne));
 
-        private readonly SyringBase _syring;
+        private readonly ISyringOne _syring;
 
         private readonly ICarrierOne _carrier; 
 
@@ -28,7 +29,7 @@ namespace Q_Platform.BLL
 
         #region Constructors
 
-        public CapperOne(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ICarrierOne carrier, IAddSolid addSolid) : base(io, motion, globalStatus,dataAccess, logger)
+        public CapperOne(IIoDevice io, ILS_Motion motion, IGlobalStatus globalStatus, ICapperPosDataAccess dataAccess, ICarrierOne carrier, IAddSolid addSolid,ISyringOne syring) : base(io, motion, globalStatus,dataAccess, logger)
         {
             this._carrier = carrier;
             this._addSolid = addSolid;
@@ -41,11 +42,9 @@ namespace Q_Platform.BLL
             _claw = 17;
             _holdingCloseSensor = 19;  //I1.3
             _holdingOpenSensor = 20;   //I1.4
-
-            _xOffset = 68;    //加液X偏移量
-
+            _capperSensor = 21;        //I1.5
             _posData = _dataAccess.GetCapperPosData(1);
-            _syring = new SyringOne(io,motion, globalStatus);
+            _syring = syring;
 
 
 
@@ -54,6 +53,17 @@ namespace Q_Platform.BLL
         {
             _posData = _dataAccess.GetCapperPosData(1);
         }
+
+        public override CapperInfo GetCapperInfo()
+        {
+            var cpInfo = base.GetCapperInfo();
+            cpInfo.CapperId = 1;
+            cpInfo.CapperName = "ICapperOne";
+            cpInfo.CapperOffDistance = -0.85;
+            cpInfo.CapperOnTorque = 80;
+            return cpInfo;
+        }
+
         #endregion
 
         #region Public Methods
@@ -112,7 +122,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -142,7 +152,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -257,7 +267,7 @@ namespace Q_Platform.BLL
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
                         {
-                            result = AddSolve(sample, cts).GetAwaiter().GetResult();
+                            result = AddSolve(sample,true, cts).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 return false;
@@ -433,9 +443,10 @@ namespace Q_Platform.BLL
         /// 加液
         /// </summary>
         /// <param name="sample"></param>
+        /// <param name="add">是否加液</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
+        protected async Task<bool> AddSolve(Sample sample,bool add, CancellationTokenSource cts)
         {
             try
             {
@@ -468,19 +479,19 @@ namespace Q_Platform.BLL
                 }
 
                 //加溶剂A   内部判断是否有盖  需要修改
-                if (sample.TechParams.Solvent_A != 0)
+                if (sample.TechParams.Solvent_A != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_A;
                     result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂B
-                if (sample.TechParams.Solvent_B != 0)
+                if (sample.TechParams.Solvent_B != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_B;
                     result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
                 }
                 //加溶剂C
-                if (sample.TechParams.Solvent_C != 0)
+                if (sample.TechParams.Solvent_C != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_C;
                     result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);

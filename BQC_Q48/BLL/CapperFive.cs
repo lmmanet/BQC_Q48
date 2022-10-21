@@ -6,6 +6,7 @@ using Q_Platform.Logger;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
+using Q_Platform.Common;
 
 namespace Q_Platform.BLL
 {
@@ -38,8 +39,7 @@ namespace Q_Platform.BLL
 
             _holdingCloseSensor = 48;  //I1.0
             _holdingOpenSensor = 49;   //I1.1
-
-            //_xOffset = 60;    //拧盖X偏移量
+            _capperSensor = 50;        //I1.2
             _posData = _dataAccess.GetCapperPosData(5);
 
         }
@@ -47,6 +47,16 @@ namespace Q_Platform.BLL
         public override void UpdatePosData()
         {
             _posData = _dataAccess.GetCapperPosData(5);
+        }
+
+        public override CapperInfo GetCapperInfo()
+        {
+            var cpInfo = base.GetCapperInfo();
+            cpInfo.CapperId = 5;
+            cpInfo.CapperName = "ICapperFive";
+            cpInfo.CapperOffDistance = -2;
+            cpInfo.CapperOnTorque = 25;
+            return cpInfo;
         }
 
         #endregion
@@ -63,13 +73,13 @@ namespace Q_Platform.BLL
         {
             //判断样品是否有盖
 
-            s1: var result = await CapperOn(25, 40, cts).ConfigureAwait(false);
+            s1: var result = await CapperOn(18, 40, cts).ConfigureAwait(false);
 
             if (!result)
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -93,13 +103,13 @@ namespace Q_Platform.BLL
         public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
         {
             //判断样品是否有盖
-           s1: var result = await CapperOff(cts, -2).ConfigureAwait(false);
+           s1: var result = await CapperOff(cts, -2.5).ConfigureAwait(false);
 
             if (!result)
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }

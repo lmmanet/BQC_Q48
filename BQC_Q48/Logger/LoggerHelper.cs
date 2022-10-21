@@ -40,7 +40,14 @@ namespace Q_Platform.Logger
 
         public void Warn(object msg)
         {
-            _logger.Warn(msg);
+            _logger.Warn(msg); 
+            AlarmMessage alarm = new AlarmMessage()
+            {
+                Message = msg.ToString(),
+                DateTime = DateTime.Now,
+                State = 0
+            };
+            Messenger.Default.Send<AlarmMessage>(alarm, "AlarmNotification");
         }
 
         public void Trace(object msg)

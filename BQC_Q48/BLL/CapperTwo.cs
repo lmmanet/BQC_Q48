@@ -2,6 +2,7 @@
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Common;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
@@ -37,7 +38,7 @@ namespace Q_Platform.BLL
             _claw = 20;
             _holdingCloseSensor = 22;  //I1.6
             _holdingOpenSensor = 23;   //I1.7
-
+            _capperSensor = 24;        //I2.0
             _xOffset = 60;    //拧盖X偏移量
 
             _posData = _dataAccess.GetCapperPosData(2);
@@ -48,9 +49,19 @@ namespace Q_Platform.BLL
             _posData = _dataAccess.GetCapperPosData(2); ;
         }
 
+        public override CapperInfo GetCapperInfo()
+        {
+            var cpInfo = base.GetCapperInfo();
+            cpInfo.CapperId = 2;
+            cpInfo.CapperName = "ICapperTwo";
+            cpInfo.CapperOffDistance = -0.85;
+            cpInfo.CapperOnTorque = 80;
+            return cpInfo;
+        }
+
         #endregion
 
-      
+
         //================================================移液部分 兽药=================================================//
 
         /// <summary>
@@ -583,7 +594,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -613,7 +624,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Q_Platform.BLL
 {
-    public class SyringOne : SyringBase
+    public class SyringOne : SyringBase,ISyringOne
     {
         private static ILogger logger = new MyLogger(typeof(SyringOne));
 

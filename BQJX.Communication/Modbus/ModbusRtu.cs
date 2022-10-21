@@ -15,7 +15,7 @@ namespace BQJX.Communication.Modbus
         #region Private Members
 
         private SerialPort serialPort;
-        private readonly static object lockObj = new object();
+        private readonly object lockObj = new object();
         private readonly ILogger _logger;
 
         #endregion

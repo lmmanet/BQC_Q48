@@ -55,7 +55,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"GetPosData err:{ex.Message}");
-                throw ex;
+                return null;
             }
             return data;
         }
@@ -84,7 +84,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"UpdatePosData err:{ex.Message}");
-                throw ex;
+                return false;
             }
         }
 
@@ -100,7 +100,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
-                throw ex;
+                return false;
             }
         }
 
@@ -124,7 +124,7 @@ namespace Q_Platform.DAL
             catch (Exception ex)
             {
                 _logger?.Error($"UpdatePosDataByAxisPosInfo err:{ex.Message}");
-                throw ex;
+                return false;
             }
         }
 

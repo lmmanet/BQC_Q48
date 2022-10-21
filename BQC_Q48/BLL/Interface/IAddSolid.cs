@@ -9,7 +9,9 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        Task<bool> AddSaltExtract(Sample sample, Func<Sample, CancellationTokenSource, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
+        void UpdatePosData();
+
+        Task<bool> AddSaltExtract(Sample sample, Func<Sample, bool,CancellationTokenSource, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
 
         /// <summary>
         /// 加固

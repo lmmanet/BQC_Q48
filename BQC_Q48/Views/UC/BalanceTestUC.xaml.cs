@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BQC_Q48.ViewModels;
+using Q_Platform.ViewModels.UC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,11 @@ namespace Q_Platform.Views.UC
         public BalanceTestUC()
         {
             InitializeComponent();
+        }
+
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.Cleanup<BalanceTestUCViewModel>();
         }
     }
 }

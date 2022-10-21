@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,10 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
+
+        void UpdatePosData();
+
+        CarrierInfo GetCarrierInfo();
 
         //===================================样品管部分=======================================//
 

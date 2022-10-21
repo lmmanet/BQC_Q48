@@ -114,9 +114,6 @@
             "projectReferences": {
               "D:\\AppV12\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj": {
                 "projectPath": "D:\\AppV12\\BQC_Q48\\BQJX.Common\\BQJX.Core.Common.csproj"
-              },
-              "D:\\AppV12\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj": {
-                "projectPath": "D:\\AppV12\\BQC_Q48\\BQJX.Core\\BQJX.Core.csproj"
               }
             }
           }

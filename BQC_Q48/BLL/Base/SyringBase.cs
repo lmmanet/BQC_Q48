@@ -37,7 +37,7 @@ namespace Q_Platform.BLL
         protected double _syringVel = 80;
         protected double _obsortVel = 50;
 
-        protected int _step;
+        protected int _step = 1;
 
         #endregion
 
@@ -66,10 +66,6 @@ namespace Q_Platform.BLL
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
                 _logger.Debug("Syring GoHome");
                 //关闭全部阀口
                 _io.WriteBit_DO(_port1, false);

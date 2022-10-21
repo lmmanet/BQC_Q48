@@ -2,6 +2,7 @@
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Common;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
@@ -51,6 +52,13 @@ namespace Q_Platform.BLL
             _posData = _dataAccess.GetPosData();
         }
 
+        public override CarrierInfo GetCarrierInfo()
+        {
+            var result = base.GetCarrierInfo();
+            result.CarrierName = "ICarrierOne";
+            result.CarrierId = 1;
+            return result;
+        }
 
         #endregion
 
@@ -1277,7 +1285,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromColdToTransfer((ushort)(2 * sampleId),(ushort)(2*posNum -1), func, cts);
+                            result = GetSampleFromColdToTransfer((ushort)(2 * sampleId -1),(ushort)(2*posNum -1), func, cts);
                             if (!result)
                             {
                                 throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
@@ -1286,7 +1294,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromColdToTransfer((ushort)(2 * sampleId - 1), (ushort)(2 * posNum), func, cts);
+                            result = GetSampleFromColdToTransfer((ushort)(2 * sampleId), (ushort)(2 * posNum), func, cts);
                             if (!result)
                             {
                                 throw new Exception($"从冰浴搬运{sampleId}样品到离心移栽失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
@@ -1550,36 +1558,6 @@ namespace Q_Platform.BLL
                         SampleStatusHelper.ResetBit(sample, SampleStatus.IsInCapperOne);
                         SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVortexed);
                     }
-
-                    //试管在拧盖2   
-
-                    //试管在振荡
-                    if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVibrationOne))
-                    {
-                        if (sample.SampleTubeStatus == 0 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId - 1), null, null, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-                            }
-                            sample.SampleTubeStatus = 1;
-                        }
-                        if (sample.SampleTubeStatus == 1 && !_globalStatus.IsStopped)
-                        {
-                            result = GetSampleFromVibrationToVortex((ushort)(2 * sampleId), null, null, cts);
-                            if (!result)
-                            {
-                                throw new Exception($"从振荡1搬运{sampleId}样品到涡旋失败！ SampleTubeStatus-{sample.SampleTubeStatus}");
-                            }
-                            sample.SampleTubeStatus = 0;
-                        }
-                        SampleStatusHelper.ResetBit(sample, SampleStatus.IsInVibrationOne);
-                        SampleStatusHelper.SetBitOn(sample, SampleStatus.IsInVortexed);
-                    }
-                    //试管在冰浴
-
-                    //试管在移栽
 
                     //试管在涡旋
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInVortexed))
@@ -3914,7 +3892,7 @@ namespace Q_Platform.BLL
                 throw new Exception("搬运移动到安全位置失败!");
             }
             
-            while (_globalStatus.IsPause)
+            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
             }
@@ -4099,7 +4077,7 @@ namespace Q_Platform.BLL
             if (!result)
             {
                 return false;
-            } while (_globalStatus.IsPause)
+            } while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
             }
@@ -4302,7 +4280,7 @@ namespace Q_Platform.BLL
             }
 
             _logger.Debug($"GetSampleFromTransferToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
-            while (_globalStatus.IsPause)
+            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
             }

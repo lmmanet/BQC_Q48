@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,9 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         Task<bool> GoHome(CancellationTokenSource cts);
 
-      
+        void UpdatePosData();
+
+        CarrierInfo GetCarrierInfo();
 
         //加标    清洗     浓缩混匀     取样1 2 
 

@@ -2,6 +2,7 @@
 using BQJX.Common.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Common;
 using Q_Platform.DAL;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,7 @@ namespace Q_Platform.BLL
         protected ushort _holding;
         protected ushort _holdingOpenSensor;
         protected ushort _holdingCloseSensor;
+        protected ushort _capperSensor; //光纤检测开关
 
         protected double _xOffset;
 
@@ -154,6 +156,26 @@ namespace Q_Platform.BLL
         public abstract void UpdatePosData();
 
         /// <summary>
+        /// 获取拧盖信息
+        /// </summary>
+        /// <returns></returns>
+        public virtual CapperInfo GetCapperInfo()
+        {
+            return new CapperInfo()
+            {
+                AxisC1 = _axisC1,
+                AxisC2 = _axisC2,
+                AxisY = _axisY,
+                AxisZ = _axisZ,
+                ClawCtl = _claw,
+                HoldCtl = _holding,
+                Hold_HP = _holdingOpenSensor,
+                Hold_WP = _holdingCloseSensor
+            };
+        }
+
+
+        /// <summary>
         /// 装盖
         /// </summary>
         /// <param name="sample"></param>
@@ -169,7 +191,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -199,7 +221,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -236,7 +258,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -285,7 +307,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -303,7 +325,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -322,7 +344,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -343,7 +365,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -361,7 +383,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -409,7 +431,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -429,7 +451,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -451,7 +473,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -469,7 +491,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -487,7 +509,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }

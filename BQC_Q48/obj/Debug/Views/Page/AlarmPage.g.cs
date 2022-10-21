@@ -10,6 +10,8 @@
 //------------------------------------------------------------------------------
 
 using BQC_Q48.Views;
+using Q_Platform.Views.Module;
+using Q_Platform.Views.UC.Base;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -20,6 +22,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Interactivity;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;

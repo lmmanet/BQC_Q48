@@ -29,9 +29,6 @@ namespace Q_Platform.ViewModels.UC
         private readonly ICardBase _card;
         private readonly IEtherCATMotion _motion;
         private readonly ILogger _logger;
-        private Task _refreshTask;
-        private bool _stopRefresh;
-        private bool _refresh;
 
         #endregion
 
@@ -213,15 +210,11 @@ namespace Q_Platform.ViewModels.UC
                         {
                             break;
                         }
-                        while (_refresh)
-                        {
-                            Thread.Sleep(1000);
-                        }
                         Thread.Sleep(1000);
                     }
                     catch (Exception ex)
                     {
-                        logger?.Error($"_refreshTask err:{ex.Message}");
+                        _logger?.Error($"_refreshTask err:{ex.Message}");
                     }
                
                 }
@@ -528,7 +521,7 @@ namespace Q_Platform.ViewModels.UC
         {
 
             //停止状态刷新
-            _refresh = true;
+            _stopRefresh = true;
             Thread.Sleep(500);
             //开始复位
             try
@@ -545,7 +538,33 @@ namespace Q_Platform.ViewModels.UC
             //弹出窗口提示正在复位...
 
             //启动刷新
-            _refresh = false;
+            _stopRefresh = false;
+            _refreshTask = Task.Run(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        var motionIo = _motion.GetMotionIoStatus(AxisNo);
+                        var status = _motion.GetMotionStatus(AxisNo);
+                        MotionStatus = (int)(motionIo + (status == 4 ? 128 : 0));
+
+                        CurrentPos = _motion.GetCurrentPos(AxisNo);
+                        CurrentVel = _motion.GetCurrentVel(AxisNo);
+                        if (_stopRefresh)
+                        {
+                            break;
+                        }
+                        Thread.Sleep(1000);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.Error($"_refreshTask err:{ex.Message}");
+                    }
+
+                }
+
+            });
         }
 
         /// <summary>

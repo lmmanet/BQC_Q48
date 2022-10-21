@@ -9,6 +9,7 @@ namespace Q_Platform.BLL
     {
         Task<bool> GoHome(CancellationTokenSource cts);
 
+        void UpdatePosData();
         void AddSampleToPipettingList(Sample sample, string actionCallBack);
         void AddSampleToConcentrationList(Sample sample);
 

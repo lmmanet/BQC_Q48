@@ -258,7 +258,7 @@ namespace Q_Platform.BLL
                 {
                     if (_globalStatus.IsPause)
                     {
-                        while (_globalStatus.IsPause)
+                        while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             Thread.Sleep(1000);
                         }
@@ -462,11 +462,27 @@ namespace Q_Platform.BLL
             //判断去重
             if (sample != null)
             {
+                if (sample.MainStep == 1)
+                {
+                    sample.ActionCallBack = "Q_Platform.BLL.IMainPro@WetBack";
+                }
+                else if (sample.MainStep == 2)
+                {
+                    sample.ActionCallBack = "Q_Platform.BLL.IMainPro@AddSalt";
+                }
+                else if (sample.MainStep == 3)
+                {
+                    sample.ActionCallBack = "Q_Platform.BLL.IMainPro@Centrifugal";
+                }
+                else if (sample.MainStep == 9)
+                {
+                    sample.ActionCallBack = "Q_Platform.BLL.IMainPro@Centrifugal";
+                }
+
                 //不存在加水涡旋工艺  直接跳过  无需进入列表  == >  进入回湿程序
                 if (sample.MainStep == 1 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Vortex))
                 {
                     sample.SubStep++;
-                    sample.ActionCallBack = "Q_Platform.BLL.IMainPro@WetBack";
                     MethodHelper.ExcuteMethod(sample, cts);
                     return;
                 }
@@ -475,6 +491,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
+                    MethodHelper.ExcuteMethod(sample, cts);
                     return;
                 }
                 //不存在加溶剂涡旋工艺 直接跳过  无需进入列表
@@ -482,6 +499,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
+                    MethodHelper.ExcuteMethod(sample, cts);
                     return;
                 }
                 //不存在加溶剂涡旋工艺 直接跳过  无需进入列表
@@ -489,6 +507,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
+                    MethodHelper.ExcuteMethod(sample, cts);
                     return;
                 }
 
@@ -541,9 +560,23 @@ namespace Q_Platform.BLL
                                 {
                                     throw new Exception("StartVortex err");
                                 }
-                                list.Remove(workSample);
-                                GlobalCache.Instance.VortexCurrentSample = null;
                                 workSample.SubStep++;
+                            }
+
+                            if (workSample.SubStep == 6)
+                            {
+                                //回湿执行完成信号
+                                if (workSample.MainStep != 1)
+                                {
+                                    workSample.MainStep++;
+                                    workSample.SubStep = 0;
+                                }
+
+                                //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
+                                MethodHelper.ExcuteMethod(workSample, cts);
+
+                                GlobalCache.Instance.VortexCurrentSample = null;
+                                list.Remove(workSample);
                             }
                         }
                         catch (Exception ex)
@@ -633,6 +666,15 @@ namespace Q_Platform.BLL
                 if (sample.MainStep == 9)
                 {
                     result = GetSampleFromVortexToMaterial(sample, 2, cts);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                else if(sample.MainStep == 3 && !TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractSupernate2))
+                {
+                    result = GetSampleFromVortexToMaterial(sample, 3, cts);
                     if (!result)
                     {
                         return false;

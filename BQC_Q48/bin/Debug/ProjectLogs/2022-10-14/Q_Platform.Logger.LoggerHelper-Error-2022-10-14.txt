@@ -1,0 +1,2 @@
+2022-10-14 09:22:10.5842 | UpdatePosDataByAxisPosInfo err:Unknown column 'TechSpecies' in 'field list' 
+2022-10-14 20:10:22.0815 | CheckDone 指令未到位-1235-12.3504 !=1542-15.4252 

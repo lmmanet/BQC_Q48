@@ -9,22 +9,18 @@ using BQJX.Common.Interface;
 using BQJX.Core.Interface;
 using GalaSoft.MvvmLight.Command;
 using PropertyChanged;
+using Q_Platform.ViewModels.Base;
 
 namespace Q_Platform.ViewModels.UC
 {
     [AddINotifyPropertyChangedInterface]
-    public class BalanceTestUCViewModel
+    public class BalanceTestUCViewModel :MyViewModelBase
     {
 
         #region Private Members
 
         private readonly IWeight _weight;
         private readonly ILogger _logger;
-        private Task _refreshTask;
-        private bool _stopRefresh;
-        private bool _refresh;
-
-        
 
         #endregion
 
@@ -78,15 +74,11 @@ namespace Q_Platform.ViewModels.UC
                         {
                             break;
                         }
-                        while (_refresh)
-                        {
-                            Thread.Sleep(1000);
-                        }
-                        Thread.Sleep(50);
+                        Thread.Sleep(500);
                     }
                     catch (Exception ex)
                     {
-                        logger?.Error($"_refreshTask err:{ex.Message}");
+                        _logger?.Error($"_refreshTask err:{ex.Message}");
                     }
                
                 }
@@ -103,6 +95,14 @@ namespace Q_Platform.ViewModels.UC
         {
             _weight.Clear(SlaveId);
         }
+
+        public override void Cleanup()
+        {
+            _stopRefresh = true;
+            base.Cleanup();
+        }
+
+
     }
 
         #endregion

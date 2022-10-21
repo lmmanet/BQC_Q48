@@ -18,16 +18,41 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid>
+        <Grid Background="#FF0076C8">
             <StackPanel Orientation="Vertical">
-                <Button Command="{Binding SwichCommand}" CommandParameter="AxisTestUC1" Content="伺服轴测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="StepAxisTestUC" Content="步进轴测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="ClawTestUC" Content="电爪测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="BalanceTestUC" Content="称台测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="ExtractIoTestUC" Content="提取IO测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="SampleStatusMonitor" Content="净化IO测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="IoTestUC" Content="离心中转IO测试" />
-                <Button Command="{Binding SwichCommand}" CommandParameter="FieldBusTestUC" Content="总线测试" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="AxisTestUC1" Content="伺服轴测试" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="StepAxisTestUC" Content="步进轴测试" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}"
+                             CommandParameter="ClawUC"
+                             Content="电爪测试"
+                             Style="{StaticResource radioBtnStyle}"
+                             Visibility="Collapsed" />
+                <RadioButton Command="{Binding SwichCommand}"
+                             CommandParameter="BalanceTestUC"
+                             Content="称台测试"
+                             Style="{StaticResource radioBtnStyle}"
+                             Visibility="Collapsed" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CarrierUC@1" Content="提取搬运" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CarrierUC@2" Content="净化搬运" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CenCarrierUC@1" Content="离心搬运" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="AddSaltUC" Content="加盐模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CapperUC@1" Content="拧盖1模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CapperUC@2" Content="拧盖2模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CapperUC@3" Content="拧盖3模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CapperUC@4" Content="拧盖4模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CapperUC@5" Content="拧盖5模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="VortexUC@1" Content="涡旋模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="VibrationUC@1" Content="振荡1模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="VibrationUC@2" Content="振荡2模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="ConcentrationUC@1" Content="浓缩模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="CentrifugalUC" Content="离心机模块" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="IoTestUC" Content="IO监控" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}" CommandParameter="SampleStatusMonitor" Content="样品状态监控" Style="{StaticResource radioBtnStyle}" />
+                <RadioButton Command="{Binding SwichCommand}"
+                             CommandParameter="FieldBusTestUC"
+                             Content="总线测试"
+                             Style="{StaticResource radioBtnStyle}"
+                             Visibility="Collapsed" />
             </StackPanel>
         </Grid>
 

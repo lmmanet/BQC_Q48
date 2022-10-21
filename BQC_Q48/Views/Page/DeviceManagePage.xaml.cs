@@ -1,4 +1,5 @@
 ﻿using BQC_Q48.ViewModels;
+using Q_Platform.ViewModels.Page;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace BQC_Q48.Views
 
         private void DeviceManagePage_Unloaded(object sender, RoutedEventArgs e)
         {
-            //ViewModelLocator.Cleanup<DeviceManagePageViewModel>();
+            ViewModelLocator.Cleanup<DeviceManagePageViewModel>();
         }
 
     }

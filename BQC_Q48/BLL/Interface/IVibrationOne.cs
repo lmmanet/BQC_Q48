@@ -13,14 +13,12 @@ namespace Q_Platform.BLL
 
         Task<bool> GoHome(CancellationTokenSource cts);
 
-        void AddSampleToVibrationList(Sample sample, string methodAction,CancellationTokenSource cts);
+       // void AddSampleToVibrationList(Sample sample, string methodAction,CancellationTokenSource cts);
 
-        Task StartVibrationAndVortex(CancellationTokenSource cts);
-
-
-        bool StartPolishVibrationAndVortex(Sample sample, CancellationTokenSource cts);
+       // Task StartVibrationAndVortex(CancellationTokenSource cts);
 
 
+        //bool StartPolishVibrationAndVortex(Sample sample, CancellationTokenSource cts);
 
 
 
@@ -28,6 +26,8 @@ namespace Q_Platform.BLL
 
 
 
+        void AddSampleToVibrationList(Sample sample, CancellationTokenSource cts);
 
+        Task StartVibration(CancellationTokenSource cts);
     }
 }

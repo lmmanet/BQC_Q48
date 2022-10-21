@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using PropertyChanged;
+using BQJX.Common.Interface;
 
 namespace Q_Platform.ViewModels.Page
 {
@@ -19,12 +20,67 @@ namespace Q_Platform.ViewModels.Page
     public class MainPageViewModel : MyViewModelBase
     {
         private readonly IMainPro _mainPro;
+        private readonly IGlobalStatus _globalStatus;
+        private readonly IRunService _service;
 
         #region Properties
 
         public ObservableCollection<SampleModel> SampleList { get; set; }
 
         public ObservableCollection<WorkLog> WorkLogList { get; set; } = new ObservableCollection<WorkLog>();
+
+
+        private double _temperatrue1 = 30;
+
+        public double Temperatrue1
+        {
+            get { return _temperatrue1; }
+            set 
+            {
+                if (_temperatrue1 == value)
+                {
+                    return;
+                }
+                _temperatrue1 = value;
+                SetTemperature1();
+            }
+        }
+
+        private double _temperatrue2 = 30;
+
+        public double Temperatrue2
+        {
+            get { return _temperatrue2; }
+            set
+            {
+                if (_temperatrue2 == value)
+                {
+                    return;
+                }
+                _temperatrue2 = value;
+                SetTemperature2();
+            }
+        }
+
+        private double _temperatrue3 = 30;
+
+        public double Temperatrue3
+        {
+            get { return _temperatrue3; }
+            set
+            {
+                if (_temperatrue3 == value)
+                {
+                    return;
+                }
+                _temperatrue3 = value;
+                SetTemperature3();
+            }
+        }
+
+
+
+
 
         /// <summary>
         /// 运行按钮
@@ -51,8 +107,6 @@ namespace Q_Platform.ViewModels.Page
         /// </summary>
         public bool InitBtnEnable { get; set; } = true;
 
-
-
         /// <summary>
         /// 回零完成
         /// </summary>
@@ -78,19 +132,35 @@ namespace Q_Platform.ViewModels.Page
         public ICommand PauseTaskCommand { get; set; }
 
         public ICommand AddSampleCommand { get; set; }
+        public ICommand ResetAlmCommand { get; set; }
 
 
         #endregion
 
         #region Construtors
 
-        public MainPageViewModel(IMainPro mainPro)
+        public MainPageViewModel(IMainPro mainPro,IRunService runService, IGlobalStatus globalStatus)
         {
             Messenger.Default.Register<WorkLog>(this, "logWorkLog", LoggingWorkLog);
 
             RegisterCommnand();
 
             this._mainPro = mainPro;
+            this._service = runService;
+            this._globalStatus = globalStatus;
+            SetTemperature1();
+            SetTemperature2();
+            SetTemperature3();
+            _service.Run();
+            _service.AlmOccuCallBack += OccuAlm;
+            _globalStatus.PauseProgramEventArgs += GlobalStatus_PauseProgramEventArgs;
+        }
+
+        private bool GlobalStatus_PauseProgramEventArgs()
+        {
+            ContinueBtnEnable = true;
+            PauseBtnEnable = false;
+            return true;
         }
 
         private void LoggingWorkLog(WorkLog obj)
@@ -121,6 +191,7 @@ namespace Q_Platform.ViewModels.Page
             ContinueCommand = new RelayCommand(ContinuePro);
             InitialSysCommand = new RelayCommand(async()=>await InitialSys());
             PauseTaskCommand = new RelayCommand(PausePro);
+            ResetAlmCommand = new RelayCommand(ResetAlm);
             AddSampleCommand = new RelayCommand<Object>(AddSample);
         }
 
@@ -192,12 +263,40 @@ namespace Q_Platform.ViewModels.Page
             _mainPro.SwitchLight();
         }
 
+        private void SetTemperature1()
+        {
+            _service.SetTemperature1 = _temperatrue1;
+        }
+        private void SetTemperature2()
+        {
+            _service.SetTemperature2 = _temperatrue2;
+        }
+        private void SetTemperature3()
+        {
+            _service.SetTemperature3 = _temperatrue3;
+        }
+
+
+
+        private void ResetAlm()
+        {
+            _service.ResetAlm();
+            Messenger.Default.Send<string>("ResetAlm", "ResetAlm");
+        }
+
+
+        private void OccuAlm(string msg)
+        {
+            Messenger.Default.Send<string>(msg, "AlmOccu");
+        }
+
 
         #endregion
 
 
         public override void Cleanup()
         {
+            _service.StopPro();
             base.Cleanup();
         }
 

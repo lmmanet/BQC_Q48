@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace Q_Platform.BLL
         /// <param name="cts"></param>
         /// <returns></returns>
         bool CapperOff(Sample sample, CancellationTokenSource cts);
+        void UpdatePosData();
+        CapperInfo GetCapperInfo();
     }
 
 }

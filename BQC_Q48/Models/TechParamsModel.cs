@@ -14,10 +14,16 @@ namespace BQJX.Models
         /// </summary> 
         public string Name { get; set; }
 
-        [ValueLimit(20,0.1)]
+        /// <summary>
+        /// 加水量
+        /// </summary>
+        public double AddWater { get; set; }
+
+
         /// <summary>
         /// 溶剂A添加量
         /// </summary>
+        [ValueLimit(20, 0.1)]
         public double Solvent_A { get; set; }    
 
         /// <summary>
@@ -31,9 +37,9 @@ namespace BQJX.Models
         public double Solvent_C { get; set; }
 
         /// <summary>
-        /// 溶剂D添加量
+        /// 加水提取时加均质子量
         /// </summary>
-        public double Solvent_D { get; set; }
+        public double AddHomo1 { get; set; }
 
         /// <summary>
         /// 涡旋时间

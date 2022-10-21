@@ -14,7 +14,7 @@ namespace BQJX.Common
         /// <summary>
         /// 0：GB23200.113-2018（果蔬）  1:GB23200.113-2018（坚果） 2：GB23200.121-2021（果蔬）  3：GB23200.121-2021（坚果） 10：兽药
         /// </summary>
-        public int TechSpecies { get; set; }
+        //public int TechSpecies { get; set; }
 
         /// <summary>
         /// 加水量

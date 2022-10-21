@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Cache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <VortexList />
+  <VibrationList />
+  <VibrationOneDic />
+  <VibrationOneDicPolish />
+  <CentrifugalBig />
+  <CentrifugalSmall />
+  <CentrifugalPolish />
+  <PipettorDic />
+  <ColdDic />
+  <WetBackSampleList />
+  <ConcentrationList />
+  <ExtractList />
+  <WorkList />
+  <VortexStep>0</VortexStep>
+  <IsCapperThreeOccupy>false</IsCapperThreeOccupy>
+  <IshaveCapper>
+    <boolean>false</boolean>
+    <boolean>false</boolean>
+    <boolean>false</boolean>
+    <boolean>false</boolean>
+    <boolean>false</boolean>
+  </IshaveCapper>
+</Cache>

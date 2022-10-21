@@ -1,4 +1,5 @@
 ﻿using BQJX.Common.Common;
+using BQJX.Core;
 using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
@@ -6,12 +7,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Q_Platform.ViewModels.Base
 {
-    public class MyViewModelBase :ViewModelBase
+    public abstract class MyViewModelBase :ViewModelBase
     {
         private object mPropertyValueCheckLock = new object();
+
+        protected Task _refreshTask;
+        protected bool _stopRefresh;
 
         #region Properties
 
@@ -70,5 +75,52 @@ namespace Q_Platform.ViewModels.Base
             }
         }
 
+
+
+        protected void RunCommandSync(Action action)
+        {
+            try
+            {
+                action?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        protected async Task RunCommandAsync(Action action)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    action?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show(ex.Message);
+                    });
+                }
+            }).ConfigureAwait(false);
+           
+        }
+
+
+
+
+
+
+
+        public override void Cleanup()
+        {
+            _stopRefresh = true;
+            base.Cleanup();
+        }
+
+
     }
+
 }

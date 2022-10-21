@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,9 @@ namespace Q_Platform.BLL
         bool AddSaltExtract(Sample sample, CancellationTokenSource cts);
         bool AddSolveExtract(Sample sample, CancellationTokenSource cts);
         bool AddWaterExtract(Sample sample, CancellationTokenSource cts);
+
+        void UpdatePosData();
+        CapperInfo GetCapperInfo();
 
 
     }

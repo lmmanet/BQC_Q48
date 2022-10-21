@@ -1,6 +1,7 @@
 ﻿using BQJX.Common;
 using BQJX.Common.Interface;
 using BQJX.Core.Interface;
+using Q_Platform.Common;
 using Q_Platform.DAL;
 using Q_Platform.Logger;
 using System;
@@ -15,7 +16,7 @@ namespace Q_Platform.BLL
     public class CapperFour : CapperBase, ICapperFour
     {
 
-        Task ConcentrationTask;
+        //Task ConcentrationTask;
 
         #region Private Members
 
@@ -53,7 +54,7 @@ namespace Q_Platform.BLL
 
             _holdingCloseSensor = 45;  //I0.5
             _holdingOpenSensor = 46;   //I0.6
-
+            _capperSensor = 47;        //I0.7
             _xOffset = 60;    //拧盖X偏移量
             _posData = _dataAccess.GetCapperPosData(4);
 
@@ -62,6 +63,16 @@ namespace Q_Platform.BLL
         public override void UpdatePosData()
         {
             _posData = _dataAccess.GetCapperPosData(4);
+        }
+
+        public override CapperInfo GetCapperInfo()
+        {
+            var cpInfo = base.GetCapperInfo();
+            cpInfo.CapperId = 4;
+            cpInfo.CapperName = "ICapperFour";
+            cpInfo.CapperOffDistance = -1.5;
+            cpInfo.CapperOnTorque = 30;
+            return cpInfo;
         }
 
         #endregion
@@ -83,7 +94,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -113,7 +124,7 @@ namespace Q_Platform.BLL
             {
                 if (_globalStatus.IsPause)
                 {
-                    while (_globalStatus.IsPause)
+                    while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
                         Thread.Sleep(2000);
                     }
@@ -144,47 +155,46 @@ namespace Q_Platform.BLL
                     bool result;
 
                     //开始移取浓缩液 浓缩
-                    if (sample.MainStep == 16 && !_globalStatus.IsStopped)
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
                     {
-                        if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
+                        //搬运到浓缩
+                        if (sample.MainStep == 16 && !_globalStatus.IsStopped)
                         {
-                            //搬运到浓缩
-                            if (sample.MainStep == 16 && !_globalStatus.IsStopped)
+                            result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
+                            if (!result)
                             {
-                                result = _carrier.GetSelingFromCapperFourToConcentration(sample, cts);
-                                if (!result)
-                                {
-                                    throw new Exception($"西林瓶{sample.Id}搬运到浓缩失败!");
-                                }
-                                sample.MainStep++;
+                                throw new Exception($"西林瓶{sample.Id}搬运到浓缩失败!");
                             }
-
-                            //开始浓缩
-                            if (sample.MainStep == 17 && !_globalStatus.IsStopped)
-                            {
-                                result = _concentration.DoConcentration(sample, cts);
-                                if (!result)
-                                {
-                                    return false;
-                                }
-                                sample.MainStep++;
-                            }
-
-                            //称重 判断结果  继续浓缩？
-                            if (sample.MainStep == 18 && !_globalStatus.IsStopped)
-                            {
-                                result = _carrier.GetSelingFromConcentrationToWeight(sample, 1, sample.TechParams.Add_Mark_B, cts);
-                                if (!result)
-                                {
-                                    return false;
-                                }
-                                sample.MainStep++;
-                            }
+                            sample.MainStep++;
                         }
 
+                        //开始浓缩
+                        if (sample.MainStep == 17 && !_globalStatus.IsStopped)
+                        {
+                            result = _concentration.DoConcentration(sample, cts);
+                            if (!result)
+                            {
+                                return false;
+                            }
+                            sample.MainStep++;
+                        }
+
+                        //称重 判断结果  继续浓缩？
+                        if (sample.MainStep == 18 && !_globalStatus.IsStopped)
+                        {
+                            result = _carrier.GetSelingFromConcentrationToWeight(sample, 1, sample.TechParams.Add_Mark_B, cts);
+                            if (!result)
+                            {
+                                return false;
+                            }
+                            sample.MainStep++;
+                        }
+                    }
+                    else
+                    {
                         sample.MainStep = 19;
                     }
-                 
+
 
                     //复溶 取样
                     if (sample.MainStep >= 19 && !_globalStatus.IsStopped)
@@ -375,6 +385,7 @@ namespace Q_Platform.BLL
                     {
                         throw new Exception($"净化管{sample.Id}提取样品液 失败!");
                     }
+                    sample.MainStep = 30;//完成
                     sample.SubStep = 0;
                     return true;
                 }
@@ -552,6 +563,7 @@ namespace Q_Platform.BLL
             if (sample.MainStep == 23)
             {
                 sample.SubStep = 0;
+                sample.MainStep = 30;  //完成
                 return true;
             }
 

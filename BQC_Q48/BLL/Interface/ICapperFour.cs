@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,8 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         bool DoPipettingOne(Sample sample,int var, CancellationTokenSource cts);
 
-
+        void UpdatePosData();
+        CapperInfo GetCapperInfo();
 
     }
 
