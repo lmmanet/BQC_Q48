@@ -160,3 +160,12 @@ D:\AppV12\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CoreCom
 D:\AppV12\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CopyComplete
 D:\AppV12\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.dll
 D:\AppV12\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.pdb
+D:\AppV12\D\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Communication.dll
+D:\AppV12\D\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Communication.pdb
+D:\AppV12\D\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Common.dll
+D:\AppV12\D\BQC_Q48\BQJX.Communication\bin\Debug\BQJX.Common.pdb
+D:\AppV12\D\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.AssemblyReference.cache
+D:\AppV12\D\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CoreCompileInputs.cache
+D:\AppV12\D\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.csproj.CopyComplete
+D:\AppV12\D\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.dll
+D:\AppV12\D\BQC_Q48\BQJX.Communication\obj\Debug\BQJX.Communication.pdb

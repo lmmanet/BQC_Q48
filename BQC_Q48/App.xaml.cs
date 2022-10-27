@@ -215,7 +215,9 @@ namespace BQC_Q48
                 new StepAxisEleGear{ AxisName="C加液轴",SlaveId=26,EleGear = 12000},
                 new StepAxisEleGear{ AxisName="拧盖Z3轴",SlaveId=29,EleGear = 10000},
                 new StepAxisEleGear{ AxisName="拧盖Z4轴",SlaveId=28,EleGear = 10000},
-                new StepAxisEleGear{ AxisName="拧盖Z5轴",SlaveId=27,EleGear = 10000}
+                new StepAxisEleGear{ AxisName="拧盖Z5轴",SlaveId=27,EleGear = 10000},
+                new StepAxisEleGear{ AxisName="加盐Z1轴",SlaveId=30,EleGear = 2500},
+                new StepAxisEleGear{ AxisName="加盐Z2轴",SlaveId=31,EleGear = 2500}
 
             };
         }

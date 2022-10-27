@@ -38,9 +38,9 @@ namespace Q_Platform.BLL
         /// 提取完上清液振荡
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool StartVibrationOne(Sample sample, CancellationTokenSource cts)
+        public bool StartVibrationOne(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
 
@@ -56,12 +56,12 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
-                    _logger?.Info($"样品{sampleId}净化管开始振荡-{time}s-{vel}rpm");
+                    _logger?.Info($"样品{sampleId}净化管开始振荡-{time}s-{vel*60}rpm");
                     bool result;
                     //振荡回零
                     if (sample.SubStep == 18 && !_globalStatus.IsStopped)
                     {
-                        result = GoHome(cts).GetAwaiter().GetResult();
+                        result = GoHome(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("振荡回零失败!");
@@ -74,7 +74,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                         {
-                            result = _carrier.GetSampleFromCapperThreeToVibration(sample, cts);
+                            result = _carrier.GetSampleFromCapperThreeToVibration(sample, gs);
                             if (!result)
                             {
                                 throw new Exception("搬运样品到振荡失败!");
@@ -88,7 +88,7 @@ namespace Q_Platform.BLL
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration))
                         {
-                            result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
+                            result = base.StartVibration(time, vel, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception("样品振荡失败!");
@@ -102,7 +102,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
-                            result = _carrier.GetSampleFromVibrationToMaterial(sample, cts);
+                            result = _carrier.GetSampleFromVibrationToMaterial(sample, gs);
                             if (!result)
                             {
                                 throw new Exception("搬运样品到试管架失败!");
@@ -125,10 +125,9 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"样品{sampleId}净化管开始振荡-{time}s-{vel}rpm 停止");
-                    return false;
+                    _logger?.Warn("程序暂停");
                 }
                 _logger?.Warn(ex.Message);
                 return false;
@@ -139,9 +138,9 @@ namespace Q_Platform.BLL
         /// 提取上清液前振荡  兽药 加入醋酸铵水溶液后
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool StartVibrationTwo(Sample sample, CancellationTokenSource cts)
+        public bool StartVibrationTwo(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
 
@@ -160,7 +159,7 @@ namespace Q_Platform.BLL
                     _logger?.Info($"样品{sampleId}油脂管开始振荡-{time}s-{vel}rpm");
 
                     //振荡回零
-                    var result = GoHome(cts).GetAwaiter().GetResult();
+                    var result = GoHome(gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("振荡回零失败!");
@@ -169,7 +168,7 @@ namespace Q_Platform.BLL
                     //搬运  从拧盖3搬运净化管到振荡
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInVibration))
                     {
-                        result = _carrier.GetSampleFromCapperThreeToVibration(sample, cts);
+                        result = _carrier.GetSampleFromCapperThreeToVibration(sample, gs);
                         if (!result)
                         {
                             throw new Exception("搬运样品到振荡失败!");
@@ -179,7 +178,7 @@ namespace Q_Platform.BLL
                     //开始振荡
                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.VibrationBeforePurify))
                     {
-                        result = base.StartVibration(time, vel, cts).GetAwaiter().GetResult();
+                        result = base.StartVibration(time, vel, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("样品振荡失败!");
@@ -190,7 +189,7 @@ namespace Q_Platform.BLL
                     //搬运净化管到拧盖3
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                     {
-                        result = _carrier.GetSampleFromVibrationToCapperThree(sample, cts);
+                        result = _carrier.GetSampleFromVibrationToCapperThree(sample, gs);
                         if (!result)
                         {
                             throw new Exception("搬运样品到拧盖3失败!");
@@ -208,10 +207,9 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"样品{sampleId}油脂开始振荡-{time}s-{vel}rpm 停止");
-                    return false;
+                    _logger?.Warn("程序暂停");
                 }
                 _logger?.Warn(ex.Message);
                 return false;

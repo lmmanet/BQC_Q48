@@ -38,7 +38,16 @@ namespace Q_Platform.ViewModels.Module
         #region Properties
 
         public double SyringTargetVel { get; set; } = 20;
-        public double SyringTargetPos { get; set; } 
+        public double SyringTargetPos { get; set; }
+
+        public bool cb1 { get; set; }
+        public bool cb2 { get; set; }
+        public bool cb3 { get; set; }
+        public bool cb4 { get; set; }
+        public bool cb5 { get; set; }
+        public bool cb6 { get; set; }
+        public bool cb7 { get; set; }
+        public bool cb8 { get; set; }
 
         #endregion
 
@@ -50,7 +59,7 @@ namespace Q_Platform.ViewModels.Module
         public ICommand SyringObsorbCommand { get; set; }
         public ICommand SyringInjectCommand { get; set; }
         public ICommand SyringResetAxisAmlCommand { get; set; }
-
+        public ICommand ForceCommand { get; set; }
 
         #endregion
 
@@ -104,7 +113,7 @@ namespace Q_Platform.ViewModels.Module
             SyringObsorbCommand = new RelayCommand(SyringObsorb);
             SyringInjectCommand = new RelayCommand(SyringInject);
             SyringResetAxisAmlCommand = new RelayCommand(SyringResetAxisAml);
-
+            ForceCommand = new RelayCommand<object>(ForceValve);
             base.RegisterCommand();
         }
 
@@ -112,6 +121,19 @@ namespace Q_Platform.ViewModels.Module
         {
             base.SaveAxisPos();
             _capper.UpdatePosData();
+        }
+
+        protected override void RefreshIoStatus()
+        {
+            cb1 = _io.ReadBit_DO(_port1);
+            cb2 = _io.ReadBit_DO(_port2);
+            cb3 = _io.ReadBit_DO(_port3);
+            cb4 = _io.ReadBit_DO(_port4);
+            cb5 = _io.ReadBit_DO(_port5);
+            cb6 = _io.ReadBit_DO(_port6);
+            cb7 = _io.ReadBit_DO(_port7);
+            cb8 = _io.ReadBit_DO(_port8);
+            base.RefreshIoStatus();
         }
 
         private void SyringAbsMove()
@@ -160,6 +182,45 @@ namespace Q_Platform.ViewModels.Module
             {
                 _iLS_Motion.ResetAxisAlm(_axisAddLiquid);
             });
+        }
+
+        private void ForceValve(object obj)
+        {
+            string str = obj.ToString();
+            if (int.TryParse(str, out int port))
+            {
+                switch (port)
+                {
+                    case 1:
+                        _io.WriteBit_DO(_port1, !cb1);
+                        break;
+                    case 2:
+                        _io.WriteBit_DO(_port2, !cb2);
+                        break;
+                    case 3:
+                        _io.WriteBit_DO(_port3, !cb3);
+                        break;
+                    case 4:
+                        _io.WriteBit_DO(_port4, !cb4);
+                        break;
+                    case 5:
+                        _io.WriteBit_DO(_port5, !cb5);
+                        break;
+                    case 6:
+                        _io.WriteBit_DO(_port6, !cb6);
+                        break;
+                    case 7:
+                        _io.WriteBit_DO(_port7, !cb7);
+                        break;
+                    case 8:
+                        _io.WriteBit_DO(_port8, !cb8);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+
         }
     }
 }

@@ -81,7 +81,7 @@ namespace Q_Platform.BLL
 
         #region Public Methods
 
-        public override async Task<bool> GoHome(CancellationTokenSource cts)
+        public override async Task<bool> GoHome(IGlobalStatus gs)
         {
             _pipStep = 0;
             if (!_motion.IsServeOn(_axisSyring))
@@ -98,7 +98,7 @@ namespace Q_Platform.BLL
             //排空残留
             _io.WriteBit_DO_Delay_Reverse(_drainPump, 20);
 
-            return await base.GoHome(cts);
+            return await base.GoHome(gs);
         }
 
         public override bool StopMove()
@@ -113,9 +113,9 @@ namespace Q_Platform.BLL
         /// 从西林瓶架搬运西林瓶到拧盖4
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromMaterialToCapperFour(Sample sample, CancellationTokenSource cts)
+        public bool GetSelingFromMaterialToCapperFour(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -139,7 +139,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.SeilingStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromMaterialToCapperFour((ushort)(2 * sampleId - 1), cts);
+                            result = GetSeilingFromMaterialToCapperFour((ushort)(2 * sampleId - 1), gs);
                             if (!result)
                             {
                                 throw new Exception($"从西林瓶架搬运{sampleId}西林瓶到拧盖4失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -148,7 +148,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.SeilingStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromMaterialToCapperFour((ushort)(2 * sampleId), cts);
+                            result = GetSeilingFromMaterialToCapperFour((ushort)(2 * sampleId), gs);
                             if (!result)
                             {
                                 throw new Exception($"从西林瓶架搬运{sampleId}西林瓶到拧盖4！ SeilingStatus-{sample.SeilingStatus}");
@@ -170,13 +170,12 @@ namespace Q_Platform.BLL
             } 
             catch (OccupyMethodException)
             {
-               return GetSelingFromMaterialToCapperFour(sample, cts);
+               return GetSelingFromMaterialToCapperFour(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -188,9 +187,9 @@ namespace Q_Platform.BLL
         /// 从拧盖4搬运西林瓶到试管架
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromCapperFourToMaterial(Sample sample, CancellationTokenSource cts)
+        public bool GetSelingFromCapperFourToMaterial(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -214,7 +213,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.SeilingStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromCapperFourToMaterial((ushort)(2 * sampleId - 1),null,null, cts);
+                            result = GetSeilingFromCapperFourToMaterial((ushort)(2 * sampleId - 1),null,null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖4搬运{sampleId}西林瓶到西林瓶架 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -223,7 +222,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.SeilingStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromCapperFourToMaterial((ushort)(2 * sampleId),null,null, cts);
+                            result = GetSeilingFromCapperFourToMaterial((ushort)(2 * sampleId),null,null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖4搬运{sampleId}西林瓶到西林瓶架 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -245,13 +244,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromCapperFourToMaterial(sample, cts);
+                return GetSelingFromCapperFourToMaterial(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -263,9 +261,9 @@ namespace Q_Platform.BLL
         /// 从拧盖4搬运西林瓶到浓缩
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromCapperFourToConcentration(Sample sample, CancellationTokenSource cts)
+        public bool GetSelingFromCapperFourToConcentration(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -289,7 +287,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.SeilingStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromCapperFourToConcentration((ushort)(2 * sampleId - 1), null, null, cts);
+                            result = GetSeilingFromCapperFourToConcentration((ushort)(2 * sampleId - 1), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖4搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -298,7 +296,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.SeilingStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromCapperFourToConcentration((ushort)(2 * sampleId), null, null, cts);
+                            result = GetSeilingFromCapperFourToConcentration((ushort)(2 * sampleId), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖4搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -320,13 +318,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromCapperFourToConcentration(sample, cts);
+                return GetSelingFromCapperFourToConcentration(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -338,9 +335,9 @@ namespace Q_Platform.BLL
         /// 从浓缩搬运西林瓶到拧盖4
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromConcentrationToCapperFour(Sample sample, CancellationTokenSource cts)
+        public bool GetSelingFromConcentrationToCapperFour(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -364,7 +361,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.SeilingStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromConcentrationToCapperFour((ushort)(2 * sampleId - 1), cts);
+                            result = GetSeilingFromConcentrationToCapperFour((ushort)(2 * sampleId - 1), gs);
                             if (!result)
                             {
                                 throw new Exception($"从浓缩搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -373,7 +370,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.SeilingStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSeilingFromConcentrationToCapperFour((ushort)(2 * sampleId), cts);
+                            result = GetSeilingFromConcentrationToCapperFour((ushort)(2 * sampleId), gs);
                             if (!result)
                             {
                                 throw new Exception($"从浓缩搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -395,13 +392,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromConcentrationToCapperFour(sample, cts);
+                return GetSelingFromConcentrationToCapperFour(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -413,9 +409,9 @@ namespace Q_Platform.BLL
         /// 从拧盖4搬运西林瓶到称重 并搬运回
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromCapperFourToWeightAndBack(Sample sample,int var ,double volume, CancellationTokenSource cts)
+        public bool GetSelingFromCapperFourToWeightAndBack(Sample sample,int var ,double volume, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -449,7 +445,7 @@ namespace Q_Platform.BLL
                                     throw new Exception("称台清零出错!");
                                 }
 
-                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId - 1), cts);
+                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId - 1), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -468,7 +464,7 @@ namespace Q_Platform.BLL
                             {
                                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
                                 {
-                                    result = AddMarkFromSourceToWeight(var, volume, cts);
+                                    result = AddMarkFromSourceToWeight(var, volume, gs);
                                     if (!result)
                                     {
                                         throw new Exception("浓缩前加标失败!");
@@ -479,7 +475,7 @@ namespace Q_Platform.BLL
                             //搬运回
                             if (sample.SeilingStep == 6 && !_globalStatus.IsStopped)
                             {
-                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId - 1), cts);
+                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId - 1), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -500,7 +496,7 @@ namespace Q_Platform.BLL
                                     throw new Exception("称台清零出错!");
                                 }
 
-                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId), cts);
+                                result = GetSeilingFromCapperFourToWeight((ushort)(2 * sampleId), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -519,7 +515,7 @@ namespace Q_Platform.BLL
                             {
                                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark1) && var != 0)
                                 {
-                                    result = AddMarkFromSourceToWeight(var, volume, cts);
+                                    result = AddMarkFromSourceToWeight(var, volume, gs);
                                     if (!result)
                                     {
                                         throw new Exception("浓缩前加标失败!");
@@ -531,7 +527,7 @@ namespace Q_Platform.BLL
                             //搬运回
                             if (sample.SeilingStep == 10 && !_globalStatus.IsStopped)
                             {
-                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId), cts);
+                                result = GetSeilingFromWeightToCapperFour((ushort)(2 * sampleId), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从称台搬运{sampleId}西林瓶到拧盖4 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -554,13 +550,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromCapperFourToWeightAndBack(sample, var,volume, cts);
+                return GetSelingFromCapperFourToWeightAndBack(sample, var,volume, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -574,9 +569,9 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="var">加标种类1~4 0：不加</param>
         /// <param name="volume">加标量</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, CancellationTokenSource cts)
+        public bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -610,7 +605,7 @@ namespace Q_Platform.BLL
                                     throw new Exception("称台清零出错!");
                                 }
 
-                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId - 1), cts);
+                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId - 1), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -627,7 +622,7 @@ namespace Q_Platform.BLL
                                     //判断是否加标
                                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
-                                        result = AddMarkFromSourceToWeight(var,volume, cts);
+                                        result = AddMarkFromSourceToWeight(var,volume, gs);
                                         if (!result)
                                         {
                                             throw new Exception($"{sampleId}西林瓶加标失败");
@@ -646,7 +641,7 @@ namespace Q_Platform.BLL
                             //搬运回
                             if (sample.SubStep ==2 && !_globalStatus.IsStopped)
                             {
-                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId - 1), cts);
+                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId - 1), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -668,7 +663,7 @@ namespace Q_Platform.BLL
                                     throw new Exception("称台清零出错!");
                                 }
 
-                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId), cts);
+                                result = GetSeilingFromConcentrationToWeight((ushort)(2 * sampleId), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从拧盖4搬运{sampleId}西林瓶到称台 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -686,7 +681,7 @@ namespace Q_Platform.BLL
                                     //判断是否加标
                                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
-                                        result = AddMarkFromSourceToWeight(var, volume, cts);
+                                        result = AddMarkFromSourceToWeight(var, volume, gs);
                                         if (!result)
                                         {
                                             throw new Exception($"{sampleId}西林瓶加标失败");
@@ -705,7 +700,7 @@ namespace Q_Platform.BLL
                             //搬运回
                             if (sample.SubStep == 5 && !_globalStatus.IsStopped)
                             {
-                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId), cts);
+                                result = GetSeilingFromWeightToConcentration((ushort)(2 * sampleId), gs);
                                 if (!result)
                                 {
                                     throw new Exception($"从称台搬运{sampleId}西林瓶到浓缩 失败！ SeilingStatus-{sample.SeilingStatus}");
@@ -726,13 +721,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSelingFromConcentrationToWeight(sample, var,volume, cts);
+                return GetSelingFromConcentrationToWeight(sample, var,volume, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -747,9 +741,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetBottleFromMaterialToCapperFive_One(Sample sample, CancellationTokenSource cts)
+        public bool GetBottleFromMaterialToCapperFive_One(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -774,7 +768,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = Get_GC_BottleFromMaterialToCapperFive(num, cts);
+                            result = Get_GC_BottleFromMaterialToCapperFive(num, gs);
                             if (!result)
                             {
                                 throw new Exception($"从气质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -783,7 +777,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = Get_LC_BottleFromMaterialToCapperFive(num, cts);
+                            result = Get_LC_BottleFromMaterialToCapperFive(num, gs);
                             if (!result)
                             {
                                 throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -805,13 +799,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetBottleFromMaterialToCapperFive_One(sample, cts);
+                return GetBottleFromMaterialToCapperFive_One(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -824,9 +817,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool GetBottleFromMaterialToCapperFive_Two(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromMaterialToCapperFive_Two(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -840,7 +833,7 @@ namespace Q_Platform.BLL
                 {
                     if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        result = Get_GC_BottleFromMaterialToCapperFive(num, cts);
+                        result = Get_GC_BottleFromMaterialToCapperFive(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从气质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -849,7 +842,7 @@ namespace Q_Platform.BLL
                     }
                     if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        result = Get_LC_BottleFromMaterialToCapperFive(num, cts);
+                        result = Get_LC_BottleFromMaterialToCapperFive(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -869,9 +862,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -884,9 +876,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool GetBottleFromCapperFiveToMaterial_One(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromCapperFiveToMaterial_One(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -900,7 +892,7 @@ namespace Q_Platform.BLL
                 {
                     if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
+                        result = Get_GC_BottleFromCapperFiveToMaterial(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
@@ -909,7 +901,7 @@ namespace Q_Platform.BLL
                     }
                     if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
+                        result = Get_LC_BottleFromCapperFiveToMaterial(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -929,9 +921,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -944,9 +935,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="isFirst">是否是第一个样品</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool GetBottleFromCapperFiveToMaterial_Two(Sample sample, CancellationTokenSource cts)
+        private bool GetBottleFromCapperFiveToMaterial_Two(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -960,7 +951,7 @@ namespace Q_Platform.BLL
                 {
                     if (sample.BottleStatus == 0 && !_globalStatus.IsStopped)
                     {
-                        result = Get_GC_BottleFromCapperFiveToMaterial(num, cts);
+                        result = Get_GC_BottleFromCapperFiveToMaterial(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从拧盖5搬运{sampleId}小瓶到气质小瓶架 失败! BottleStatus-{sample.BottleStatus}");
@@ -969,7 +960,7 @@ namespace Q_Platform.BLL
                     }
                     if (sample.BottleStatus == 1 && !_globalStatus.IsStopped)
                     {
-                        result = Get_LC_BottleFromCapperFiveToMaterial(num, cts);
+                        result = Get_LC_BottleFromCapperFiveToMaterial(num, gs);
                         if (!result)
                         {
                             throw new Exception($"从液质小瓶架搬运{sampleId}小瓶到拧盖5 失败! BottleStatus-{sample.BottleStatus}");
@@ -989,9 +980,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+               if(_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -1006,18 +996,20 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">1:净化管到小瓶  2:西林瓶到小瓶</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPipettingOne(Sample sample, int var,Func<Sample,int,CancellationTokenSource,bool> capperOn, Func<Sample, int,CancellationTokenSource, bool> capperOff, CancellationTokenSource cts)
+        public bool DoPipettingOne(Sample sample, int var,Func<Sample,int,IGlobalStatus,bool> capperOn, Func<Sample, int,IGlobalStatus, bool> capperOff, IGlobalStatus gs)
         {
-            double volume = sample.TechParams.ExtractSampleVolume;  //提取样品溶液量
+            double volume = sample.TechParams.ExtractSampleVolume;  //提取样品溶液量 ExtractSampleVolume
             int tech_i = 1;
             double deep = 3;
             double liquidHigh = sample.TechParams.ExtractDeepOffset[1]; // 农残 净化到小瓶
+            double[] safePos = GetPipettingSafePos();
             if (var == 2)
             {
                 tech_i = 2;
                 liquidHigh = sample.TechParams.ExtractDeepOffset[3];  //农残西林到小  兽药西林到小瓶
+                safePos = null;
             }
             Thread.Sleep(300);
             try
@@ -1037,7 +1029,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id - 1), gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1049,7 +1041,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i,liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1 , tech_i,liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1061,7 +1053,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {  
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id -1, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1072,7 +1064,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 4 && !_globalStatus.IsStopped)
                     { 
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id -1 ), cts,30).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id -1 ), gs,30).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1085,7 +1077,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
                         //装盖 
-                        var result = capperOn(sample,1,cts);
+                        var result = capperOn(sample,1,gs);
                         if (!result)
                         {
                             throw new Exception($"小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
@@ -1097,7 +1089,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 6 && !_globalStatus.IsStopped)
                     {
                         //搬运下料 
-                        var result = GetBottleFromCapperFiveToMaterial_One(sample, cts);
+                        var result = GetBottleFromCapperFiveToMaterial_One(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"第一组小瓶搬运到试管架失败,pipettingStep-{sample.PipettorStep2}");
@@ -1109,7 +1101,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 7 && !_globalStatus.IsStopped)
                     {
                         //搬运上料
-                        var result = GetBottleFromMaterialToCapperFive_Two(sample, cts);
+                        var result = GetBottleFromMaterialToCapperFive_Two(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"第二组小瓶搬运到拧盖5失败,pipettingStep-{sample.PipettorStep2}");
@@ -1121,7 +1113,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 8 && !_globalStatus.IsStopped)
                     {
                         // 拆盖 
-                        var result = capperOff(sample,2, cts);
+                        var result = capperOff(sample,2, gs);
                         if (!result)
                         {
                             throw new Exception($"第二组小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
@@ -1133,7 +1125,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 9 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id ), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTip1Coordinate(2 * sample.Id ), gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1144,7 +1136,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 10 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id ,tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1155,7 +1147,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 11 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id , tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1166,7 +1158,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 12 && !_globalStatus.IsStopped)
                     {
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id ), cts, 30).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTip1Coordinate(2 * sample.Id ), gs, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1179,7 +1171,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 13 && !_globalStatus.IsStopped)
                     {
                         //装盖 
-                        var result = capperOn(sample,2, cts);
+                        var result = capperOn(sample,2, gs);
                         if (!result)
                         {
                             throw new Exception($"第二组小瓶装盖失败,pipettingStep-{sample.PipettorStep2}");
@@ -1191,7 +1183,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 14 && !_globalStatus.IsStopped)
                     {
                         //搬运下料 
-                        var result = GetBottleFromCapperFiveToMaterial_Two(sample, cts);
+                        var result = GetBottleFromCapperFiveToMaterial_Two(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"第二组小瓶搬运到试管架失败,pipettingStep-{sample.PipettorStep2}");
@@ -1207,10 +1199,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return DoPipettingOne(sample,var,capperOn, capperOff, cts);
+                return DoPipettingOne(sample,var,capperOn, capperOff, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1222,14 +1218,15 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">1:净化管（2ml） ==》西林瓶 2:大管==》西林瓶</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPipettingTwo(Sample sample,int var,CancellationTokenSource cts)
+        public bool DoPipettingTwo(Sample sample,int var,IGlobalStatus gs)
         {
             double volume = sample.TechParams.ConcentrationVolume;  //提取样品浓缩量
             int tech_i = 3;
             double deep = 3; //液面深度
             double liquidHigh = sample.TechParams.ExtractDeepOffset[3];  //净化管到西林瓶 农残
+            double[] safePos = GetPipettingSafePos();
             if (var == 2)
             {
                 tech_i = 4;
@@ -1253,7 +1250,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 1 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管取枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1265,7 +1262,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, tech_i, liquidHigh), GetPipettorTargetCoordinate(1, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1277,7 +1274,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 3 && !_globalStatus.IsStopped)
                     {
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), cts, 30).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id - 1), gs, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管放枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1289,7 +1286,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 4 && !_globalStatus.IsStopped)
                     {
                         //取枪头
-                        var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id), cts).GetAwaiter().GetResult();
+                        var result = base.GetNeedleAsync(GetTip2Coordinate(2 * sample.Id), gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管取枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1301,7 +1298,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, cts).GetAwaiter().GetResult();
+                        var result = DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, tech_i, liquidHigh), GetPipettorTargetCoordinate(2, tech_i), volume, deep, 0.05, safePos, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep2}");
@@ -1313,7 +1310,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep2 == 6 && !_globalStatus.IsStopped)
                     {
                         //退枪头
-                        var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id), cts, 30).GetAwaiter().GetResult();
+                        var result = base.PutNeedleAsync(GetTip2Coordinate(2 * sample.Id), gs, 30).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管放枪头失败,pipettingStep-{sample.PipettorStep2}");
@@ -1327,10 +1324,15 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return DoPipettingTwo(sample, var,cts);
+                return DoPipettingTwo(sample, var,gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
                 throw ex;
             }
 
@@ -1344,9 +1346,9 @@ namespace Q_Platform.BLL
         /// 从试管架搬运净化管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromMaterialToCapperThree(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleFromMaterialToCapperThree(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1371,7 +1373,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId - 1), cts);
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId - 1), gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1380,7 +1382,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId), cts);
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId), gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1402,10 +1404,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromMaterialToCapperThree(sample, cts);
+                return GetSampleFromMaterialToCapperThree(sample, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1415,9 +1421,9 @@ namespace Q_Platform.BLL
         /// 从拧盖3搬运净化管到振荡
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToVibration(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1443,7 +1449,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToVibration((ushort)(2 * sampleId),null,null, cts);
+                            result = GetSampleFromCapperThreeToVibration((ushort)(2 * sampleId),null,null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1452,7 +1458,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToVibration((ushort)(2 * sampleId -1), null, null, cts);
+                            result = GetSampleFromCapperThreeToVibration((ushort)(2 * sampleId -1), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1474,10 +1480,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromCapperThreeToVibration(sample, cts);
+                return GetSampleFromCapperThreeToVibration(sample, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1487,9 +1497,9 @@ namespace Q_Platform.BLL
         /// 从振荡搬运净化管到哪拧盖3
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromVibrationToCapperThree(Sample sample,CancellationTokenSource cts)
+        public bool GetSampleFromVibrationToCapperThree(Sample sample,IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1515,7 +1525,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId -1), null, null, cts);
+                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId -1), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1524,7 +1534,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId ), null, null, cts);
+                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId ), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1546,10 +1556,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromVibrationToCapperThree(sample, cts);
+                return GetSampleFromVibrationToCapperThree(sample, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1559,9 +1573,9 @@ namespace Q_Platform.BLL
         /// 从振荡搬运净化管到试管架
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromVibrationToMaterial(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleFromVibrationToMaterial(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1587,7 +1601,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId - 1),null,null, cts);
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId - 1),null,null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1596,7 +1610,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId), null, null, cts);
+                            result = GetSampleFromVibrationToMaterial((ushort)(2 * sampleId), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从振荡搬运{sampleId}净化管到试管架失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1618,10 +1632,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromVibrationToMaterial(sample, cts);
+                return GetSampleFromVibrationToMaterial(sample, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1633,9 +1651,9 @@ namespace Q_Platform.BLL
         /// 搬运试管到拧盖3
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleToCapperThree(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleToCapperThree(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1660,7 +1678,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId - 1), cts);
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId - 1), gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1669,7 +1687,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId), cts);
+                            result = GetSampleFromMaterialToCapperThree((ushort)(2 * sampleId), gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1685,7 +1703,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId -1), null, null,cts);
+                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId -1), null, null,gs);
                             if (!result)
                             {
                                 throw new Exception($"从振荡2搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1694,7 +1712,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId), null, null, cts);
+                            result = GetSampleFromVibrationToCapperThree((ushort)(2 * sampleId), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从振荡2" +
@@ -1719,13 +1737,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleToCapperThree(sample, cts);
+                return GetSampleToCapperThree(sample, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"搬运{sampleId}净化管到拧盖3 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -1738,9 +1755,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1765,7 +1782,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId),null,null, func, cts);
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId),null,null, func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1774,7 +1791,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId - 1), null, null, func, cts);
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId - 1), null, null, func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1796,10 +1813,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromCapperThreeToTransfer(sample,func, cts);
+                return GetSampleFromCapperThreeToTransfer(sample,func, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1809,9 +1830,9 @@ namespace Q_Platform.BLL
         /// 从拧盖3取有盖试管到试管架
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToMaterial(Sample sample,CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToMaterial(Sample sample,IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1836,7 +1857,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId - 1),null,null, cts);
+                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId - 1),null,null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1845,7 +1866,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId ), null, null, cts);
+                            result = GetSampleFromCapperThreeToMaterial((ushort)(2 * sampleId ), null, null, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到净化管架失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1867,10 +1888,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromCapperThreeToMaterial(sample, cts);
+                return GetSampleFromCapperThreeToMaterial(sample, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -1882,9 +1907,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1909,7 +1934,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperThree((ushort)(2 * sampleId), func, cts);
+                            result = GetSampleFromTransferToCapperThree((ushort)(2 * sampleId), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从移栽搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1918,7 +1943,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToCapperThree((ushort)(2 * sampleId -1), func, cts);
+                            result = GetSampleFromTransferToCapperThree((ushort)(2 * sampleId -1), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从移栽搬运{sampleId}净化管到拧盖3失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1940,13 +1965,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromTransferToCapperThree(sample,func, cts);
+                return GetSampleFromTransferToCapperThree(sample,func, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"从移栽搬运{sampleId}净化管到拧盖3 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -1959,9 +1983,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -1986,7 +2010,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -1995,7 +2019,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2017,13 +2041,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromMaterialToTransfer(sample, func, cts);
+                return GetSampleFromMaterialToTransfer(sample, func, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"搬运{sampleId}净化管到移栽 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -2036,9 +2059,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -2063,7 +2086,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId - 1), func, cts);
+                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId - 1), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2072,7 +2095,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId), func, cts);
+                            result = GetSampleFromTransferToMaterial((ushort)(2 * sampleId), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从移栽搬运{sampleId}净化管到试管架失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2094,10 +2117,14 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleFromTransferToMaterial(sample,func, cts);
+                return GetSampleFromTransferToMaterial(sample,func, gs);
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                  throw ex;
             }
@@ -2108,9 +2135,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             bool result;
@@ -2135,7 +2162,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, cts);
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId - 1), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2144,7 +2171,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, cts);
+                            result = GetSampleFromMaterialToTransfer((ushort)(2 * sampleId), func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2160,7 +2187,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), null, null,func, cts);
+                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId - 1), null, null,func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从振荡2搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2169,7 +2196,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), null, null,func, cts);
+                            result = GetSampleFromVibrationToTransfer((ushort)(2 * sampleId), null, null,func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从振荡2搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2185,7 +2212,7 @@ namespace Q_Platform.BLL
                     {
                         if (sample.PurifyStatus == 0 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId - 1), null, null, func, cts);
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId - 1), null, null, func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2194,7 +2221,7 @@ namespace Q_Platform.BLL
                         }
                         if (sample.PurifyStatus == 1 && !_globalStatus.IsStopped)
                         {
-                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId), null, null, func, cts);
+                            result = GetSampleFromCapperThreeToTransfer((ushort)(2 * sampleId), null, null, func, gs);
                             if (!result)
                             {
                                 throw new Exception($"从拧盖3搬运{sampleId}净化管到移栽失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -2216,13 +2243,12 @@ namespace Q_Platform.BLL
             }
             catch (OccupyMethodException)
             {
-                return GetSampleToTransfer(sample, func, cts);
+                return GetSampleToTransfer(sample, func, gs);
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped||_globalStatus.IsPause)
                 {
-                    _logger?.Info($"搬运{sampleId}净化管到移栽 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -2234,7 +2260,7 @@ namespace Q_Platform.BLL
         /// 清洗加标注射器
         /// </summary>
         /// <returns></returns>
-        public bool WashSyring(CancellationTokenSource cts)
+        public bool WashSyring(IGlobalStatus gs)
         {
            s0: try
             {
@@ -2252,11 +2278,11 @@ namespace Q_Platform.BLL
                     _logger?.Info($"清洗加标注射器");
 
                     //加入清水
-                    var result2 = _syring.AddSolve(1, 2, cts);
+                    var result2 = _syring.AddSolve(1, 2, gs);
                     //气缸上升
                     Z_Cylinder_Up();
                     //移动到清洗位
-                    var result = CarrierMoveToSafePos(GetSyringWashCoordinate(),cts);
+                    var result = CarrierMoveToSafePos(GetSyringWashCoordinate(),gs);
 
                     if (!result.GetAwaiter().GetResult())
                     {
@@ -2291,9 +2317,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"清洗加标注射器 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
@@ -2313,25 +2338,25 @@ namespace Q_Platform.BLL
         /// 从试管架到拧盖3
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromMaterialToCapperThree(ushort num, CancellationTokenSource cts)
+        protected bool GetSampleFromMaterialToCapperThree(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
-            {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-            }
+            //if (gs?.IsCancellationRequested == true)
+            //{
+            //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
+            //}
 
             //取料
-            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2343,25 +2368,25 @@ namespace Q_Platform.BLL
         /// 从试管架到振荡
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromMaterialToVibration(ushort num, CancellationTokenSource cts)
+        protected bool GetSampleFromMaterialToVibration(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2374,21 +2399,21 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="num"></param>
         /// <param name="func">移栽旋转指定角度</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromMaterialToTransfer(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        protected bool GetSampleFromMaterialToTransfer(ushort num, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
             //旋转到指定位置
-            var result1 = func.Invoke(num, cts);
+            var result1 = func.Invoke(num, gs);
 
             //取料
-            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2401,7 +2426,7 @@ namespace Q_Platform.BLL
             }
     
             //放料
-            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2415,15 +2440,15 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromCapperThreeToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSampleFromCapperThreeToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料辅助动作
@@ -2434,7 +2459,7 @@ namespace Q_Platform.BLL
             }
      
             //取料
-            result = base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2447,7 +2472,7 @@ namespace Q_Platform.BLL
             }
       
             //放料
-            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2461,15 +2486,15 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromCapperThreeToVibration(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSampleFromCapperThreeToVibration(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料辅助动作
@@ -2480,7 +2505,7 @@ namespace Q_Platform.BLL
             }
           
             //取料
-            result =  base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2493,7 +2518,7 @@ namespace Q_Platform.BLL
             }
           
             //放料
-            result = base.PutTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2508,18 +2533,18 @@ namespace Q_Platform.BLL
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
         /// <param name="func3">移栽旋转指定角度</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromCapperThreeToTransfer(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        protected bool GetSampleFromCapperThreeToTransfer(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
             //旋转到指定位置
-            var result1 = func.Invoke(num, cts);
+            var result1 = func.Invoke(num, gs);
 
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
@@ -2529,13 +2554,13 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            result =  base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.GetTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //Z轴上升
-            CheckAxisZInSafePos(cts).GetAwaiter().GetResult();
+            CheckAxisZInSafePos(gs).GetAwaiter().GetResult();
             while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
@@ -2554,7 +2579,7 @@ namespace Q_Platform.BLL
             }
           
             //放料
-            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2568,15 +2593,15 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromVibrationToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSampleFromVibrationToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料辅助动作
@@ -2587,7 +2612,7 @@ namespace Q_Platform.BLL
             }
            
             //取料
-            result = base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2600,7 +2625,7 @@ namespace Q_Platform.BLL
             } 
       
             //放料
-            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2615,18 +2640,18 @@ namespace Q_Platform.BLL
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
         /// <param name="func3">移栽旋转指定角度</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromVibrationToTransfer(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        protected bool GetSampleFromVibrationToTransfer(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
             //旋转到指定位置
-            var result1 = func.Invoke(num, cts);
+            var result1 = func.Invoke(num, gs);
 
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
@@ -2636,7 +2661,7 @@ namespace Q_Platform.BLL
             }
 
             //取料
-            result = base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2655,7 +2680,7 @@ namespace Q_Platform.BLL
             }
            
             //放料
-            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetTransferCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2667,13 +2692,13 @@ namespace Q_Platform.BLL
         /// 从振荡到拧盖3
         /// </summary>
         /// <returns></returns>
-        protected bool GetSampleFromVibrationToCapperThree(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSampleFromVibrationToCapperThree(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料辅助动作
@@ -2684,7 +2709,7 @@ namespace Q_Platform.BLL
             }
      
             //取料
-            result =  base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.GetTubeAsync(GetVibrationCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2697,7 +2722,7 @@ namespace Q_Platform.BLL
             }
  
             //放料
-            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2710,33 +2735,33 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="num"></param>
         /// <param name="func">移栽旋转指定角度</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromTransferToMaterial(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        protected bool GetSampleFromTransferToMaterial(ushort num, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //旋转到指定位置
-            var result1 = func.Invoke(num, cts);
+            var result1 = func.Invoke(num, gs);
             if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
    
             //取料
-            var result =  base.GetTubeAsync(GetTransferCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetTransferCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
         
             //放料
-            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2749,32 +2774,32 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="num"></param>
         /// <param name="func">移栽旋转指定角度</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSampleFromTransferToCapperThree(ushort num, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        protected bool GetSampleFromTransferToCapperThree(ushort num, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             byte clawOpenByte = 0;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //旋转到指定位置
-            var result1 = func.Invoke(num,cts);
+            var result1 = func.Invoke(num,gs);
             if (!result1.GetAwaiter().GetResult())
             {
                 throw new Exception("移栽移动到指定位失败!");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetTransferCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetTransferCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperThreeCoordinatte(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2788,25 +2813,25 @@ namespace Q_Platform.BLL
         /// 从西林瓶架到拧盖4
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromMaterialToCapperFour(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromMaterialToCapperFour(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetSeilingCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetSeilingCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2820,25 +2845,25 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromCapperFourToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSeilingFromCapperFourToMaterial(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetSeilingCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetSeilingCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2852,25 +2877,25 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromCapperFourToConcentration(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, CancellationTokenSource cts)
+        protected bool GetSeilingFromCapperFourToConcentration(ushort num, Func<ushort, bool> func1, Func<ushort, bool> func2, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2884,25 +2909,25 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromCapperFourToWeight(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromCapperFourToWeight(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2914,25 +2939,25 @@ namespace Q_Platform.BLL
         /// 从浓缩到拧盖4
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromConcentrationToCapperFour(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromConcentrationToCapperFour(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2944,25 +2969,25 @@ namespace Q_Platform.BLL
         /// 从浓缩到称重
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromConcentrationToWeight(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromConcentrationToWeight(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
             //取料
-            var result = base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetConcentrationCoordinate(num,true), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetWeightCoordinate(num,false), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -2974,25 +2999,25 @@ namespace Q_Platform.BLL
         /// 从称重到拧盖4
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromWeightToCapperFour(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromWeightToCapperFour(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetCapperFourCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3004,25 +3029,25 @@ namespace Q_Platform.BLL
         /// 从称重到浓缩
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool GetSeilingFromWeightToConcentration(ushort num, CancellationTokenSource cts)
+        protected bool GetSeilingFromWeightToConcentration(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 10;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetWeightCoordinate(num,true), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(GetConcentrationCoordinate(num,false), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3034,25 +3059,25 @@ namespace Q_Platform.BLL
         /// 从气质小瓶架到拧盖5
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool Get_GC_BottleFromMaterialToCapperFive(ushort num, CancellationTokenSource cts)
+        protected bool Get_GC_BottleFromMaterialToCapperFive(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 180;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(Get_GC_BottleCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(Get_GC_BottleCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetCapperFiveCoordinate(1), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperFiveCoordinate(1), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3066,25 +3091,25 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool Get_GC_BottleFromCapperFiveToMaterial(ushort num, CancellationTokenSource cts)
+        protected bool Get_GC_BottleFromCapperFiveToMaterial(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 180;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result =  base.GetTubeAsync(GetCapperFiveCoordinate(1), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result =  base.GetTubeAsync(GetCapperFiveCoordinate(1), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result =  base.PutTubeAsync(Get_GC_BottleCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result =  base.PutTubeAsync(Get_GC_BottleCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3096,25 +3121,25 @@ namespace Q_Platform.BLL
         /// 从液质小瓶架到拧盖5
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool Get_LC_BottleFromMaterialToCapperFive(ushort num, CancellationTokenSource cts)
+        protected bool Get_LC_BottleFromMaterialToCapperFive(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 180;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(Get_LC_BottleCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(Get_LC_BottleCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(GetCapperFiveCoordinate(2), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(GetCapperFiveCoordinate(2), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3128,25 +3153,25 @@ namespace Q_Platform.BLL
         /// <param name="num"></param>
         /// <param name="func1">取料前动作</param>
         /// <param name="func2">取料后动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool Get_LC_BottleFromCapperFiveToMaterial(ushort num, CancellationTokenSource cts)
+        protected bool Get_LC_BottleFromCapperFiveToMaterial(ushort num, IGlobalStatus gs)
         {
             byte clawOpenByte = 180;
 
-            if (cts?.IsCancellationRequested == true)
+            if (gs?.IsStopped == true || gs?.IsEmgStop == true || gs?.IsPause == true)
             {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                throw new TaskCanceledException($"触发停止");
             }
 
             //取料
-            var result = base.GetTubeAsync(GetCapperFiveCoordinate(2), clawOpenByte, cts).GetAwaiter().GetResult();
+            var result = base.GetTubeAsync(GetCapperFiveCoordinate(2), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
             }
             //放料
-            result = base.PutTubeAsync(Get_LC_BottleCoordinate(num), clawOpenByte, cts).GetAwaiter().GetResult();
+            result = base.PutTubeAsync(Get_LC_BottleCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
             {
                 return false;
@@ -3163,15 +3188,15 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">加标种类1~4</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool AddMarkFromSourceToWeight(int var,double volume, CancellationTokenSource cts)
+        protected bool AddMarkFromSourceToWeight(int var,double volume, IGlobalStatus gs)
         {
             try
             {
                 Z_Cylinder_Up();
                 //Xy移动到取液位
-                var result = CarrierMoveToSafePos(GetAddMarkSourceCoordinate(var),cts).GetAwaiter().GetResult();
+                var result = CarrierMoveToSafePos(GetAddMarkSourceCoordinate(var),gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception("XY轴移动到加标取液位 失败!");
@@ -3194,7 +3219,7 @@ namespace Q_Platform.BLL
                     Thread.Sleep(2000);
                 }
                 //xy移动到吐液位
-                result = CarrierMoveToSafePos(GetAddMarkTargetCoordinate(), cts).GetAwaiter().GetResult();
+                result = CarrierMoveToSafePos(GetAddMarkTargetCoordinate(), gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception("XY轴移动到加标吐液位 失败!");
@@ -3221,6 +3246,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 throw ex;
             }
@@ -3238,14 +3267,14 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="deep">移液液位深度</param>
         /// <param name="airColumn">吸取空气柱</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected override async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume,double deep,double airColumn, CancellationTokenSource cts)
+        protected override async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume,double deep,double airColumn,double[] safePos, IGlobalStatus gs)
         {
             //移液1ml
             if (volume <= 1 && !_globalStatus.IsStopped)
             {
-                return await base.DoPipettingAsync(sourcePos, targetPos, volume, deep, airColumn, cts).ConfigureAwait(false);
+                return await base.DoPipettingAsync(sourcePos, targetPos, volume, deep, airColumn, safePos, gs).ConfigureAwait(false);
             }
 
             //移液1~2ml
@@ -3253,7 +3282,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3262,7 +3291,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3277,7 +3306,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3286,7 +3315,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3295,7 +3324,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 2, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 2, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3310,7 +3339,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3319,7 +3348,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3328,7 +3357,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3337,7 +3366,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 3 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 3, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 3, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3352,7 +3381,7 @@ namespace Q_Platform.BLL
             {
                 if (_pipStep == 0 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3361,7 +3390,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 1 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3370,7 +3399,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 2 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3379,7 +3408,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 3 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, 1, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3388,7 +3417,7 @@ namespace Q_Platform.BLL
                 }
                 if (_pipStep == 4 && !_globalStatus.IsStopped)
                 {
-                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 4, deep, airColumn, cts).ConfigureAwait(false);
+                    var result = await base.DoPipettingAsync(sourcePos, targetPos, volume - 4, deep, airColumn, safePos, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception($"DoPipettingAsync err step:{_pipStep}");
@@ -3400,7 +3429,6 @@ namespace Q_Platform.BLL
 
             throw new InvalidOperationException($"移液参数超出范围{volume}");
         }
-
 
         /// <summary>
         /// Z气缸上
@@ -3464,6 +3492,15 @@ namespace Q_Platform.BLL
             //        throw new TimeoutException("Z_Cylinder_Down 超时");
             //    }
             //} while (!result);
+        }
+
+        /// <summary>
+        /// 移液器规避位置
+        /// </summary>
+        /// <returns></returns>
+        protected override double[] GetPipettingSafePos()
+        {
+            return new double[] { 378, 118 };
         }
 
         #endregion
@@ -3860,10 +3897,10 @@ namespace Q_Platform.BLL
             return _posData.SyringWashPos;
         }
 
-
-        #endregion
-
-
+        /// <summary>
+        /// 读取重量值
+        /// </summary>
+        /// <returns></returns>
         private double ReadWeight()
         {
             //等待称台稳定
@@ -3883,22 +3920,20 @@ namespace Q_Platform.BLL
             return _weight.ReadWeight(_weithtId).GetAwaiter().GetResult();
         }
 
+        /// <summary>
+        /// 称台清零
+        /// </summary>
+        /// <returns></returns>
         private bool WeightClear()
         {
             return true;
          //  return _weight.Clear(_weithtId).GetAwaiter().GetResult();
         }
 
+        #endregion
 
-        /// <summary>
-        /// 移液器规避位置
-        /// </summary>
-        /// <returns></returns>
-        protected override double[] GetPipettingSafePos()
-        {
-            return null;
-            //return new double[] { 330, 0 };
-        }
+
+
 
     }
 }

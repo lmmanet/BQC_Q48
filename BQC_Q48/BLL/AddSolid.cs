@@ -47,7 +47,7 @@ namespace Q_Platform.BLL
         private readonly ushort _Z2CylinderDown = 11;    //Z2气缸下感应
         private double _stepMoveVel = 30;                //步进电机移动速度
         private double _sevorMoveVel = 60;               //伺服电机移动速度
-        //private double _rotateVel = 60;                  //旋转加固旋转速度
+        private double _zMoveLowVel = 400;                  //Z轴下降速度
         private ushort _weightId1 = 1;                   //称台1
         private ushort _weightId2 = 2;                   //称台2
 
@@ -101,19 +101,26 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 模块回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> GoHome(CancellationTokenSource cts)
+        public async Task<bool> GoHome(IGlobalStatus gs)
         {
             try
             {
                 _logger?.Info("加盐模块回零");
-                Z1_Cylinder_Up();
-                Z2_Cylinder_Up();
+
+                var ret1 = _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ1, gs);
+                var ret2 = _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ2, gs);
+                if (!await ret1 || !await ret2)
+                {
+                    throw new Exception("加盐Z轴回零失败");
+                }
+                //Z1_Cylinder_Up();
+                //Z2_Cylinder_Up();
 
                 //使能Y步进轴
                 await _stepMotion.ServoOn(_axisY2).ConfigureAwait(false);
-                var result = await _stepMotion.GoHomeWithCheckDone(_axisY2, cts).ConfigureAwait(false);
+                var result = await _stepMotion.GoHomeWithCheckDone(_axisY2, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -132,12 +139,12 @@ namespace Q_Platform.BLL
                 //使能Z1Z2轴
                 //await _stepMotion.ServoOn(_axisZ1).ConfigureAwait(false);
                 //await _stepMotion.ServoOn(_axisZ2).ConfigureAwait(false);
-                //result = await _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ1,cts).ConfigureAwait(false);
+                //result = await _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ1,gs).ConfigureAwait(false);
                 //if (!result)
                 //{
                 //    return false;
                 //}
-                //result = await _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ2,cts).ConfigureAwait(false); 
+                //result = await _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ2,gs).ConfigureAwait(false); 
                 //if (!result)
                 //{
                 //    return false;
@@ -150,13 +157,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped  || _globalStatus.IsPause)
                 {
-                    return false;
-                }
-                if (cts?.IsCancellationRequested == true)
-                {
-                    _logger?.Info("加盐模块回零,停止");
                     return false;
                 }
                 _logger?.Warn($"GoHome err:{ex.Message}");
@@ -174,8 +176,8 @@ namespace Q_Platform.BLL
             _stepMotion.StopMove(_axisY2);
             _stepMotion.StopMove(_axisC1);
             _stepMotion.StopMove(_axisC2);
-            Z1_Cylinder_Up();
-            Z2_Cylinder_Up();
+            _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ1, null);
+            _stepMotion.DM2C_GoHomeWithCheckDone(_axisZ2, null);
             return true;
         }
 
@@ -183,9 +185,9 @@ namespace Q_Platform.BLL
         /// 加盐提取
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> AddSaltExtract(Sample sample, Func<Sample, bool,CancellationTokenSource, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
+        public async Task<bool> AddSaltExtract(Sample sample, Func<Sample, bool,IGlobalStatus, Task<bool>> addSolveFunc, Func<bool> func1, Func<bool> func2, IGlobalStatus gs)
         {
             //判断是否有加盐工艺
             if ((sample.TechParams.Tech & 0x1e00) == 0)
@@ -204,7 +206,7 @@ namespace Q_Platform.BLL
                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) || TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
                     {
                         bool add = TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2);
-                        result = await addSolveFunc(sample, add, cts).ConfigureAwait(false);
+                        result = await addSolveFunc(sample, add, gs).ConfigureAwait(false);
                         if (!result)
                         {
                             return false;
@@ -223,7 +225,7 @@ namespace Q_Platform.BLL
                         var weight = new double[] { sample.TechParams.AddHomo[2], sample.TechParams.Solid_B[2], sample.TechParams.Solid_C[2],
                         sample.TechParams.Solid_D[2], sample.TechParams.Solid_E[2],sample.TechParams.Solid_F[2] };
 
-                        result = await AddSolidAsync(sample, weight, func1, func2, cts).ConfigureAwait(false);
+                        result = await AddSolidAsync(sample, weight, func1, func2, gs).ConfigureAwait(false);
                         if (!result)
                         {
                             return false;
@@ -243,6 +245,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -254,9 +260,9 @@ namespace Q_Platform.BLL
         /// 加固
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolidAsync(Sample sample,double[] weights, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts)
+        public async Task<bool> AddSolidAsync(Sample sample,double[] weights, Func<bool> func1, Func<bool> func2, IGlobalStatus gs)
         {
             try
             {
@@ -269,7 +275,7 @@ namespace Q_Platform.BLL
                 //加固到接驳位   内部已有暂停判断
                 if (!_globalStatus.IsStopped)
                 {
-                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -280,7 +286,7 @@ namespace Q_Platform.BLL
                 if (!SampleStatusHelper.BitIsOn(sample,SampleStatus.IsInAddSolid) && !_globalStatus.IsStopped)
                 {
                     //由内部判断暂停
-                    result = _carrier.GetSampleFromCapperOneToAddSolid(sample, func1, func2, cts);
+                    result = _carrier.GetSampleFromCapperOneToAddSolid(sample, func1, func2, gs);
                     if (!result)
                     {
                         return false;
@@ -291,7 +297,7 @@ namespace Q_Platform.BLL
                 if (!_isAddSolidDone && !_globalStatus.IsStopped)
                 {
                     //由内部判断暂停
-                    result = await Add_Solid(weights, cts).ConfigureAwait(false);
+                    result = await Add_Solid(weights, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -303,7 +309,7 @@ namespace Q_Platform.BLL
                 //完成后加固到接驳位
             Done: if (!_globalStatus.IsStopped)
                 {
-                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -313,7 +319,7 @@ namespace Q_Platform.BLL
                 //从加固搬运试管到拧盖1位
                 if (!_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetSampleFromAddSolidToCapperOne(sample, cts);
+                    result = _carrier.GetSampleFromAddSolidToCapperOne(sample, gs);
                     if (!result)
                     {
                         return false;
@@ -327,6 +333,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error(ex.Message);
                 return false;
             }
@@ -339,15 +349,15 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 移动到上下料位
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
+        protected async Task<bool> MovePutGetPos(IGlobalStatus gs)
         {
             try
             {
                 _logger?.Debug($"MovePutGetPos");
                 //步进Y轴移动到原点位置
-               s1: var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, cts).ConfigureAwait(false);
+               s1: var result = await _stepMotion.P2pMoveWithCheckDone(_axisY2, 0, _stepMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -369,6 +379,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -379,9 +393,9 @@ namespace Q_Platform.BLL
         /// 加固
         /// </summary>
         /// <param name="weights">加固重量</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> Add_Solid(double[] weights, CancellationTokenSource cts)
+        protected async Task<bool> Add_Solid(double[] weights, IGlobalStatus gs)
         {
             weights.ToList().ForEach(w=>_logger.Debug($"Add_Solid Weight {w}"));
             double rotateVel = 10;
@@ -401,7 +415,7 @@ namespace Q_Platform.BLL
                     _step++;
                     continue;
                 }
-                var result = await Add_SolidSub(_step+1, weights[_step], rotateVel, cts).ConfigureAwait(false);
+                var result = await Add_SolidSub(_step+1, weights[_step], rotateVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("加固失败!");
@@ -417,9 +431,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="solid">添加种类1~6</param>
         /// <param name="weight">加固重量</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> Add_SolidSub(int solid, double weight,double rotateVel, CancellationTokenSource cts)
+        protected async Task<bool> Add_SolidSub(int solid, double weight,double rotateVel, IGlobalStatus gs)
         {
             try
             {
@@ -451,7 +465,7 @@ namespace Q_Platform.BLL
                 X_Cylinder_Left();
                 //伺服Y轴移动到指定位置
                s1: var result11 =  _motion.P2pMoveWithCheckDone(_axisY1, pos[0], _sevorMoveVel, _globalStatus).ConfigureAwait(false);
-                var result22 =  _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, cts).ConfigureAwait(false);
+                var result22 =  _stepMotion.P2pMoveWithCheckDone(_axisY2, pos[1], _stepMoveVel, gs).ConfigureAwait(false);
 
                 if (!await result11)
                 {
@@ -487,13 +501,20 @@ namespace Q_Platform.BLL
                     throw new Exception("步进Y轴移动到指定位置出错");
                 }
 
+                //检测称台数据判断是否完成
+                var result1 = CheckDone1(weight + gross1).ConfigureAwait(false);
+                var result2 = CheckDone2(weight + gross2).ConfigureAwait(false);
 
-                //Z1 Z2气缸下降 
-               s3:
+            //Z1 Z2气缸下降 
+            s3:
                 if (_isCanPressDown)
                 {
-                    Z1_Cylinder_Down();
-                    Z2_Cylinder_Down();
+                    var ret11 = _stepMotion.P2pMoveWithCheckDone(_axisZ1, GetOpenHighCoordinate(solid), _zMoveLowVel, gs);
+                    var ret22 = _stepMotion.P2pMoveWithCheckDone(_axisZ2, GetOpenHighCoordinate(solid), _zMoveLowVel, gs);
+                    await ret11;
+                    await ret22;
+                    //Z1_Cylinder_Down();
+                    //Z2_Cylinder_Down();
                 }
                 else
                 {
@@ -552,28 +573,36 @@ namespace Q_Platform.BLL
                     throw new Exception("加盐旋转电机2报警");
                 }
 
-                //检测称台数据判断是否完成
-                var result1 = CheckDone1(weight + gross1).ConfigureAwait(false);
-                var result2 = CheckDone2(weight + gross2).ConfigureAwait(false);
+               
                 await result1;
                 await result2;
 
        
                 //回转1/8
-                var ret3 = _stepMotion.RelativeMoveWithCheckDone(_axisC1, -0.12, 50, cts);
-                var ret4 = _stepMotion.RelativeMoveWithCheckDone(_axisC2, -0.12, 50, cts);
+                var ret3 = _stepMotion.RelativeMoveWithCheckDone(_axisC1, -0.12, 50, gs);
+                var ret4 = _stepMotion.RelativeMoveWithCheckDone(_axisC2, -0.12, 50, gs);
                 await ret3;
                 await ret4;
 
                 //Z1 Z2气缸上升
-                Z1_Cylinder_Up();
-                Z2_Cylinder_Up();
+                var ret1 = _stepMotion.P2pMoveWithCheckDone(_axisZ1, GetZSafeCoordinate(), _zMoveLowVel ,gs);
+                var ret2 = _stepMotion.P2pMoveWithCheckDone(_axisZ2, GetZSafeCoordinate(), _zMoveLowVel,gs);
+                if (!await ret1 || !await ret2)
+                {
+                    throw new Exception("加盐Z轴回零失败");
+                }
+                //Z1_Cylinder_Up();
+                //Z2_Cylinder_Up();
                 AddPreWeight1 = 0;
                 AddPreWeight2 = 0;
                 return true;
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -591,14 +620,19 @@ namespace Q_Platform.BLL
             _logger?.Debug($"CheckDone1-{weight}-{timeout}" );
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
             await Task.Delay(500).ConfigureAwait(false);
-            while (true)
+            while (!_globalStatus.IsStopped)
             {
                 Thread.Sleep(300);
                 var value = _weight.ReadWeight(_weightId1).GetAwaiter().GetResult();
                 if (value >= weight)
                 {
                     _stepMotion.StopMove(_axisC1).GetAwaiter().GetResult();
-                    var res = Rotate1HomePos(null).GetAwaiter().GetResult();
+                    var res = Z1MoveTo(GetCloseHighCoordinate(1),null).GetAwaiter().GetResult();
+                    if (!res)
+                    {
+                        throw new Exception("Z1轴到原位出错!");
+                    }
+                    res = Rotate1HomePos(null).GetAwaiter().GetResult();
                     if (!res)
                     {
                         throw new Exception("旋转到原位出错!");
@@ -615,6 +649,10 @@ namespace Q_Platform.BLL
                     _stepMotion.StopMove(_axisC1).GetAwaiter().GetResult();
                     throw new TimeoutException($"CheckDone1 加固超时");
                 }
+                if (_globalStatus.IsPause)
+                {
+                    throw new Exception("程序暂停!");
+                }
             }
             return true;
         }
@@ -630,14 +668,19 @@ namespace Q_Platform.BLL
             _logger?.Debug($"CheckDone2-{weight}-{timeout}");
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(timeout);
             await Task.Delay(500).ConfigureAwait(false);
-            while (true)
+            while (!_globalStatus.IsStopped)
             {
                 Thread.Sleep(300);
                 var value = _weight.ReadWeight(_weightId2).GetAwaiter().GetResult();
                 if (value >= weight)
                 {
                     _stepMotion.StopMove(_axisC2).GetAwaiter().GetResult();
-                    var res = Rotate2HomePos(null).GetAwaiter().GetResult();
+                    var res = Z2MoveTo(GetCloseHighCoordinate(1), null).GetAwaiter().GetResult();
+                    if (!res)
+                    {
+                        throw new Exception("Z2轴到原位出错!");
+                    }
+                    res = Rotate2HomePos(null).GetAwaiter().GetResult();
                     if (!res)
                     {
                         throw new Exception("旋转到原位出错!");
@@ -653,6 +696,10 @@ namespace Q_Platform.BLL
                 {
                     _stepMotion.StopMove(_axisC2).GetAwaiter().GetResult();
                     throw new TimeoutException($"CheckDone1 加固超时");
+                }
+                if (_globalStatus.IsPause)
+                {
+                    throw new Exception("程序暂停");
                 }
             }
             return true;
@@ -827,7 +874,7 @@ namespace Q_Platform.BLL
         }
 
 
-        protected async Task<bool> Rotate1HomePos(CancellationTokenSource cts)
+        protected async Task<bool> Rotate1HomePos(IGlobalStatus gs)
         {
             var t1 = _stepMotion.GetCurrentPos(_axisC1).ConfigureAwait(false);
          
@@ -835,7 +882,7 @@ namespace Q_Platform.BLL
          
             double offset1 = 0.5 - pos1 % 0.5;
          
-            var t3 = _stepMotion.RelativeMoveWithCheckDone(_axisC1, offset1, 50, cts);
+            var t3 = _stepMotion.RelativeMoveWithCheckDone(_axisC1, offset1, 50, gs);
      
 
             if (!await t3 )
@@ -844,7 +891,7 @@ namespace Q_Platform.BLL
             }
             return true;
         }
-        protected async Task<bool> Rotate2HomePos(CancellationTokenSource cts)
+        protected async Task<bool> Rotate2HomePos(IGlobalStatus gs)
         {
           
             var t2 = _stepMotion.GetCurrentPos(_axisC2).ConfigureAwait(false);
@@ -853,7 +900,7 @@ namespace Q_Platform.BLL
          
             double offset2 = 0.5 - pos2 % 0.5;
 
-            var t4 =  _stepMotion.RelativeMoveWithCheckDone(_axisC2, offset2, 50, cts);
+            var t4 =  _stepMotion.RelativeMoveWithCheckDone(_axisC2, offset2, 50, gs);
 
             if ( !await t4)
             {
@@ -875,14 +922,14 @@ namespace Q_Platform.BLL
         }
 
 
-        protected async Task<bool> Z1MoveTo(double offset,CancellationTokenSource cts)
+        protected async Task<bool> Z1MoveTo(double offset,IGlobalStatus gs)
         {
-           return await _stepMotion.P2pMoveWithCheckDone(_axisZ1, offset, 20, cts).ConfigureAwait(false);
+           return await _stepMotion.P2pMoveWithCheckDone(_axisZ1, offset, _zMoveLowVel, gs).ConfigureAwait(false);
         }
 
-        protected async Task<bool> Z2MoveTo(double offset,CancellationTokenSource cts)
+        protected async Task<bool> Z2MoveTo(double offset,IGlobalStatus gs)
         {
-            return await _stepMotion.P2pMoveWithCheckDone(_axisZ2, offset, 20, cts).ConfigureAwait(false);
+            return await _stepMotion.P2pMoveWithCheckDone(_axisZ2, offset, _zMoveLowVel, gs).ConfigureAwait(false);
         }
 
 
@@ -917,6 +964,54 @@ namespace Q_Platform.BLL
 
         }
 
+
+        private double GetCloseHighCoordinate(int solid)
+        {
+            switch (solid)
+            {
+                case 1:
+                    return 33;
+                case 2:
+                    return 33;
+                case 3:
+                    return 33;
+                case 4:
+                    return 33;
+                case 5:
+                    return 33;
+                case 6:
+                    return 33;
+                default:
+                    throw new Exception($"参数错误：{solid}");
+            }
+        }
+
+        private double GetOpenHighCoordinate(int solid)
+        {
+            switch (solid)
+            {
+                case 1:
+                    return 33; //35~38
+                case 2:
+                    return 38;
+                case 3:
+                    return 37;
+                case 4:
+                    return 37;
+                case 5:
+
+                    return 37;
+                case 6:
+                    return 37;
+                default:
+                    throw new Exception($"参数错误：{solid}");
+            }
+        }
+
+        private double GetZSafeCoordinate()
+        {
+            return 10;
+        }
 
         /// <summary>
         /// 推拉感应回调

@@ -50,7 +50,7 @@ namespace Q_Platform.ViewModels.Base
                     {
                         ListAxisInfo.Add(item);
                     }
-
+                    _axisEleGear = ListAxisInfo[0];
                     GetAxisPosInfo(ListAxisInfo[0]);
                 }
             }
@@ -119,10 +119,27 @@ namespace Q_Platform.ViewModels.Base
         /// </summary>
         public uint MotionIoStatus { get; set; }
 
+
         /// <summary>
         /// 电爪状态
         /// </summary>
         public Byte ClawStatus { get; set; }
+
+        /// <summary>？
+        /// 手爪控制目标位置
+        /// </summary>
+        public byte ClawTargetPos { get; set; } = 0;
+
+        /// <summary>
+        /// 手爪控制目标速度
+        /// </summary>
+        public byte ClawTargetVel { get; set; } = 255;
+
+        /// <summary>
+        /// 手爪控制目标转矩
+        /// </summary>
+        public byte ClawTargetTorque { get; set; } = 255;
+
 
         /// <summary>
         /// 报警信息
@@ -150,8 +167,25 @@ namespace Q_Platform.ViewModels.Base
         /// 
         public ObservableCollection<AxisEleGear> ListAxisInfo { get; set; }
 
+       
+        private AxisEleGear _axisEleGear ;
+
         [DoNotNotify]
-        public ushort AxisNo { get; set; }
+        public AxisEleGear SelectedAxis
+        {
+            get { return _axisEleGear; }
+            set 
+            {
+                if (_axisEleGear == value)
+                {
+                  
+                    return;
+                }
+                _axisEleGear = value;
+                GetAxisPosInfo(_axisEleGear);
+                RaisePropertyChanged();
+            }
+        }
 
 
         /// <summary>
@@ -169,7 +203,6 @@ namespace Q_Platform.ViewModels.Base
         /// 定位完成
         /// </summary>
         public bool AbsMoveDone { get; set; }
-
 
         #endregion
 
@@ -273,6 +306,11 @@ namespace Q_Platform.ViewModels.Base
         public ICommand CloseClawCommand { get; set; }
 
         /// <summary>
+        /// 夹爪自定义命令
+        /// </summary>
+        public ICommand ExcuteUserCommand { get; set; }
+
+        /// <summary>
         /// 移液器退枪头
         /// </summary>
         public ICommand PutNeeldCommand { get; set; }
@@ -313,8 +351,8 @@ namespace Q_Platform.ViewModels.Base
 
         protected virtual void RefreshStatus()
         {
-            MotionIoStatus = _motion.GetMotionIoStatus(AxisNo);
-            if (_motion.GetMotionStatus(AxisNo) == 4)
+            MotionIoStatus = _motion.GetMotionIoStatus(SelectedAxis.AxisNo);
+            if (_motion.GetMotionStatus(SelectedAxis.AxisNo) == 4)
             {
                 MotionStatus = 1;
             }
@@ -370,6 +408,7 @@ namespace Q_Platform.ViewModels.Base
             DisableCommand = new RelayCommand(DisableClaw);
             OpenClawCommand = new RelayCommand<object>(OpenClaw);
             CloseClawCommand = new RelayCommand(CloseClaw);
+            ExcuteUserCommand = new RelayCommand(ExcuteUser);
         }
 
         /// <summary>
@@ -388,7 +427,7 @@ namespace Q_Platform.ViewModels.Base
             {
                 return;
             }
-            AxisNo = axis.AxisNo;
+            //AxisNo = axis.AxisNo;
             //更新轴点位信息
             GetAxisPosInfo(axis);
 
@@ -500,19 +539,19 @@ namespace Q_Platform.ViewModels.Base
             {
                 return;
             }
-            if (AxisNo == 0 || AxisNo == 9) //X轴
+            if (SelectedAxis.AxisNo == 0 || SelectedAxis.AxisNo == 9) //X轴
             {
                 posInfo.PosData = XCurrentPos;
             }
-            else if(AxisNo == 1 || AxisNo == 10)//Y轴
+            else if(SelectedAxis.AxisNo == 1 || SelectedAxis.AxisNo == 10)//Y轴
             {
                 posInfo.PosData = YCurrentPos;
             }
-            else if(AxisNo == 2 || AxisNo == 11)//Z1轴
+            else if(SelectedAxis.AxisNo == 2 || SelectedAxis.AxisNo == 11)//Z1轴
             {
                 posInfo.PosData = Z1CurrentPos;
             }
-            else if(AxisNo == 3 || AxisNo == 12) //Z2轴
+            else if(SelectedAxis.AxisNo == 3 || SelectedAxis.AxisNo == 12) //Z2轴
             {
                 posInfo.PosData = Z2CurrentPos;
             }
@@ -663,6 +702,18 @@ namespace Q_Platform.ViewModels.Base
             }
         }
 
+        protected void ExcuteUser()
+        {
+            try
+            {
+                _clawInstance.SendCommand(CarrierInfo.ClawId, ClawTargetPos, ClawTargetVel, ClawTargetTorque);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
 
         #region Fuction EtherCat
 
@@ -674,7 +725,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.StopMove(AxisNo);
+                _motion.StopMove(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -687,7 +738,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.Emg_stop(AxisNo);
+                _motion.Emg_stop(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -700,7 +751,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.ResetAxisAlm(AxisNo);
+                _motion.ResetAxisAlm(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -715,7 +766,7 @@ namespace Q_Platform.ViewModels.Base
             {
                 await RunCommandAsync(() => AbsMoveBusy, async () =>
                 {
-                    AbsMoveDone = await _motion.P2pMoveWithCheckDone(AxisNo, TargetPos, TargetVel, null);
+                    AbsMoveDone = await _motion.P2pMoveWithCheckDone(SelectedAxis.AxisNo, TargetPos, TargetVel, null);
                 });
             }
             catch (Exception ex)
@@ -729,14 +780,14 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                switch (AxisNo)
+                switch (SelectedAxis.AxisNo)
                 {
                     case 4:
                     case 8:
                     case 13: //Z相回零
                         await RunCommandOpAsync(() => Homing, () =>
                         {
-                            return _motion.GohomeWithCheckDone(AxisNo, 33, null);
+                            return _motion.GohomeWithCheckDone(SelectedAxis.AxisNo, 33, null);
                         });
                         break;
                     case 6:
@@ -744,7 +795,7 @@ namespace Q_Platform.ViewModels.Base
                     case 15://原点回零
                         await RunCommandOpAsync(() => Homing, () =>
                         {
-                            return _motion.GohomeWithCheckDone(AxisNo, 21, null);
+                            return _motion.GohomeWithCheckDone(SelectedAxis.AxisNo, 21, null);
                         });
                         break;
                     default:
@@ -763,7 +814,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.ServoOn(AxisNo);
+                _motion.ServoOn(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -776,7 +827,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.ServoOff(AxisNo);
+                _motion.ServoOff(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -790,7 +841,7 @@ namespace Q_Platform.ViewModels.Base
             try
             {
                 double jogVel = TargetVel > 100 ? 100 : TargetVel;
-                _motion.JogMove(AxisNo, jogVel, 1);
+                _motion.JogMove(SelectedAxis.AxisNo, jogVel, 1);
 
             }
             catch (Exception ex)
@@ -804,7 +855,7 @@ namespace Q_Platform.ViewModels.Base
             try
             {
                 double jogVel = TargetVel > 100 ? 100 : TargetVel;
-                _motion.JogMove(AxisNo, jogVel, 0);
+                _motion.JogMove(SelectedAxis.AxisNo, jogVel, 0);
 
             }
             catch (Exception ex)
@@ -817,7 +868,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.JogStop(AxisNo);
+                _motion.JogStop(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)
@@ -830,7 +881,7 @@ namespace Q_Platform.ViewModels.Base
         {
             try
             {
-                _motion.AbsSysClear(AxisNo);
+                _motion.AbsSysClear(SelectedAxis.AxisNo);
 
             }
             catch (Exception ex)

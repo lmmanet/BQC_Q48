@@ -82,17 +82,17 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> GoHome(CancellationTokenSource cts)
+        public override async Task<bool> GoHome(IGlobalStatus gs)
         {
             _logger?.Info($"拧盖模块3回零");
             try
             {
                 //注射器回零
-                var result1 = _syring.GoHome(cts).ConfigureAwait(false);
+                var result1 = _syring.GoHome(gs).ConfigureAwait(false);
                 //拧盖回零
-                var result2 = base.GoHome(cts).ConfigureAwait(false);
+                var result2 = base.GoHome(gs).ConfigureAwait(false);
 
                 if (!await result1 || !await result2)
                 {
@@ -103,7 +103,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
                     return false;
                 }
@@ -116,13 +116,13 @@ namespace Q_Platform.BLL
         /// 装盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOnAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
 
-           s1: var result = await CapperOn(50, 40, cts).ConfigureAwait(false);
+           s1: var result = await CapperOn(50, 40, gs).ConfigureAwait(false);
 
             if (!result)
             {
@@ -130,7 +130,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -147,12 +147,12 @@ namespace Q_Platform.BLL
         /// 拆盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOffAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
-            s1: var result = await CapperOff(cts, -1.3).ConfigureAwait(false);
+            s1: var result = await CapperOff(gs, -1.3).ConfigureAwait(false);
 
             if (!result)
             {
@@ -160,7 +160,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -169,6 +169,30 @@ namespace Q_Platform.BLL
                     }
                 }
             }
+        //    //检测是否拆盖成功
+        //    result = CheckUnCapper(gs);
+        //    if (!result)
+        //    {
+        //        return false;
+        //    }
+
+        //s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
+        //    if (!result)
+        //    {
+        //        if (_globalStatus.IsPause)
+        //        {
+        //            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
+        //            {
+        //                Thread.Sleep(1000);
+        //            }
+        //            if (!_globalStatus.IsStopped)
+        //            {
+        //                goto s5;
+        //            }
+        //        }
+        //        throw new Exception("Y轴运动出错！");
+        //    }
+
 
             return result;
         }
@@ -180,9 +204,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToTransfer(Sample sample ,Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToTransfer(Sample sample ,Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             try
@@ -196,7 +220,7 @@ namespace Q_Platform.BLL
                     //拧盖移动到上下料位
                     if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -209,7 +233,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
-                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -228,7 +252,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -247,7 +271,7 @@ namespace Q_Platform.BLL
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolveAcetic))
                         {
-                            result = AddSolve(sample, cts).GetAwaiter().GetResult();
+                            result = AddSolve(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}净化管加醋酸铵水溶液 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -264,7 +288,7 @@ namespace Q_Platform.BLL
                             //装盖
                             if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                             {
-                                result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                                result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                                 if (!result)
                                 {
                                     throw new Exception($"{sample.Id}样品移液管装盖 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -281,7 +305,7 @@ namespace Q_Platform.BLL
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.VibrationBeforePurify))
                         {
                             //振荡
-                            result = _vibration.StartVibrationTwo(sample, cts); // 5 6 7
+                            result = _vibration.StartVibrationTwo(sample, gs); // 5 6 7
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}净化管加醋酸铵水溶液振荡 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -295,7 +319,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -308,7 +332,7 @@ namespace Q_Platform.BLL
                     //移动到上下料位
                     if (sample.SubStep == 9 && !_globalStatus.IsStopped)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -340,9 +364,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToTransferWithoutVibration(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToTransferWithoutVibration(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             try
@@ -356,7 +380,7 @@ namespace Q_Platform.BLL
                     //拧盖移动到上下料位
                     if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -369,7 +393,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
-                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架取{sample.Id}样品移液管 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -383,7 +407,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -402,7 +426,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped) && SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCapper))
                         {
-                            result = _carrier.GetSampleFromCapperThreeToTransfer(sample, func, cts);
+                            result = _carrier.GetSampleFromCapperThreeToTransfer(sample, func, gs);
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品移液管搬运到移栽 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -440,9 +464,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts)
+        public bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             try
@@ -453,14 +477,14 @@ namespace Q_Platform.BLL
                     _logger?.Info($"从移栽取{sample.Id}样品净化管到拧盖3");
 
                     //拧盖移动到上下料位
-                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    var result = MovePutGetPos(gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("拧盖移动到上下料位 出错");
                     }
 
                     //从移栽取试管到拧盖3
-                    result = _carrier.GetSampleFromTransferToCapperThree(sample, func, cts);
+                    result = _carrier.GetSampleFromTransferToCapperThree(sample, func, gs);
                     if (!result)
                     {
                         throw new Exception($"从移栽取{sample.Id}样品净化管到拧盖3 失败!");
@@ -486,9 +510,9 @@ namespace Q_Platform.BLL
         /// 从拧盖3搬运净化管到振荡或者搬运净化管到试管架
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToVibration(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             try
@@ -511,7 +535,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品净化管装盖 失败!");
@@ -524,7 +548,7 @@ namespace Q_Platform.BLL
                     //移动到上下料位
                     if (!_globalStatus.IsStopped && sample.SubStep == 17)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -539,7 +563,7 @@ namespace Q_Platform.BLL
                 {
                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.PurifyVibration) && sample.MainStep == 5)
                     {
-                        result = _vibration.StartVibrationOne(sample, cts);
+                        result = _vibration.StartVibrationOne(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"净化管{sampleId}振荡失败");
@@ -570,7 +594,7 @@ namespace Q_Platform.BLL
         }
 
 
-        public bool GetSampleFromCapperThreeToMaterial(Sample sample,CancellationTokenSource cts)
+        public bool GetSampleFromCapperThreeToMaterial(Sample sample,IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             try
@@ -583,7 +607,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品净化管装盖 失败!");
@@ -597,7 +621,7 @@ namespace Q_Platform.BLL
                     //移动到上下料位
                     if (!_globalStatus.IsStopped && sample.SubStep == 17)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -608,7 +632,7 @@ namespace Q_Platform.BLL
                     //下料到试管架
                     if (!_globalStatus.IsStopped && sample.SubStep == 18)
                     {
-                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, gs);
                         if (!result)
                         {
                             throw new Exception("从拧盖3取试管到试管架 出错");
@@ -640,9 +664,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="func">移液动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPipetting(Sample sample, Func<Sample, CancellationTokenSource,bool> func, CancellationTokenSource cts)
+        public bool DoPipetting(Sample sample, Func<Sample, IGlobalStatus, bool> func, IGlobalStatus gs)
         {
             s1: ushort sampleId = sample.Id;
             Thread.Sleep(1000); //等待获取锁间隔
@@ -665,7 +689,7 @@ namespace Q_Platform.BLL
                     //拧盖移动到上下料位
                     if (sample.SubStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖移动到上下料位 出错");
@@ -678,7 +702,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                         {
-                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, cts);
+                            result = _carrier.GetSampleFromMaterialToCapperThree(sample, gs);
                             if (!result)
                             {
                                 throw new Exception($"从试管架取{sample.Id}净化管 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -692,7 +716,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
@@ -705,7 +729,7 @@ namespace Q_Platform.BLL
                     //移液
                     if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
-                        result = func?.Invoke(sample, cts) != false;
+                        result = func?.Invoke(sample, gs) != false;
                         if (!result)
                         {
                             throw new Exception("拧盖3移液失败!");
@@ -718,7 +742,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyUnCapped))
                         {
-                            result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"{sample.Id}样品净化管装盖 失败!");
@@ -731,7 +755,7 @@ namespace Q_Platform.BLL
                     //搬运到试管架
                     if (sample.SubStep == 5 && !_globalStatus.IsStopped)
                     {
-                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromCapperThreeToMaterial(sample, gs);
                         if (!result)
                         {
                             throw new Exception("从拧盖3搬运净化管到试管架失败!");
@@ -760,15 +784,15 @@ namespace Q_Platform.BLL
         /// 加液
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private async Task<bool> AddSolve(Sample sample, CancellationTokenSource cts)
+        private async Task<bool> AddSolve(Sample sample, IGlobalStatus gs)
         {
             ushort sampleId = sample.Id;
             double volume = sample.TechParams.cusuanan;
             _logger?.Info($"{sampleId}净化管加液-{volume}ml");
             //加入醋酸铵水溶液
-            return await AddSolve(volume, cts);
+            return await AddSolve(volume, gs);
      
         }
 
@@ -777,9 +801,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="solve"></param>
         /// <param name="volume"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private async Task<bool> AddSolve(double volume, CancellationTokenSource cts,byte solve = 0x01)
+        private async Task<bool> AddSolve(double volume, IGlobalStatus gs,byte solve = 0x01)
         {
             _logger?.Debug($"AddSolve-{solve}-{volume}");
             try
@@ -788,7 +812,7 @@ namespace Q_Platform.BLL
                 _io.WriteBit_DO(_holding, true);
 
                 //Y轴移动到加液位
-               s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, cts).ConfigureAwait(false);
+               s1: var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -806,7 +830,7 @@ namespace Q_Platform.BLL
                 }
 
                 //开始加液
-                s2: result = await _syring.AddSolve(solve, volume, cts).ConfigureAwait(false);
+                s2: result = await _syring.AddSolve(solve, volume, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -828,6 +852,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false; ;
             }

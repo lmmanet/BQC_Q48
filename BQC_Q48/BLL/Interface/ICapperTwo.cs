@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
 
      
@@ -30,7 +31,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽搬运萃取空管到拧盖2   
@@ -39,7 +40,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖2搬运萃取空管到试管架2  拧盖2内部（装盖，下料到试管架） 或搬运取完上清液的萃取管等待振荡
@@ -47,7 +48,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖2搬运萃取管到冰浴 
@@ -55,7 +56,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToCold(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从试管架2搬运萃取管到拧盖2 接受上清液
@@ -63,7 +64,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToCapperTwo(Sample sample, IGlobalStatus gs);
 
 
         //================================================移液部分 =================================================//
@@ -74,7 +75,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+        Task<bool> GetSampleFromMaterialToCapperTwo(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖2取回移液完后的样品管到试管架1
@@ -82,7 +83,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
+        Task<bool> GetSampleFromCapperTwoToMaterial(Sample sample, IGlobalStatus gs);
 
         void UpdatePosData();
 

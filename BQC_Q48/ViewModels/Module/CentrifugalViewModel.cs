@@ -28,6 +28,9 @@ namespace Q_Platform.ViewModels.Module
 
         #region Properties
 
+        public int MotionStatus { get; set; }
+
+        public uint MotionIoStatus { get; set; }
 
         public string AlarmMessage { get; set; }
 
@@ -36,6 +39,19 @@ namespace Q_Platform.ViewModels.Module
         public double WCurrentVel { get; set; }
 
         public double TargetVel { get; set; }
+
+        /// <summary>
+        /// 离心机门开关状态 0： 开 1：关 2：中间位
+        /// </summary>
+        public int ShadowStatus { get; set; }
+
+        /// <summary>
+        /// 在工位1
+        /// </summary>
+        public bool InStation1 { get; set; }
+        public bool InStation2 { get; set; }
+        public bool InStation3 { get; set; }
+        public bool InStation4 { get; set; }
 
 
         #endregion
@@ -89,6 +105,29 @@ namespace Q_Platform.ViewModels.Module
         private void RefreshStatus()
         {
             WCurrentVel = _motion.GetCurrentVel(_axis)*60;
+            MotionIoStatus = _motion.GetMotionIoStatus(4);
+            if (_motion.GetMotionStatus(_axis) == 4)
+            {
+                MotionStatus = 1;
+            }
+            else
+            {
+                MotionStatus = 0;
+            }
+            WCurrentVel = _motion.GetCurrentVel(_axis) * 60;
+            if (_io.ReadBit_DI(_shadowOpenSensor) && !_io.ReadBit_DI(_shadowCloseSensor))
+            {
+                ShadowStatus = 0;
+            }
+            else if (!_io.ReadBit_DI(_shadowOpenSensor) && _io.ReadBit_DI(_shadowCloseSensor))
+            {
+                ShadowStatus = 1;
+            }
+            else
+            {
+                ShadowStatus = 2;
+            }
+
         }
 
         private void RegisterCommand()
@@ -98,10 +137,10 @@ namespace Q_Platform.ViewModels.Module
             EnableMotionCommand = new RelayCommand(EnableMotion);
             DisableMotionCommand = new RelayCommand(DisableMotion);
             ResetAxisAmlCommand = new RelayCommand(ResetAxisAml);
-            HomeMove1Command = new RelayCommand(HomeMove1);
-            HomeMove2Command = new RelayCommand(HomeMove2);
-            HomeMove3Command = new RelayCommand(HomeMove3);
-            HomeMove4Command = new RelayCommand(HomeMove4);
+            HomeMove1Command = new RelayCommand(async()=> await HomeMove1());
+            HomeMove2Command = new RelayCommand(async () => await HomeMove2());
+            HomeMove3Command = new RelayCommand(async () => await HomeMove3());
+            HomeMove4Command = new RelayCommand(async () => await HomeMove4());
             OpenShadowCommand = new RelayCommand(OpenShadow);
             CloseShadowCommand = new RelayCommand(CloseShadow);
         }
@@ -146,37 +185,38 @@ namespace Q_Platform.ViewModels.Module
             });
         }
 
-        private void HomeMove1()
+        private async Task HomeMove1()
         {
-            RunCommandAsync(() =>
+            await RunCommandAsync(() => InStation1, () =>
             {
-                _motion.GohomeWithCheckDone(_axis, _homeMode, 0.05, null);
+                return _motion.GohomeWithCheckDone(_axis, _homeMode, 0.055, null);
             });
         }
 
-        private void HomeMove2()
+        private async Task HomeMove2()
         {
-            RunCommandAsync(() =>
+            await RunCommandAsync(() => InStation2, () =>
             {
-                _motion.GohomeWithCheckDone(_axis, _homeMode, 0.3, null);
+                return _motion.GohomeWithCheckDone(_axis, _homeMode, 0.305, null);
             });
         }
 
-        private void HomeMove3()
+        private async Task HomeMove3()
         {
-            RunCommandAsync(() =>
+            await RunCommandAsync(() => InStation3, () =>
             {
-                _motion.GohomeWithCheckDone(_axis, _homeMode, 0.55, null);
+                return _motion.GohomeWithCheckDone(_axis, _homeMode, 0.555, null);
             });
         }
 
-        private void HomeMove4()
+        private async Task HomeMove4()
         {
-            RunCommandAsync(() =>
+            await RunCommandAsync(() => InStation4, () =>
             {
-                _motion.GohomeWithCheckDone(_axis, _homeMode, 0.8, null);
+                return _motion.GohomeWithCheckDone(_axis, _homeMode, 0.805, null);
             });
         }
+
 
         private void OpenShadow()
         {
@@ -195,6 +235,8 @@ namespace Q_Platform.ViewModels.Module
                 _io.WriteBit_DO(_shadowOpen, false);
             });
         }
+
+   
     }
 
 

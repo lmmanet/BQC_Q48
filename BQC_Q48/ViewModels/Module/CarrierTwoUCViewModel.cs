@@ -79,18 +79,18 @@ namespace Q_Platform.ViewModels.Module
             bool result = false;
 
 
-            if (AxisNo >= 9 && AxisNo <= 12)
+            if (SelectedAxis.AxisNo >= 9 && SelectedAxis.AxisNo <= 12)
             {
                 ushort id = 0;
-                if (AxisNo == 10)
+                if (SelectedAxis.AxisNo == 10)
                 {
                     id = 1;
                 }
-                if (AxisNo == 11)
+                if (SelectedAxis.AxisNo == 11)
                 {
                     id = 2;
                 }
-                if (AxisNo == 12)
+                if (SelectedAxis.AxisNo == 12)
                 {
                     id = 2;
                 }

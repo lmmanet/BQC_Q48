@@ -107,9 +107,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> GoHome(CancellationTokenSource cts)
+        public async Task<bool> GoHome(IGlobalStatus gs)
         {
             _logger.Info("涡旋回零");
             try
@@ -120,14 +120,14 @@ namespace Q_Platform.BLL
                 //使能Y轴
                 await _stepMotion.ServoOn(_axisY).ConfigureAwait(false);
                 //Y轴回零
-                var result = await _stepMotion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
+                var result = await _stepMotion.GoHomeWithCheckDone(_axisY, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("Y轴回零失败");
                 }
 
                 //Y轴移动到上下料位
-                result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
+                result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("Y轴到上下料位失败");
@@ -136,7 +136,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsPause == true)
                 {
                     return false;
                 }
@@ -154,7 +154,7 @@ namespace Q_Platform.BLL
             return true;
         }
 
-        public bool StartVortex(Sample sample, int step, CancellationTokenSource cts)
+        public bool StartVortex(Sample sample, int step, IGlobalStatus gs)
         {
             int vel = sample.TechParams.VortexVel[step];
             int time = sample.TechParams.VortexTime[step];
@@ -166,7 +166,7 @@ namespace Q_Platform.BLL
                     _logger?.Info($"{sample.Id}样品涡旋-{time}s-{vel}rpm");
 
                     //到上下料位
-                    var result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    var result = MovePutGetPos(gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("涡旋到上下料位失败");
@@ -179,7 +179,7 @@ namespace Q_Platform.BLL
                         if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVibration3))
                         {
                             //从振荡搬运萃取管到试管架  并返回完成
-                            result = _carrier.GetPolishFromVibrationToMaterial(sample, cts);
+                            result = _carrier.GetPolishFromVibrationToMaterial(sample, gs);
                             if (!result)
                             {
                                 throw new Exception("从振荡搬运萃取管到试管架失败!");
@@ -197,7 +197,7 @@ namespace Q_Platform.BLL
                         }
                         else
                         {
-                            result = _carrier.GetPolishFromVibrationToVortex(sample, null, null, cts);
+                            result = _carrier.GetPolishFromVibrationToVortex(sample, null, null, gs);
                             if (!result)
                             {
                                 throw new Exception("从振荡搬运萃取管到涡旋失败!");
@@ -206,7 +206,7 @@ namespace Q_Platform.BLL
                     }
                     else
                     {
-                        result = _carrier.GetSampleToVortex(sample, cts);
+                        result = _carrier.GetSampleToVortex(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"搬运{sample.Id}样品到涡旋失败!");
@@ -214,7 +214,7 @@ namespace Q_Platform.BLL
                     }
 
                     //开始涡旋
-                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
+                    result = StartVortexAsync(time, vel, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("涡旋失败");
@@ -224,7 +224,7 @@ namespace Q_Platform.BLL
                     if (step == 3)
                     {
                         //从涡旋搬运萃取管到试管架
-                        result = _carrier.GetPolishFromVortexToMaterial(sample, cts);
+                        result = _carrier.GetPolishFromVortexToMaterial(sample, gs);
                         if (!result)
                         {
                             throw new Exception("从涡旋搬运萃取管到试管架失败!");
@@ -233,7 +233,7 @@ namespace Q_Platform.BLL
                     }
                     else
                     {
-                        result = _carrier.GetSampleFromVortexToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromVortexToMaterial(sample, gs);
                         if (!result)
                         {
                             throw new Exception("搬运样品到试管架失败");
@@ -246,7 +246,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested != false)
+                if (gs?.IsPause == true)
                 {
                     _logger?.Info($"样品{sample.Id}振荡-{time}s-{vel}rpm 停止");
                     return false;
@@ -264,16 +264,16 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 移动到上下料位
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> MovePutGetPos(CancellationTokenSource cts)
+        protected async Task<bool> MovePutGetPos(IGlobalStatus gs)
         {
             try
             {
                 PressUp();
 
                 //步进Y轴移动到原点位置
-               s1: var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, cts).ConfigureAwait(false);
+               s1: var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _stepMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -307,16 +307,16 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="time"></param>
         /// <param name="vel">30~3000</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> StartVortexAsync(int time,int vel,CancellationTokenSource cts)
+        protected async Task<bool> StartVortexAsync(int time,int vel,IGlobalStatus gs)
         {
             try
             {
                 PressUp();
 
                 //Y轴移动到涡旋位置
-                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, cts).ConfigureAwait(false);
+                var result = await _stepMotion.P2pMoveWithCheckDone(_axisY, _posData.VortexPos, _stepMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -387,7 +387,7 @@ namespace Q_Platform.BLL
                 //Y轴移动到上下料位置
                 if (GlobalCache.Instance.VortexStep == 5 && !_globalStatus.IsStopped)
                 {
-                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -476,8 +476,8 @@ namespace Q_Platform.BLL
         /// 添加样品到涡旋列表
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
-        public void AddSampleToVortexList(Sample sample, CancellationTokenSource cts)
+        /// <param name="gs"></param>
+        public void AddSampleToVortexList(Sample sample, IGlobalStatus gs)
         {
             //判断去重
             if (sample != null)
@@ -502,8 +502,8 @@ namespace Q_Platform.BLL
                 //不存在加水涡旋工艺  直接跳过  无需进入列表  == >  进入回湿程序
                 if (sample.MainStep == 1 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Vortex))
                 {
-                    sample.SubStep++;
-                    MethodHelper.ExcuteMethod(sample, cts);
+                    sample.SubStep = 13;
+                    MethodHelper.ExcuteMethod(sample, gs);
                     return;
                 }
                 //不存在加溶剂涡旋工艺 直接跳过  无需进入列表
@@ -511,7 +511,7 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
-                    MethodHelper.ExcuteMethod(sample, cts);
+                    MethodHelper.ExcuteMethod(sample, gs);
                     return;
                 }
                 //不存在加溶剂涡旋工艺 直接跳过  无需进入列表
@@ -519,15 +519,15 @@ namespace Q_Platform.BLL
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
-                    MethodHelper.ExcuteMethod(sample, cts);
+                    MethodHelper.ExcuteMethod(sample, gs);
                     return;
                 }
                 //不存在加溶剂涡旋工艺 直接跳过  无需进入列表
-                if (sample.MainStep == 9 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex2))
+                if (sample.MainStep == 9 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractVortex3))
                 {
                     sample.SubStep = 0;
                     sample.MainStep++;
-                    MethodHelper.ExcuteMethod(sample, cts);
+                    MethodHelper.ExcuteMethod(sample, gs);
                     return;
                 }
 
@@ -543,9 +543,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 启动涡旋任务
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public Task StartVortex(CancellationTokenSource cts)
+        public Task StartVortex(IGlobalStatus gs)
         {
             if (_vortexTask != null)
             {
@@ -573,17 +573,17 @@ namespace Q_Platform.BLL
                         try
                         {
                             //涡旋
-                            if (workSample.SubStep == 5 && !_globalStatus.IsStopped)
+                            if (workSample.SubStep >= 9 && workSample.SubStep <12 &&!_globalStatus.IsStopped)
                             {
-                                var result = StartVortex(workSample, cts);
+                                var result = StartVortex(workSample, gs);
                                 if (!result)
                                 {
                                     throw new Exception("StartVortex err");
                                 }
-                                workSample.SubStep++;
+                                workSample.SubStep++; //13步
                             }
 
-                            if (workSample.SubStep == 6)
+                            if (workSample.SubStep == 14)
                             {
                                 //回湿执行完成信号
                                 if (workSample.MainStep != 1)
@@ -593,7 +593,7 @@ namespace Q_Platform.BLL
                                 }
 
                                 //成功执行完成  == 》 调用下一步流程  加入上一步工作列表或者加入下一步列表
-                                MethodHelper.ExcuteMethod(workSample, cts);
+                                MethodHelper.ExcuteMethod(workSample, gs);
 
                                 GlobalCache.Instance.VortexCurrentSample = null;
                                 list.Remove(workSample);
@@ -601,6 +601,10 @@ namespace Q_Platform.BLL
                         }
                         catch (Exception ex)
                         {
+                            if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                            {
+                                _logger?.Warn("程序暂停");
+                            }
                             _globalStatus.PauseProgram();
                             _logger.Warn(ex.Message);
                             return;
@@ -618,101 +622,122 @@ namespace Q_Platform.BLL
         /// 开始涡旋
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool StartVortex(Sample sample,CancellationTokenSource cts)
+        private bool StartVortex(Sample sample,IGlobalStatus gs)
         {
             try
             {
                 _logger?.Info($"{sample.Id}样品涡旋");
+                bool result = false;
 
                 //到上下料位
-                var result = MovePutGetPos(cts).GetAwaiter().GetResult();
-                if (!result)
+                if (sample.SubStep == 9 && !_globalStatus.IsStopped)
                 {
-                    throw new Exception("涡旋到上下料位失败");
+                    result = MovePutGetPos(gs).GetAwaiter().GetResult();
+                    if (!result)
+                    {
+                        throw new Exception("涡旋到上下料位失败");
+                    }
+                    sample.SubStep++;
                 }
 
                 //搬运样品到涡旋
-                result = GetSampleFromMaterialToVortex(sample, cts);
-                if (!result)
+                if (sample.SubStep == 10 && !_globalStatus.IsStopped)
                 {
-                    throw new Exception("搬运样品到涡旋失败!");
+                    result = GetSampleFromMaterialToVortex(sample, gs);
+                    if (!result)
+                    {
+                        throw new Exception("搬运样品到涡旋失败!");
+                    }
+                    sample.SubStep++;
                 }
-
+              
                 //开始涡旋
-                if (sample.MainStep == 9)
+                if (sample.SubStep == 11 && !_globalStatus.IsStopped)
                 {
-                    int vel = sample.TechParams.VortexVel[3];
-                    int time = sample.TechParams.VortexTime[3];
-                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.MainStep == 9)
                     {
-                        throw new Exception("涡旋4失败");
+                        int vel = sample.TechParams.VortexVel[2];
+                        int time = sample.TechParams.VortexTime[2];
+                        result = StartVortexAsync(time, vel, gs).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("涡旋4失败");
+                        }
                     }
+                    else if (sample.MainStep == 1)
+                    {
+                        int vel = sample.TechParams.VortexVel[0];
+                        int time = sample.TechParams.VortexTime[0];
+                        result = StartVortexAsync(time, vel, gs).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("涡旋1失败");
+                        }
+                    }
+                    else if (sample.MainStep == 2)
+                    {
+                        int vel = sample.TechParams.VortexVel[1];
+                        int time = sample.TechParams.VortexTime[1];
+                        result = StartVortexAsync(time, vel, gs).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("涡旋2失败");
+                        }
+                    }
+                    else if (sample.MainStep == 3)
+                    {
+                        int vel = sample.TechParams.VortexVel[2];
+                        int time = sample.TechParams.VortexTime[2];
+                        result = StartVortexAsync(time, vel, gs).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("涡旋3失败");
+                        }
+                    }
+                    sample.SubStep++;
                 }
-                else if (sample.MainStep == 1)
+              
+                //从涡旋搬运到试管架
+                if (sample.SubStep == 12 && !_globalStatus.IsStopped)
                 {
-                    int vel = sample.TechParams.VortexVel[0];
-                    int time = sample.TechParams.VortexTime[0];
-                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    if (sample.MainStep == 9)
                     {
-                        throw new Exception("涡旋1失败");
+                        result = GetSampleFromVortexToMaterial(sample, 2, gs);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
-                }
-                else if (sample.MainStep == 2)
-                {
-                    int vel = sample.TechParams.VortexVel[1];
-                    int time = sample.TechParams.VortexTime[1];
-                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    else if (sample.MainStep == 3 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
                     {
-                        throw new Exception("涡旋2失败");
+                        result = GetSampleFromVortexToMaterial(sample, 3, gs);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
-                }
-                else if (sample.MainStep == 3)
-                {
-                    int vel = sample.TechParams.VortexVel[2];
-                    int time = sample.TechParams.VortexTime[2];
-                    result = StartVortexAsync(time, vel, cts).GetAwaiter().GetResult();
-                    if (!result)
+                    else
                     {
-                        throw new Exception("涡旋3失败");
+                        result = GetSampleFromVortexToMaterial(sample, 1, gs);
+                        if (!result)
+                        {
+                            return false;
+                        }
                     }
+                    sample.SubStep++;
+                    return true;
                 }
 
-                //从涡旋搬运到试管架
-                if (sample.MainStep == 9)
-                {
-                    result = GetSampleFromVortexToMaterial(sample, 2, cts);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-                else if(sample.MainStep == 3 && !TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.ExtractSupernate2))
-                {
-                    result = GetSampleFromVortexToMaterial(sample, 3, cts);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-                else
-                {
-                    result = GetSampleFromVortexToMaterial(sample, 1, cts);
-                    if (!result)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
+                return false;
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -765,29 +790,29 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">1;到试管架1 2:到试管架2 3:样品管到冰浴 4;萃取管到冰浴</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool GetSampleFromVortexToMaterial(Sample sample,int var,CancellationTokenSource cts)
+        private bool GetSampleFromVortexToMaterial(Sample sample,int var,IGlobalStatus gs)
         {
             if (var == 1)
             {
                 //样品管从涡旋到试管架
-                return _carrier.GetSampleFromVortexToMaterial(sample, cts);
+                return _carrier.GetSampleFromVortexToMaterial(sample, gs);
             }
             else if (var == 2)
             {
                 //从涡旋搬运萃取管到试管架
-                return _carrier.GetPolishFromVortexToMaterial(sample, cts);
+                return _carrier.GetPolishFromVortexToMaterial(sample, gs);
             }
             else if (var == 3)
             {
                 //从涡旋搬运试管到冰浴
-                return _carrier.GetSampleFromVortexToCold(sample, cts);
+                return _carrier.GetSampleFromVortexToCold(sample, gs);
             }
             else if (var == 4)
             {
                 //从涡旋搬运萃取管到冰浴
-                return _carrier.GetPolishFromVortexToCold(sample, cts);
+                return _carrier.GetPolishFromVortexToCold(sample, gs);
             }
             return false;
         }
@@ -797,19 +822,19 @@ namespace Q_Platform.BLL
         /// 从试管架搬运试管到涡旋
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool GetSampleFromMaterialToVortex(Sample sample,CancellationTokenSource cts)
+        private bool GetSampleFromMaterialToVortex(Sample sample,IGlobalStatus gs)
         {
             //从试管架2搬运萃取管到涡旋
             if (sample.MainStep == 9)
             {
-                return _carrier.GetPolishFromMaterialToVortex(sample, cts);
+                return _carrier.GetPolishFromMaterialToVortex(sample, gs);
             }
             //从试管架1搬运试管到涡旋
             else
             {
-                return _carrier.GetSampleToVortex(sample, cts);
+                return _carrier.GetSampleToVortex(sample, gs);
             }
           
 

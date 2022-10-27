@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
 
 
@@ -30,7 +31,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToTransfer(Sample sample,Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToTransfer(Sample sample,Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖3取净化管到移栽 无振荡加液  
@@ -39,7 +40,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移栽旋转动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToTransferWithoutVibration(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToTransferWithoutVibration(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽搬运无盖净化管到拧盖3
@@ -48,7 +49,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
         
         /// <summary>
         /// 从拧盖3搬运有盖净化盖到试管架
@@ -56,9 +57,9 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToVibration(Sample sample, IGlobalStatus gs);
 
-        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToMaterial(Sample sample, IGlobalStatus gs);
 
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace Q_Platform.BLL
         /// <param name="func">移液动作</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoPipetting(Sample sample, Func<Sample, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool DoPipetting(Sample sample, Func<Sample, IGlobalStatus, bool> func, IGlobalStatus gs);
 
         void UpdatePosData();
         CapperInfo GetCapperInfo();

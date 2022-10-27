@@ -47,7 +47,10 @@ namespace Q_Platform.ViewModels.Base
                     {
                         ListAxisInfo.Add(item);
                     }
-
+                    if (ListAxisInfo.Count > 0)
+                    {
+                        AxisNo = ListAxisInfo[0].SlaveId;
+                    }
                     GetAxisPosInfo(ListAxisInfo[0]);
                 }
             }
@@ -58,6 +61,11 @@ namespace Q_Platform.ViewModels.Base
 
 
         #region Properties
+
+        /// <summary>
+        /// 电机状态
+        /// </summary>
+        public int MotionIoStatus { get; set; }
 
         /// <summary>
         /// Y轴当前值
@@ -241,10 +249,9 @@ namespace Q_Platform.ViewModels.Base
 
         #endregion
 
-        protected void RefreshIoStatus()
+        protected virtual void RefreshIoStatus()
         {
-            var MotionStatusY = _iLS_Motion.GetMotionIoStatus(_capperInfo.AxisY).GetAwaiter().GetResult();
-            var MotionStatusZ = _iLS_Motion.GetMotionIoStatus(_capperInfo.AxisZ).GetAwaiter().GetResult();
+            MotionIoStatus = _iLS_Motion.GetMotionIoStatus(AxisNo).GetAwaiter().GetResult();
             YCurrentPos = _iLS_Motion.GetCurrentPos(_capperInfo.AxisY).GetAwaiter().GetResult();
             ZCurrentPos = _iLS_Motion.GetCurrentPos(_capperInfo.AxisZ).GetAwaiter().GetResult();
 

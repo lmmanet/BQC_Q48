@@ -55,7 +55,15 @@ namespace Q_Platform.ViewModels.Module
 
         #region Properties
 
+        /// <summary>
+        /// 电机状态（使能）
+        /// </summary>
+        public int MotionStatus { get; set; }
 
+        /// <summary>
+        /// 电机io状态 (限位 回零)
+        /// </summary>
+        public uint MotionIoStatus { get; set; }
         public string AlarmMessage { get; set; }
 
         public Visibility ShowAlarmMsg { get; set; }
@@ -72,6 +80,24 @@ namespace Q_Platform.ViewModels.Module
         /// 电爪状态
         /// </summary>
         public Byte ClawStatus { get; set; }
+
+        /// <summary>
+        /// 手爪控制目标位置
+        /// </summary>
+        public byte ClawTargetPos { get; set; } = 0;
+
+        /// <summary>
+        /// 手爪控制目标速度
+        /// </summary>
+        public byte ClawTargetVel { get; set; } = 255;
+
+        /// <summary>
+        /// 手爪控制目标转矩
+        /// </summary>
+        public byte ClawTargetTorque { get; set; } = 255;
+
+        public Visibility ShowServoStatus { get; set; } = Visibility.Visible;
+        public Visibility ShowStepStatus { get; set; } = Visibility.Collapsed;
 
         #endregion
 
@@ -107,6 +133,11 @@ namespace Q_Platform.ViewModels.Module
         /// 关闭夹爪
         /// </summary>
         public ICommand CloseClawCommand { get; set; }
+
+        /// <summary>
+        /// 手爪自定义命令
+        /// </summary>
+        public ICommand ExcuteUserCommand { get; set; }
 
         /// <summary>
         /// 轴号变化
@@ -175,7 +206,29 @@ namespace Q_Platform.ViewModels.Module
             XCurrentPos = _iLS_Motion.GetCurrentPos(_axisX).GetAwaiter().GetResult();
             ZCurrentPos = _motion.GetCurrentPos(_axisZ);
             CCurrentPos = _iLS_Motion.GetCurrentPos(_axisC).GetAwaiter().GetResult();
-            _clawInstance.GetClawStatus(_clawId).GetAwaiter().GetResult();
+            var result = _clawInstance.GetClawStatus(_clawId).GetAwaiter().GetResult();
+            if (result != null)
+            {
+                ClawStatus = result.ClawStatus;
+            }
+
+            if (_selectAxis == 7)
+            {
+                MotionIoStatus = _motion.GetMotionIoStatus(7);
+            }
+            else
+            {
+                MotionIoStatus = (uint)_iLS_Motion.GetMotionIoStatus(_selectAxis).GetAwaiter().GetResult();
+            }
+
+            if (_motion.GetMotionStatus(7) == 4)
+            {
+                MotionStatus = 1;
+            }
+            else
+            {
+                MotionStatus = 0;
+            }
         }
 
         private void RegisterCommand()
@@ -197,6 +250,7 @@ namespace Q_Platform.ViewModels.Module
             AxisPosInfoChangedCommand = new RelayCommand<object>(AxisPosInfoChanged);
             TechCommand = new RelayCommand<object>(TechAxisPos);
             SavePosDataCommand = new RelayCommand(SaveAxisPos);
+            ExcuteUserCommand = new RelayCommand(ExcuteUser);
         }
 
         private void AbsMove()
@@ -375,6 +429,16 @@ namespace Q_Platform.ViewModels.Module
                 return;
             }
             _selectAxis = axis.AxisNo;
+            if (_selectAxis == 7)
+            {
+                ShowServoStatus = Visibility.Visible;
+                ShowStepStatus = Visibility.Collapsed;
+            }
+            else
+            {
+                ShowServoStatus = Visibility.Collapsed;
+                ShowStepStatus = Visibility.Visible;
+            }
             //更新轴点位信息
             GetAxisPosInfo(axis);
 
@@ -529,6 +593,18 @@ namespace Q_Platform.ViewModels.Module
             }
            
 
+        }
+
+        protected void ExcuteUser()
+        {
+            try
+            {
+                _clawInstance.SendCommand(_clawId, ClawTargetPos, ClawTargetVel, ClawTargetTorque);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
 

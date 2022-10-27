@@ -63,7 +63,7 @@
                                 <TextBlock Grid.Row="9" Text="试管Tech：" />
                                 <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding TechParams.Tech}" />
                                 <TextBlock Grid.Row="10" Text="试管MainStep：" />
-                                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding MainStep}" />   
+                                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding MainStep}" />
                                 <TextBlock Grid.Row="11" Text="试管SubStep：" />
                                 <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding SubStep}" />
                                 <TextBlock Grid.Row="12" Text="试管PipettorStep：" />

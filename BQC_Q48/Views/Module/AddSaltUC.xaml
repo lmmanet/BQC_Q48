@@ -3,12 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:uc="clr-namespace:Q_Platform.Views.UC.Base"
              xmlns:local="clr-namespace:Q_Platform.Views.Module"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:uc="clr-namespace:Q_Platform.Views.UC.Base"
              d:DesignHeight="800"
              d:DesignWidth="800"
-             DataContext="{Binding Source={StaticResource Locator},Path= AddSaltUCViewModel}"
+             DataContext="{Binding Source={StaticResource Locator}, Path=AddSaltUCViewModel}"
              mc:Ignorable="d">
 
 
@@ -54,10 +54,10 @@
                             <Grid>
                                 <TextBlock Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="状态显示" />
                                 <TextBlock Margin="80,0,0,0"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding AlarmMessage}"
-                                       Visibility="{Binding ShowAlarmMsg}" />
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding AlarmMessage}"
+                                           Visibility="{Binding ShowAlarmMsg}" />
                                 <Button x:Name="btnOpenTechPos" Width=" 20" HorizontalAlignment="Right" />
                             </Grid>
                         </Border>
@@ -65,12 +65,22 @@
                         <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
 
                         <StackPanel Grid.Row="2" Margin="10,20" Orientation="Horizontal">
-                            <TextBlock FontSize="{StaticResource FontSizeRegular}" Text="当前坐标(Y1 Y2 C1 C2)：" />
+                            <TextBlock FontSize="{StaticResource FontSizeRegular}" Text="当前坐标(Y1 Y2 Z1 Z2 C1 C2)：" />
                             <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding Y1CurrentPos}" />
                             <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding Y2CurrentPos}" />
+                            <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding Z1CurrentPos}" />
+                            <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding Z2CurrentPos}" />
                             <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding C1CurrentPos}" />
                             <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding C2CurrentPos}" />
                         </StackPanel>
+
+                        <Border Grid.Row="1" Visibility="{Binding ShowStepStatus}">
+                            <uc:StepStatusUC IoStatus="{Binding MotionIoStatus}" />
+                        </Border>
+
+                        <Border Grid.Row="1" Visibility="{Binding ShowServoStatus}">
+                            <uc:ServoStatusUC IoStatus="{Binding MotionIoStatus}" MotionStatus="{Binding MotionStatus}" />
+                        </Border>
 
                     </Grid>
                 </Border>
@@ -85,7 +95,7 @@
                         <Border Height="30" Background="{StaticResource VeryLightGrayBrush}">
                             <Grid>
                                 <TextBlock Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="点动操作" />
-                               
+
                             </Grid>
                         </Border>
 
@@ -93,7 +103,7 @@
 
                         <Grid Grid.Row="1" Margin="10,20">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
 
@@ -104,12 +114,12 @@
                                 <WrapPanel Height="40" Margin="5">
                                     <TextBlock Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="选择轴:" />
                                     <ComboBox x:Name="combSelect"
-                                          MinWidth="400"
-                                          Margin="5"
-                                          DisplayMemberPath="AxisName"
-                                          ItemsSource="{Binding ListAxisInfo}"
-                                          SelectedIndex="0"
-                                          SelectedValuePath="SlaveId">
+                                              MinWidth="400"
+                                              Margin="5"
+                                              DisplayMemberPath="AxisName"
+                                              ItemsSource="{Binding ListAxisInfo}"
+                                              SelectedIndex="0"
+                                              SelectedValuePath="SlaveId">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="SelectionChanged">
                                                 <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.ComboxSelectChangedCommand, Mode=TwoWay}" CommandParameter="{Binding ElementName=combSelect, Path=SelectedItem}" />
@@ -122,12 +132,12 @@
                                 <WrapPanel Height="40" Margin="5">
                                     <TextBlock Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="选择点位:" />
                                     <ComboBox x:Name="combSelect1"
-                                          MinWidth="400"
-                                          Margin="5"
-                                          DisplayMemberPath="PosName"
-                                          ItemsSource="{Binding AxisPosInfos}"
-                                          SelectedIndex="0"
-                                          SelectedValuePath="AxisNo">
+                                              MinWidth="400"
+                                              Margin="5"
+                                              DisplayMemberPath="PosName"
+                                              ItemsSource="{Binding AxisPosInfos}"
+                                              SelectedIndex="0"
+                                              SelectedValuePath="AxisNo">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="SelectionChanged">
                                                 <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.AxisPosInfoChangedCommand, Mode=TwoWay}" CommandParameter="{Binding ElementName=combSelect1, Path=SelectedItem}" />
@@ -150,8 +160,7 @@
                                         <TextBlock Margin="5" VerticalAlignment="Center" Text="速度设置:" />
                                         <TextBox Grid.Column="1" MinWidth="80" Margin="5">
                                             <TextBox.Text>
-                                                <Binding NotifyOnValidationError="True" Path="TargetVel">
-                                                </Binding>
+                                                <Binding NotifyOnValidationError="True" Path="TargetVel" />
                                             </TextBox.Text>
                                             <TextBox.ToolTip>
                                                 <ToolTip>
@@ -162,10 +171,10 @@
                                         <TextBlock Grid.Column="2" Margin="30,5,5,5" VerticalAlignment="Center" Text="目标位置:" />
                                         <TextBox Grid.Column="3" MinWidth="80" Margin="5" Text="{Binding TargetPos}" />
                                         <Button Grid.Column="4"
-                                            Margin="20,0"
-                                            Padding="10,3"
-                                            Command="{Binding AbsMoveCommand}"
-                                            Content="Go" />
+                                                Margin="20,0"
+                                                Padding="10,3"
+                                                Command="{Binding AbsMoveCommand}"
+                                                Content="Go" />
                                     </Grid>
                                 </Border>
 
@@ -175,7 +184,7 @@
                                         <Style TargetType="Button">
                                             <Setter Property="Margin" Value="5,8" />
                                             <Setter Property="Padding" Value="15,8" />
-                                            <Setter Property="Height" Value="50" />
+                                            <Setter Property="Height" Value="40" />
                                             <Setter Property="Width" Value="120" />
                                         </Style>
                                     </Grid.Resources>
@@ -189,7 +198,7 @@
                                             <Button Command="{Binding ResetAxisAmlCommand}" Content="轴报警复位" />
                                             <Button Command="{Binding RotateStartCommand}" Content="旋转轴旋转" />
                                             <Button Command="{Binding RotateStopCommand}" Content="旋转轴停止" />
-                                
+
                                         </UniformGrid>
                                     </Border>
 
@@ -222,19 +231,15 @@
                                         <Style TargetType="Button">
                                             <Setter Property="Margin" Value="5,8" />
                                             <Setter Property="Padding" Value="15,8" />
-                                            <Setter Property="Height" Value="50" />
+                                            <Setter Property="Height" Value="40" />
                                             <Setter Property="Width" Value="120" />
                                         </Style>
                                     </Grid.Resources>
 
                                     <Border>
                                         <UniformGrid Columns="4">
-                                            <Button Command="{Binding PressDown1Command}" Content="Z1气缸伸出"/>
-                                            <Button Command="{Binding PressUp1Command}" Content="Z1气缸收回"/>
-                                            <Button Command="{Binding PressDown2Command}" Content="Z2气缸伸出"/>
-                                            <Button Command="{Binding PressUp2Command}" Content="Z2气缸收回"/>
-                                            <Button Command="{Binding CylinderLeftCommand}" Content="X气缸左"/>
-                                            <Button Command="{Binding CylinderRightCommand}" Content="X气缸右"/>
+                                            <Button Command="{Binding CylinderLeftCommand}" Content="X气缸左" />
+                                            <Button Command="{Binding CylinderRightCommand}" Content="X气缸右" />
                                         </UniformGrid>
                                     </Border>
 
@@ -253,10 +258,10 @@
             <Border HorizontalAlignment="Right" Background="{StaticResource BackgroundLightBrush}" CornerRadius="0 5 5 0">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="5"
-                                  Direction="0"
-                                  Opacity="0.3"
-                                  ShadowDepth="0"
-                                  Color="Gray" />
+                                      Direction="0"
+                                      Opacity="0.3"
+                                      ShadowDepth="0"
+                                      Color="Gray" />
                 </Border.Effect>
 
                 <Border.RenderTransform>
@@ -289,10 +294,10 @@
                                 </Border>
 
                                 <Button Grid.Row="1"
-                                    Grid.Column="0"
-                                    Background="{StaticResource WordBlueBrush}"
-                                    Command="{Binding SavePosDataCommand}"
-                                    Style="{StaticResource SaveBtnStyle}" />
+                                        Grid.Column="0"
+                                        Background="{StaticResource WordBlueBrush}"
+                                        Command="{Binding SavePosDataCommand}"
+                                        Style="{StaticResource SaveBtnStyle}" />
 
 
                             </Grid>
@@ -307,5 +312,5 @@
 
         </Grid>
     </Border>
-    
+
 </UserControl>

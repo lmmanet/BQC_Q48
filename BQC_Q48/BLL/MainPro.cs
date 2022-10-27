@@ -17,8 +17,7 @@ namespace Q_Platform.BLL
 {
     public class MainPro : IMainPro
     {
-        CancellationTokenSource cts = new CancellationTokenSource();
-        Task _taskHome;
+        Task<bool> _taskHome;
 
         Task _main;
 
@@ -84,220 +83,188 @@ namespace Q_Platform.BLL
 
         #region Public Methods
 
-        public Task GoHome(Expression<Func<bool>> homeDoneFlag)
+        public void GoHome(Expression<Func<bool>> homeDoneFlag)
         {
             //回零完成标志
             homeDoneFlag.SetPropertyValue(false);
+            Task.Run(() =>
+            {
+                bool result = _globalStatus.InitStatus(StopDone, InitSys);
+                if (result)
+                {
+                    homeDoneFlag.SetPropertyValue(true);
+                }
+            });
+        }
 
+        /// <summary>
+        /// 初始化回零
+        /// </summary>
+        /// <param name="homeDoneFlag"></param>
+        /// <returns></returns>
+        private async Task<bool> InitSys()
+        {
             if (_taskHome != null)
             {
                 if (_taskHome.IsCompleted == false) //是否完成
                 {
-                    return _taskHome;
+                    return false;
                 }
 
                 if (_taskHome.IsCanceled == true) //被取消而执行完成
                 {
-                    return _taskHome;
+                    return false;
                 }
 
                 if (_taskHome.IsFaulted == true) //未经处理异常而停止
                 {
-                    return _taskHome;
+                    return false;
                 }
             }
 
-            _taskHome = Task.Run(async () =>
+            _taskHome = Task<bool>.Run(async() =>
             {
-                var result6 = _carrierOne.GoHome(cts).ConfigureAwait(false);  //搬运1回零
+                var result6 = _carrierOne.GoHome(_globalStatus).ConfigureAwait(false);  //搬运1回零
 
-                var result20 = _carrierTwo.GoHome(cts).ConfigureAwait(false); //搬运2回零
+                var result20 = _carrierTwo.GoHome(_globalStatus).ConfigureAwait(false); //搬运2回零
 
                 if (!await result6)
                 {
                     Console.WriteLine("carrieroneHomeErr");
-                    return;
+                    return false;
                 }
-                var result1 = _capperOne.GoHome(cts).ConfigureAwait(false);  //拧盖1回零
-                var result2 = _vortex.GoHome(cts).ConfigureAwait(false);  //涡旋回零
-                var result3 = _capperTwo.GoHome(cts).ConfigureAwait(false);  //拧盖2回零
-                var result4 = _vibrationOne.GoHome(cts).ConfigureAwait(false);  //振荡回零
-                var result5 = _addSolid.GoHome(cts).ConfigureAwait(false);  //加固回零  无需单独回零
+                var result1 = _capperOne.GoHome(_globalStatus).ConfigureAwait(false);  //拧盖1回零
+                var result2 = _vortex.GoHome(_globalStatus).ConfigureAwait(false);  //涡旋回零
+                var result3 = _capperTwo.GoHome(_globalStatus).ConfigureAwait(false);  //拧盖2回零
+                var result4 = _vibrationOne.GoHome(_globalStatus).ConfigureAwait(false);  //振荡回零
+                var result5 = _addSolid.GoHome(_globalStatus).ConfigureAwait(false);  //加固回零  无需单独回零
 
-                var result7 = _centrifugal.GoHome(cts); // 离心机回零
+                var result7 = _centrifugal.GoHome(_globalStatus); // 离心机回零
 
                 if (!await result20)
                 {
                     Console.WriteLine("carriertwoHomeErr");
-                    return;
+                    return false;
                 }
 
-                var result8 = _capperThree.GoHome(cts); // 拧盖3回零
-                var result9 = _capperFour.GoHome(cts); // 拧盖4回零
-                var result10 = _capperFive.GoHome(cts); // 拧盖5回零
-                var result11 = _concentration.GoHome(cts); // 浓缩回零
+                var result8 = _capperThree.GoHome(_globalStatus); // 拧盖3回零
+                var result9 = _capperFour.GoHome(_globalStatus); // 拧盖4回零
+                var result10 = _capperFive.GoHome(_globalStatus); // 拧盖5回零
+                var result11 = _concentration.GoHome(_globalStatus); // 浓缩回零
 
                 if (!await result1)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result2)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result3)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result4)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result5)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result7)
                 {
-                    return;
+                    return false;
                 }
                 if (!await result8)
                 {
                     Console.WriteLine("回零失败 result8！");
-                    return;
+                    return false;
                 }
                 if (!await result9)
                 {
                     Console.WriteLine("回零失败 result9！");
-                    return;
+                    return false;
                 }
                 if (!await result10)
                 {
                     Console.WriteLine("回零失败 result10！");
-                    return;
+                    return false;
                 }
                 if (!await result11)
                 {
                     Console.WriteLine("回零失败 result11！");
-                    return;
+                    return false;
                 }
                 _logger.Info("HomeDone");
 
-                //回零完成
-                homeDoneFlag.SetPropertyValue(true);
+                return true;
 
 
             });
 
-            return _taskHome;
-
+            return await _taskHome.ConfigureAwait(false);
         }
+
 
         public void StartPro()
         {
-            var _workList = GlobalCache.Instance.ExtractList;
-            if (_workList.Count == 0)
+            if (_globalStatus.StartProgram())
             {
-                /// GB23200.113-2018 果蔬    0xF43EE00
-                /// GB23200.113-2018 坚果    0xF43EE19
-                /// GB23200.121-2021 果蔬    0x803EEF9
-                /// GB23200.121-2021 坚果    0x803EEF9
-                /// 兽药                     0xFFDE1EB
-                for (int i = 9; i < 17;)
+                var _workList = GlobalCache.Instance.ExtractList;
+                if (_workList.Count == 0)
                 {
-                    Sample sample = new Sample()    
-                    {
-                        Id = (ushort)i,
-                        Status = 0x11100101001,
-                        MainStep = 1,
-                        TechParams = new TechParams()  //113-2018 坚果
-                        {
-                            AddWater = 10,
-                            Solvent_A = 15,    //ACE    =2=3==23=4=234=2=3=4=  调换了
-                            Solvent_B = 0,   //乙腈醋酸
-                            Solvent_C = 0,
-                            WetTime = 30,
-                            AddHomo = new double[3] { 0, 0, 1 },    //均质子
-                            Solid_B = new double[3] { 0, 0, 0 },    //硫酸镁
-                            Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
-                            Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
-                            Solid_E = new double[3] { 0, 0, 6 },    //无水硫酸钠
-                            Solid_F = new double[3] { 0, 0, 1.5 },    // 醋酸钠
-                            VibrationOneTime = new int[] { 60, 60, 60, 60 },
-                            VibrationOneVel = new int[] { 420, 420, 420, 420 },
-                            VibrationTwoTime = new int[] { 60, 0 },
-                            VibrationTwoVel = new int[] { 420, 0 },
-                            VortexTime = new int[] { 60, 60, 60 },
-                            VortexVel = new int[] { 2000, 2000, 2000 },
-                            CentrifugalOneTime = new int[] { 5, 5, 0 },
-                            CentrifugalOneVelocity = new int[] { 4200, 4200, 0 },
-                            ExtractVolume = 8,
-                            ConcentrationVolume = 2,
-                            ConcentrationTime = 5,
-                            ConcentrationVel = 10000,
-                            Redissolve = 1,                             //乙酸乙酯
-                            Add_Mark_B = 20,                            //加标20uL
-                            ExtractSampleVolume = 1,                     //最终样品1ml
-
-                            Tech = 0xF03EE19,                         //工艺
-                        }
-                    };
-                    _workList.Add(sample);
-                    i++;
+                    return;
                 }
 
+                foreach (var item in _workList)
+                {
+                    Messenger.Default.Send<Sample>(item, "Add");
+                    //添加到列表方便保存
+                    GlobalCache.Instance.WorkList.Add(item);
+                }
+                StartExtract();
             }
-
-            foreach (var item in _workList)
-            {
-                Messenger.Default.Send<Sample>(item, "Add");
-                //添加到列表方便保存
-                GlobalCache.Instance.WorkList.Add(item);
-            }
-
-            StartExtract();
-
         }
 
         public void StopPro()
         {
+            //保存状态数据
+            GlobalCache.Save();
             _globalStatus.StopProgram(StopDone);
-
         }
 
         public void PausePro(Expression<Func<bool>> pauseFlag)
         {
             //保存状态数据
             GlobalCache.Save();
-
-            pauseFlag.SetPropertyValue(true);
-            _globalStatus.PauseProgram();
+            var result = _globalStatus.PauseProgram();
+            pauseFlag.SetPropertyValue(result);
         }
 
         public void ContinuePro()
         {
-            _globalStatus.ContinueProgram();
-
-            _centrifugalCarrier.StartConcentration(cts);
-            _centrifugalCarrier.StartPipetting(cts);
-            _centrifugal.StartCentrifugal(cts);
-            //_vibrationOne.StartVibrationAndVortex(cts);
-            _vibrationOne.StartVibration(cts);
-            _vortex.StartVortex(cts);
-
-
-            StartExtract();//启动提取
-
-            foreach (var item in GlobalCache.Instance.WorkList)
+            if (_globalStatus.ContinueProgram())
             {
-                Messenger.Default.Send<Sample>(item, "Add");
-            }
 
+                _centrifugalCarrier.StartConcentration(_globalStatus);
+                _centrifugalCarrier.StartPipetting(_globalStatus);
+                _centrifugal.StartCentrifugal(_globalStatus);
+                _vibrationOne.StartVibration(_globalStatus);
+                _vortex.StartVortex(_globalStatus);
+
+
+                StartExtract();//启动提取
+
+                foreach (var item in GlobalCache.Instance.WorkList)
+                {
+                    Messenger.Default.Send<Sample>(item, "Add");
+                }
+            }
         }
 
         public void SwitchLight()
         {
-            GlobalCache.Load();
             if (!_io.ReadBit_DO(3))
             {
                 _io.WriteBit_DO(3, true);
@@ -363,7 +330,7 @@ namespace Q_Platform.BLL
             //加水提取
             if (sample.MainStep == 1 && !_globalStatus.IsStopped)
             {
-                var ret = _capperOne.AddWaterExtract(sample, cts);
+                var ret = _capperOne.AddWaterExtract(sample, _globalStatus);
                 if (!ret)
                 {
                     //暂停所有任务 
@@ -371,13 +338,13 @@ namespace Q_Platform.BLL
                     return false;
                 }
                 //把样品加入到振荡涡旋列表  并启动程序
-                _vibrationOne.AddSampleToVibrationList(sample, cts);
-                _vibrationOne.StartVibration(cts);
+                _vibrationOne.AddSampleToVibrationList(sample, _globalStatus);
+                _vibrationOne.StartVibration(_globalStatus);
             }
 
             if (sample.MainStep == 2 && !_globalStatus.IsStopped)
             {
-                var result = _capperOne.AddSolveExtract(sample, cts);
+                var result = _capperOne.AddSolveExtract(sample, _globalStatus);
                 if (!result)
                 {
                     _globalStatus.PauseProgram();
@@ -385,13 +352,13 @@ namespace Q_Platform.BLL
                 }
 
                 //把样品加入到振荡涡旋列表  并启动程序
-                _vibrationOne.AddSampleToVibrationList(sample, cts);
-                _vibrationOne.StartVibration(cts);
+                _vibrationOne.AddSampleToVibrationList(sample, _globalStatus);
+                _vibrationOne.StartVibration(_globalStatus);
             }
 
             if (sample.MainStep == 3 && !_globalStatus.IsStopped)
             {
-                var result = _capperOne.AddSaltExtract(sample, cts);
+                var result = _capperOne.AddSaltExtract(sample, _globalStatus);
                 if (!result)
                 {
                     _globalStatus.PauseProgram();
@@ -399,8 +366,8 @@ namespace Q_Platform.BLL
                 }
 
                 //把样品加入到振荡涡旋列表  并启动程序
-                _vibrationOne.AddSampleToVibrationList(sample, cts);
-                _vibrationOne.StartVibration(cts);
+                _vibrationOne.AddSampleToVibrationList(sample, _globalStatus);
+                _vibrationOne.StartVibration(_globalStatus);
             }
 
             return true;
@@ -411,7 +378,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="workList">任务列表</param>
-        public void WetBack(Sample sample, CancellationTokenSource cts)
+        public void WetBack(Sample sample, IGlobalStatus gs)
         {
             int minutes = sample.TechParams.WetTime;
             DateTime end = DateTime.Now + TimeSpan.FromMinutes(minutes);
@@ -488,7 +455,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="workList">任务列表</param>
-        public void AddSalt(Sample sample, CancellationTokenSource cts)
+        public void AddSalt(Sample sample, IGlobalStatus gs)
         {
             var list = GlobalCache.Instance.ExtractList;
             if (list.Count > 1)
@@ -525,58 +492,58 @@ namespace Q_Platform.BLL
         //==============================================================================================================//
 
         //一次离心 
-        public void Centrifugal(Sample sample, CancellationTokenSource cts)
+        public void Centrifugal(Sample sample, IGlobalStatus gs)
         {
             if (sample.MainStep == 4)
             {
                 _logger.Info("振荡完成 下一步一次离心!");
                 _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack");
-                _centrifugal.StartCentrifugal(cts);
+                _centrifugal.StartCentrifugal(gs);
             }
             else if (sample.MainStep == 7)
             {
                 _logger.Info("净化振荡完成 下一步二次离心!");
                 _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", 1);
-                _centrifugal.StartCentrifugal(cts);
+                _centrifugal.StartCentrifugal(gs);
             }
 
             else if (sample.MainStep == 10)
             {
                 _logger.Info("萃取振荡完成 下一步三次离心!");
                 _centrifugal.AddSampleToCentrifugalList(sample, "Q_Platform.BLL.IMainPro@CentrifugalCallBack", 2);
-                _centrifugal.StartCentrifugal(cts);
+                _centrifugal.StartCentrifugal(gs);
             }
 
         }
 
         //一次移液  二次移液
-        public void CentrifugalCallBack(Sample sample, CancellationTokenSource cts)
+        public void CentrifugalCallBack(Sample sample,IGlobalStatus gs)
         {
             if (sample.MainStep == 8 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
             {
                 _centrifugalCarrier.AddSampleToConcentrationList(sample);
-                _centrifugalCarrier.StartConcentration(cts);
+                _centrifugalCarrier.StartConcentration(gs);
             }
 
             else if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate3) && sample.MainStep == 11)
             {
                 _centrifugalCarrier.AddSampleToConcentrationList(sample);
-                _centrifugalCarrier.StartConcentration(cts);
+                _centrifugalCarrier.StartConcentration(gs);
             }
             else
             {
                 _centrifugalCarrier.AddSampleToPipettingList(sample, "Q_Platform.BLL.IMainPro@PipettingCallBack");
-                _centrifugalCarrier.StartPipetting(cts);
+                _centrifugalCarrier.StartPipetting(gs);
 
             }
         }
 
-        public void PipettingCallBack(Sample sample, CancellationTokenSource cts)
+        public void PipettingCallBack(Sample sample, IGlobalStatus gs)
         {
             //上一步  移液 净化振荡
             if (sample.MainStep == 7)
             {
-                Centrifugal(sample, cts);
+                Centrifugal(sample, gs);
             }
             //上一步提取净化液
             if (sample.MainStep == 9 && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))//振荡涡旋
@@ -584,8 +551,8 @@ namespace Q_Platform.BLL
                 //振荡涡旋
                 //_vibrationOne.AddSampleToVibrationList(sample, "Q_Platform.BLL.IMainPro@Centrifugal", cts);
                 //_vibrationOne.StartVibrationAndVortex(cts);
-                _vibrationOne.AddSampleToVibrationList(sample, cts);
-                _vibrationOne.StartVibration(cts);
+                _vibrationOne.AddSampleToVibrationList(sample, gs);
+                _vibrationOne.StartVibration(gs);
             }
 
 
@@ -605,8 +572,8 @@ namespace Q_Platform.BLL
                     && _centrifugalCarrier.IsPipttorTaskDone          // 移液任务结束
                     && _centrifugal.IsCentrifugalTaskDone             // 离心任务结束
                     && _vibrationOne.IsVibrationTaskDone              // 振荡任务结束
-                    && _main?.IsCompleted == true                     // 提取任务结束
-                    && _wetBackTask?.IsCompleted == true)             // 回湿任务结束
+                    && _main?.IsCompleted != false                     // 提取任务结束
+                    && _wetBackTask?.IsCompleted != false)             // 回湿任务结束
                 {
                     return true;
                 }
@@ -665,6 +632,7 @@ namespace Q_Platform.BLL
                 }
             };
 
+            //113-2018 坚果   20221022测试OK
             Sample sample2 = new Sample()    
             {
                 Id = 1,
@@ -673,7 +641,7 @@ namespace Q_Platform.BLL
                 TechParams = new TechParams()  //113-2018 坚果
                 {
                     AddWater = 10,
-                    Solvent_A = 0,    //ACE
+                    Solvent_A = 0,    //ACE  
                     Solvent_B = 15,   //乙腈醋酸
                     Solvent_C = 0,
                     WetTime = 30,
@@ -681,14 +649,14 @@ namespace Q_Platform.BLL
                     Solid_B = new double[3] { 0, 0, 0 },    //硫酸镁
                     Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
                     Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
-                    Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
-                    Solid_F = new double[3] { 0, 0, 7.5 },    // 无水硫酸钠+醋酸钠
-                    VibrationOneTime = new int[] { 0, 0, 60, 0 },
-                    VibrationOneVel = new int[] { 0, 0, 400, 0 },
+                    Solid_E = new double[3] { 0, 0, 6 },    //无水硫酸钠
+                    Solid_F = new double[3] { 0, 0, 1.5 },    // 醋酸钠
+                    VibrationOneTime = new int[] { 60, 60, 60, 60 },
+                    VibrationOneVel = new int[] { 420, 420, 420, 420 },
                     VibrationTwoTime = new int[] { 60, 0 },
-                    VibrationTwoVel = new int[] { 400, 0 },
-                    VortexTime = new int[] { 60, 0, 0 },
-                    VortexVel = new int[] { 2000, 0, 0 },
+                    VibrationTwoVel = new int[] { 420, 0 },
+                    VortexTime = new int[] { 60, 60, 60 },
+                    VortexVel = new int[] { 2000, 2000, 2000 },
                     CentrifugalOneTime = new int[] { 5, 5, 0 },
                     CentrifugalOneVelocity = new int[] { 4200, 4200, 0 },
                     ExtractVolume = 8,
@@ -698,7 +666,14 @@ namespace Q_Platform.BLL
                     Redissolve = 1,                             //乙酸乙酯
                     Add_Mark_B = 20,                            //加标20uL
                     ExtractSampleVolume = 1,                     //最终样品1ml
-
+                    //移液高度 取液大管135
+                    //吐液小管     71.92
+                    //取液小管   44.5（用不上）
+                    //净化管取液 167
+                    //西林瓶取液  145.5
+                    //移栽大管取液 73.371
+                    //样品小瓶吐液 120
+                    //西林瓶吐液  105.085
                     Tech = 0xF03EE19,                         //工艺
                 }
             };
@@ -757,8 +732,8 @@ namespace Q_Platform.BLL
                     Solid_B = new double[3] { 0, 0, 0 },    //硫酸镁
                     Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
                     Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
-                    Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
-                    Solid_F = new double[3] { 0, 0, 7.5 },    //
+                    Solid_E = new double[3] { 0, 0, 6 },  //
+                    Solid_F = new double[3] { 0, 0, 1.5 },    //
                     VibrationOneTime = new int[] { 0, 60, 60, 0 },
                     VibrationOneVel = new int[] { 0, 400, 400, 0 },
                     VibrationTwoTime = new int[] { 60, 0 },
@@ -821,82 +796,6 @@ namespace Q_Platform.BLL
             };
 
         }
-
-
-
-        //离心
-        //var sample = _workList[0];
-        //sample.Status = 0x11100101080;
-        //sample.TechParams.Tech = 0x3EFDE1AB;   //兽药
-        //sample.TechParams.cusuanan = 5;
-        //sample.TechParams.CentrifugalOneVelocity = new int[] { 1000, 1000, 1000 };
-        //sample.TechParams.CentrifugalOneTime = new int[] { 1, 1, 1 };
-        //GlobalCache.Instance.ColdDic.Add(sample, (ushort)(i + 1));
-        //sample.MainStep = 10;
-
-        //Centrifugal(sample, cts);
-
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    var sample = _workList[i];
-
-        //    sample.MainStep = 8;
-
-        //    _centrifugalCarrier.AddSampleToPipettingList(sample, "Q_Platform.BLL.IMainPro@PipettingCallBack");
-        //    _centrifugalCarrier.StartPipetting(cts);
-        //}
-
-
-
-        //浓缩测试  及  浓缩移液
-        //for (int i = 0; i < 8; i++)
-        //{
-        //    var sample = _workList[i];
-        //    sample.Status = 0x11100101080;
-        //    sample.TechParams.Tech = 0xF43EE00;   //E03EE00:农残取液   F03EE00：农残浓缩
-        //    sample.TechParams.ConcentrationTime = 1;
-        //    GlobalCache.Instance.ConcentrationList.Add(sample);
-        //    //sample.MainStep = 8;  浓缩/提取样品
-        //    sample.MainStep = 11;  //兽药浓缩
-        //    _centrifugalCarrier.StartConcentration(sample, cts);
-        //}
-
-
-        //左侧移液
-        //for (int i = 0; i < 8; i++)
-        //{
-        //    var sample = _workList[i];
-        //    sample.Status = 0x11100101001;
-        //    sample.TechParams.Tech = 0x3EFDE1AB;   //  //0x3EFDE1AB:兽药移液1   0xF45EE00:兽药移液2
-        //    sample.TechParams.cusuanan = 5;
-        //    sample.TechParams.ConcentrationTime = 1;
-        //    sample.TechParams.VibrationTwoTime = new int[] {30,30 };
-        //    sample.TechParams.VibrationTwoVel = new int[] { 300,300};
-
-
-        //    //GlobalCache.Instance.ConcentrationList.Add(sample);
-        //    //sample.MainStep = 8;  浓缩/提取样品
-        //    sample.MainStep = 8;  //兽药浓缩
-        //    //sample.MainStep = 5;  //兽药移液1
-        //    _pipettingTask = _centrifugalCarrier.StartPipetting(sample, "Q_Platform.BLL.IMainPro@test", cts);
-        //}
-
-        //
-
-        //if (_workList != null && _workList.Count > 0)
-        //{
-        //    var samplevar = _workList[0];
-        //    samplevar.MainStep = 11; ///调试
-        //    if (samplevar != null)
-        //    {
-        //            _centrifugalCarrier.AddSampleToConcentrationList(samplevar);
-        //            _centrifugalCarrier.StartConcentration(cts);
-
-        //        //    _centrifugalCarrier.AddSampleToPipettingList(samplevar, "Q_Platform.BLL.IMainPro@PipettingCallBack");
-        //        //_centrifugalCarrier.StartPipetting(cts);
-        //    }
-        //}
-
 
 
 

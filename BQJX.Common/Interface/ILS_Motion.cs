@@ -1,4 +1,5 @@
 ﻿using BQJX.Common.Common;
+using BQJX.Common.Interface;
 using BQJX.Core.Common;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,9 @@ namespace BQJX.Core.Interface
         /// 判断轴定位是否完成
         /// </summary>
         /// <param name="axisNo"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> CheckDone(int axisNo, CancellationTokenSource cts);
+        Task<bool> CheckDone(int axisNo, IGlobalStatus gs);
 
         /// <summary>
         /// 急停
@@ -52,25 +53,25 @@ namespace BQJX.Core.Interface
         /// </summary>
         /// <param name="axisNo"></param>
         /// <param name="mode">2：限位回零负向  3：限位回零正向  6：原点负向回零 7：原点正向回零    14：负向力矩回零  15：正向力矩回零 </param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> GoHomeWithCheckDone(int axisNo, ushort mode, CancellationTokenSource cts);
+        Task<bool> GoHomeWithCheckDone(int axisNo, ushort mode,IGlobalStatus gs);
 
         /// <summary>
         /// 回零
         /// </summary>
         /// <param name="axisNo"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> GoHomeWithCheckDone(int axisNo, CancellationTokenSource cts);
+        Task<bool> GoHomeWithCheckDone(int axisNo, IGlobalStatus gs);
 
         /// <summary>
         /// DM2C驱动回零用
         /// </summary>
         /// <param name="axisNo"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> DM2C_GoHomeWithCheckDone(int axisNo, CancellationTokenSource cts);
+        Task<bool> DM2C_GoHomeWithCheckDone(int axisNo,IGlobalStatus gs);
 
         /// <summary>
         /// 力矩回零
@@ -78,10 +79,10 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="torque">力矩百分比</param>
         /// <param name="direction">0：负向回零  1：正向回零</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
 
-        Task<bool> GoHomeTorqueWithCheckDone(int axisNo, short torque, int direction, CancellationTokenSource cts);
+        Task<bool> GoHomeTorqueWithCheckDone(int axisNo, short torque, int direction, IGlobalStatus gs);
 
         /// <summary>
         /// 正向点动
@@ -114,9 +115,9 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo">从站Id</param>
         /// <param name="offset">目标位置unit</param>
         /// <param name="velocity">速度rpm</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> P2pMoveWithCheckDone(int axisNo, double offset, double velocity, CancellationTokenSource cts);
+        Task<bool> P2pMoveWithCheckDone(int axisNo, double offset, double velocity, IGlobalStatus gs);
 
         /// <summary>
         /// 读取轴报警代码
@@ -142,9 +143,9 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="offset"></param>
         /// <param name="velocity"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> RelativeMoveWithCheckDone(int axisNo, double offset, double velocity, CancellationTokenSource cts);
+        Task<bool> RelativeMoveWithCheckDone(int axisNo, double offset, double velocity,IGlobalStatus gs);
 
         /// <summary>
         /// 复位报警
@@ -196,9 +197,9 @@ namespace BQJX.Core.Interface
         /// <param name="axisNo"></param>
         /// <param name="velocity"></param>
         /// <param name="torque"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque, int timeout, CancellationTokenSource cts);
+        Task<bool> TorqueMoveWithCheckDone(int axisNo, double velocity, double torque, int timeout, IGlobalStatus gs);
 
         /// <summary>
         /// 速度运动

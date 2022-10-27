@@ -60,9 +60,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 注射器回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> GoHome(CancellationTokenSource cts)
+        public async Task<bool> GoHome(IGlobalStatus gs)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace Q_Platform.BLL
                 //使能轴
                 await _motion.ServoOn(_axisAddLiquid).ConfigureAwait(false);
 
-                var result = await _motion.GoHomeWithCheckDone(_axisAddLiquid, cts);
+                var result = await _motion.GoHomeWithCheckDone(_axisAddLiquid, gs);
                 _step = 1;
                 return result;
             }
@@ -102,16 +102,16 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="solve">加液种类</param>
         /// <param name="volume">需要加液量0~40ml</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts)
+        public async Task<bool> AddSolve(byte solve, double volume, IGlobalStatus gs)
         {
             _logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
             if (volume <= 10 && !_globalStauts.IsStopped)
             {
                 return await AddSolveSub(solve, volume, null).ConfigureAwait(false);
             }
-            if (volume >10 && volume <= 20 &&cts?.IsCancellationRequested != true)
+            if (volume >10 && volume <= 20 &&gs?.IsStopped != true)
             {
                 if (_step == 1 && !_globalStauts.IsStopped)
                 {
@@ -217,14 +217,14 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="solve">溶剂种类</param>
         /// <param name="volume"> 1- 10ml</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolveSub(byte solve, double volume, CancellationTokenSource cts = null)
+        protected async Task<bool> AddSolveSub(byte solve, double volume, IGlobalStatus gs = null)
         {
-            if (cts?.IsCancellationRequested == true)
-            {
-                throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-            }
+            //if (gs?.IsCancellationRequested == true)
+            //{
+            //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
+            //}
             _logger?.Debug($"AddSolveSub-{solve}-{volume},isAddSolve{_isAddSolve},isAbsorb{_isAbsorb}");
             //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)
@@ -248,7 +248,7 @@ namespace Q_Platform.BLL
             _io.WriteBit_DO(_port8, false);
 
             //开始吸液
-            var result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, volume, _obsortVel, cts).ConfigureAwait(false);
+            var result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, volume, _obsortVel, gs).ConfigureAwait(false);
             if (!result)
             {
                 throw new Exception("吸液失败");
@@ -279,7 +279,7 @@ namespace Q_Platform.BLL
             _isAbsorb = true;
 
         //开始吐液
-        inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, cts).ConfigureAwait(false);
+        inject: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos, _syringVel, gs).ConfigureAwait(false);
             if (!result)
             {
                 throw new Exception("吐液失败");
@@ -289,7 +289,7 @@ namespace Q_Platform.BLL
 
             //开始回吸空气柱
             await Task.Delay(1000).ConfigureAwait(false);
-        air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, cts).ConfigureAwait(false);
+        air: result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, _syringHomePos + 0.2, _obsortVel, gs).ConfigureAwait(false);
             if (!result)
             {
                 throw new Exception("回吸空气柱失败");

@@ -71,6 +71,7 @@ namespace Q_Platform.BLL
             this._dataAccess = dataAccess;
 
             _posData = dataAccess.GetPosData();
+            _globalStatus.StopProgramEventArgs += StopMove;
         }
 
         public void UpdatePosData()
@@ -85,15 +86,15 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public async Task<bool> GoHome(CancellationTokenSource cts)
+        public async Task<bool> GoHome(IGlobalStatus gs)
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsStopped == true || gs?.IsPause == true || gs?.IsEmgStop == true)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    throw new TaskCanceledException($"触发停止");
                 }
                 _logger?.Info("浓缩回零");
 
@@ -103,7 +104,7 @@ namespace Q_Platform.BLL
                 //使能Y轴
                 await _motion.ServoOn(_axisY).ConfigureAwait(false);
                 //Y轴回零
-                var result = await _motion.GoHomeWithCheckDone(_axisY, cts).ConfigureAwait(false);
+                var result = await _motion.GoHomeWithCheckDone(_axisY, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -113,7 +114,7 @@ namespace Q_Platform.BLL
                 //复位真空
 
                 //Y轴移动到上下料位置
-                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, cts).ConfigureAwait(false);
+                result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -123,9 +124,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info("浓缩回零 停止");
                     return false;
                 }
                 _logger?.Warn($"浓缩回零 err:{ex.Message}");
@@ -134,13 +134,22 @@ namespace Q_Platform.BLL
 
         }
 
+        public bool StopMove()
+        {
+            StopRotate();
+            CloseBlow();
+            CloseVaccume();
+            Z_Cylinder_Up();
+            return true;
+        }
+
         /// <summary>
         /// 样品浓缩
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoConcentration(Sample sample, CancellationTokenSource cts)
+        public bool DoConcentration(Sample sample, IGlobalStatus gs)
         {
             try
             {
@@ -150,7 +159,7 @@ namespace Q_Platform.BLL
 
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Concentration))
                 {
-                    result = DoConcentration(vel, time, cts);
+                    result = DoConcentration(vel, time, gs);
                     if (!result)
                     {
                         throw new Exception($"样品{sample.Id}浓缩失败!");
@@ -161,9 +170,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger.Warn(ex.Message);
@@ -175,9 +183,9 @@ namespace Q_Platform.BLL
         /// 样品复溶
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool Redissolve(Sample sample, CancellationTokenSource cts)
+        public bool Redissolve(Sample sample, IGlobalStatus gs)
         {
             try
             {
@@ -188,7 +196,7 @@ namespace Q_Platform.BLL
                 
                 if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.Redissolve))
                 {
-                    result = Redissolve(2,volume, vel, time, cts);
+                    result = Redissolve(2,volume, vel, time, gs);
                     if (!result)
                     {
                         throw new Exception($"样品{sample.Id}复溶失败!");
@@ -199,9 +207,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Error(ex.Message);
                     return false;
                 }
                 _logger.Warn(ex.Message);
@@ -222,9 +229,9 @@ namespace Q_Platform.BLL
         /// <param name="volume">复溶加液量</param>
         /// <param name="vel">涡旋速度</param>
         /// <param name="time">涡旋时间</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool Redissolve(byte var,double volume, int vel, int time, CancellationTokenSource cts)
+        protected bool Redissolve(byte var,double volume, int vel, int time, IGlobalStatus gs)
         {
             byte port = 0x04;
             if (var == 2)
@@ -238,7 +245,7 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动到加液
-                s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetAddLiquidPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+                s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetAddLiquidPos(), _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -257,7 +264,7 @@ namespace Q_Platform.BLL
                 }
 
                 //注射器加液
-               s2: result = _syringTwo.AddSolve(port, volume, cts).GetAwaiter().GetResult(); //乙酸乙酯
+               s2: result = _syringTwo.AddSolve(port, volume, gs).GetAwaiter().GetResult(); //乙酸乙酯
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -276,7 +283,7 @@ namespace Q_Platform.BLL
                 }
 
                 //Y轴移动到浓缩位
-               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -320,7 +327,7 @@ namespace Q_Platform.BLL
 
                 //完成
                 //Y轴移动到上下位
-               s4: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s4: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -341,6 +348,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger.Error(ex.Message);
                 return false;
             }
@@ -352,9 +363,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="vel"></param>
         /// <param name="time"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected bool DoConcentration(int vel, int time, CancellationTokenSource cts)
+        protected bool DoConcentration(int vel, int time, IGlobalStatus gs)
         {
             try
             {
@@ -362,7 +373,7 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动到浓缩位
-               s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s1: var result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos(), _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -420,7 +431,7 @@ namespace Q_Platform.BLL
                     {
                         break;
                     }
-                    if (cts?.IsCancellationRequested == true)
+                    if (gs?.IsEmgStop == true || gs?.IsStopped == true)
                     {
                         throw new TaskCanceledException();
                     }
@@ -434,7 +445,7 @@ namespace Q_Platform.BLL
                 Z_Cylinder_Up();
 
                 //Y轴移动一小步 
-              s2: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos() + 5, _yMoveVel, cts).GetAwaiter().GetResult();
+              s2: result = _motion.P2pMoveWithCheckDone(_axisY, GetConcenPos() + 5, _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -456,7 +467,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(1000);
 
                 //Y轴移动到上下位
-               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, cts).GetAwaiter().GetResult();
+               s3: result = _motion.P2pMoveWithCheckDone(_axisY, GetPutGetPos(), _yMoveVel, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -479,7 +490,11 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                CloseBlow();//关闭吹气
+                CloseBlow();//关闭吹气          
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger.Error(ex.Message);
                 return false;
             }

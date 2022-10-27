@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,11 @@ namespace Q_Platform.BLL
     public interface ICapperOne
     {
 
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
-        bool AddSaltExtract(Sample sample, CancellationTokenSource cts);
-        bool AddSolveExtract(Sample sample, CancellationTokenSource cts);
-        bool AddWaterExtract(Sample sample, CancellationTokenSource cts);
+        bool AddSaltExtract(Sample sample, IGlobalStatus gs);
+        bool AddSolveExtract(Sample sample, IGlobalStatus gs);
+        bool AddWaterExtract(Sample sample, IGlobalStatus gs);
 
         void UpdatePosData();
         CapperInfo GetCapperInfo();

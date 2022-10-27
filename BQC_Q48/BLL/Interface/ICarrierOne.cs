@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         void UpdatePosData();
 
@@ -31,7 +32,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromAddSolidToCapperOne(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromAddSolidToCapperOne(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖1取样品管到加固
@@ -41,7 +42,7 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperOneToAddSolid(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
+        bool GetSampleFromCapperOneToAddSolid(Sample sample, Func<bool> func1, Func<bool> func2, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖1搬运试管到振荡
@@ -49,7 +50,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperOneToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperOneToVibration(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖1搬运样品管到试管架1
@@ -57,7 +58,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperOneToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperOneToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从试管架取样品管到拧盖1
@@ -65,7 +66,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToCapperOne(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromMaterialToCapperOne(Sample sample, IGlobalStatus gs);
 
 
         /// <summary>
@@ -75,14 +76,14 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
         /// <summary>
         /// 从振荡1取试管到试管架
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVibrationToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromVibrationToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从涡旋搬运样品管到试管架1
@@ -90,7 +91,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVortexToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromVortexToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从涡旋搬运试管到冰浴
@@ -98,7 +99,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVortexToCold(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromVortexToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡1取样品管到冰浴
@@ -106,7 +107,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVibrationToCold(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromVibrationToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽取样品管到试管架
@@ -115,7 +116,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖2取样品管到试管架（移液后）
@@ -123,7 +124,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperTwoToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从冰浴取样品管到移栽 （离心前）
@@ -132,7 +133,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromColdToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡1取样品管到移栽 （振荡完离心前）
@@ -141,7 +142,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVibrationOneToTransfer(Sample sample, Func<ushort, CancellationTokenSource, bool> func, CancellationTokenSource cts);
+        bool GetSampleFromVibrationOneToTransfer(Sample sample, Func<ushort, IGlobalStatus, bool> func, IGlobalStatus gs);
 
         /// <summary>
         /// 取样品离心管到拧盖2
@@ -149,18 +150,18 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromMaterialToCapperTwo(Sample sample, IGlobalStatus gs);
 
         
 
 
-        bool GetSampleToVortex(Sample sample, CancellationTokenSource cts);
+        bool GetSampleToVortex(Sample sample, IGlobalStatus gs);
 
-        bool GetSampleToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetSampleToVibration(Sample sample, IGlobalStatus gs);
 
         //===================================移液部分=======================================//
 
-        bool DoPipetting(Sample sample, bool bigToSmall, CancellationTokenSource cts);
+        bool DoPipetting(Sample sample, bool bigToSmall, IGlobalStatus gs);
 
 
         //===================================萃取管部分=======================================//
@@ -171,7 +172,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToCold(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽取萃取无盖管到拧盖2
@@ -180,7 +181,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromTransferToCapperTwo(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖2取萃取管到试管架2
@@ -188,7 +189,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 取预放粉包，均质子离心管到拧盖2 取离心完成后除脂萃取试管
@@ -196,7 +197,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromMaterialToCapperTwo(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToCapperTwo(Sample sample, IGlobalStatus gs);
 
 
         /// <summary>
@@ -205,7 +206,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromMaterialToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToVibration(Sample sample, IGlobalStatus gs);
 
 
         /// <summary>
@@ -215,7 +216,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡1取萃取管到冰浴
@@ -225,7 +226,7 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromVibrationToCold(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromVibrationToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从涡旋取萃取管到冰浴
@@ -233,7 +234,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromVortexToCold(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromVortexToCold(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡1取萃取管到涡旋
@@ -243,20 +244,20 @@ namespace Q_Platform.BLL
         /// <param name="func2"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, CancellationTokenSource cts);
+        bool GetPolishFromVibrationToVortex(Sample sample, Func<bool> func1, Func<bool> func2, IGlobalStatus gs);
 
-        bool GetPolishFromVibrationToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromVibrationToMaterial(Sample sample, IGlobalStatus gs);
 
-        bool GetPolishFromMaterialToVortex(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToVortex(Sample sample, IGlobalStatus gs);
 
-        bool GetPolishFromVortexToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromVortexToMaterial(Sample sample, IGlobalStatus gs);
         /// <summary>
         /// 从拧盖2取萃取管到振荡
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromCapperTwoToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetPolishFromCapperTwoToVibration(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从冰浴搬运萃取管到移栽
@@ -264,7 +265,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromColdToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从试管架搬运萃取管到移栽
@@ -272,7 +273,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从离心移栽取出离心完后的萃取管到试管架
@@ -281,6 +282,6 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetPolishFromTransferToMaterial(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
     }
 }

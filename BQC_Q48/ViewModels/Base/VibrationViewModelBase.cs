@@ -24,6 +24,15 @@ namespace Q_Platform.ViewModels.Base
 
         #region Properties
 
+        /// <summary>
+        /// 电机状态（使能）
+        /// </summary>
+        public int MotionStatus { get; set; }
+
+        /// <summary>
+        /// 电机io状态 (限位 回零)
+        /// </summary>
+        public uint MotionIoStatus { get; set; }
 
         public string AlarmMessage { get; set; }
 
@@ -61,6 +70,15 @@ namespace Q_Platform.ViewModels.Base
         protected void RefreshStatus()
         {
             WCurrentVel = _motion.GetCurrentVel(_axis) *60;
+            MotionIoStatus = _motion.GetMotionIoStatus(_axis);
+            if (_motion.GetMotionStatus(_axis) == 4)
+            {
+                MotionStatus = 1;
+            }
+            else
+            {
+                MotionStatus = 0;
+            }
         }
 
         private void RegisterCommand()

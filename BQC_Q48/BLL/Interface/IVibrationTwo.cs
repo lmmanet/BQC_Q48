@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         /// <summary>
         /// 提取完上清液振荡
@@ -24,7 +25,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool StartVibrationOne(Sample sample, CancellationTokenSource cts);
+        bool StartVibrationOne(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 提取上清液前振荡  兽药 加入醋酸铵水溶液后
@@ -32,7 +33,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool StartVibrationTwo(Sample sample, CancellationTokenSource cts);
+        bool StartVibrationTwo(Sample sample, IGlobalStatus gs);
 
     }
 }

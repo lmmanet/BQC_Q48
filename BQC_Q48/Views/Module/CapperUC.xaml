@@ -58,6 +58,7 @@
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Border Height="30" Background="{StaticResource VeryLightGrayBrush}">
@@ -74,12 +75,15 @@
 
                     <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
 
-                    <StackPanel Grid.Row="1" Margin="50,20" Orientation="Horizontal">
+                    <StackPanel Grid.Row="2" Margin="50,10" Orientation="Horizontal">
                         <TextBlock FontSize="{StaticResource FontSizeRegular}" Text="当前坐标(Y Z)：" />
                         <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding YCurrentPos}" />
                         <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding ZCurrentPos}" />
                     </StackPanel>
 
+                    <Border Grid.Row="1">
+                        <uc:StepStatusUC IoStatus="{Binding MotionIoStatus}" />
+                    </Border>
 
                 </Grid>
             </Border>
@@ -159,8 +163,7 @@
                                     <TextBlock Margin="5" VerticalAlignment="Center" Text="速度设置:" />
                                     <TextBox Grid.Column="1" MinWidth="80" Margin="5">
                                         <TextBox.Text>
-                                            <Binding NotifyOnValidationError="True" Path="TargetVel">
-                                            </Binding>
+                                            <Binding NotifyOnValidationError="True" Path="TargetVel" />
                                         </TextBox.Text>
                                         <TextBox.ToolTip>
                                             <ToolTip>
@@ -184,7 +187,7 @@
                                     <Style TargetType="Button">
                                         <Setter Property="Margin" Value="5,8" />
                                         <Setter Property="Padding" Value="15,8" />
-                                        <Setter Property="Height" Value="50" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="Width" Value="120" />
                                     </Style>
                                 </Grid.Resources>
@@ -198,7 +201,7 @@
                                         <Button Command="{Binding DisableMotionCommand}" Content="失能" />
 
                                         <Button Command="{Binding ResetAxisAmlCommand}" Content="轴报警复位" />
-           
+
                                     </UniformGrid>
                                 </Border>
 
@@ -208,7 +211,7 @@
 
                         </StackPanel>
 
-                        <!-- 注射器部分 -->
+                        <!--  注射器部分  -->
                         <StackPanel Grid.Row="1" Visibility="{Binding SyringVisibility}">
                             <TextBlock Margin="10" FontSize="20" FontWeight="Bold" Text="注射器操作" />
                             <!--  位置/速度设置  -->
@@ -225,8 +228,7 @@
                                     <TextBlock Margin="5" VerticalAlignment="Center" Text="速度设置:" />
                                     <TextBox Grid.Column="1" MinWidth="80" Margin="5">
                                         <TextBox.Text>
-                                            <Binding NotifyOnValidationError="True" Path="SyringTargetVel">
-                                            </Binding>
+                                            <Binding NotifyOnValidationError="True" Path="SyringTargetVel" />
                                         </TextBox.Text>
                                         <TextBox.ToolTip>
                                             <ToolTip>
@@ -250,12 +252,16 @@
                                     <Style TargetType="Button">
                                         <Setter Property="Margin" Value="5,8" />
                                         <Setter Property="Padding" Value="15,8" />
-                                        <Setter Property="Height" Value="50" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="Width" Value="120" />
                                     </Style>
                                 </Grid.Resources>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
 
-                                <Border Grid.RowSpan="2">
+                                <Border Grid.Row="0">
                                     <UniformGrid Columns="4">
                                         <Button Command="{Binding SyringStopMoveCommand}" Content="停止" />
                                         <Button Command="{Binding SyringHomeMoveCommand}" Content="回零" />
@@ -266,6 +272,9 @@
                                     </UniformGrid>
                                 </Border>
 
+                                <Border Grid.Row="1" Padding="50,20">
+                                    <uc:ValvesControlUC />
+                                </Border>
 
 
                             </Grid>

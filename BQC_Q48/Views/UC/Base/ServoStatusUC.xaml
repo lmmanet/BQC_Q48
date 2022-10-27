@@ -51,7 +51,7 @@
                 <CheckBox Content="EL-" IsEnabled="False" />
                 <CheckBox Content="EMG" IsEnabled="False" />
                 <CheckBox Content="ORG" IsEnabled="False" />
-                <CheckBox Visibility="Collapsed" IsEnabled="False" />
+                <CheckBox IsEnabled="False" Visibility="Collapsed" />
                 <CheckBox Content="SL+" IsEnabled="False" />
                 <CheckBox Content="SL-" IsEnabled="False" />
 

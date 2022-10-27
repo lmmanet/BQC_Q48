@@ -34,6 +34,10 @@ namespace Q_Platform.ViewModels.Module
 
         #region Properties
 
+        /// <summary>
+        /// 电机状态
+        /// </summary>
+        public int MotionIoStatus { get; set; }
 
         public string AlarmMessage { get; set; }
 
@@ -45,7 +49,7 @@ namespace Q_Platform.ViewModels.Module
 
         public double TargetPos { get; set; }
 
-        public int VortexVel { get; set; } = 1000;
+        public int VortexVel { get; set; } = 2000;
 
         /// <summary>
         /// 轴点位数据信息
@@ -124,6 +128,7 @@ namespace Q_Platform.ViewModels.Module
 
         private void RefreshStatus()
         {
+            MotionIoStatus = _iLS_Motion.GetMotionIoStatus(_axisY).GetAwaiter().GetResult();
             YCurrentPos = _iLS_Motion.GetCurrentPos(_axisY).GetAwaiter().GetResult();
         }
 

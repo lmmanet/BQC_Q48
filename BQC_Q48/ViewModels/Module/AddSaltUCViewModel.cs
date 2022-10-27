@@ -16,6 +16,7 @@ using Q_Platform.DAL;
 using System.Reflection;
 using GalaSoft.MvvmLight.Ioc;
 using Q_Platform.BLL;
+using System.Threading;
 
 namespace Q_Platform.ViewModels.Module
 {
@@ -31,13 +32,11 @@ namespace Q_Platform.ViewModels.Module
         private readonly ushort _axisY2 = 1;    //步进Y轴
         private readonly ushort _axisC1 = 3;    //步进旋转轴
         private readonly ushort _axisC2 = 2;    //步进旋转轴
+        private readonly ushort _axisZ1 = 30;    //步进Z1轴
+        private readonly ushort _axisZ2 = 31;    //步进Z2轴
         private readonly ushort _XCylinderControl = 9; //X气缸控制
-        private readonly ushort _Z1CylinderControl = 11; //Z1气缸控制
-        private readonly ushort _Z2CylinderControl = 13; //Z2气缸控制
         private readonly ushort _XCylinderRight = 12;    //X气缸右感应
         private readonly ushort _XCylinderLeft = 13;     //X气缸左感应
-        private readonly ushort _Z1CylinderDown = 9;     //Z1气缸下感应
-        private readonly ushort _Z2CylinderDown = 11;    //Z2气缸下感应
         private ushort _weightId1 = 1;                   //称台1
         private ushort _weightId2 = 2;                   //称台2
 
@@ -45,14 +44,44 @@ namespace Q_Platform.ViewModels.Module
         #region Properties
 
         /// <summary>
-        /// Y轴当前值
+        /// 电机状态（使能）
         /// </summary>
-        public double YCurrentPos { get; set; }
+        public int MotionStatus { get; set; }
 
         /// <summary>
-        /// Z轴当前值
+        /// 电机io状态 (限位 回零)
         /// </summary>
-        public double ZCurrentPos { get; set; }
+        public uint MotionIoStatus { get; set; }
+
+        /// <summary>
+        /// Y1轴当前值
+        /// </summary>
+        public double Y1CurrentPos { get; set; }
+
+        /// <summary>
+        /// Y2轴当前值
+        /// </summary>
+        public double Y2CurrentPos { get; set; }
+
+        /// <summary>
+        /// Z1轴当前值
+        /// </summary>
+        public double Z1CurrentPos { get; set; }
+
+        /// <summary>
+        /// Z2轴当前值
+        /// </summary>
+        public double Z2CurrentPos { get; set; }
+
+        /// <summary>
+        /// C1轴当前值
+        /// </summary>
+        public double C1CurrentPos { get; set; }
+
+        /// <summary>
+        /// C2轴当前值
+        /// </summary>
+        public double C2CurrentPos { get; set; }
 
         /// <summary>
         /// 报警信息
@@ -81,7 +110,7 @@ namespace Q_Platform.ViewModels.Module
         public ObservableCollection<StepAxisEleGear> ListAxisInfo { get; set; }
 
         [DoNotNotify]
-        public ushort AxisNo { get; set; } = 22;
+        public ushort AxisNo { get; set; } = 1;
 
 
         /// <summary>
@@ -101,6 +130,8 @@ namespace Q_Platform.ViewModels.Module
         public bool AbsMoveDone { get; set; }
 
 
+        public Visibility ShowServoStatus { get; set; } = Visibility.Visible;
+        public Visibility ShowStepStatus { get; set; } = Visibility.Collapsed;
 
         #endregion
 
@@ -137,26 +168,6 @@ namespace Q_Platform.ViewModels.Module
         public ICommand DisableMotionCommand { get; set; }
 
 
-
-        /// <summary>
-        /// Z1气缸下
-        /// </summary>
-        public ICommand PressDown1Command { get; set; }
-
-        /// <summary>
-        /// Z2气缸下
-        /// </summary>
-        public ICommand PressDown2Command { get; set; }
-
-        /// <summary>
-        /// Z1气缸上
-        /// </summary>
-        public ICommand PressUp1Command { get; set; }
-
-        /// <summary>
-        /// Z2气缸上
-        /// </summary>
-        public ICommand PressUp2Command { get; set; }
         public ICommand CylinderLeftCommand { get; set; }
         public ICommand CylinderRightCommand { get; set; }
 
@@ -201,6 +212,34 @@ namespace Q_Platform.ViewModels.Module
             this._iLS_Motion = iLS_Motion;
             this._io = io;
             this._dataAccess = dataAccess;
+            ListAxisInfo = new ObservableCollection<StepAxisEleGear>();
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐Y1轴", SlaveId = 5, EleGear = 0.1 });
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐Y2轴", SlaveId = 1, EleGear = 88.2, HomeHigh = 10, UpdateParams = true, JogVel = 10, JogAccDec = 50 });
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐C1轴", SlaveId = 3, EleGear = 10000 });
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐C2轴", SlaveId = 2, EleGear = 10000 });
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐Z1轴", SlaveId = 30, EleGear = 2500 });
+            ListAxisInfo.Add(new StepAxisEleGear { AxisName = "加盐Z2轴", SlaveId = 31, EleGear = 2500 });
+
+            _refreshTask = Task.Run(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        RefreshIoStatus();
+                        if (_stopRefresh)
+                        {
+                            break;
+                        }
+                        Thread.Sleep(1000);
+                    }
+                    catch (Exception )
+                    {
+                        //logger?.Error($"_refreshTask err:{ex.Message}");
+                    }
+                }
+
+            });
             RegisterCommand();
         }
 
@@ -208,10 +247,30 @@ namespace Q_Platform.ViewModels.Module
 
         protected void RefreshIoStatus()
         {
-            //var MotionStatusY = _iLS_Motion.GetMotionIoStatus(_capperInfo.AxisY).GetAwaiter().GetResult();
-            //var MotionStatusZ = _iLS_Motion.GetMotionIoStatus(_capperInfo.AxisZ).GetAwaiter().GetResult();
-            //YCurrentPos = _iLS_Motion.GetCurrentPos(_capperInfo.AxisY).GetAwaiter().GetResult();
-            //ZCurrentPos = _iLS_Motion.GetCurrentPos(_capperInfo.AxisZ).GetAwaiter().GetResult();
+            Y1CurrentPos = _motion.GetCurrentPos(_axisY1);
+            Z1CurrentPos = _iLS_Motion.GetCurrentPos(_axisZ1).GetAwaiter().GetResult();
+            Z2CurrentPos = _iLS_Motion.GetCurrentPos(_axisZ2).GetAwaiter().GetResult();
+            Y2CurrentPos = _iLS_Motion.GetCurrentPos(_axisZ2).GetAwaiter().GetResult();
+            C1CurrentPos = _iLS_Motion.GetCurrentPos(_axisC1).GetAwaiter().GetResult();
+            C2CurrentPos = _iLS_Motion.GetCurrentPos(_axisC2).GetAwaiter().GetResult();
+
+            if (AxisNo == 5)
+            {
+                MotionIoStatus = _motion.GetMotionIoStatus(5);
+            }
+            else
+            {
+                MotionIoStatus = (uint)_iLS_Motion.GetMotionIoStatus(AxisNo).GetAwaiter().GetResult();
+            }
+
+            if (_motion.GetMotionStatus(5) == 4)
+            {
+                MotionStatus = 1;
+            }
+            else
+            {
+                MotionStatus = 0;
+            }
 
             AlarmMessage = "";
             ShowAlarmMsg = Visibility.Visible;
@@ -235,11 +294,6 @@ namespace Q_Platform.ViewModels.Module
 
             TechCommand = new RelayCommand<object>(TechAxisPos);
             SavePosDataCommand = new RelayCommand(SaveAxisPos);
-
-            PressDown1Command = new RelayCommand(PressDown1);
-            PressDown2Command = new RelayCommand(PressDown2);
-            PressUp1Command = new RelayCommand(PressUp1);
-            PressUp2Command = new RelayCommand(PressUp2);
             CylinderLeftCommand = new RelayCommand(CylinderLeft);
             CylinderRightCommand = new RelayCommand(CylinderRight);
             RotateStartCommand = new RelayCommand(RotateStart);
@@ -254,11 +308,14 @@ namespace Q_Platform.ViewModels.Module
         protected void SaveAxisPos()
         {
             var list = AxisPosInfos.ToList();
-            bool result = _dataAccess.UpdatePosDataByAxisPosInfo(0, list);
-            //加盐Y为1
-           // bool result = _dataAccess.UpdatePosDataByAxisPosInfo(1, list);
-
-
+            if (AxisNo == 5)
+            {
+                bool result = _dataAccess.UpdatePosDataByAxisPosInfo(1, list);
+            }
+            else
+            {
+                bool result = _dataAccess.UpdatePosDataByAxisPosInfo(0, list);
+            }
             SimpleIoc.Default.GetInstance<IAddSolid>().UpdatePosData();
         }
 
@@ -273,14 +330,22 @@ namespace Q_Platform.ViewModels.Module
             {
                 return;
             }
-            //if (AxisNo == _capperInfo.AxisY)
-            //{
-            //    posInfo.PosData = YCurrentPos;
-            //}
-            //if (AxisNo == _capperInfo.AxisZ)
-            //{
-            //    posInfo.PosData = ZCurrentPos;
-            //}
+            if (AxisNo == 5)
+            {
+                posInfo.PosData = Y1CurrentPos;
+            }
+            if (AxisNo == _axisY2)
+            {
+                posInfo.PosData = Y1CurrentPos;
+            }
+            if (AxisNo == _axisZ1)
+            {
+                posInfo.PosData = Y1CurrentPos;
+            }
+            if (AxisNo == _axisZ2)
+            {
+                posInfo.PosData = Y1CurrentPos;
+            }
         }
 
         /// <summary>
@@ -312,6 +377,17 @@ namespace Q_Platform.ViewModels.Module
                 //更新轴点位信息
 
                 GetAxisPosInfo(stepAxisEleGear);
+
+                if (AxisNo == 5)
+                {
+                    ShowServoStatus = Visibility.Visible;
+                    ShowStepStatus = Visibility.Collapsed;
+                }
+                else
+                {
+                    ShowServoStatus = Visibility.Collapsed;
+                    ShowStepStatus = Visibility.Visible;
+                }
             }
 
         }
@@ -350,6 +426,8 @@ namespace Q_Platform.ViewModels.Module
                 _iLS_Motion.StopMove(_axisY2);
                 _iLS_Motion.StopMove(_axisC1);
                 _iLS_Motion.StopMove(_axisC2);
+                _iLS_Motion.StopMove(_axisZ1);
+                _iLS_Motion.StopMove(_axisZ2);
             });
         }
 
@@ -357,7 +435,15 @@ namespace Q_Platform.ViewModels.Module
         {
             try
             {
+                if (AxisNo == 5)
+                {
+                    _motion.ResetAxisAlm(5);
+                }
+                else
+                {
                 _iLS_Motion.ResetAxisAlm(AxisNo);
+
+                }
 
             }
             catch (Exception ex)
@@ -389,6 +475,14 @@ namespace Q_Platform.ViewModels.Module
                 if (AxisNo == _axisY1)
                 {
                     _motion.P2pMoveWithCheckDone(_axisY1, 0, 50, null).GetAwaiter().GetResult();
+                }
+                else if(AxisNo == _axisZ1)
+                {
+                    _iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null).GetAwaiter().GetResult();
+                }
+                else if(AxisNo == _axisZ2)
+                {
+                    _iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null).GetAwaiter().GetResult();
                 }
                 else
                 {
@@ -427,39 +521,6 @@ namespace Q_Platform.ViewModels.Module
                 }
             });
 
-        }
-
-
-        private void PressDown1()
-        {
-            RunCommandSync(() =>
-            {
-                _io.WriteBit_DO(_Z1CylinderControl, true);
-            });
-        }
-        
-        private void PressDown2()
-        {
-            RunCommandSync(() =>
-            {
-                _io.WriteBit_DO(_Z2CylinderControl, true);
-            });
-        }
-        
-        private void PressUp1()
-        {
-            RunCommandSync(() =>
-            {
-                _io.WriteBit_DO(_Z1CylinderControl, false);
-            });
-        }
-        
-        private void PressUp2()
-        {
-            RunCommandSync(() =>
-            {
-                _io.WriteBit_DO(_Z2CylinderControl, false);
-            });
         }
 
         private void RotateStart()

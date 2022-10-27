@@ -4,9 +4,224 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:Q_Platform.Views.Windows"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:uc="clr-namespace:Q_Platform.Views.UC"
+        x:Name="Window"
         Title="AddSampleWin"
         Width="800"
-        Height="450"
+        Height="800"
+        DataContext="{Binding Source={StaticResource Locator}, Path=AddSampleWinViewModel}"
+        WindowStyle="None"
         mc:Ignorable="d">
-    <Grid />
+
+
+    <Window.Resources>
+        <Style TargetType="local:AddSampleWin">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Window">
+                        <Border Background="White">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border>
+                                    <Grid Background="#2c676d">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+
+
+                                        <Border Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                CornerRadius="5"
+                                                IsHitTestVisible="True">
+                                            <TextBlock HorizontalAlignment="Center" FontSize="20" Foreground="White" Text="添加样品" />
+                                        </Border>
+
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                                            <Button Command="{Binding WindowCloseCommand}"
+                                                    CommandParameter="{Binding ElementName=Window}"
+                                                    Content="✕"
+                                                    Style="{StaticResource MainButtonStyle}"
+                                                    Tag="Red" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Grid Grid.Row="1">
+                                    <ContentPresenter />
+                                </Grid>
+
+
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="50" CornerRadius="5" GlassFrameThickness="0" ResizeBorderThickness="10" />
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <!--  新建工艺  -->
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  标题  -->
+            <Border Height="30" Background="{StaticResource VeryLightGrayBrush}">
+                <Grid>
+                    <TextBlock Margin="5,0,0,0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Text="新建样品:" />
+                    <Button HorizontalAlignment="Right" Command="{Binding ImportSampleCommand}" Content="批量导入" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+
+            <!--  内容  -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Margin="50,15,50,20" Orientation="Horizontal" TextBlock.FontSize="18">
+                    <TextBlock VerticalAlignment="Center" Text="样品名称1：" />
+                    <TextBox HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             FontSize="18"
+                             Style="{StaticResource hintTextBox}"
+                             Tag="新建样品名"
+                             Text="{Binding SampleModel.Name1}" />
+                    <TextBox Width="150"
+                             Margin="50,0"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             FontSize="18"
+                             Style="{StaticResource hintTextBox}"
+                             Tag="新建样品编号"
+                             Text="{Binding SampleModel.SnNum1}" />
+
+                </StackPanel>
+                <StackPanel Grid.Row="1" Margin="50,15,50,20" Orientation="Horizontal" TextBlock.FontSize="18">
+                    <TextBlock VerticalAlignment="Center" Text="样品名称2：" />
+                    <TextBox HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             FontSize="18"
+                             Style="{StaticResource hintTextBox}"
+                             Tag="新建样品名"
+                             Text="{Binding SampleModel.Name2}" />
+
+                    <TextBox Width="150"
+                             Margin="50,0"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             FontSize="18"
+                             Style="{StaticResource hintTextBox}"
+                             Tag="新建样品编号"
+                             Text="{Binding SampleModel.SnNum2}" />
+
+                </StackPanel>
+
+            </Grid>
+
+        </Grid>
+
+        <!--  设置工艺参数  -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  标题  -->
+            <Border Height="30" Background="{StaticResource VeryLightGrayBrush}">
+                <Grid>
+                    <TextBlock Margin="5,0,0,0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Text="选择工艺:" />
+
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+            <!--  内容  -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border BorderBrush="DimGray" BorderThickness="0.5" CornerRadius="5" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="20,20" VerticalAlignment="Center" FontSize="18" Text="请选择处理工艺:" />
+
+                    <ComboBox x:Name="combSelect"
+                              Grid.Row="1"
+                              MinWidth="400"
+                              Margin="5"
+                              VerticalAlignment="Center"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding TechList}"
+                              SelectedIndex="0"
+                              SelectedItem="{Binding TechParamsModelSelected}" />
+
+                </StackPanel>
+
+                <uc:TechParamsUC Grid.Row="1" DataContext="{Binding ElementName=combSelect, Path=SelectedItem}" />
+
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Button Width="150"
+                    Height="40"
+                    Margin="150,10"
+                    Padding="20,5"
+                    HorizontalAlignment="Right"
+                    Command="{Binding DoneCommand}"
+                    CommandParameter="{Binding ElementName=Window}"
+                    Content="完成"
+                    IsDefault="True" />
+            <Button Width="150"
+                    Height="40"
+                    Margin="150,10"
+                    Padding="20,5"
+                    HorizontalAlignment="Left"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding ElementName=Window}"
+                    Content="取消" />
+        </Grid>
+
+    </Grid>
+
+
 </Window>

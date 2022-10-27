@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="Q_Platform.Views.UC.SampleProcessUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cv="clr-namespace:BQJX.Converts"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ext="clr-namespace:Q_Platform.Views"
+             xmlns:local="clr-namespace:Q_Platform.Views.UC"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+
+    <Border BorderBrush="DimGray" BorderThickness="1" CornerRadius="2">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0">
+                <Grid>
+                    <Grid.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="Gray" />
+                            <Setter Property="BorderThickness" Value="0.5" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="17" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0">
+                        <TextBlock HorizontalAlignment="Center" Text="样品位置" />
+                    </Border>
+                    <Border Grid.Column="1">
+                        <TextBlock HorizontalAlignment="Center" Text="样品编号" />
+                    </Border>
+                    <Border Grid.Column="2">
+                        <TextBlock HorizontalAlignment="Center" Text="样品名称" />
+                    </Border>
+                    <Border Grid.Column="3">
+                        <TextBlock HorizontalAlignment="Center" Text="处理工艺" />
+                    </Border>
+                    <Border Grid.Column="4">
+                        <TextBlock HorizontalAlignment="Center" Text="当前进度" />
+                    </Border>
+                    <Border Grid.Column="5">
+                        <TextBlock HorizontalAlignment="Center" Text="当前状态" />
+                    </Border>
+                    <Border Grid.Column="6">
+                        <TextBlock HorizontalAlignment="Center" Text="浓缩状态" />
+                    </Border>
+                    <Border Grid.Column="7">
+                        <TextBlock HorizontalAlignment="Center" Text="操作" />
+                    </Border>
+
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+                <ItemsControl ItemsSource="{Binding SampleList}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Gray" BorderThickness="0,0,0,1">
+                                <Grid ext:GridHelper.ShowBorder="True">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id,Converter={cv:SampleIdToPosString},ConverterParameter=1}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id,Converter={cv:SampleIdToPosString},ConverterParameter=2}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Text="{Binding SnNum1}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Text="{Binding SnNum2}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Text="{Binding Name1}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" Text="{Binding Name2}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="6" HorizontalAlignment="Center" Text="{Binding Sample.ConcentrationFailure}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="6" HorizontalAlignment="Center" Text="{Binding Sample.ConcentrationFailure}" />
+
+                                    <TextBlock Grid.RowSpan="2"
+                                               Grid.Column="3"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding TechName}" />
+                                    <ProgressBar Grid.RowSpan="2" Grid.Column="4" Maximum="30" Value="{Binding Sample.MainStep}" />
+                                    <TextBlock Grid.RowSpan="2" Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{cv:ProcessMultiIntToString}">
+                                                <Binding Path="Sample.MainStep" />
+                                                <Binding Path="Sample.SubStep" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+
+                                    <Grid Grid.RowSpan="2" Grid.Column="7">
+                                        <Button Margin="5,0"
+                                                Padding="10,5"
+                                                HorizontalContentAlignment="Center"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="删除" />
+
+                                    </Grid>
+
+                                </Grid>
+                            </Border>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+
+
+                </ItemsControl>
+            </ScrollViewer>
+
+
+        </Grid>
+
+    </Border>
+</UserControl>
+

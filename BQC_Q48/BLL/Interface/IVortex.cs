@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         /// <summary>
         /// 判断涡旋任务是否结束
@@ -31,11 +32,11 @@ namespace Q_Platform.BLL
         /// <param name="step">涡旋步骤号</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool StartVortex(Sample sample, int step, CancellationTokenSource cts);
+        bool StartVortex(Sample sample, int step, IGlobalStatus gs);
 
         //==============================================涡旋单独用===================================================//
-        void AddSampleToVortexList(Sample sample, CancellationTokenSource cts);
-        Task StartVortex(CancellationTokenSource cts);
+        void AddSampleToVortexList(Sample sample, IGlobalStatus gs);
+        Task StartVortex(IGlobalStatus gs);
 
 
 

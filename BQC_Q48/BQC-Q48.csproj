@@ -83,6 +83,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
+    <Compile Include="AttachedProperties\IsDoneSuccessful.cs" />
     <Compile Include="AttachedProperties\IsBusyProperty.cs" />
     <Compile Include="AttachedProperties\IsRunningProperty.cs" />
     <Compile Include="BLL\AddSolid.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Converts\IoBitConverter.cs" />
     <Compile Include="Converts\MotionConvert.cs" />
     <Compile Include="Converts\ProcessIntToString.cs" />
+    <Compile Include="Converts\ProcessMultiIntToString.cs" />
     <Compile Include="Converts\SampleIdToPosString.cs" />
     <Compile Include="Converts\StatusIntToString.cs" />
     <Compile Include="Core\SampleObj.cs" />
@@ -296,6 +298,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UC\Base\ValvesControlUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UC\FieldBusTestUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -304,11 +310,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\UC\SampleProcessUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UC\SampleStatusMonitor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UC\StepAxisTestUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UC\TechParamsUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -350,7 +364,9 @@
     <Compile Include="ViewModels\UC\IoTestUCViewModel.cs" />
     <Compile Include="ViewModels\UC\SampleStatusMonitorViewModel.cs" />
     <Compile Include="ViewModels\UC\StepAxisTestUCViewModel.cs" />
+    <Compile Include="ViewModels\Windows\AddSampleWinViewModel.cs" />
     <Compile Include="ViewModels\Windows\MainWindowViewModel.cs" />
+    <Compile Include="Views\GridHelper.cs" />
     <Compile Include="Views\Module\AddSaltUC.xaml.cs">
       <DependentUpon>AddSaltUC.xaml</DependentUpon>
     </Compile>
@@ -426,17 +442,26 @@
     <Compile Include="Views\UC\Base\ClawUC.xaml.cs">
       <DependentUpon>ClawUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UC\Base\ValvesControlUC.xaml.cs">
+      <DependentUpon>ValvesControlUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UC\FieldBusTestUC.xaml.cs">
       <DependentUpon>FieldBusTestUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UC\IoTestUC.xaml.cs">
       <DependentUpon>IoTestUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UC\SampleProcessUC.xaml.cs">
+      <DependentUpon>SampleProcessUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UC\SampleStatusMonitor.xaml.cs">
       <DependentUpon>SampleStatusMonitor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UC\StepAxisTestUC.xaml.cs">
       <DependentUpon>StepAxisTestUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UC\TechParamsUC.xaml.cs">
+      <DependentUpon>TechParamsUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Windows\AddSampleWin.xaml.cs">
       <DependentUpon>AddSampleWin.xaml</DependentUpon>

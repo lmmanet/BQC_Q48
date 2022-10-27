@@ -659,8 +659,8 @@ namespace Q_Platform.ViewModels.UC
         {
             try
             {
-                if (AxisNo == 12 || AxisNo == 13 || AxisNo == 27 || AxisNo == 28 || AxisNo == 29)
-                {//12 13 27 28 29
+                if (AxisNo == 12 || AxisNo == 13 || AxisNo == 27 || AxisNo == 28 || AxisNo == 29 || AxisNo == 30 || AxisNo == 31)
+                {//12 13 27 28 29 30 31
                     _iLS_Motion.DM2C_GoHomeWithCheckDone(AxisNo, null);
                 }
                 else

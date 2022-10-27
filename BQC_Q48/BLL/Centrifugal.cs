@@ -80,12 +80,12 @@ namespace Q_Platform.BLL
         /// 模块回零
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> GoHome(CancellationTokenSource cts)
+        public async Task<bool> GoHome(IGlobalStatus gs)
         {
             _logger?.Info("离心机回零");
             try
             {
-                var result =await _carrier.GoHome(cts).ConfigureAwait(false);
+                var result =await _carrier.GoHome(gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("离心移栽回零失败!");
@@ -104,7 +104,7 @@ namespace Q_Platform.BLL
             //}
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
                     return false;
                 }
@@ -160,9 +160,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="actionCallBack"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public Task StartCentrifugal(CancellationTokenSource cts)
+        public Task StartCentrifugal(IGlobalStatus gs)
         {
             if (_centrifugalTask != null)
             {
@@ -174,7 +174,7 @@ namespace Q_Platform.BLL
 
             _centrifugalTask = Task.Run(() =>
             {
-                while (cts?.IsCancellationRequested != true)
+                while (gs?.IsStopped != true)
                 {
                     try
                     {
@@ -219,8 +219,8 @@ namespace Q_Platform.BLL
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1))
                                 {
-                                    _logger?.Debug("一次次离心");
-                                    var result = DoCentrifugal(itemSample1, cts);
+                                    _logger?.Debug("一次离心");
+                                    var result = DoCentrifugal(itemSample1, gs);
                                     if (!result)
                                     {
                                         throw new Exception("DoCentrifugal1 err");
@@ -229,7 +229,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取上清液  加入移液列表
-                                    MethodHelper.ExcuteMethod(itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, gs);
 
                                     //样品和任务从列表移除
                                     dicBig1.Remove(itemSample1);
@@ -252,7 +252,7 @@ namespace Q_Platform.BLL
                                         if (itemSample2.MainStep == 4 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal1))//一次离心
                                         {
                                             _logger?.Debug("二次离心 大小管同时离心");
-                                            var ret = DoCentrifugalBigAndSmall(itemSample2, itemSample1, 1, cts);
+                                            var ret = DoCentrifugalBigAndSmall(itemSample2, itemSample1, 1, gs);
                                             if (!ret)
                                             {
                                                 throw new Exception("DoCentrifugal3 err");
@@ -262,8 +262,8 @@ namespace Q_Platform.BLL
                                             itemSample2.MainStep++;
 
                                             //触发后续动作   取净化液  加入到移液列表
-                                            MethodHelper.ExcuteMethod(itemSample1, cts);
-                                            MethodHelper.ExcuteMethod(itemSample2, cts);
+                                            MethodHelper.ExcuteMethod(itemSample1, gs);
+                                            MethodHelper.ExcuteMethod(itemSample2, gs);
 
                                             //样品和任务从列表移除
                                             dicSmall1.Remove(itemSample1);
@@ -276,7 +276,7 @@ namespace Q_Platform.BLL
                                   
                                     //单独小管离心
                                     _logger?.Debug("三次离心 小管单独离心");
-                                    var result = DoCentrifugalSmall(itemSample1, cts);
+                                    var result = DoCentrifugalSmall(itemSample1, gs);
                                     if (!result)
                                     {
                                         throw new Exception("DoCentrifugal2 err");
@@ -285,7 +285,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取净化液  加入到移液列表
-                                    MethodHelper.ExcuteMethod(itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, gs);
 
                                     //样品和任务从列表移除
 
@@ -307,7 +307,7 @@ namespace Q_Platform.BLL
                                         if (itemSample2.MainStep == 7 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal2))
                                         {
                                             _logger?.Debug("三次离心 大小管同时离心");
-                                            var ret = DoCentrifugalBigAndSmall(itemSample1, itemSample2, 2, cts);
+                                            var ret = DoCentrifugalBigAndSmall(itemSample1, itemSample2, 2, gs);
                                             if (!ret)
                                             {
                                                 throw new Exception("DoCentrifugal4 err");
@@ -317,8 +317,8 @@ namespace Q_Platform.BLL
                                             itemSample2.MainStep++;
 
                                             //触发后续动作   取净化液  加入到移液列表
-                                            MethodHelper.ExcuteMethod(itemSample1, cts);
-                                            MethodHelper.ExcuteMethod(itemSample2, cts);
+                                            MethodHelper.ExcuteMethod(itemSample1, gs);
+                                            MethodHelper.ExcuteMethod(itemSample2, gs);
 
                                             //样品和任务从列表移除
                                             dicPolish1.Remove(itemSample1);
@@ -328,7 +328,7 @@ namespace Q_Platform.BLL
                                         }
                                     }
                                     _logger?.Debug("三次离心 萃取管单独离心");
-                                    var result = DoPolishCentrifugal(itemSample1, cts);
+                                    var result = DoPolishCentrifugal(itemSample1, gs);
                                     if (!result)
                                     {
                                         throw new Exception("DoCentrifugal3 err");
@@ -337,7 +337,7 @@ namespace Q_Platform.BLL
                                     itemSample1.MainStep++;
 
                                     //触发后续动作   取萃取液  加入移液列表
-                                    MethodHelper.ExcuteMethod(itemSample1, cts);
+                                    MethodHelper.ExcuteMethod(itemSample1, gs);
 
                                     //样品和任务从列表移除
 
@@ -357,6 +357,10 @@ namespace Q_Platform.BLL
                     }
                     catch (Exception ex)
                     {
+                        if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                        {
+                            return;
+                        }
                         _globalStatus.PauseProgram();
                         _logger?.Warn(ex.Message);
                         return;
@@ -372,9 +376,9 @@ namespace Q_Platform.BLL
         /// 大管离心
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoCentrifugal(Sample sample, CancellationTokenSource cts)
+        public bool DoCentrifugal(Sample sample, IGlobalStatus gs)
         {
             lock (_lockObj)
             {
@@ -384,7 +388,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCentrifugal))
                     {
-                        result = _carrier.GetSampleFromColdToCentrifugal(sample, GoStation, cts);
+                        result = _carrier.GetSampleFromColdToCentrifugal(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -401,7 +405,7 @@ namespace Q_Platform.BLL
                     {
                         int time = sample.TechParams.CentrifugalOneTime[0];
                         int vel = sample.TechParams.CentrifugalOneVelocity[0];
-                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        result = DoCentrifugal(time, vel, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("大管离心出错!");
@@ -415,7 +419,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInShelf))
                     {
-                        result = _carrier.GetSampleFromCentrifugalToMaterial(sample, GoStation, cts);
+                        result = _carrier.GetSampleFromCentrifugalToMaterial(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -444,9 +448,9 @@ namespace Q_Platform.BLL
         /// 萃取大管离心
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPolishCentrifugal(Sample sample, CancellationTokenSource cts)
+        public bool DoPolishCentrifugal(Sample sample, IGlobalStatus gs)
         {
             lock (_lockObj)
             {
@@ -456,7 +460,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInCentrifugal))
                     {
-                        result = _carrier.GetPolishFromMaterialToCentrifugal(sample, GoStation, cts);
+                        result = _carrier.GetPolishFromMaterialToCentrifugal(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -472,7 +476,7 @@ namespace Q_Platform.BLL
                     {
                         int time = sample.TechParams.CentrifugalOneTime[2];
                         int vel = sample.TechParams.CentrifugalOneVelocity[2];
-                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        result = DoCentrifugal(time, vel, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("萃取管离心出错!");
@@ -486,7 +490,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPolishInShelf))
                     {
-                        result = _carrier.GetPolishFroCentrifugaToShelf(sample, GoStation, cts);
+                        result = _carrier.GetPolishFroCentrifugaToShelf(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -513,9 +517,9 @@ namespace Q_Platform.BLL
         /// 小管离心
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoCentrifugalSmall(Sample sample, CancellationTokenSource cts)
+        public bool DoCentrifugalSmall(Sample sample, IGlobalStatus gs)
         {
             lock (_lockObj)
             {
@@ -524,7 +528,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInCentrifugal))
                     {
-                        result = _carrier.GetPurifyFromMaterialToCentrifugal(sample, GoStation, cts);
+                        result = _carrier.GetPurifyFromMaterialToCentrifugal(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -540,7 +544,7 @@ namespace Q_Platform.BLL
                     {
                         int time = sample.TechParams.CentrifugalOneTime[1];
                         int vel = sample.TechParams.CentrifugalOneVelocity[1];
-                        result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                        result = DoCentrifugal(time, vel, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("小管离心出错!");
@@ -553,7 +557,7 @@ namespace Q_Platform.BLL
                 {
                     if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsPurfyInShelf))
                     {
-                        result = _carrier.GetPurifyFromCentrifugalToMaterial(sample, GoStation, cts);
+                        result = _carrier.GetPurifyFromCentrifugalToMaterial(sample, GoStation, gs);
                         if (!result)
                         {
                             return false;
@@ -584,9 +588,9 @@ namespace Q_Platform.BLL
         /// <param name="sample1">大管</param>
         /// <param name="sample2">小管</param>
         /// <param name="var">1:样品管 2:萃取管</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool DoCentrifugalBigAndSmall(Sample sample1,Sample sample2,int var,CancellationTokenSource cts)
+        private bool DoCentrifugalBigAndSmall(Sample sample1,Sample sample2,int var,IGlobalStatus gs)
         {
             lock (_lockObj)
             {
@@ -595,7 +599,7 @@ namespace Q_Platform.BLL
                 //搬运大小管到离心机
                 if ((sample1.SubStep < 2 && !_globalStatus.IsStopped) || (sample2.SubStep < 2 && !_globalStatus.IsStopped))
                 {
-                    result = _carrier.GetBigAndSmallToCentrifugal(sample1, sample2, var, GoStation, cts);
+                    result = _carrier.GetBigAndSmallToCentrifugal(sample1, sample2, var, GoStation, gs);
                     if (!result)
                     {
                         return false;
@@ -607,7 +611,7 @@ namespace Q_Platform.BLL
                 {
                     int time = sample2.TechParams.CentrifugalOneTime[1];
                     int vel = sample2.TechParams.CentrifugalOneVelocity[1];
-                    result = DoCentrifugal(time, vel, cts).GetAwaiter().GetResult();
+                    result = DoCentrifugal(time, vel, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("大小管离心出错!");
@@ -620,7 +624,7 @@ namespace Q_Platform.BLL
                 //搬运大小管下料
                 if (sample1.SubStep >= 3 && sample2.SubStep >= 3 && !_globalStatus.IsStopped)
                 {
-                    result = _carrier.GetBigAndSmallToToMarterial(sample1,sample2,var, GoStation, cts);
+                    result = _carrier.GetBigAndSmallToToMarterial(sample1,sample2,var, GoStation, gs);
                     if (!result)
                     {
                         return false;
@@ -650,9 +654,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="time"></param>
         /// <param name="vel"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private async Task<bool> DoCentrifugal(int time,int vel, CancellationTokenSource cts)
+        private async Task<bool> DoCentrifugal(int time,int vel, IGlobalStatus gs)
         {
             //关闭门
             CloseShadow();
@@ -698,7 +702,7 @@ namespace Q_Platform.BLL
                 {
                     throw new TimeoutException("检测离心机停止超时");
                 }
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsStopped == true || gs?.IsEmgStop == true)
                 {
                     throw new TaskCanceledException();
                 }
@@ -810,19 +814,19 @@ namespace Q_Platform.BLL
             //离心机移动到指定位置
             if (num == 1)
             {
-                offset = 0.05;
+                offset = 0.055;
             }
             else if(num == 2)
             {
-                offset = 0.3;
+                offset = 0.305;
             }
             else if(num == 3)
             {
-                offset = 0.55;
+                offset = 0.555;
             }
             else if (num == 4)
             {
-                offset = 0.8;
+                offset = 0.805;
             }
             else
             {
@@ -833,6 +837,10 @@ namespace Q_Platform.BLL
             var result = await _motion.GohomeWithCheckDone(_axisCentrigugal, _homeMode,offset, null).ConfigureAwait(false);
             if (!result)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Error($"离心机移动到指定位出错");
                 throw new Exception("离心机移动到指定位置出错");
             }

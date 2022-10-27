@@ -67,13 +67,13 @@ namespace Q_Platform.BLL
         /// 装盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOnAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
 
-            s1: var result = await CapperOn(18, 40, cts).ConfigureAwait(false);
+            s1: var result = await CapperOn(18, 40, gs).ConfigureAwait(false);
 
             if (!result)
             {
@@ -81,7 +81,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -98,12 +98,12 @@ namespace Q_Platform.BLL
         /// 拆盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOffAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
-           s1: var result = await CapperOff(cts, -2.5).ConfigureAwait(false);
+           s1: var result = await CapperOff(gs, -2.5).ConfigureAwait(false);
 
             if (!result)
             {
@@ -111,7 +111,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -120,6 +120,30 @@ namespace Q_Platform.BLL
                     }
                 }
             }
+        //    //检测是否拆盖成功
+        //    result = CheckUnCapper(gs);
+        //    if (!result)
+        //    {
+        //        return false;
+        //    }
+
+        //s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
+        //    if (!result)
+        //    {
+        //        if (_globalStatus.IsPause)
+        //        {
+        //            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
+        //            {
+        //                Thread.Sleep(1000);
+        //            }
+        //            if (!_globalStatus.IsStopped)
+        //            {
+        //                goto s5;
+        //            }
+        //        }
+        //        throw new Exception("Y轴运动出错！");
+        //    }
+
 
             return result;
         }
@@ -128,9 +152,9 @@ namespace Q_Platform.BLL
         /// 提取净化管  ===> 小瓶
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPipettingFromCapperThreeToBottle(Sample sample,CancellationTokenSource cts)
+        public bool DoPipettingFromCapperThreeToBottle(Sample sample,IGlobalStatus gs)
         {
             try
             {
@@ -138,7 +162,7 @@ namespace Q_Platform.BLL
                 {
                     bool result;
 
-                    result = _carrier.DoPipettingOne(sample, 1, CapOn, CapOff, cts);
+                    result = _carrier.DoPipettingOne(sample, 1, CapOn, CapOff, gs);
                     if (!result)
                     {
                         throw new Exception($"样品小瓶{sample.Id}移液失败!");
@@ -148,6 +172,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -158,9 +186,9 @@ namespace Q_Platform.BLL
         /// 提取浓缩样品液
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool DoPipettingFromCapperFourToBottle(Sample sample, CancellationTokenSource cts)
+        public bool DoPipettingFromCapperFourToBottle(Sample sample, IGlobalStatus gs)
         {
             try
             {
@@ -174,7 +202,7 @@ namespace Q_Platform.BLL
                     //准备小瓶
                     if (sample.BottleStep == 0 && !_globalStatus.IsStopped)
                     {
-                        result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                        result = MovePutGetPos(gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception("拧盖Y轴到接驳位出错!");
@@ -187,7 +215,7 @@ namespace Q_Platform.BLL
                     {
                         if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
                         {
-                            result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
+                            result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, gs);
                             if (!result)
                             {
                                 throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
@@ -207,7 +235,7 @@ namespace Q_Platform.BLL
                         {
                             if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                             {
-                                result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                                result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                                 if (!result)
                                 {
                                     throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -221,7 +249,7 @@ namespace Q_Platform.BLL
                     //两次移液
                     if (sample.BottleStep == 3 && !_globalStatus.IsStopped)
                     {
-                        result = _carrier.DoPipettingOne(sample, 2, CapOn, CapOff, cts);
+                        result = _carrier.DoPipettingOne(sample, 2, CapOn, CapOff, gs);
                         if (!result)
                         {
                             throw new Exception();
@@ -245,6 +273,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -254,14 +286,14 @@ namespace Q_Platform.BLL
         /// 拆盖  拧盖4调用
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool CapperOff(Sample sample, CancellationTokenSource cts)
+        public bool CapperOff(Sample sample, IGlobalStatus gs)
         {
             if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
             {
                 //内部已有拆盖暂停判断
-                var result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                var result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                 if (!result)
                 {
                     throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -285,16 +317,16 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">1:净化管 ==》小瓶  2:西林瓶==》小瓶</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool DoPipetting(Sample sample, int var, CancellationTokenSource cts)
+        private bool DoPipetting(Sample sample, int var, IGlobalStatus gs)
         {
             bool result;
             lock (_lockObj)
             {
                 if (sample.BottleStep == 0 && !_globalStatus.IsStopped)
                 {
-                    result = MovePutGetPos(cts).GetAwaiter().GetResult();
+                    result = MovePutGetPos(gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception("拧盖Y轴到接驳位出错!");
@@ -307,7 +339,7 @@ namespace Q_Platform.BLL
                 {
                     if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1InShelf))
                     {
-                        result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, cts);
+                        result = _carrier.GetBottleFromMaterialToCapperFive_One(sample, gs);
                         if (!result)
                         {
                             throw new Exception($"搬运{sample.Id}样品小瓶到拧盖5失败!");
@@ -327,7 +359,7 @@ namespace Q_Platform.BLL
                     {
                         if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                         {
-                            result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                            result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -367,9 +399,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="var">1:第一组</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool CapOn(Sample sample,int var ,CancellationTokenSource cts)
+        private bool CapOn(Sample sample,int var ,IGlobalStatus gs)
         {
             bool result;
             //装盖
@@ -377,7 +409,7 @@ namespace Q_Platform.BLL
             {
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                 {
-                    result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                    result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -391,7 +423,7 @@ namespace Q_Platform.BLL
             {
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
                 {
-                    result = CapperOnAsync(sample, cts).GetAwaiter().GetResult();
+                    result = CapperOnAsync(sample, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -409,9 +441,9 @@ namespace Q_Platform.BLL
         /// 第二组拆盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        private bool CapOff(Sample sample,int var,CancellationTokenSource cts)
+        private bool CapOff(Sample sample,int var,IGlobalStatus gs)
         {
             bool result;
 
@@ -420,7 +452,7 @@ namespace Q_Platform.BLL
             {
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
                 {
-                    result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                    result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
@@ -434,7 +466,7 @@ namespace Q_Platform.BLL
             {
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle2UnCapped))
                 {
-                    result = CapperOffAsync(sample, cts).GetAwaiter().GetResult();
+                    result = CapperOffAsync(sample, gs).GetAwaiter().GetResult();
                     if (!result)
                     {
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");

@@ -123,13 +123,7 @@
                                           DisplayMemberPath="AxisName"
                                           ItemsSource="{Binding ListAxisInfo}"
                                           SelectedIndex="0"
-                                          SelectedValuePath="SlaveId">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="SelectionChanged">
-                                            <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.ComboxSelectChangedCommand, Mode=TwoWay}" CommandParameter="{Binding ElementName=combSelect, Path=SelectedItem}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
+                                          SelectedItem="{Binding SelectedAxis}" />
                             </WrapPanel>
 
                             <!--  选择点位  -->
@@ -194,7 +188,7 @@
                                     <Style TargetType="Button">
                                         <Setter Property="Margin" Value="5,8" />
                                         <Setter Property="Padding" Value="15,8" />
-                                        <Setter Property="Height" Value="50" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="Width" Value="120" />
                                     </Style>
                                 </Grid.Resources>

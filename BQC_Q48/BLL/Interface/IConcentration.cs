@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         void UpdatePosData();
         /// <summary>
@@ -20,7 +21,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoConcentration(Sample sample, CancellationTokenSource cts);
+        bool DoConcentration(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 样品复溶
@@ -28,7 +29,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool Redissolve(Sample sample, CancellationTokenSource cts);
+        bool Redissolve(Sample sample, IGlobalStatus gs);
 
 
     }

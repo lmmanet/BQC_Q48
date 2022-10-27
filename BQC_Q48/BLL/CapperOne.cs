@@ -71,21 +71,21 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> GoHome(CancellationTokenSource cts)
+        public override async Task<bool> GoHome(IGlobalStatus gs)
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsEmgStop == true || gs?.IsStopped == true)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    throw new TaskCanceledException($"触发停止");
                 }
                 _logger?.Info($"拧盖模块1回零");
                 //注射器回零
-                var result1 = _syring.GoHome(cts).ConfigureAwait(false);
+                var result1 = _syring.GoHome(gs).ConfigureAwait(false);
                 //拧盖回零
-                var result2 = base.GoHome(cts).ConfigureAwait(false);
+                var result2 = base.GoHome(gs).ConfigureAwait(false);
 
                 if (!await result1 || !await result2)
                 {
@@ -96,9 +96,8 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
-                    _logger?.Info($"拧盖模块1回零 停止");
                     return false;
                 }
                 _logger?.Warn($"{ex.Message}");
@@ -110,13 +109,13 @@ namespace Q_Platform.BLL
         /// 装盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOnAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOnAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
 
-           s1: var result = await CapperOn(80, 40, cts).ConfigureAwait(false);
+           s1: var result = await CapperOn(80, 40, gs).ConfigureAwait(false);
 
             if (!result)
             {
@@ -124,7 +123,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -141,12 +140,12 @@ namespace Q_Platform.BLL
         /// 拆盖
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public override async Task<bool> CapperOffAsync(Sample sample, CancellationTokenSource cts)
+        public override async Task<bool> CapperOffAsync(Sample sample, IGlobalStatus gs)
         {
             //判断样品是否有盖
-            s1: var result = await CapperOff(cts, -0.85).ConfigureAwait(false);
+            s1: var result = await CapperOff(gs, -0.85).ConfigureAwait(false);
 
             if (!result)
             {
@@ -154,7 +153,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
 
                     if (!_globalStatus.IsStopped)
@@ -172,9 +171,9 @@ namespace Q_Platform.BLL
         /// 加盐提取
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool AddSaltExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddSaltExtract(Sample sample, IGlobalStatus gs)
         {
             //判断是否有加盐工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve2) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2))
@@ -191,7 +190,7 @@ namespace Q_Platform.BLL
                     //加溶剂 + 加盐
                     if (sample.SubStep < 2 && !_globalStatus.IsStopped)
                     {
-                        result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, cts).GetAwaiter().GetResult();
+                        result = _addSolid.AddSaltExtract(sample, AddSolve, null, null, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
@@ -203,7 +202,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
-                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        result = MoveOut(sample, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
@@ -215,7 +214,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         //下料到试管架
-                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, gs);
                         if (!result)
                         {
                             return false;
@@ -234,6 +233,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -245,9 +248,9 @@ namespace Q_Platform.BLL
         /// 加溶剂提取
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool AddSolveExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddSolveExtract(Sample sample, IGlobalStatus gs)
         {
             //判断是否有加溶剂工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1))
@@ -267,7 +270,7 @@ namespace Q_Platform.BLL
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSolve1))
                         {
-                            result = AddSolve(sample,true, cts).GetAwaiter().GetResult();
+                            result = AddSolve(sample,true, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 return false;
@@ -286,7 +289,7 @@ namespace Q_Platform.BLL
                             var weight = new double[] { sample.TechParams.AddHomo[1], sample.TechParams.Solid_B[1], sample.TechParams.Solid_C[1],
                         sample.TechParams.Solid_D[1], sample.TechParams.Solid_E[1],sample.TechParams.Solid_F[1] };
 
-                            result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                            result = _addSolid.AddSolidAsync(sample, weight, null, null, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 return false;
@@ -299,7 +302,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
-                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        result = MoveOut(sample, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
@@ -311,7 +314,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         ////下料到试管架
-                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, gs);
                         if (!result)
                         {
                             return false;
@@ -332,6 +335,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -343,9 +350,9 @@ namespace Q_Platform.BLL
         /// 加水提取
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public bool AddWaterExtract(Sample sample, CancellationTokenSource cts)
+        public bool AddWaterExtract(Sample sample, IGlobalStatus gs)
         {
             //判断是否有加水工艺
             if (!TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater) && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo)) 
@@ -365,7 +372,7 @@ namespace Q_Platform.BLL
                     {
                         if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddWater))
                         {
-                            result = AddWater(sample, cts).GetAwaiter().GetResult();
+                            result = AddWater(sample, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 return false;
@@ -384,7 +391,7 @@ namespace Q_Platform.BLL
                             var weight = new double[] { sample.TechParams.AddHomo[0], sample.TechParams.Solid_B[0], sample.TechParams.Solid_C[0],
                         sample.TechParams.Solid_D[0], sample.TechParams.Solid_E[0],sample.TechParams.Solid_F[0] };
 
-                            result = _addSolid.AddSolidAsync(sample, weight, null, null, cts).GetAwaiter().GetResult();
+                            result = _addSolid.AddSolidAsync(sample, weight, null, null, gs).GetAwaiter().GetResult();
                             if (!result)
                             {
                                 return false;
@@ -398,7 +405,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 2 && !_globalStatus.IsStopped)
                     {
                         //装盖 内部判断在拧盖1就执行
-                        result = MoveOut(sample, cts).GetAwaiter().GetResult();
+                        result = MoveOut(sample, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             return false;
@@ -410,7 +417,7 @@ namespace Q_Platform.BLL
                     if (sample.SubStep == 3 && !_globalStatus.IsStopped)
                     {
                         ////下料到试管架
-                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, cts);
+                        result = _carrier.GetSampleFromCapperOneToMaterial(sample, gs);
                         if (!result)
                         {
                             return false;
@@ -429,6 +436,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 return false;
             }
@@ -444,9 +455,9 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="add">是否加液</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolve(Sample sample,bool add, CancellationTokenSource cts)
+        protected async Task<bool> AddSolve(Sample sample,bool add, IGlobalStatus gs)
         {
             try
             {
@@ -454,14 +465,14 @@ namespace Q_Platform.BLL
                 ushort sampleId = sample.Id;
                 _logger?.Info($"样品{sampleId}加液");
                 //拧盖移动到上下料位
-                var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                var result = await MovePutGetPos(gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("拧盖移动到上下料位 出错") ;
                 }
 
                 //搬运试管到拧盖1  内部判断试管位置
-                result = _carrier.GetSampleFromMaterialToCapperOne(sample,cts);
+                result = _carrier.GetSampleFromMaterialToCapperOne(sample,gs);
                 if (!result)
                 {
                     throw new Exception("搬运试管到拧盖1 出错");
@@ -470,7 +481,7 @@ namespace Q_Platform.BLL
                 //判断试管是否有盖 拆盖
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                 {
-                    result = await CapperOffAsync(sample,cts).ConfigureAwait(false);
+                    result = await CapperOffAsync(sample,gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拆盖 出错");
@@ -482,25 +493,25 @@ namespace Q_Platform.BLL
                 if (sample.TechParams.Solvent_A != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_A;
-                    result = await AddSolve(0x02, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x02, volume, gs).ConfigureAwait(false);
                 }
                 //加溶剂B
                 if (sample.TechParams.Solvent_B != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_B;
-                    result = await AddSolve(0x04, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x04, volume, gs).ConfigureAwait(false);
                 }
                 //加溶剂C
                 if (sample.TechParams.Solvent_C != 0 && add)
                 {
                     double volume = sample.TechParams.Solvent_C;
-                    result = await AddSolve(0x08, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x08, volume, gs).ConfigureAwait(false);
                 }
         
                 //判断是否有后续动作
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
                 {
-                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拧盖移动到上下料位 出错");
@@ -512,6 +523,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 throw ex;
             }
@@ -523,27 +538,27 @@ namespace Q_Platform.BLL
         /// 加水
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> AddWater(Sample sample, CancellationTokenSource cts)
+        protected async Task<bool> AddWater(Sample sample, IGlobalStatus gs)
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
+                //if (gs?.IsCancellationRequested == true)
+                //{
+                //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
+                //}
                 ushort sampleId = sample.Id;
                 _logger?.Info($"样品{sampleId}加液");
                 //拧盖移动到上下料位
-                var result = await MovePutGetPos(cts).ConfigureAwait(false);
+                var result = await MovePutGetPos(gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("拧盖移动到上下料位 出错") ;
                 }
 
                 //搬运试管到拧盖1  内部判断试管位置
-                result = _carrier.GetSampleFromMaterialToCapperOne(sample,cts);
+                result = _carrier.GetSampleFromMaterialToCapperOne(sample,gs);
                 if (!result)
                 {
                     throw new Exception("搬运试管到拧盖1 出错");
@@ -552,7 +567,7 @@ namespace Q_Platform.BLL
                 //判断试管是否有盖 拆盖
                 if (!SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                 {
-                    result = await CapperOffAsync(sample,cts).ConfigureAwait(false);
+                    result = await CapperOffAsync(sample,gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拆盖 出错");
@@ -564,7 +579,7 @@ namespace Q_Platform.BLL
                 if (sample.TechParams.AddWater != 0)
                 {
                     double volume = sample.TechParams.AddWater;  //加水量
-                    result = await AddSolve(0x01, volume, cts).ConfigureAwait(false);
+                    result = await AddSolve(0x01, volume, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -574,7 +589,7 @@ namespace Q_Platform.BLL
                 //判断是否有后续动作
                 if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt1)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddSalt2)|| TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddHomo))
                 {
-                    result = await MovePutGetPos(cts).ConfigureAwait(false);
+                    result = await MovePutGetPos(gs).ConfigureAwait(false);
                     if (!result)
                     {
                         throw new Exception("拧盖移动到上下料位 出错");
@@ -586,6 +601,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 throw ex;
             }
@@ -598,30 +617,30 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="solve"></param>
         /// <param name="volume"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> AddSolve(byte solve,double volume, CancellationTokenSource cts)
+        protected async Task<bool> AddSolve(byte solve,double volume, IGlobalStatus gs)
         {
             try
             {
 
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsStopped == true || gs?.IsEmgStop == true)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    throw new TaskCanceledException($"触发停止");
                 }
                 _logger?.Debug($"AddSolve-{solve}-{volume}");
                 //抱夹夹紧
                 _io.WriteBit_DO(_holding, true);
 
                 //Y轴移动到加液位
-                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, cts).ConfigureAwait(false);
+                var result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.AddLiquidPos, _yMoveVel, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
                 }
 
                 //开始加液
-                result = await _syring.AddSolve(solve, volume, cts).ConfigureAwait(false);
+                result = await _syring.AddSolve(solve, volume, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     return false;
@@ -632,6 +651,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 throw ex;
             }
         }
@@ -641,15 +664,15 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="getToMaterial"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> MoveOut(Sample sample,CancellationTokenSource cts)
+        protected async Task<bool> MoveOut(Sample sample,IGlobalStatus gs)
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
+                if (gs?.IsEmgStop == true || gs?.IsStopped == true)
                 {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
+                    throw new TaskCanceledException($"触发停止");
                 }
                 bool result;
 
@@ -662,7 +685,7 @@ namespace Q_Platform.BLL
                 //判断试管是否有盖 装盖
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsUnCapped))
                 {
-                    result = await CapperOnAsync(sample, cts).ConfigureAwait(false);
+                    result = await CapperOnAsync(sample, gs).ConfigureAwait(false);
                     if (!result)
                     {
                         return false;
@@ -673,6 +696,10 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
                 _logger?.Warn(ex.Message);
                 throw ex;
             }

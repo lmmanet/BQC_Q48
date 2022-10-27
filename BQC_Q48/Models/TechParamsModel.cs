@@ -19,27 +19,51 @@ namespace BQJX.Models
         /// </summary>
         public double AddWater { get; set; }
 
+        /// <summary>
+        /// 乙腈添加量
+        /// </summary>
+        [ValueLimit(20, 0)]
+        public double ACE { get; set; }
 
         /// <summary>
-        /// 溶剂A添加量
+        /// 醋酸添加量
         /// </summary>
-        [ValueLimit(20, 0.1)]
-        public double Solvent_A { get; set; }    
+        public double Acid { get; set; }
 
         /// <summary>
-        /// 溶剂B添加量
+        /// 甲酸添加量
         /// </summary>
-        public double Solvent_B { get; set; }
+        public double Formic { get; set; }
 
         /// <summary>
-        /// 溶剂C添加量
+        /// 加均质子量
         /// </summary>
-        public double Solvent_C { get; set; }
+        public double Homo { get; set; }
 
         /// <summary>
-        /// 加水提取时加均质子量
+        /// 硫酸镁
         /// </summary>
-        public double AddHomo1 { get; set; }
+        public double MgSO4 { get; set; }
+
+        /// <summary>
+        /// 氯化钠/硫酸钠
+        /// </summary>
+        public double NaCl { get; set; }
+
+        /// <summary>
+        /// 柠檬酸钠
+        /// </summary>
+        public double Trisodium { get; set; }
+
+        /// <summary>
+        /// 柠檬酸氢二钠
+        /// </summary>
+        public double Monosodium { get; set; }
+
+        /// <summary>
+        /// 乙酸钠
+        /// </summary>
+        public double Sodium { get; set; }
 
         /// <summary>
         /// 涡旋时间
@@ -47,44 +71,19 @@ namespace BQJX.Models
         public int VortexTime { get; set; }
 
         /// <summary>
-        /// 均质子添加量
+        /// 涡旋速度
         /// </summary>
-        public int Junzhizi { get; set; }
+        public int VortexVel { get; set; }
 
         /// <summary>
-        /// 超声时间
+        /// 振荡时间
         /// </summary>
-        public int UltrasoundTime { get; set; }
+        public int VibrationTime { get; set; }
 
         /// <summary>
-        /// 均质时间
+        /// 涡旋速度
         /// </summary>
-        public int HomoTime { get; set; }
-
-        /// <summary>
-        /// 均质速度
-        /// </summary>
-        public int HomoVelocity { get; set; }
-         
-        /// <summary>
-        /// 均质头清洗次数
-        /// </summary>
-        public int WashTimes { get; set; }
-
-        /// <summary>
-        /// 均质头清洗速度
-        /// </summary>
-        public int WashVelocity { get; set; }
-
-        /// <summary>
-        /// 均质头清洗时间
-        /// </summary>
-        public int WashTime { get; set; }
-
-        /// <summary>
-        /// 离心速度
-        /// </summary>
-        public int CentrifugalVelocity { get; set; }
+        public int VibrationVel { get; set; }
 
         /// <summary>
         /// 离心时间
@@ -92,19 +91,29 @@ namespace BQJX.Models
         public int CentrifugalTime { get; set; }
 
         /// <summary>
+        /// 离心速度
+        /// </summary>
+        public int CentrifugalVel { get; set; }
+
+        /// <summary>
         /// 上清液提取量
         /// </summary>
         public double ExtractVolume { get; set; }
 
         /// <summary>
+        /// 浓缩时间
+        /// </summary>
+        public int ConcentrationTime { get; set; }
+
+        /// <summary>
+        /// 浓缩速度
+        /// </summary>
+        public int ConcentrationVel { get; set; }
+
+        /// <summary>
         /// 工艺创建时间
         /// </summary>
         public DateTime Createtime { get; set; }
-
-        /// <summary>
-        /// 工艺更新时间
-        /// </summary>
-        public DateTime Updatetime { get; set; }
 
         /// <summary>
         /// 处理工艺（处理方法）
@@ -142,6 +151,7 @@ namespace BQJX.Models
             Name = "";
             Createtime = DateTime.Now;
         }
+
 
     }
 

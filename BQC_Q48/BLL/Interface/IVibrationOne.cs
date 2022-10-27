@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,12 @@ namespace Q_Platform.BLL
     public interface IVibrationOne
     {
 
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         bool IsVibrationTaskDone { get; }
 
-        void AddSampleToVibrationList(Sample sample, CancellationTokenSource cts);
+        void AddSampleToVibrationList(Sample sample, IGlobalStatus gs);
 
-        Task StartVibration(CancellationTokenSource cts);
+        Task StartVibration(IGlobalStatus gs);
     }
 }

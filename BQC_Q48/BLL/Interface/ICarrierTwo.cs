@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="cts"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         void UpdatePosData();
 
@@ -36,7 +37,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToCapperThree(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromMaterialToCapperThree(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖3搬运净化管到振荡
@@ -44,7 +45,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToVibration(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToVibration(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡搬运净化管到哪拧盖3
@@ -52,7 +53,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVibrationToCapperThree(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromVibrationToCapperThree(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从振荡搬运净化管到试管架
@@ -60,7 +61,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromVibrationToMaterial(Sample sample ,CancellationTokenSource cts);
+        bool GetSampleFromVibrationToMaterial(Sample sample ,IGlobalStatus gs);
 
         //=======离心移栽===//
 
@@ -71,7 +72,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromMaterialToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽取净化管到试管架
@@ -80,7 +81,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToMaterial(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖3取净化管到移栽
@@ -89,7 +90,7 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖3取净化管到试管架
@@ -97,7 +98,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromCapperThreeToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSampleFromCapperThreeToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从移栽取净化管到拧盖3
@@ -106,13 +107,13 @@ namespace Q_Platform.BLL
         /// <param name="func"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleFromTransferToCapperThree(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
    
 
 
 
-        bool GetSampleToTransfer(Sample sample, Func<ushort, CancellationTokenSource, Task<bool>> func, CancellationTokenSource cts);
+        bool GetSampleToTransfer(Sample sample, Func<ushort, IGlobalStatus, Task<bool>> func, IGlobalStatus gs);
 
 
 
@@ -124,7 +125,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromMaterialToCapperFour(Sample sample, CancellationTokenSource cts);
+        bool GetSelingFromMaterialToCapperFour(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖4搬运西林瓶到试管架
@@ -132,7 +133,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromCapperFourToMaterial(Sample sample, CancellationTokenSource cts);
+        bool GetSelingFromCapperFourToMaterial(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从拧盖4搬运西林瓶到浓缩
@@ -140,7 +141,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromCapperFourToConcentration(Sample sample, CancellationTokenSource cts);
+        bool GetSelingFromCapperFourToConcentration(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 从浓缩搬运西林瓶到拧盖4
@@ -148,7 +149,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromConcentrationToCapperFour(Sample sample, CancellationTokenSource cts);
+        bool GetSelingFromConcentrationToCapperFour(Sample sample, IGlobalStatus gs);
 
 
         /// <summary>
@@ -157,7 +158,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromCapperFourToWeightAndBack(Sample sample, int var,double volume, CancellationTokenSource cts);
+        bool GetSelingFromCapperFourToWeightAndBack(Sample sample, int var,double volume, IGlobalStatus gs);
 
         /// <summary>
         /// 从浓缩搬运西林瓶到称重 并搬运回
@@ -167,7 +168,7 @@ namespace Q_Platform.BLL
         /// <param name="volume">加标量</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, CancellationTokenSource cts);
+        bool GetSelingFromConcentrationToWeight(Sample sample, int var, double volume, IGlobalStatus gs);
 
         //========================================进样小瓶=========================================================//
 
@@ -178,7 +179,7 @@ namespace Q_Platform.BLL
         /// <param name="isFirst">是否是第一个样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetBottleFromMaterialToCapperFive_One(Sample sample, CancellationTokenSource cts);
+        bool GetBottleFromMaterialToCapperFive_One(Sample sample, IGlobalStatus gs);
 
 
 
@@ -194,7 +195,7 @@ namespace Q_Platform.BLL
         /// <param name="capperOff">小瓶拆盖</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoPipettingOne(Sample sample, int var, Func<Sample, int,CancellationTokenSource, bool> capperOn, Func<Sample,int, CancellationTokenSource, bool> capperOff, CancellationTokenSource cts);
+        bool DoPipettingOne(Sample sample, int var, Func<Sample, int,IGlobalStatus, bool> capperOn, Func<Sample,int, IGlobalStatus, bool> capperOff, IGlobalStatus gs);
 
 
         /// <summary>
@@ -204,7 +205,7 @@ namespace Q_Platform.BLL
         /// <param name="var">1:净化管（2ml） ==》西林瓶 2:大管==》西林瓶</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoPipettingTwo(Sample sample, int var, CancellationTokenSource cts);
+        bool DoPipettingTwo(Sample sample, int var, IGlobalStatus gs);
 
       
 

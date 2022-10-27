@@ -1,0 +1,111 @@
+﻿<UserControl x:Class="Q_Platform.Views.UC.TechParamsUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Q_Platform.Views.UC"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="800"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  带标签参数设置  -->
+        <Style x:Key="ParamTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="#999999" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Width" Value="430" />
+            <Setter Property="Margin" Value="0,25,0,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="1.5*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" Text="{TemplateBinding Tag}" />
+                            <Border x:Name="border"
+                                    Grid.Column="1"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    SnapsToDevicePixels="True">
+
+                                <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                            </Border>
+                        </Grid>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <StackPanel TextBlock.FontSize="16">
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="水添加量(ml)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="乙腈溶液添加量(ml)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="醋酸溶液添加量(ml)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="甲酸溶液添加量(ml)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="均质子添加量(g):" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="硫酸镁添加量(g):" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="氯化钠/硫酸钠添加量(g)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="柠檬酸钠/二水合物添加量(g)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="柠檬酸氢二钠/柠檬酸二钠盐添加量(g)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="乙酸钠添加量(g)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="涡旋时间(s)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="涡旋速度(rmp)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="振荡时间(s)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="振荡速度(rmp)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="离心时间(min)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="离心速度(rpm)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="上清液提取量(ml)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="浓缩时间(min)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="浓缩速度(rmp)：" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="水：" Text="{Binding AddWater, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="乙腈：" Text="{Binding ACE, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="醋酸：" Text="{Binding Acid, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="甲酸：" Text="{Binding Formic, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="均质子：" Text="{Binding Homo, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="硫酸镁/钠:" Text="{Binding MgSO4, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="氯化钠:" Text="{Binding NaCl, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="柠檬酸钠：" Text="{Binding Trisodium, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="柠檬酸氢二钠：" Text="{Binding Monosodium, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="乙酸钠：" Text="{Binding Sodium, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="涡旋时间(s)：" Text="{Binding VortexTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="涡旋速度(rpm)：" Text="{Binding VortexVel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="振荡时间(s)：" Text="{Binding VibrationTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="振荡速度(rpm)：" Text="{Binding VibrationVel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="离心时间(min)：" Text="{Binding CentrifugalTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="离心速度(rpm)：" Text="{Binding CentrifugalVel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="上清液提取量(ml)：" Text="{Binding ExtractVolume, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="浓缩时间(min)：" Text="{Binding ConcentrationTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource ParamsBox}" Tag="浓缩速度(rpm)：" Text="{Binding ConcentrationVel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+
+    </Grid>
+
+
+</UserControl>

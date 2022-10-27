@@ -132,7 +132,7 @@
     </Page.Resources>
 
     <Grid>
-      
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="1.3*" />
@@ -160,54 +160,7 @@
 
                 <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
 
-
-                <DataGrid x:Name="dg"
-                          Grid.Row="1"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          CanUserReorderColumns="False"
-                          CanUserResizeRows="False"
-                          CanUserSortColumns="False"
-                          ItemsSource="{Binding SampleList}"
-                          VerticalScrollBarVisibility="Auto">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Width="*" Binding="{Binding Id, Converter={cv:SampleIdToPosString}}" Header="样品位置" />
-                        <DataGridTextColumn Width="*" Binding="{Binding SnNum}" Header="样品编号" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Name}"  Header="样品名称" >
-                          
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Width="*" Binding="{Binding CurrentProcess}" Header="当前进度" />
-                        <DataGridTextColumn Width="*" Binding="{Binding TechName}" Header="处理工艺" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Status}" Header="当前状态" />
-                        <DataGridTemplateColumn Width="2*" Header="操作">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Margin="5,0"
-                                                Padding="10,5"
-                                                Command="{Binding DataContext.UpCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                Content="置顶" />
-                                        <Button Margin="5,0"
-                                                Padding="10,5"
-                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                Content="编辑"
-                                                Visibility="Collapsed" />
-                                        <Button Margin="5,0"
-                                                Padding="10,5"
-                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                Content="删除" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-
-                </DataGrid>
-
-
+                <ucb:SampleProcessUC xmlns:ucb="clr-namespace:Q_Platform.Views.UC" Grid.Row="1" />
 
             </Grid>
         </Border>
@@ -215,10 +168,133 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Border>
+            <Border Grid.Column="0">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Height="40" Background="{StaticResource VeryLightGrayBrush}">
+                        <Grid>
+                            <TextBlock Margin="5,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       FontSize="{StaticResource FontLable}"
+                                       Text="运行状态" />
+
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="1" />
+
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Padding="20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Height="50" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="系统当前状态：" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding RunStatus, FallbackValue=暂停中,Converter={cv:StatusIntToString}}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Height="50" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="冰浴当前温度:" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding ColdTemperature, FallbackValue=0}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Height="50" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="小瓶架当前温度:" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding BottleTemperature, FallbackValue=0}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Height="50" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="标准品当前温度:" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding StandardTemperature, FallbackValue=0}" />
+                                </StackPanel>
+
+                            </Grid>
+
+
+
+                        </Border>
+
+
+
+                        <Border Grid.Column="1" Padding="20,10" BorderBrush="Gray" BorderThickness="1,0,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50" />
+                                    <RowDefinition Height="50" />
+                                    <RowDefinition Height="50" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           VerticalAlignment="Center"
+                                           FontSize="20"
+                                           Text="冰浴温度设定:" />
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           VerticalAlignment="Center"
+                                           FontSize="20"
+                                           Text="样品小瓶温度设定:" />
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           VerticalAlignment="Center"
+                                           FontSize="20"
+                                           Text="标准品温度设定:" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Width="80"
+                                         VerticalAlignment="Center"
+                                         BorderThickness="0,0,0,1"
+                                         FontSize="20"
+                                         Text="{Binding Temperatrue1}" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Width="80"
+                                         VerticalAlignment="Center"
+                                         BorderThickness="0,0,0,1"
+                                         FontSize="20"
+                                         Text="{Binding Temperatrue2}" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Width="80"
+                                         VerticalAlignment="Center"
+                                         BorderThickness="0,0,0,1"
+                                         FontSize="20"
+                                         Text="{Binding Temperatrue3}" />
+
+                            </Grid>
+                        </Border>
+
+                    </Grid>
+
+
+
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -250,31 +326,8 @@
                                         Height="400"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch">
-                            <uc:TubePos SampleCount="15"  Command="{Binding AddSampleCommand}"/>
+                            <uc:TubePos HorizontalAlignment="Center" Command="{Binding AddSampleCommand}" SampleCount="{Binding SampleCount}" />
                         </ContentControl>
-
-                        <Border Grid.Column="1" Padding="20,10" BorderBrush="Gray" BorderThickness="1,0,0,0">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="冰浴温度:" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="样品小瓶温度:" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="标准品温度:" />
-                                <TextBox Grid.Row="0" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue1}" />
-                                <TextBox Grid.Row="1" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue2}" />
-                                <TextBox Grid.Row="2" Grid.Column="1" BorderThickness="0,0,0,1" Text="{Binding Temperatrue3}" />
-
-                            </Grid>
-                        </Border>
 
                     </Grid>
 
@@ -283,7 +336,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="1" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="0">
+            <Border Grid.Column="2" BorderBrush="{StaticResource VeryLightGrayBrush}" BorderThickness="0">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -319,7 +372,31 @@
         </Grid>
 
         <Border Grid.Row="2" Padding="5,10">
+            <Border.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="{StaticResource WordBlueBrush}" />
+                    <Setter Property="Width" Value="140" />
+                    <Setter Property="Height" Value="50" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="back" Background="{TemplateBinding Background}" BorderThickness="1" CornerRadius="10">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </Border>
 
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="back" Property="Background" Value="AliceBlue" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+
+                            </ControlTemplate>
+
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Border.Resources>
 
             <UniformGrid Rows="1">
                 <Button Width="140" Command="{Binding StartTaskCommand}" Content="运行序列" IsEnabled="{Binding RunBtnEnable}" />
@@ -327,7 +404,7 @@
                 <Button Width="140" Command="{Binding StopTaskCommand}" Content="停止序列" IsEnabled="{Binding StopBtnEnable}" />
                 <Button Width="140" Command="{Binding ContinueCommand}" Content="继续序列" IsEnabled="{Binding ContinueBtnEnable}" />
                 <Button Width="140" Command="{Binding InitialSysCommand}" Content="系统初始化" IsEnabled="{Binding InitBtnEnable}" />
-                <Button Width="140" Command="{Binding ResetAlmCommand}" Content="报警复位"  />
+                <Button Width="140" Command="{Binding ResetAlmCommand}" Content="报警复位" />
             </UniformGrid>
 
         </Border>

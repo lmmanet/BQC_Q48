@@ -110,6 +110,28 @@ namespace Q_Platform.ViewModels.Base
 
 
 
+        protected async Task RunCommandAsync(Expression<Func<bool>> doneSuccessFlag, Func<Task<bool>> func)
+        {
+            try
+            {
+                var result = await func();
+                if (!result)
+                {
+                    doneSuccessFlag.SetPropertyValue(false);
+                }
+                else
+                {
+                    doneSuccessFlag.SetPropertyValue(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(ex.Message);
+                });
+            }
+        }
 
 
 

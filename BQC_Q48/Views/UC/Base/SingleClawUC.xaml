@@ -60,7 +60,7 @@
                         <Border />
                         <Border />
                         <Border />
-                        <Button Height="40" Command="{Binding OpenClawCommand}" Content="打开手爪" CommandParameter="{Binding ElementName=tbPos,Path=Text}" />
+                        <Button Height="40" Command="{Binding OpenClawCommand}" CommandParameter="{Binding ElementName=tbPos, Path=Text}" Content="打开手爪" />
                         <Border />
                         <Button Height="40" Command="{Binding CloseClawCommand}" Content="关闭手爪" />
                     </UniformGrid>

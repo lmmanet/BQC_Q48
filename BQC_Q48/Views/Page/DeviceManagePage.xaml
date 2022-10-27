@@ -19,7 +19,12 @@
         </Grid.ColumnDefinitions>
 
         <Grid Background="#FF0076C8">
-            <StackPanel Orientation="Vertical">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <UniformGrid Columns="1">
                 <RadioButton Command="{Binding SwichCommand}" CommandParameter="AxisTestUC1" Content="伺服轴测试" Style="{StaticResource radioBtnStyle}" />
                 <RadioButton Command="{Binding SwichCommand}" CommandParameter="StepAxisTestUC" Content="步进轴测试" Style="{StaticResource radioBtnStyle}" />
                 <RadioButton Command="{Binding SwichCommand}"
@@ -53,7 +58,8 @@
                              Content="总线测试"
                              Style="{StaticResource radioBtnStyle}"
                              Visibility="Collapsed" />
-            </StackPanel>
+            </UniformGrid>
+            
         </Grid>
 
         <Grid Grid.Column="1">

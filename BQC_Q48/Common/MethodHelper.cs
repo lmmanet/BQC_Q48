@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using GalaSoft.MvvmLight.Ioc;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Q_Platform.Common
     public static class MethodHelper
     {
 
-        public static object ExcuteMethod(Sample sample, CancellationTokenSource cts)
+        public static object ExcuteMethod(Sample sample, IGlobalStatus gs)
         {
             var strs = sample.ActionCallBack.Split('@');
             string interfaceName = strs[0];
@@ -26,7 +27,7 @@ namespace Q_Platform.Common
 
             if (mi != null)
             {
-               return mi.Invoke(instance, new object[] { sample, cts });
+               return mi.Invoke(instance, new object[] { sample, gs });
             }
             return null;
         }

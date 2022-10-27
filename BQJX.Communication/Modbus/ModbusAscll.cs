@@ -19,12 +19,6 @@ namespace BQJX.Communication.Modbus
 
         #endregion
 
-        #region Properties
-
-        public bool IsDebug { get; set; } = false;
-
-        #endregion
-
         #region Construtors
 
         public ModbusAscll(SerialPortParams spParams, ILogger logger)

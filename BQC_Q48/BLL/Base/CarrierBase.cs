@@ -103,16 +103,12 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        public virtual async Task<bool> GoHome(CancellationTokenSource cts)
+        public virtual async Task<bool> GoHome(IGlobalStatus gs)
         {
             try
             {
-                if (cts?.IsCancellationRequested == true)
-                {
-                    throw new TaskCanceledException($"触发停止 cts:{cts.IsCancellationRequested}");
-                }
                 //禁用夹爪
                 var result = await _claw.Disable(_clawSlaveId).ConfigureAwait(false);
                 if (!result)
@@ -153,7 +149,7 @@ namespace Q_Platform.BLL
                     _motion.ServoOn(_axisP);
                     await Task.Delay(1000).ConfigureAwait(false);
                 }
-                result = await SyringHome(cts).ConfigureAwait(false);
+                result = await SyringHome(gs).ConfigureAwait(false);
                 if (!result)
                 {
                     throw new Exception("注射器回零失败！");
@@ -191,7 +187,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (cts?.IsCancellationRequested == true)
+                if (_globalStatus?.IsStopped == true)
                 {
                     return false;
                 }
@@ -232,16 +228,16 @@ namespace Q_Platform.BLL
         /// <param name="pos">目标点位</param>
         /// <param name="clawOpenByte">手爪打开位</param>
         /// <param name="func">取料辅助动作</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <param name="clawCloseByte">手爪关闭位置</param>
         /// <returns></returns>
-        protected async Task<bool> GetTubeAsync(double[] pos,byte clawOpenByte, CancellationTokenSource cts,byte clawCloseByte = 255)
+        protected async Task<bool> GetTubeAsync(double[] pos,byte clawOpenByte, IGlobalStatus gs,byte clawCloseByte = 255)
         {
             try
             {
                 _logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
                 //判断手爪是否抓取物件 在指定打开位置
-               s1: var result = await CarrierMoveToSafePos(pos, cts).ConfigureAwait(false);
+               s1: var result = await CarrierMoveToSafePos(pos, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -250,22 +246,12 @@ namespace Q_Platform.BLL
                         {
                             Thread.Sleep(1000);
                         }
-
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
-                        else
-                        {
-                            throw new Exception("XY移动到目标位置出错!");
-                        }
-
                     }
-                    else
-                    {
-                        throw new Exception("XY移动到目标位置出错!");
-                    }
-                  
+                    throw new Exception("XY移动到目标位置出错!");
                 }
 
                 if (!await ClawIsGetchPiece(false))
@@ -283,7 +269,7 @@ namespace Q_Platform.BLL
                 }
 
                 //移动到取料点位
-                s2: result = await CarrierMoveTo(pos, null,cts).ConfigureAwait(false);
+                s2: result = await CarrierMoveTo(pos, null,gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -293,7 +279,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s2;
                         }
@@ -307,7 +293,7 @@ namespace Q_Platform.BLL
                 {
                     while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
                     result = await CloseClaw(clawCloseByte).ConfigureAwait(false);
                     if (!result)
@@ -332,7 +318,7 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
                 {
                     return false;
                 }
@@ -347,9 +333,9 @@ namespace Q_Platform.BLL
         /// 放试管
         /// </summary>
         /// <param name="clawOpenByte">手爪打开位</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> PutTubeAsync(double[] pos, byte clawOpenByte, CancellationTokenSource cts)
+        protected async Task<bool> PutTubeAsync(double[] pos, byte clawOpenByte, IGlobalStatus gs)
         {
             try
             {
@@ -361,7 +347,7 @@ namespace Q_Platform.BLL
                 }
 
                 //移动到放料点位
-                s1: var result = await CarrierMoveTo(pos, ClawIsGetchPiece, cts).ConfigureAwait(false);
+                s1: var result = await CarrierMoveTo(pos, ClawIsGetchPiece, gs).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -371,7 +357,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -388,18 +374,18 @@ namespace Q_Platform.BLL
 
                 //移动到安全位置
                 //判断Z轴是否在原点
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
 
                 return true;
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                 return false;
             }
            
@@ -413,7 +399,7 @@ namespace Q_Platform.BLL
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        protected async Task<bool> GetNeedleAsync(double[] pos, CancellationTokenSource cts)
+        protected async Task<bool> GetNeedleAsync(double[] pos, IGlobalStatus gs)
         {
             try
             {
@@ -425,7 +411,7 @@ namespace Q_Platform.BLL
                 }
 
                 //判断Z1 Z2是否在原位
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
               
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
@@ -440,7 +426,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -458,7 +444,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s2;
                         }
@@ -477,7 +463,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s3;
                         }
@@ -499,7 +485,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s4;
                         }
@@ -511,12 +497,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                 return false;
             }
         }
@@ -527,9 +513,9 @@ namespace Q_Platform.BLL
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="z"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> PutNeedleAsync(double[] pos, CancellationTokenSource cts,double putOffset = 80)
+        protected async Task<bool> PutNeedleAsync(double[] pos, IGlobalStatus gs,double putOffset = 80)
         {
             try
             {
@@ -541,7 +527,7 @@ namespace Q_Platform.BLL
                 }
 
                 //判断Z1 Z2是否在原位
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
 
                 //XY轴移动到目标位置
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
@@ -556,7 +542,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -584,7 +570,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s2;
                         }
@@ -612,7 +598,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s3;
                         }
@@ -633,7 +619,7 @@ namespace Q_Platform.BLL
                 Thread.Sleep(100);
 
                 //移液器回零
-                SyringHome(cts);
+                SyringHome(gs);
                 while (_globalStatus.IsPause && !_globalStatus.IsStopped)
                 {
                     Thread.Sleep(2000);
@@ -649,7 +635,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s4;
                         }
@@ -671,12 +657,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                return false;
             }
            
@@ -690,9 +676,9 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="deep">移液液位深度</param>
         /// <param name="airColumn">吸取空气柱</param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos,double volume, double deep,double airColumn, CancellationTokenSource cts)
+        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume, double deep, double airColumn,double[] safePos, IGlobalStatus gs)
         {
             try
             {
@@ -702,7 +688,7 @@ namespace Q_Platform.BLL
                 double[] targetPosArray = new double[2] { targetPos[0], targetPos[1] };
 
                 //判断Z1 Z2是否在原位
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
 
                 //判断是否已经吸取溶液
                 if (_syringHaveLiquid)
@@ -723,7 +709,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -751,7 +737,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s2;
                         }
@@ -782,7 +768,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s3;
                         }
@@ -813,7 +799,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s4;
                         }
@@ -867,10 +853,9 @@ namespace Q_Platform.BLL
 
                 //避位
                 //XY轴移动到吐液位置
-                double[] poses = GetPipettingSafePos();
-                if (poses!=null)
+                if (safePos != null)
                 {
-                   s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, poses, _xyMoveVel, _globalStatus).ConfigureAwait(false);
+                   s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, safePos, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                     if (!result)
                     {
                         if (_globalStatus.IsPause)
@@ -880,7 +865,7 @@ namespace Q_Platform.BLL
                                 Thread.Sleep(1000);
                             }
 
-                            if (!_globalStatus.IsStopped)
+                            if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                             {
                                 goto s6;
                             }
@@ -910,7 +895,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s7;
                         }
@@ -939,7 +924,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s8;
                         }
@@ -967,7 +952,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s9;
                         }
@@ -994,7 +979,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s10;
                         }
@@ -1022,7 +1007,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s11;
                         }
@@ -1043,18 +1028,18 @@ namespace Q_Platform.BLL
                 #endregion
 
                 ////Z2轴上升到安全位置   报错
-                //_motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, cts);
+                //_motion.P2pMoveWithCheckDone(_axisZ2, 0, _moveVel, gs);
 
                 return result;
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                 return false;
             }
           
@@ -1063,9 +1048,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 检查Z轴是否在安全位置
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> CheckAxisZInSafePos(CancellationTokenSource cts)
+        protected async Task<bool> CheckAxisZInSafePos(IGlobalStatus gs)
         {
             _logger?.Debug($"CheckAxisZInSafePos");
             if (!AxisIsInSafePos(_axisZ1))
@@ -1080,7 +1065,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -1210,9 +1195,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 移液器回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> SyringHome(CancellationTokenSource cts)
+        protected async Task<bool> SyringHome(IGlobalStatus gs)
         {
             _logger?.Debug($"SyringHome");
             var result = await _motion.GohomeWithCheckDone(_axisP, 21, _globalStatus).ConfigureAwait(false);
@@ -1227,9 +1212,9 @@ namespace Q_Platform.BLL
         /// 搬运XYZ移动到坐标点
         /// </summary>
         /// <param name="coordinate"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<bool,int,Task<bool>> func,CancellationTokenSource cts)
+        protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<bool,int,Task<bool>> func,IGlobalStatus gs)
         {
             _logger?.Debug($"CarrierMoveTo");
             try
@@ -1241,7 +1226,7 @@ namespace Q_Platform.BLL
                 double[] targetArr = new double[2] { x, y };
 
                 //判断Z轴是否在原点
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
                s1: var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _xyMoveVel, _globalStatus).ConfigureAwait(false);
@@ -1254,7 +1239,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -1291,7 +1276,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s2;
                         }
@@ -1311,12 +1296,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                 return false;
             }
           
@@ -1325,9 +1310,9 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 搬运移动到安全位
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        protected async Task<bool> CarrierMoveToSafePos(double[] coordinate, CancellationTokenSource cts)
+        protected async Task<bool> CarrierMoveToSafePos(double[] coordinate, IGlobalStatus gs)
         {
             try
             {
@@ -1338,7 +1323,7 @@ namespace Q_Platform.BLL
                 double[] targetArr = new double[2] { x, y };
 
                 //判断Z轴是否在原点
-                await CheckAxisZInSafePos(cts).ConfigureAwait(false);
+                await CheckAxisZInSafePos(gs).ConfigureAwait(false);
 
                 //XY轴移动到取料位置
               s1:  var ret = await _motion.InterPolation_2D_lineWithCheckDone(axisXY, targetArr, _xyMoveVel, _globalStatus).ConfigureAwait(false);
@@ -1351,7 +1336,7 @@ namespace Q_Platform.BLL
                             Thread.Sleep(1000);
                         }
 
-                        if (!_globalStatus.IsStopped)
+                        if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
                         {
                             goto s1;
                         }
@@ -1371,12 +1356,12 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (_globalStatus.IsStopped)
+                if (_globalStatus.IsStopped ||_globalStatus.IsPause)
                 {
                     return false;
                 }
 
-                _logger.Error(ex.Message);
+                _logger.Warn(ex.Message);
                 return false;
             }
            

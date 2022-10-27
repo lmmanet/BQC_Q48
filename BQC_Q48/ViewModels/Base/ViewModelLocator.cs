@@ -53,6 +53,10 @@ namespace BQC_Q48.ViewModels
             SimpleIoc.Default.Register<VibrationOneViewModel>();
             SimpleIoc.Default.Register<VibrationTwoViewModel>();
             SimpleIoc.Default.Register<AddSaltUCViewModel>();
+
+
+            SimpleIoc.Default.Register<AddSampleWinViewModel>();
+
         }
 
         #endregion
@@ -97,6 +101,8 @@ namespace BQC_Q48.ViewModels
         public IoTestUCViewModel IoTestUCViewModel => ServiceLocator.Current.GetInstance<IoTestUCViewModel>();
         public BalanceTestUCViewModel BalanceTestUCViewModel => ServiceLocator.Current.GetInstance<BalanceTestUCViewModel>();
 
+
+        public AddSampleWinViewModel AddSampleWinViewModel => ServiceLocator.Current.GetInstance<AddSampleWinViewModel>();
 
         #endregion
 

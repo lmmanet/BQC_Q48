@@ -6,9 +6,9 @@
              xmlns:local="clr-namespace:Q_Platform.Views.Module"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:uc="clr-namespace:Q_Platform.Views.UC.Base"
-             DataContext="{Binding Source={StaticResource Locator},Path=CenCarrierViewModel}"
              d:DesignHeight="800"
              d:DesignWidth="800"
+             DataContext="{Binding Source={StaticResource Locator}, Path=CenCarrierViewModel}"
              mc:Ignorable="d">
 
     <UserControl.Triggers>
@@ -81,6 +81,15 @@
                         <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding ZCurrentPos}" />
                         <TextBlock Margin="10,0" FontSize="{StaticResource FontSizeRegular}" Text="{Binding CCurrentPos}" />
                     </StackPanel>
+
+                    <Border Grid.Row="1" Visibility="{Binding ShowStepStatus}">
+                        <uc:StepStatusUC IoStatus="{Binding MotionIoStatus}" />
+                    </Border>
+
+                    <Border Grid.Row="1" Visibility="{Binding ShowServoStatus}">
+                        <uc:ServoStatusUC IoStatus="{Binding MotionIoStatus}" MotionStatus="{Binding MotionStatus}" />
+                    </Border>
+
 
                 </Grid>
             </Border>
@@ -184,7 +193,7 @@
                                     <Style TargetType="Button">
                                         <Setter Property="Margin" Value="5,8" />
                                         <Setter Property="Padding" Value="15,8" />
-                                        <Setter Property="Height" Value="50" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="Width" Value="120" />
                                     </Style>
                                 </Grid.Resources>

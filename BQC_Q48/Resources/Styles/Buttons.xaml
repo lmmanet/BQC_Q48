@@ -440,6 +440,67 @@
 
     </Style>
 
+    <Style x:Key="CtlButton" TargetType="Button">
+        <Setter Property="Padding" Value="15,8" />
+        <Setter Property="Margin" Value="5,8" />
+        <Setter Property="Height" Value="50" />
+        <Setter Property="Width" Value="120" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="att:IsDoneSuccessful.Value" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <TextBlock Margin="{TemplateBinding Padding}"
+                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                       Focusable="False"
+                                       FontFamily="{TemplateBinding FontFamily}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                       Text="{TemplateBinding Content}"
+                                       Visibility="{TemplateBinding att:IsBusyProperty.Value,
+                                                                    Converter={cv:BooleanToVisiblityConverter}}" />
+                            <TextBlock HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       Style="{StaticResource SpinningText}"
+                                       Visibility="{TemplateBinding att:IsBusyProperty.Value,
+                                                                    Converter={cv:BooleanToVisiblityConverter},
+                                                                    ConverterParameter=true}" />
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" To="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="Background.Color" From="{StaticResource WordBlue}" Duration="0:0:0.3" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <Trigger Property="att:IsDoneSuccessful.Value" Value="true">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource ForegroundDarkBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!--  关闭按钮样式  -->
     <Style x:Key="CloseBtnStyle" TargetType="Button">
         <Setter Property="Width" Value="40" />
@@ -524,12 +585,13 @@
     <!--  TopRadionButton  -->
     <Style x:Key="radioBtnStyle" TargetType="RadioButton">
         <Setter Property="FontFamily" Value="{StaticResource iconfont}" />
-        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="Padding" Value="8,0,8,0" />
         <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="Foreground" Value="White" />
+        <Setter Property="MinHeight" Value="35" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
@@ -583,6 +645,69 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+    <Style x:Key="ParamsBox" TargetType="TextBox">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Foreground" Value="#999999" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Width" Value="430" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Margin" Value="0,25,0,0" />
+        <Setter Property="Validation.ErrorTemplate" Value="{StaticResource TextBoxErrorTemplate}" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition MinHeight="30" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalContentAlignment="Center"
+                                          BorderThickness="0"
+                                          Focusable="false"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden" />
+                        </Border>
+
+                        <TextBlock x:Name="errorTxt"
+                                   Grid.Row="1"
+                                   Margin="0,3"
+                                   FontSize="12"
+                                   Foreground="Red"
+                                   Text="{Binding Path=(Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=TemplatedParent}, StringFormat=*{0}}"
+                                   Visibility="Visible" />
+
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter TargetName="errorTxt" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="Red" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+
+            </Setter.Value>
+        </Setter>
+
+
+
+
+
+
+
+    </Style>
+
 
 
 </ResourceDictionary>

@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace Q_Platform.BLL
 {
     public interface ICentrifugalCarrier
     {
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
         bool IsPipttorTaskDone { get; }
 
@@ -19,34 +20,23 @@ namespace Q_Platform.BLL
 
         void ClearTubeOut();
 
-        Task StartPipetting(CancellationTokenSource cts);
+        Task StartPipetting(IGlobalStatus gs);
 
-        Task StartConcentration(CancellationTokenSource cts);
+        Task StartConcentration(IGlobalStatus gs);
 
         //==================================================================离心移栽部分======================================================================================//
 
-        bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetSampleFromColdToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
-        bool GetSampleFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetSampleFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
-        bool GetPolishFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetPolishFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
-        bool GetPolishFroCentrifugaToShelf(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetPolishFroCentrifugaToShelf(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
-        bool GetPurifyFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetPurifyFromMaterialToCentrifugal(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
-        bool GetPurifyFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sample1">大管</param>
-        /// <param name="sample2">小管</param>
-        /// <param name="var"></param>
-        /// <param name="GoStation"></param>
-        /// <param name="cts"></param>
-        /// <returns></returns>
-        bool GetBigAndSmallToCentrifugal(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetPurifyFromCentrifugalToMaterial(Sample sample, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
         /// <summary>
         /// 
@@ -57,7 +47,18 @@ namespace Q_Platform.BLL
         /// <param name="GoStation"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetBigAndSmallToToMarterial(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, CancellationTokenSource cts);
+        bool GetBigAndSmallToCentrifugal(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sample1">大管</param>
+        /// <param name="sample2">小管</param>
+        /// <param name="var"></param>
+        /// <param name="GoStation"></param>
+        /// <param name="cts"></param>
+        /// <returns></returns>
+        bool GetBigAndSmallToToMarterial(Sample sample1, Sample sample2, int var, Func<ushort, Task<bool>> GoStation, IGlobalStatus gs);
 
         /// <summary>
         /// 搬运试管到离心机  （离心机调用）
@@ -67,7 +68,7 @@ namespace Q_Platform.BLL
         /// <param name="varTube">1:样品大管 2;净化小管 3;萃取大管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetTubeInCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, CancellationTokenSource cts);
+       // bool GetTubeInCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, IGlobalStatus gs);
 
         /// <summary>
         /// 从离心机取出试管  （离心机调用）
@@ -77,7 +78,7 @@ namespace Q_Platform.BLL
         /// <param name="varTube">1:样品大管 2;净化小管 3;萃取大管</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool GetTubeOutCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, CancellationTokenSource cts);
+       // bool GetTubeOutCentrifugal(Sample sample, Func<ushort, Task<bool>> func, int varTube, IGlobalStatus gs);
 
         //==================================================================离心部分======================================================================================//
 
@@ -87,7 +88,7 @@ namespace Q_Platform.BLL
         ///// <param name="sample"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetSampleFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+        //bool GetSampleFromColdToTransfer(Sample sample, IGlobalStatus gs);
 
         ///// <summary>
         ///// 从冰浴搬运萃取管到移栽
@@ -95,7 +96,7 @@ namespace Q_Platform.BLL
         ///// <param name="sample"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetPolishFromColdToTransfer(Sample sample, CancellationTokenSource cts);
+        //bool GetPolishFromColdToTransfer(Sample sample, IGlobalStatus gs);
 
         ///// <summary>
         ///// 从试管架搬运净化管到移栽
@@ -103,7 +104,7 @@ namespace Q_Platform.BLL
         ///// <param name="sample"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetPurifyFromMaterialToTransfer(Sample sample, CancellationTokenSource cts);
+        //bool GetPurifyFromMaterialToTransfer(Sample sample, IGlobalStatus gs);
 
 
 
@@ -114,7 +115,7 @@ namespace Q_Platform.BLL
         ///// <param name="isBig"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetSampleFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        //bool GetSampleFromTransferToMarterial(Sample sample, IGlobalStatus gs);
 
         ///// <summary>
         ///// 从移栽取离心完成后的萃取管到试管架
@@ -123,7 +124,7 @@ namespace Q_Platform.BLL
         ///// <param name="isBig"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetPolishFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        //bool GetPolishFromTransferToMarterial(Sample sample, IGlobalStatus gs);
 
         ///// <summary>
         ///// 离心完成后从移栽中取净化管  
@@ -131,7 +132,7 @@ namespace Q_Platform.BLL
         ///// <param name="sample"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetPurifyFromTransferToMarterial(Sample sample, CancellationTokenSource cts);
+        //bool GetPurifyFromTransferToMarterial(Sample sample, IGlobalStatus gs);
 
         //==================================================================移液部分（大管到小管  小管到大管）.（农残氮吹移液）======================================================================================//
 
@@ -144,7 +145,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        //bool GetSampleFromTransferToMarterialPiperttor(Sample sample, CancellationTokenSource cts);
+        //bool GetSampleFromTransferToMarterialPiperttor(Sample sample, IGlobalStatus gs);
 
         //==================================================================移液部分（兽药氮吹移液）大管到西林瓶  兽药======================================================================================//
 
@@ -154,7 +155,7 @@ namespace Q_Platform.BLL
         ///// <param name="sample"></param>
         ///// <param name="cts"></param>
         ///// <returns></returns>
-        //bool GetPolishFromTransferToMaterial(Sample sample, CancellationTokenSource cts);
+        //bool GetPolishFromTransferToMaterial(Sample sample, IGlobalStatus gs);
 
 
 

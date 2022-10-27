@@ -40,7 +40,15 @@ namespace Q_Platform.BLL
         /// </summary>
         event Action<string> CarrierTwoContinueEventHandler;
 
+        /// <summary>
+        /// 当前温度变化
+        /// </summary>
+        event Action<double[]> TemperatureChangedEventHandler;
 
+        /// <summary>
+        /// 急停事件发生
+        /// </summary>
+        event Action EmgStopOccuEventArgs;
 
         double AD_Value1 { get; set; }
         double AD_Value5 { get; set; }

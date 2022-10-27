@@ -1,4 +1,5 @@
 ﻿using BQJX.Common;
+using BQJX.Common.Interface;
 using Q_Platform.Common;
 using System;
 using System.Collections.Generic;
@@ -15,18 +16,18 @@ namespace Q_Platform.BLL
         /// <summary>
         /// 回零
         /// </summary>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        Task<bool> GoHome(CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
 
 
         /// <summary>
         /// 农残浓缩
         /// </summary>
         /// <param name="sample"></param>
-        /// <param name="cts"></param>
+        /// <param name="gs"></param>
         /// <returns></returns>
-        bool DoConcentrationOne(Sample sample, CancellationTokenSource cts);
+        bool DoConcentrationOne(Sample sample, IGlobalStatus gs);
 
         /// <summary>
         /// 兽残浓缩
@@ -34,13 +35,13 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoConcentrationTwo(Sample sample, CancellationTokenSource cts);
+        bool DoConcentrationTwo(Sample sample, IGlobalStatus gs);
 
 
 
 
 
-        Task<bool> GetSeilingAndWeight(Sample sample, CancellationTokenSource cts);
+        Task<bool> GetSeilingAndWeight(Sample sample, IGlobalStatus gs);
 
 
 
@@ -51,7 +52,7 @@ namespace Q_Platform.BLL
         /// <param name="var">1:浓缩移液 2:提取样品</param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        bool DoPipettingOne(Sample sample,int var, CancellationTokenSource cts);
+        bool DoPipettingOne(Sample sample,int var, IGlobalStatus gs);
 
         void UpdatePosData();
         CapperInfo GetCapperInfo();

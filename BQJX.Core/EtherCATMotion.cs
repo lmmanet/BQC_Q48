@@ -44,13 +44,9 @@ namespace BQJX.Core
 
         public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             } 
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
             ushort mode = homeMode;
@@ -76,13 +72,9 @@ namespace BQJX.Core
 
         public async Task<bool> GohomeWithCheckDone(ushort axisNo, ushort homeMode, double offset, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             }
             AxisEleGear ele = _eleGearList.Find(P => P.AxisNo == axisNo);
             ushort mode = homeMode;
@@ -109,13 +101,9 @@ namespace BQJX.Core
 
         public async Task<bool> InterPolation_2D_lineWithCheckDone(ushort[] axisNo, double[] PositionArray, double velocity, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             }
             ushort AxisNum = 2; //插补轴数
             ushort Crd = 0;//坐标系号
@@ -263,13 +251,9 @@ namespace BQJX.Core
 
         public async Task<bool> P2pMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             }
             var result = P2pMove(axisNo, offset, velocity);
             if (!result)
@@ -328,13 +312,9 @@ namespace BQJX.Core
 
         public async Task<bool> RelativeMoveWithCheckDone(ushort axisNo, double offset, double velocity, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             }
             var result = RelativeMove(axisNo, offset, velocity);
             if (!result)
@@ -630,7 +610,7 @@ namespace BQJX.Core
 
 
                     }
-                } while (gs?.IsStopped != true);
+                } while (gs?.IsStopped != true && gs?.IsEmgStop != true);
 
                 return false;
             }).ConfigureAwait(false);
@@ -650,7 +630,7 @@ namespace BQJX.Core
                         return true;
                     }
                     Thread.Sleep(1000);
-                } while (gs?.IsStopped != true);
+                } while (gs?.IsStopped != true && gs?.IsEmgStop != true);
                 if (gs?.IsStopped == true)
                 {
                     throw new TaskCanceledException($"触发停止 gs:{gs.IsStopped}");
@@ -736,13 +716,9 @@ namespace BQJX.Core
         }
         public async Task<bool> TorqueMoveWithCheckDone(ushort axisNo, short targetTorque, uint torqueSlope, uint velocity, double maxOffset, IGlobalStatus gs)
         {
-            while (gs?.IsPause == true)
+            if (gs?.IsPause == true || gs?.IsStopped == true || gs?.IsEmgStop == true)
             {
-                if (gs.IsStopped)
-                {
-                    return false;
-                }
-                await Task.Delay(1000).ConfigureAwait(false);
+                return false;
             }
             throw new NotImplementedException();
         }

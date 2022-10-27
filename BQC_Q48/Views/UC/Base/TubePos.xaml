@@ -45,75 +45,76 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <Button x:Name="btn1" Grid.Row="0" Grid.Column="2">
+
+                    <Button x:Name="btn1" Grid.Row="0" Grid.Column="6">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn2" Grid.Row="1" Grid.Column="2">
+                    <Button x:Name="btn2" Grid.Row="1" Grid.Column="6">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn3" Grid.Row="2" Grid.Column="2">
+                    <Button x:Name="btn3" Grid.Row="2" Grid.Column="6">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn4" Grid.Row="3" Grid.Column="2">
+                    <Button x:Name="btn4" Grid.Row="3" Grid.Column="6">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btn5" Grid.Row="0" Grid.Column="1">
+                    <Button x:Name="btn5" Grid.Row="0" Grid.Column="5">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn6" Grid.Row="1" Grid.Column="1">
+                    <Button x:Name="btn6" Grid.Row="1" Grid.Column="5">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn7" Grid.Row="2" Grid.Column="1">
+                    <Button x:Name="btn7" Grid.Row="2" Grid.Column="5">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn8" Grid.Row="3" Grid.Column="1">
+                    <Button x:Name="btn8" Grid.Row="3" Grid.Column="5">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btn9" Grid.Row="0" Grid.Column="0">
+                    <Button x:Name="btn9" Grid.Row="0" Grid.Column="4">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn10" Grid.Row="1" Grid.Column="0">
+                    <Button x:Name="btn10" Grid.Row="1" Grid.Column="4">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn11" Grid.Row="2" Grid.Column="0">
+                    <Button x:Name="btn11" Grid.Row="2" Grid.Column="4">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn12" Grid.Row="3" Grid.Column="0">
+                    <Button x:Name="btn12" Grid.Row="3" Grid.Column="4">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H3" Style="{StaticResource TubeCheckBox}" />
@@ -121,78 +122,75 @@
                     </Button>
 
 
-
-
-
-                    <Button x:Name="btn13" Grid.Row="0" Grid.Column="6">
+                    <Button x:Name="btn13" Grid.Row="0" Grid.Column="2">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn14" Grid.Row="1" Grid.Column="6">
+                    <Button x:Name="btn14" Grid.Row="1" Grid.Column="2">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn15" Grid.Row="2" Grid.Column="6">
+                    <Button x:Name="btn15" Grid.Row="2" Grid.Column="2">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn16" Grid.Row="3" Grid.Column="6">
+                    <Button x:Name="btn16" Grid.Row="3" Grid.Column="2">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G1" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H1" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btn17" Grid.Row="0" Grid.Column="5">
+                    <Button x:Name="btn17" Grid.Row="0" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn18" Grid.Row="1" Grid.Column="5">
+                    <Button x:Name="btn18" Grid.Row="1" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn19" Grid.Row="2" Grid.Column="5">
+                    <Button x:Name="btn19" Grid.Row="2" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn20" Grid.Row="3" Grid.Column="5">
+                    <Button x:Name="btn20" Grid.Row="3" Grid.Column="1">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G2" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H2" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btn21" Grid.Row="0" Grid.Column="4">
+                    <Button x:Name="btn21" Grid.Row="0" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="A3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="B3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn22" Grid.Row="1" Grid.Column="4">
+                    <Button x:Name="btn22" Grid.Row="1" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="C3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="D3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn23" Grid.Row="2" Grid.Column="4">
+                    <Button x:Name="btn23" Grid.Row="2" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="E3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="F3" Style="{StaticResource TubeCheckBox}" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn24" Grid.Row="3" Grid.Column="4">
+                    <Button x:Name="btn24" Grid.Row="3" Grid.Column="0">
                         <StackPanel Orientation="Vertical">
                             <CheckBox Content="G3" Style="{StaticResource TubeCheckBox}" />
                             <CheckBox Content="H3" Style="{StaticResource TubeCheckBox}" />

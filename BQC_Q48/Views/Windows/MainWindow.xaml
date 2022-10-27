@@ -8,6 +8,8 @@
         Title="MainWindow"
         Width="1080"
         Height="900"
+        MaxWidth="1920"
+        MaxHeight="1060"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
         WindowStyle="None"
         mc:Ignorable="d">
@@ -59,11 +61,11 @@
                                 <Border Grid.Row="2" Background="#2c676d" ClipToBounds="True">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        
+
                                         <StackPanel Grid.Column="0" Margin="10,0,0,0" Orientation="Horizontal">
                                             <TextBlock VerticalAlignment="Center"
                                                        FontSize="14"
@@ -75,11 +77,16 @@
 
                                         <Border Grid.Column="1" Visibility="{Binding IsAlmVisibility}">
                                             <Grid>
-                                                <TextBlock Text="{Binding AlmMsg}" Foreground="Red" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="20"
+                                                           Foreground="Red"
+                                                           Text="{Binding AlmMsg}" />
                                             </Grid>
                                         </Border>
-                                        
-                                        <TextBlock Margin="0,0,10,0" Grid.Column="2"
+
+                                        <TextBlock Grid.Column="2"
+                                                   Margin="0,0,10,0"
                                                    HorizontalAlignment="Right"
                                                    VerticalAlignment="Center"
                                                    FontSize="14"

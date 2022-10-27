@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BQJX.Common.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Q_Platform.BLL
 {
     public interface ISyringOne
     {
-        Task<bool> GoHome(CancellationTokenSource cts);
-        Task<bool> AddSolve(byte solve, double volume, CancellationTokenSource cts);
+        Task<bool> GoHome(IGlobalStatus gs);
+        Task<bool> AddSolve(byte solve, double volume, IGlobalStatus gs);
     }
 }

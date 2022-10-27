@@ -20,6 +20,9 @@ namespace Q_Platform.BLL
         public event Action<string> CarrierOneContinueEventHandler;
         public event Action<string> CarrierTwoPauseEventHandler;
         public event Action<string> CarrierTwoContinueEventHandler;
+        public event Action EmgStopOccuEventArgs;
+
+        public event Action<double[]> TemperatureChangedEventHandler;
 
         #endregion
 
@@ -36,6 +39,7 @@ namespace Q_Platform.BLL
         private ushort pump1 = 22;
         private ushort pump2 = 69;
         private ushort pump3 = 70;
+        private ushort _emgSersor = 4;
 
 
         private bool pumpRunning1;
@@ -62,7 +66,7 @@ namespace Q_Platform.BLL
         private bool _shelfSensor6Temp;     //试管架2-3到位检测   I26 
         private bool _shelfSensor7Temp;     //试管架2-4到位检测   I27 
 
-
+        private bool _emgOccuTemp = true; //急停发生
 
         #endregion
 
@@ -136,9 +140,17 @@ namespace Q_Platform.BLL
                 
                 while (!_runFlag)
                 {
-                    AD_Value1 = _io.ReadByte_AD(0) * 0.00468 - 50;
-                    AD_Value5 = _io.ReadByte_AD(4) * 0.00468 - 50;
-                    AD_Value6 = _io.ReadByte_AD(5) * 0.00468 - 50;
+                    var t1 =Math.Round(_io.ReadByte_AD(0) * 0.00468 - 50,1);
+                    var t2= Math.Round(_io.ReadByte_AD(4) * 0.00468 - 50,1);
+                    var t3= Math.Round(_io.ReadByte_AD(5) * 0.00468 - 50,1);
+                    if (t1!= AD_Value1 || t2!=AD_Value5 || t3!=AD_Value6)
+                    {
+                        AD_Value1 = t1;
+                        AD_Value5 = t2;
+                        AD_Value6 = t3;
+                        double[] tArr = new double[] { t1, t2, t3 };
+                        TemperatureChangedEventHandler?.Invoke(tArr);
+                    }
                     if (AD_Value1 > SetTemperature1 && !pumpRunning1 && IsTemperatureCtl)
                     {
                         _io.WriteBit_DO_Delay_Reverse(pump1, 60);
@@ -156,6 +168,17 @@ namespace Q_Platform.BLL
                     pumpRunning2 = _io.ReadBit_DO(pump2);
                     pumpRunning3 = _io.ReadBit_DO(pump3);
 
+                    //急停
+                    bool emg = _io.ReadBit_DI(_emgSersor);
+                    if (_emgOccuTemp && !emg)
+                    {
+                        EmgStopOccuEventArgs?.Invoke();
+                        _emgOccuTemp = false;
+                    }
+                    if (!_emgOccuTemp && emg)
+                    {
+                        _emgOccuTemp = true;
+                    }
                     //报警程序
                     ReadAlm();
 
@@ -202,6 +225,10 @@ namespace Q_Platform.BLL
             }
             else
             {
+                if (_almStepAxisNo<1 || _almStepAxisNo >32)
+                {
+                    return;
+                }
                 _iLsMotion.ResetAxisAlm(_almStepAxisNo);
             }
             IsAlmOccu = false;
@@ -271,7 +298,7 @@ namespace Q_Platform.BLL
                         IsAlmOccu = true;
                         _almCode = $"步进电机{item.AxisName} err:{status.ToString()}";
                         _almAxisType = 1;
-                        _almServoAxisNo = item.SlaveId;
+                        _almStepAxisNo = item.SlaveId;
                         return;
                     }
                     Thread.Sleep(1000);

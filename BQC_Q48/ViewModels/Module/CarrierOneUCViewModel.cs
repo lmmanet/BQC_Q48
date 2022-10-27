@@ -60,10 +60,10 @@ namespace Q_Platform.ViewModels.Module
             var list = AxisPosInfos.ToList();
             bool result = false;
 
-            if (AxisNo <= 3)
+            if (SelectedAxis.AxisNo <= 3)
             {
-                ushort id = AxisNo;
-                if (AxisNo == 3)
+                ushort id = SelectedAxis.AxisNo;
+                if (SelectedAxis.AxisNo == 3)
                 {
                     id = 2;
                 }
