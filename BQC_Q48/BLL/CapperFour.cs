@@ -301,7 +301,7 @@ namespace Q_Platform.BLL
                     //取样 并 搬回空管
                     if (sample.MainStep >= 19 && !_globalStatus.IsStopped)
                     {
-                        result = RedissolveAndGetSampleToBottle(sample, gs);
+                        result = RedissolveAndGetSampleToBottle(sample, gs,false);
                         if (!result)
                         {
                             return false;
@@ -534,15 +534,16 @@ namespace Q_Platform.BLL
         /// </summary>
         /// <param name="sample"></param>
         /// <param name="gs"></param>
+        /// <param name="isExtractToSample">是否提取到小瓶</param>
         /// <returns></returns>
-        private bool RedissolveAndGetSampleToBottle(Sample sample,IGlobalStatus gs)
+        private bool RedissolveAndGetSampleToBottle(Sample sample,IGlobalStatus gs,bool isExtractToSample = true)
         {
             bool result;
             //复溶
             if (sample.MainStep == 19 && !_globalStatus.IsStopped)
             {
                 if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInConcentration) && TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.Redissolve)
-                    && !sample.ConcentrationFailure)
+                    && !sample.ConcentrationFailure && !sample.ConcentrationFailure2)
                 {
                     result = _concentration.Redissolve(sample, gs);
                     if (!result)
@@ -563,14 +564,18 @@ namespace Q_Platform.BLL
                     {
                         throw new Exception($"西林瓶{sample.Id}搬运到拧盖4 失败!");
                     }
+                    sample.MainStep++;
                 }
-                sample.MainStep++;
+                if (!isExtractToSample) //无需提取到小瓶
+                {
+                    sample.MainStep = 22;
+                }
             }
 
             //提取样品液
             if (sample.MainStep == 21 && !_globalStatus.IsStopped)
             {
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper) && !sample.ConcentrationFailure)
+                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsSelingInCapper) && !sample.ConcentrationFailure && !sample.ConcentrationFailure2)
                 {
                     result = _capperFive.DoPipettingFromCapperFourToBottle(sample, gs);
                     if (!result)

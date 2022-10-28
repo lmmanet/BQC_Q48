@@ -51,7 +51,6 @@
                             <DataGridTextColumn Width="*" Binding="{Binding SnNum}" Header="样品编号" />
                             <DataGridTextColumn Width="1.5*" Binding="{Binding Name}" Header="样品名称" />
                             <DataGridTextColumn Width="1.5*" Binding="{Binding TechName}" Header="处理工艺" />
-                            <DataGridTextColumn Width="1.5*" Binding="{Binding Status}" Header="状态" />
                             <DataGridTextColumn Width="1.5*" Binding="{Binding CreateTime, StringFormat={}{0:yyyy-MM-dd}}" Header="创建时间" />
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.CellTemplate>

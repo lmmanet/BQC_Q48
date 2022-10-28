@@ -142,9 +142,14 @@ namespace BQJX.Common
         public DateTime WetBackEndTime { get; set; }
 
         /// <summary>
-        /// 浓缩失败
+        /// 样品1浓缩失败
         /// </summary>
         public bool ConcentrationFailure { get; set; }
+
+        /// <summary>
+        /// 样品2浓缩失败
+        /// </summary>
+        public bool ConcentrationFailure2 { get; set; }
 
 
 

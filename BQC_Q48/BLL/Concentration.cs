@@ -196,7 +196,12 @@ namespace Q_Platform.BLL
                 
                 if (TechStatusHelper.BitIsOn(sample.TechParams,TechStatus.Redissolve))
                 {
-                    result = Redissolve(2,volume, vel, time, gs);
+                    byte var = 2;//农残复溶
+                    if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
+                    {
+                        var = 1;//兽残复溶
+                    }
+                    result = Redissolve(var, volume, vel, time, gs);
                     if (!result)
                     {
                         throw new Exception($"样品{sample.Id}复溶失败!");
@@ -746,7 +751,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         private double GetAddLiquidPos()
         {
-            return _posData.ConcPos + 30;
+            return _posData.ConcPos + 27;
         }
 
 

@@ -16,9 +16,10 @@ namespace Q_Platform.BLL
         void PausePro(Expression<Func<bool>> pauseFlag);
         void SwitchLight();
 
-
-
-
+        /// <summary>
+        /// 清空工作列表
+        /// </summary>
+        void ClearWorkList();
 
 
         void Centrifugal(Sample sample, IGlobalStatus gs);

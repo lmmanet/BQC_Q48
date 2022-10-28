@@ -211,7 +211,7 @@
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Height="50" Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center" FontSize="20" Text="系统当前状态：" />
-                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding RunStatus, FallbackValue=暂停中,Converter={cv:StatusIntToString}}" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="20" Text="{Binding RunStatus, FallbackValue=暂停中, Converter={cv:StatusIntToString}}" />
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Height="50" Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center" FontSize="20" Text="冰浴当前温度:" />
@@ -275,14 +275,14 @@
                                          VerticalAlignment="Center"
                                          BorderThickness="0,0,0,1"
                                          FontSize="20"
-                                         Text="{Binding Temperatrue2}" />
+                                         Text="{Binding Temperatrue3}" />
                                 <TextBox Grid.Row="2"
                                          Grid.Column="1"
                                          Width="80"
                                          VerticalAlignment="Center"
                                          BorderThickness="0,0,0,1"
                                          FontSize="20"
-                                         Text="{Binding Temperatrue3}" />
+                                         Text="{Binding Temperatrue2}" />
 
                             </Grid>
                         </Border>

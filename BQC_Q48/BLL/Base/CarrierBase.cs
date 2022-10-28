@@ -50,8 +50,9 @@ namespace Q_Platform.BLL
         #region Variable
 
         protected double _xyMoveVel = 500;
-        protected double _zMoveDownVel = 100;
+        protected double _zMoveDownVel = 200;
         protected double _zMoveUpVel = 600;
+        protected double _zPipettorMoveUpVel = 100;
         protected double _absorbVel = 2;
         protected double _syringVel = 3;
 
@@ -676,9 +677,11 @@ namespace Q_Platform.BLL
         /// <param name="volume"></param>
         /// <param name="deep">移液液位深度</param>
         /// <param name="airColumn">吸取空气柱</param>
+        /// <param name="safePos">避空位</param>
+        /// <param name="isNeedGoSafePosObsorb">吸液前是否需要移动到避空位</param>
         /// <param name="gs"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume, double deep, double airColumn,double[] safePos, IGlobalStatus gs)
+        protected virtual async Task<bool> DoPipettingAsync(double[] sourcePos, double[] targetPos, double volume, double deep, double airColumn,double[] safePos,bool isNeedGoSafePosObsorb, IGlobalStatus gs)
         {
             try
             {
@@ -698,8 +701,40 @@ namespace Q_Platform.BLL
 
                 #region 去吸取溶液
 
-                //XY轴移动到取液位置
-                s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
+                //避位
+                if (safePos != null && isNeedGoSafePosObsorb)
+                {
+                s0: var ret = await _motion.InterPolation_2D_lineWithCheckDone(axes, safePos, _xyMoveVel, _globalStatus).ConfigureAwait(false);
+                    if (!ret)
+                    {
+                        if (_globalStatus.IsPause)
+                        {
+                            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
+                            {
+                                Thread.Sleep(1000);
+                            }
+
+                            if (!_globalStatus.IsPause && !_globalStatus.IsStopped)
+                            {
+                                goto s0;
+                            }
+                            else
+                            {
+                                throw new Exception($"DoPipettingAsync XY移动到移液规避位置失败");
+                            }
+
+                        }
+                        else
+                        {
+                            throw new Exception($"DoPipettingAsync XY移动到移液规避位置失败");
+                        }
+
+                    }
+
+                }
+
+            //XY轴移动到取液位置
+            s1: var result = await _motion.InterPolation_2D_lineWithCheckDone(axes, sourcePosArray, _xyMoveVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -789,7 +824,7 @@ namespace Q_Platform.BLL
                 _syringHaveLiquid = true;
 
                 //Z2轴上升到安全位置
-               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zMoveUpVel, _globalStatus).ConfigureAwait(false);
+               s4: result = await _motion.P2pMoveWithCheckDone(_axisZ2, 0, _zPipettorMoveUpVel, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -852,7 +887,6 @@ namespace Q_Platform.BLL
                 #region 去目标位置吐液
 
                 //避位
-                //XY轴移动到吐液位置
                 if (safePos != null)
                 {
                    s6: result = await _motion.InterPolation_2D_lineWithCheckDone(axes, safePos, _xyMoveVel, _globalStatus).ConfigureAwait(false);

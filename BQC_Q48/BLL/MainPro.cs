@@ -23,6 +23,9 @@ namespace Q_Platform.BLL
 
         Task _wetBackTask;
 
+        private List<Sample> _workList = new List<Sample>();
+
+
         #region Private Members
 
         private ICapperOne _capperOne;
@@ -33,6 +36,7 @@ namespace Q_Platform.BLL
         private ICapperFive _capperFive;
         private IConcentration _concentration;
         private IVibrationOne _vibrationOne;
+        private IVibrationTwo _vibrationTwo;
         private IAddSolid _addSolid;
 
         private ICarrierOne _carrierOne;
@@ -54,13 +58,14 @@ namespace Q_Platform.BLL
 
         #region Construtor
 
-        public MainPro(ICapperOne capperOne, IVortex vortex, ICapperTwo capperTwo, IVibrationOne vibrationOne, IAddSolid addSolid, ICarrierOne carrierOne, ICarrierTwo carrierTwo, ICentrifugal centrifugal, ICentrifugalCarrier centrifugalCarrier
+        public MainPro(ICapperOne capperOne, IVortex vortex, ICapperTwo capperTwo, IVibrationOne vibrationOne, IVibrationTwo vibrationTwo, IAddSolid addSolid, ICarrierOne carrierOne, ICarrierTwo carrierTwo, ICentrifugal centrifugal, ICentrifugalCarrier centrifugalCarrier
             , ICapperThree capperThree, ICapperFour capperFour, ICapperFive capperFive, IConcentration concentration, IGlobalStatus globalStatus, IIoDevice io)
         {
             this._capperOne = capperOne;
             this._vortex = vortex;
             this._capperTwo = capperTwo;
             this._vibrationOne = vibrationOne;
+            this._vibrationTwo = vibrationTwo;
             this._addSolid = addSolid;
             this._carrierOne = carrierOne;
             this._carrierTwo = carrierTwo;
@@ -130,20 +135,21 @@ namespace Q_Platform.BLL
 
                 if (!await result6)
                 {
-                    Console.WriteLine("carrieroneHomeErr");
+                    _logger?.Warn("搬运1回零失败!");
                     return false;
                 }
                 var result1 = _capperOne.GoHome(_globalStatus).ConfigureAwait(false);  //拧盖1回零
                 var result2 = _vortex.GoHome(_globalStatus).ConfigureAwait(false);  //涡旋回零
                 var result3 = _capperTwo.GoHome(_globalStatus).ConfigureAwait(false);  //拧盖2回零
                 var result4 = _vibrationOne.GoHome(_globalStatus).ConfigureAwait(false);  //振荡回零
+                var result12 = _vibrationTwo.GoHome(_globalStatus).ConfigureAwait(false);// 振荡2回零
                 var result5 = _addSolid.GoHome(_globalStatus).ConfigureAwait(false);  //加固回零  无需单独回零
 
                 var result7 = _centrifugal.GoHome(_globalStatus); // 离心机回零
 
                 if (!await result20)
                 {
-                    Console.WriteLine("carriertwoHomeErr");
+                    _logger?.Warn("搬运2回零失败!");
                     return false;
                 }
 
@@ -154,49 +160,60 @@ namespace Q_Platform.BLL
 
                 if (!await result1)
                 {
+                    _logger?.Warn("拧盖1回零失败!");
                     return false;
                 }
                 if (!await result2)
                 {
+                    _logger?.Warn("涡旋回零失败!");
                     return false;
                 }
                 if (!await result3)
                 {
+                    _logger?.Warn("拧盖2回零失败!");
                     return false;
                 }
                 if (!await result4)
                 {
+                    _logger?.Warn("振荡1回零失败!");
                     return false;
                 }
                 if (!await result5)
                 {
+                    _logger?.Warn("加固回零失败!");
                     return false;
                 }
                 if (!await result7)
                 {
+                    _logger?.Warn("离心机回零失败!");
+                    return false;
+                }
+                if (!await result12)
+                {
+                    _logger?.Warn("振荡2回零失败!");
                     return false;
                 }
                 if (!await result8)
                 {
-                    Console.WriteLine("回零失败 result8！");
+                    _logger?.Warn("拧盖3回零失败!");
                     return false;
                 }
                 if (!await result9)
                 {
-                    Console.WriteLine("回零失败 result9！");
+                    _logger?.Warn("拧盖4回零失败!");
                     return false;
                 }
                 if (!await result10)
                 {
-                    Console.WriteLine("回零失败 result10！");
+                    _logger?.Warn("拧盖5回零失败!");
                     return false;
                 }
                 if (!await result11)
                 {
-                    Console.WriteLine("回零失败 result11！");
+                    _logger?.Warn("浓缩回零失败!");
                     return false;
                 }
-                _logger.Info("HomeDone");
+                _logger.Info("回零初始化完成");
 
                 return true;
 
@@ -206,23 +223,31 @@ namespace Q_Platform.BLL
             return await _taskHome.ConfigureAwait(false);
         }
 
+        public void ClearWorkList()
+        {
+            _workList = new List<Sample>();
+        }
 
         public void StartPro()
         {
             if (_globalStatus.StartProgram())
             {
-                var _workList = GlobalCache.Instance.ExtractList;
                 if (_workList.Count == 0)
                 {
-                    return;
+                    _workList = GlobalCache.Instance.WorkList;
+                    var exlist = GlobalCache.Instance.ExtractList;
+                    foreach (var item in _workList)
+                    {
+                        exlist.Add(item);
+                        Messenger.Default.Send<Sample>(item, "Add");
+                    }
                 }
-
-                foreach (var item in _workList)
-                {
-                    Messenger.Default.Send<Sample>(item, "Add");
-                    //添加到列表方便保存
-                    GlobalCache.Instance.WorkList.Add(item);
-                }
+      
+                _centrifugalCarrier.StartConcentration(_globalStatus);
+                _centrifugalCarrier.StartPipetting(_globalStatus);
+                _centrifugal.StartCentrifugal(_globalStatus);
+                _vibrationOne.StartVibration(_globalStatus);
+                _vortex.StartVortex(_globalStatus);
                 StartExtract();
             }
         }
@@ -299,24 +324,24 @@ namespace Q_Platform.BLL
             }
             _main = Task.Run(() =>
             {
-                var _workList = GlobalCache.Instance.ExtractList;
+                var extractList = GlobalCache.Instance.ExtractList;
                 //正式程序
                 while (!_globalStatus.IsStopped)
                 {
-                    if (_workList != null && _workList.Count > 0)
+                    if (extractList != null && extractList.Count > 0)
                     {
-                        var samplevar = _workList[0];
+                        var samplevar = extractList[0];
                         if (samplevar != null)
                         {
                             var result = Ext(samplevar);
                             if (result)
                             {
-                                _workList.Remove(samplevar);
+                                extractList.Remove(samplevar);
                             }
                         }
                     }
                     Thread.Sleep(1000);
-                    if (_workList.Count == 0)
+                    if (extractList.Count == 0)
                     {
                         break;
                     }

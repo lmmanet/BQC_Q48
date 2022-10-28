@@ -414,15 +414,43 @@ namespace BQJX.Converts
                         }
                         if (param == 4)
                         {
-                            return "萃取管振荡中...";
+                            return "萃取管准备振荡混匀...";
                         }
                         if (param == 5)
                         {
-                            return "萃取管涡旋中...";
+                            return "萃取管搬运到振荡1...";
                         }
                         if (param == 6)
                         {
-                            return "萃取管完成振荡涡旋,等待离心";
+                            return "萃取管振荡混匀中...";
+                        }
+                        if (param == 7)
+                        {
+                            return "萃取管完成振荡1";
+                        }
+                        if (param == 8)
+                        {
+                            return "萃取管等待涡旋混匀...";
+                        }
+                        if (param == 9)
+                        {
+                            return "萃取管准备涡旋混匀";
+                        }
+                        if (param == 10)
+                        {
+                            return "萃取管搬运到涡旋...";
+                        }
+                        if (param == 11)
+                        {
+                            return "萃取管涡旋中...";
+                        }
+                        if (param == 12)
+                        {
+                            return "萃取管完成涡旋";
+                        }
+                        if (param == 13)
+                        {
+                            return "萃取管等待离心...";
                         }
                         break;
                     case 10: //三次离心

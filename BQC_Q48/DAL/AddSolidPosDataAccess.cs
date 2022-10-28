@@ -37,7 +37,7 @@ namespace Q_Platform.DAL
             AddSolidPosData data = new AddSolidPosData();
             try
             {
-                string sql = "Select * from AddSolidPosData order by id limit 0,2 ";
+                string sql = "Select * from AddSolidPosData order by id limit 0,3 ";
                 DataTable dt = _dataAccess.Query(sql);
                 int i = 0;
                 foreach (var item in dt.AsEnumerable())
@@ -66,7 +66,7 @@ namespace Q_Platform.DAL
             try
             {
                 string sql = "";
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     string header = "update AddSolidPosData set ";
                     string param = $"Solid_A = '{data.Solid_A[i]}'," +
@@ -78,7 +78,7 @@ namespace Q_Platform.DAL
                     sql += header + param + $" where id = {i};";
                 }
 
-                return _dataAccess.ExecuteNonQuery(sql) == 2;
+                return _dataAccess.ExecuteNonQuery(sql) == 3;
 
             }
             catch (Exception ex)

@@ -4,6 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:BQC_Q48.Views"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:uc="clr-namespace:Q_Platform.Views.UC"
       d:DesignHeight="450"
       d:DesignWidth="800"
       DataContext="{Binding Source={StaticResource Locator}, Path=TechManagePageViewModel}"
@@ -51,7 +52,7 @@
                       TextBlock.FontSize="16">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="*" Binding="{Binding Id}" Header="序号" />
-                    <DataGridTextColumn Width="1*" Binding="{Binding TechName}" Header="工艺名称" />
+                    <DataGridTextColumn Width="1*" Binding="{Binding Name}" Header="工艺名称" />
                     <DataGridTextColumn Width="1*" Binding="{Binding Createtime, StringFormat={}{0:yyyy-MM-dd}}" Header="创建时间" />
 
                     <DataGridTemplateColumn Width="1*">
@@ -132,6 +133,7 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
+                            <uc:TechParamsUC Grid.Row="1" DataContext="{Binding SelectedTechInfo}" IsEnabled="False"/>
                             <!--<local:SelectTechUC DataContext="{Binding SelectedTechInfo.Tech}" IsEnabled="False" />-->
 
                             <!--<local:TechParamUC Grid.Row="1"

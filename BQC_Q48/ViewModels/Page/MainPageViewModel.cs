@@ -15,6 +15,8 @@ using PropertyChanged;
 using BQJX.Common.Interface;
 using Q_Platform.Views.Windows;
 using BQJX.Common;
+using CommonServiceLocator;
+using Q_Platform.DAL;
 
 namespace Q_Platform.ViewModels.Page
 {
@@ -24,6 +26,7 @@ namespace Q_Platform.ViewModels.Page
         private readonly IMainPro _mainPro;
         private readonly IGlobalStatus _globalStatus;
         private readonly IRunService _service;
+        private readonly ISampleDataAccess _dataAccess;
         private ushort _addSampleId;
 
         private List<Sample> _workSampleList = new List<Sample>();
@@ -158,6 +161,10 @@ namespace Q_Platform.ViewModels.Page
         /// </summary>
         public bool HomeDoneFlag { get; set; }
 
+        /// <summary>
+        /// 删除使能
+        /// </summary>
+        public bool DelectSampleEnable { get; set; } = true;
 
         #endregion
 
@@ -185,7 +192,7 @@ namespace Q_Platform.ViewModels.Page
 
         #region Construtors
 
-        public MainPageViewModel(IMainPro mainPro, IRunService runService, IGlobalStatus globalStatus)
+        public MainPageViewModel(IMainPro mainPro, IRunService runService, IGlobalStatus globalStatus,ISampleDataAccess dataAccess)
         {
             Messenger.Default.Register<WorkLog>(this, "logWorkLog", LoggingWorkLog);
 
@@ -204,8 +211,8 @@ namespace Q_Platform.ViewModels.Page
             _globalStatus.MachineStatusChangedEventArgs += () => { RunStatus = _globalStatus.MachineStatus; };
             _service.EmgStopOccuEventArgs += _globalStatus.EmgStop;
             Messenger.Default.Register<SampleModel>(this, "AddSampleModel", AddSampleToList);
-
-
+            _dataAccess = dataAccess;
+            ServiceLocator.Current.GetInstance<AlarmPageViewModel>();//加载一下报警页面
         }
 
       
@@ -260,8 +267,12 @@ namespace Q_Platform.ViewModels.Page
 
         private void InitialSys()
         {
+            _mainPro.ClearWorkList();
+            _workSampleList = new List<Sample>();
+            SampleList = new ObservableCollection<SampleModel>();
              _mainPro.GoHome(() => HomeDoneFlag);
-
+            DelectSampleEnable = true;
+            UpdateSampleCount(); //更新样品数量
             //回零完成判断是否回零成功  并使能启动按钮
             //if (HomeDoneFlag)
             //{
@@ -296,12 +307,15 @@ namespace Q_Platform.ViewModels.Page
         private void StartPro()
         {
             GenerateSampleList();//转换数据
-            GlobalCache.Instance.ExtractList = _workSampleList;
+            GlobalCache.Instance.WorkList = _workSampleList;
 
             _mainPro.StartPro();
 
             PauseBtnEnable = true;
             ContinueBtnEnable = false;
+            DelectSampleEnable = false;
+
+
         }
 
         private void Delete(object obj)
@@ -486,150 +500,41 @@ namespace Q_Platform.ViewModels.Page
         }
 
 
-        private void GenerateMockData()
+
+        /// <summary>
+        /// 清除离心机占用状态
+        /// </summary>
+        private void ClearCentrifugalOccupy()
         {
-            SampleList.Add(new SampleModel()
+            GlobalCache.Instance.TubeInCentrifugal = new List<ushort>();
+        }
+
+        /// <summary>
+        /// 保存样品到数据库
+        /// </summary>
+        /// <param name="sampleModel"></param>
+        /// <returns></returns>
+        private bool SaveSampleModelToDataBase(SampleModel sampleModel)
+        {
+            SampleInfo sampleInfo1 = new SampleInfo()
             {
-                Id = 1,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
+                Name = sampleModel.Name1,
+                SnNum = sampleModel.SnNum1,
+                TechName = sampleModel.TechName,
+                CreateTime = DateTime.Now,
+                Status = 0,
+            };
+            SampleInfo sampleInfo2 = new SampleInfo()
             {
-                Id = 2,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 3,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 4,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 5,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 6,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 7,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 8,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 9,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 10,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 11,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 12,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 13,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            SampleList.Add(new SampleModel()
-            {
-                Id = 14,
-                Name1 = "大白菜",
-                Name2 = "白菜",
-                SnNum1 = "pxsf",
-                SnNum2 = "oojo",
-                TechName = "农残121"
-
-            });
-            UpdateSampleCount();
-
+                Name = sampleModel.Name2,
+                SnNum = sampleModel.SnNum2,
+                TechName = sampleModel.TechName,
+                CreateTime = DateTime.Now,
+                Status = 0,
+            };
+           var result1 =  _dataAccess.InsertSampleInfo(sampleInfo1);
+           var result2 = _dataAccess.InsertSampleInfo(sampleInfo2);
+            return result1 && result2;
         }
 
     }

@@ -312,9 +312,13 @@ namespace Q_Platform.ViewModels.Module
             {
                 bool result = _dataAccess.UpdatePosDataByAxisPosInfo(1, list);
             }
-            else
+            else if (AxisNo == _axisY2)
             {
                 bool result = _dataAccess.UpdatePosDataByAxisPosInfo(0, list);
+            }
+            else if(AxisNo == _axisZ1 || AxisNo ==_axisZ2)
+            {
+                bool result = _dataAccess.UpdatePosDataByAxisPosInfo(2, list);
             }
             SimpleIoc.Default.GetInstance<IAddSolid>().UpdatePosData();
         }
@@ -375,8 +379,16 @@ namespace Q_Platform.ViewModels.Module
                 AxisNo = stepAxisEleGear.SlaveId;
 
                 //更新轴点位信息
+                try
+                {
+                    GetAxisPosInfo(stepAxisEleGear);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message) ;
+                }
 
-                GetAxisPosInfo(stepAxisEleGear);
+          
 
                 if (AxisNo == 5)
                 {
@@ -402,17 +414,33 @@ namespace Q_Platform.ViewModels.Module
             AddSolidPosData data = _dataAccess.GetPosData();
             Type type = typeof(AddSolidPosData);
             PropertyInfo[] propertyInfos = type.GetProperties();
-
+            int index = 0;
             foreach (var item in propertyInfos)
             {
-                var values = (double)item.GetValue(data);
+                var values = (double[])item.GetValue(data);
                 string posName = item.Name;
                 if (item.IsDefined(typeof(PosNameAttribute)))
                 {
                     var posNameAtt = item.GetCustomAttribute(typeof(PosNameAttribute)) as PosNameAttribute;
                     posName = posNameAtt.PosName;
+                    if (axis.SlaveId == _axisY1)
+                    {
+                        index = 0;
+                    }
+                    else if(axis.SlaveId == _axisY2)
+                    {
+                        index = 1;
+                    }
+                    else if(axis.SlaveId == _axisZ1 || axis.SlaveId == _axisZ2)
+                    {
+                        index = 2;
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
-                AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values });
+                AxisPosInfos.Add(new AxisPosInfo() { AxisName = axis.AxisName, MemberName = item.Name, AxisNo = axis.SlaveId, PosName = posName, PosData = values[index] });
 
             }
         }

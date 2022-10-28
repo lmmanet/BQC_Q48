@@ -6,20 +6,20 @@ namespace Q_Platform.DAL
 {
     public interface ITechParamsDataAccess
     {
-        TechParams FindTechParamsById(int id);
+        List<TechParamsInfo> FindTechParamsById(int id);
 
-        TechParams FindTechParamsByName(string techName);
+        List<TechParamsInfo> FindTechParamsByName(string techName);
 
-        List<TechParams> GetTechParamsInfoById(int start, int end);
+        List<TechParamsInfo> GetTechParamsInfoById(int start, int end);
 
-        List<TechParams> GetTechParamsInfoByTechName(string name);
+        List<TechParamsInfo> GetTechParamsInfoByTechName(string name);
 
-        List<TechParams> GetTechParamsInfoByTime(DateTime start, DateTime end);
+        List<TechParamsInfo> GetTechParamsInfoByTime(DateTime start, DateTime end);
 
-        bool InsertTechParamsInfo(TechParams tech);
+        bool InsertTechParamsInfo(TechParamsInfo tech);
 
-        bool DeleteTechParamsInfo(TechParams tech);
+        bool DeleteTechParamsInfo(TechParamsInfo tech);
 
-        bool UpdateTechParams(TechParams tech, int id);
+        bool UpdateTechParams(TechParamsInfo tech, int id);
     }
 }

@@ -92,14 +92,14 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id,Converter={cv:SampleIdToPosString},ConverterParameter=1}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id,Converter={cv:SampleIdToPosString},ConverterParameter=2}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Converter={cv:SampleIdToPosString}, ConverterParameter=1}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding Id, Converter={cv:SampleIdToPosString}, ConverterParameter=2}" />
                                     <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Text="{Binding SnNum1}" />
                                     <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Text="{Binding SnNum2}" />
                                     <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Text="{Binding Name1}" />
                                     <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" Text="{Binding Name2}" />
                                     <TextBlock Grid.Row="0" Grid.Column="6" HorizontalAlignment="Center" Text="{Binding Sample.ConcentrationFailure}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="6" HorizontalAlignment="Center" Text="{Binding Sample.ConcentrationFailure}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="6" HorizontalAlignment="Center" Text="{Binding Sample.ConcentrationFailure2}" />
 
                                     <TextBlock Grid.RowSpan="2"
                                                Grid.Column="3"
@@ -122,7 +122,8 @@
                                                 HorizontalContentAlignment="Center"
                                                 Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                Content="删除" />
+                                                Content="删除"
+                                                IsEnabled="{Binding DataContext.DelectSampleEnable, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 
                                     </Grid>
 

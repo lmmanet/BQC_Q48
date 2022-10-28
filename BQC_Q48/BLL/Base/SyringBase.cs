@@ -248,12 +248,13 @@ namespace Q_Platform.BLL
             _io.WriteBit_DO(_port8, false);
 
             //开始吸液
-            var result = await _motion.P2pMoveWithCheckDone(_axisAddLiquid, volume, _obsortVel, gs).ConfigureAwait(false);
+            var result = await _motion.RelativeMoveWithCheckDone(_axisAddLiquid, volume, _obsortVel, gs).ConfigureAwait(false);
             if (!result)
             {
                 throw new Exception("吸液失败");
             }
 
+            Thread.Sleep(1000);
             //切换阀口
             if ((solve & 0x01) == 0x01)
             {

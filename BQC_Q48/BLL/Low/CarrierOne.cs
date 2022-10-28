@@ -3130,7 +3130,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 2 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall,liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, deep,0.1, safePos, gs).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id - 1, bigToSmall,liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id - 1, bigToSmall), volume, deep,0.1, safePos,false, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第一管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -3163,7 +3163,7 @@ namespace Q_Platform.BLL
                     if (sample.PipettorStep1 == 5 && !_globalStatus.IsStopped)
                     {
                         //移液
-                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall, liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, deep, 0.1, safePos, gs).GetAwaiter().GetResult();
+                        var result = base.DoPipettingAsync(GetPipettorSourceCoordinate(2 * sample.Id, bigToSmall, liquidHigh), GetPipettorTargetCoordinate(2 * sample.Id, bigToSmall), volume, deep, 0.1, safePos, false, gs).GetAwaiter().GetResult();
                         if (!result)
                         {
                             throw new Exception($"第二管移液失败,pipettingStep-{sample.PipettorStep1}");
@@ -4643,7 +4643,7 @@ namespace Q_Platform.BLL
                     {   //大管取液位置 小管到大管
                         _posData.PipettingSourcePos[0],
                         _posData.PipettingSourcePos[1],
-                        _posData.PipettingSourcePos[2] +30,
+                        _posData.PipettingSourcePos[2] -100,
                     };
 
             }
@@ -4662,7 +4662,7 @@ namespace Q_Platform.BLL
                 {   //大管取液位置 小管到大管
                     _posData.PipettingSourcePos[0] + 60,
                     _posData.PipettingSourcePos[1],
-                    _posData.PipettingSourcePos[2] +30,
+                    _posData.PipettingSourcePos[2] -100,
                 };
             }
           

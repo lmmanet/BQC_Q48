@@ -26,7 +26,7 @@ namespace Q_Platform.ViewModels.Page
 
         #region Properties
 
-        public ObservableCollection<TechParamsModel> TechList { get; set; } = new ObservableCollection<TechParamsModel>();
+        public ObservableCollection<TechParamsInfo> TechList { get; set; } = new ObservableCollection<TechParamsInfo>();
 
         /// <summary>
         /// 详细参数显示
@@ -36,7 +36,7 @@ namespace Q_Platform.ViewModels.Page
         public DateTime? SearchStartTime { get; set; }
         public DateTime? SearchEndTime { get; set; }
 
-        public Visibility DetailVisibility { get; set; }
+        public Visibility DetailVisibility { get; set; } = Visibility.Collapsed;
 
         #endregion
 
@@ -61,6 +61,7 @@ namespace Q_Platform.ViewModels.Page
             this._dataAccess = dataAccess;
             this._logger = logger;
             RegisterCommnand();
+            GetTechInfoByIdFromDataBase(0, 10);
         }
 
         #endregion
@@ -83,8 +84,6 @@ namespace Q_Platform.ViewModels.Page
 
             Messenger.Default.Register<TechParamsInfo>(this, "AddTech", OnAddTechCallBack);
         }
-
-
 
         private void SearchTech()
         {
@@ -113,11 +112,11 @@ namespace Q_Platform.ViewModels.Page
             {
                 try
                 {
-                    //var result = _dataAccess.DeleteTechParamsInfo(tech);
-                    //if (result)
-                    //{
-                    //    TechList.Remove(tech);
-                    //}
+                    var result = _dataAccess.DeleteTechParamsInfo(tech);
+                    if (result)
+                    {
+                        TechList.Remove(tech);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -194,10 +193,10 @@ namespace Q_Platform.ViewModels.Page
                 TechList.Clear();
                 var techParamsList = _dataAccess.GetTechParamsInfoById(start, end - start);
 
-                //foreach (TechParamsInfo item in techParamsList)
-                //{
-                //    TechList.Add(item);
-                //}
+                foreach (TechParamsInfo item in techParamsList)
+                {
+                    TechList.Add(item);
+                }
             }
             catch (Exception ex)
             {
@@ -213,10 +212,10 @@ namespace Q_Platform.ViewModels.Page
                 TechList.Clear();
                 var techParamsList = _dataAccess.GetTechParamsInfoByTechName(techName);
 
-                //foreach (TechParamsInfo item in techParamsList)
-                //{
-                //    TechList.Add(item);
-                //}
+                foreach (TechParamsInfo item in techParamsList)
+                {
+                    TechList.Add(item);
+                }
             }
             catch (Exception ex)
             {
@@ -232,10 +231,10 @@ namespace Q_Platform.ViewModels.Page
                 TechList.Clear();
                 var techParamsList = _dataAccess.GetTechParamsInfoByTime(start, end == null ? DateTime.Now : (DateTime)end);
 
-                //foreach (TechParamsInfo item in techParamsList)
-                //{
-                //    TechList.Add(item);
-                //}
+                foreach (TechParamsInfo item in techParamsList)
+                {
+                    TechList.Add(item);
+                }
             }
             catch (Exception ex)
             {
@@ -251,17 +250,16 @@ namespace Q_Platform.ViewModels.Page
             {
                 var list = _dataAccess.GetTechParamsInfoById(0, 1000);
 
-                //var tech = list.FirstOrDefault(t => t.TechName == techParamsInfo.TechName);
-                //if (tech == null)
-                //{
-                //    //_dataAccess.InsertTechParamsInfo(techParamsInfo);
-                //    return true;
-                //}
-                //else
-                //{
-                //    return false;
-                //}
-                return false;
+                var tech = list.FirstOrDefault(t => t.Name == techParamsInfo.Name);
+                if (tech == null)
+                {
+                    _dataAccess.InsertTechParamsInfo(techParamsInfo);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             });
         }
 

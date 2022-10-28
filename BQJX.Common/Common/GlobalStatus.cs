@@ -134,7 +134,7 @@ namespace BQJX.Common.Common
         public bool InitStatus(Func<bool> stopDoneFunc, Func<Task<bool>> initFunc)
         {
             //不在待机状态不可进行初始化操作
-            if ((_machineStatus & 0xfdff) != 0x08 || _emgStop) 
+            if ((_machineStatus & 0x10f) != 0x08 || _emgStop) 
             {
                 return false;
             }
@@ -177,7 +177,8 @@ namespace BQJX.Common.Common
         /// </summary>
         public void EmgStop()
         {
-            _emgStop = true; 
+            _emgStop = true;
+            _stop = true;//??
             _machineStatus = _machineStatus | 0x02;
             _machineStatus = _machineStatus & 0xfff2;
             MachineStatusChangedEventArgs?.Invoke();
@@ -197,8 +198,14 @@ namespace BQJX.Common.Common
         /// </summary>
         public void ResetAlm()
         {
-            _emgStop = false;
+            _emgStop = false; 
+
+            if ((_machineStatus & 0x0f) == 0x02) // 急停状态
+            {
+                _machineStatus = _machineStatus | 0x08;//待机状态
+            }
             _machineStatus = _machineStatus & 0xFEFD;   //fuwei 8 bit bao jing
+      
             MachineStatusChangedEventArgs?.Invoke();
         }
 

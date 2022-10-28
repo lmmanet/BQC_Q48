@@ -557,7 +557,7 @@ namespace Q_Platform.ViewModels.Windows
                 CentrifugalTime = 5,           //离心时间
                 CentrifugalVel = 4200,         //离心速度
                 ExtractVolume = 5,             //上清液提取量
-                ConcentrationTime = 5,         //浓缩时间
+                ConcentrationTime = 10,         //浓缩时间
                 ConcentrationVel = 10000,      //浓缩速度
                 Tech = 0x3EFDE1AB,              //工艺
             });

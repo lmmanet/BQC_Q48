@@ -991,18 +991,17 @@ namespace Q_Platform.BLL
             switch (solid)
             {
                 case 1:
-                    return 33; //35~38
+                    return _posData.Solid_A[2];
                 case 2:
-                    return 38;
+                    return _posData.Solid_B[2];
                 case 3:
-                    return 37;
+                    return _posData.Solid_C[2];
                 case 4:
-                    return 37;
+                    return _posData.Solid_D[2];
                 case 5:
-
-                    return 37;
+                    return _posData.Solid_E[2];
                 case 6:
-                    return 37;
+                    return _posData.Solid_F[2];
                 default:
                     throw new Exception($"参数错误：{solid}");
             }

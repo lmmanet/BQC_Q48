@@ -12,12 +12,12 @@ namespace BQJX.Common
     public class SampleInfo
     {
         /// <summary>
-        /// 样品编号
+        /// 样品id
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 样品1号
+        /// 样品编号
         /// </summary>
         public string SnNum{ get; set; }
 
