@@ -114,6 +114,10 @@ namespace BQJX.Common
         /// </summary>
         public int ConcentrationVel { get; set; }
 
+        /// <summary>
+        /// 工业
+        /// </summary>
+        public int Tech { get; set; }
 
         /// <summary>
         /// 工艺创建时间

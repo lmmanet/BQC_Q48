@@ -174,7 +174,7 @@ namespace Q_Platform.BLL
 
             _centrifugalTask = Task.Run(() =>
             {
-                while (gs?.IsStopped != true)
+               s0: while (gs?.IsStopped != true)
                 {
                     try
                     {
@@ -219,7 +219,7 @@ namespace Q_Platform.BLL
                             {
                                 if (!_globalStatus.IsStopped && TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.Centrifugal1))
                                 {
-                                    _logger?.Debug("一次离心");
+                                    //_logger?.Debug("一次离心");
                                     var result = DoCentrifugal(itemSample1, gs);
                                     if (!result)
                                     {
@@ -251,7 +251,7 @@ namespace Q_Platform.BLL
                                         //大小管一起离心
                                         if (itemSample2.MainStep == 4 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal1))//一次离心
                                         {
-                                            _logger?.Debug("二次离心 大小管同时离心");
+                                            //_logger?.Debug("二次离心 大小管同时离心");
                                             var ret = DoCentrifugalBigAndSmall(itemSample2, itemSample1, 1, gs);
                                             if (!ret)
                                             {
@@ -275,7 +275,7 @@ namespace Q_Platform.BLL
                                     }
                                   
                                     //单独小管离心
-                                    _logger?.Debug("三次离心 小管单独离心");
+                                    //_logger?.Debug("三次离心 小管单独离心");
                                     var result = DoCentrifugalSmall(itemSample1, gs);
                                     if (!result)
                                     {
@@ -306,7 +306,7 @@ namespace Q_Platform.BLL
                                         //大小管一起离心
                                         if (itemSample2.MainStep == 7 && TechStatusHelper.BitIsOn(itemSample2.TechParams, TechStatus.Centrifugal2))
                                         {
-                                            _logger?.Debug("三次离心 大小管同时离心");
+                                            //_logger?.Debug("三次离心 大小管同时离心");
                                             var ret = DoCentrifugalBigAndSmall(itemSample1, itemSample2, 2, gs);
                                             if (!ret)
                                             {
@@ -327,7 +327,7 @@ namespace Q_Platform.BLL
                                             continue;
                                         }
                                     }
-                                    _logger?.Debug("三次离心 萃取管单独离心");
+                                    //_logger?.Debug("三次离心 萃取管单独离心");
                                     var result = DoPolishCentrifugal(itemSample1, gs);
                                     if (!result)
                                     {
@@ -363,7 +363,11 @@ namespace Q_Platform.BLL
                         }
                         _globalStatus.PauseProgram();
                         _logger?.Warn(ex.Message);
-                        return;
+                        while (!_globalStatus.IsStopped && _globalStatus.IsPause && !_globalStatus.IsEmgStop)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        goto s0;
                     }
                 }
             });

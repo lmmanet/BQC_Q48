@@ -118,6 +118,10 @@ namespace Q_Platform.BLL
                                 throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+                            if (_unCapFalt == true)
+                            {
+                                throw new Exception("拧盖2检测有盖,请确认拆盖成功后继续程序!");
+                            }
                         }
                     }
                     
@@ -409,6 +413,10 @@ namespace Q_Platform.BLL
                                 throw new Exception($"{sample.Id}样品萃取管拆盖 失败!");
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPolishUnCapped);
+                            if (_unCapFalt == true)
+                            {
+                                throw new Exception("拧盖2检测有盖,请确认拆盖成功后继续程序!");
+                            }
                         }
                     }
 
@@ -496,6 +504,10 @@ namespace Q_Platform.BLL
                                     throw new Exception($"{sample.Id}样品管拆盖 失败!");
                                 }
                                 SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                                if (_unCapFalt == true)
+                                {
+                                    throw new Exception("拧盖2检测有盖,请确认拆盖成功后继续程序!");
+                                }
                             }
                         }
 

@@ -93,7 +93,6 @@ namespace Q_Platform.ViewModels.Windows
         private void WindowMin(object o)
         {
             (o as MainWindow).WindowState = WindowState.Minimized;
-            LoggerHelper.Logger.Debug("=======================++++++++++++++=====================");
         }
 
         private void WindowMax(object o)

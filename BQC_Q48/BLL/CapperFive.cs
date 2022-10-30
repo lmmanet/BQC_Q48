@@ -120,30 +120,6 @@ namespace Q_Platform.BLL
                     }
                 }
             }
-        //    //检测是否拆盖成功
-        //    result = CheckUnCapper(gs);
-        //    if (!result)
-        //    {
-        //        return false;
-        //    }
-
-        //s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
-        //    if (!result)
-        //    {
-        //        if (_globalStatus.IsPause)
-        //        {
-        //            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-        //            {
-        //                Thread.Sleep(1000);
-        //            }
-        //            if (!_globalStatus.IsStopped)
-        //            {
-        //                goto s5;
-        //            }
-        //        }
-        //        throw new Exception("Y轴运动出错！");
-        //    }
-
 
             return result;
         }
@@ -249,6 +225,11 @@ namespace Q_Platform.BLL
                     //两次移液
                     if (sample.BottleStep == 3 && !_globalStatus.IsStopped)
                     {
+                        if (_unCapFalt == true)
+                        {
+                            throw new Exception("拧盖5检测有盖,请确认拆盖成功后继续程序!");
+                        }
+
                         result = _carrier.DoPipettingOne(sample, 2, CapOn, CapOff, gs);
                         if (!result)
                         {
@@ -302,6 +283,10 @@ namespace Q_Platform.BLL
             }
             if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsBottle1UnCapped))
             {
+                if (_unCapFalt == true)
+                {
+                    throw new Exception("拧盖5检测有盖,请确认拆盖成功后继续程序!");
+                }
                 return true;
             }
             return false;
@@ -373,8 +358,11 @@ namespace Q_Platform.BLL
                 //两次移液
                 if (sample.BottleStep == 3 && !_globalStatus.IsStopped)
                 {
-                   
                     sample.BottleStep++;
+                    if (_unCapFalt == true)
+                    {
+                        throw new Exception("拧盖5检测有盖,请确认拆盖成功后继续程序!");
+                    }
                 }
 
                 if (sample.BottleStep == 4 )
@@ -457,7 +445,11 @@ namespace Q_Platform.BLL
                     {
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
                     }
-                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped); 
+                    SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle1UnCapped);
+                    if (_unCapFalt == true)
+                    {
+                        throw new Exception("拧盖5检测有盖,请确认拆盖成功后继续程序!");
+                    }
                     return true;
                 }
                
@@ -472,10 +464,15 @@ namespace Q_Platform.BLL
                         throw new Exception($"样品小瓶{sample.Id}拆盖失败!");
                     }
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsBottle2UnCapped);
+                    if (_unCapFalt == true)
+                    {
+                        throw new Exception("拧盖5检测有盖,请确认拆盖成功后继续程序!");
+                    }
                     return true;
                 }
              
             }
+
             return false;
 
         }

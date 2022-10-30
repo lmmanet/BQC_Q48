@@ -34,6 +34,30 @@ namespace BQC_Q48
         public string _sampleFile;
         public App()
         {
+
+            int times = 0;
+            bool isRun = false;
+            while (times < 5)
+            {
+                System.Diagnostics.Process[] tmp = System.Diagnostics.Process.GetProcessesByName("Q_Platform");
+                if (tmp.Length > 1)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    isRun = true;
+                    times++;
+                }
+                else
+                {
+                    isRun = false;
+                    break;
+                }
+            }
+            if (isRun)
+            {
+                this.Shutdown();
+            }
+
+
             string currentPath = Environment.CurrentDirectory;
             _axisDataFilePath = "C:\\Program Files\\AppConfig" + "\\AxisData.ini";
             _sampleFile = currentPath + "\\Sample.xml";
@@ -132,6 +156,9 @@ namespace BQC_Q48
 
             ///初始化卡
             SimpleIoc.Default.GetInstance<ICardBase>().Initialize(_axisDataFilePath);
+
+            //加载文件
+            GlobalCache.Load();
 
             // if (new LoginWindow().ShowDialog() == true)
             //  {

@@ -79,14 +79,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromAddSolidToCapperOne")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromAddSolidToCapperOne";
 
                     _logger?.Info($"搬运{sampleId}样品到拧盖1");
              
@@ -156,14 +157,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromMaterialToCapperOne")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromMaterialToCapperOne";
 
                     _logger?.Info($"从试管架搬运{sampleId}样品到拧盖1");
 
@@ -234,14 +236,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromMaterialToTransfer")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromMaterialToTransfer";
 
 
                     _logger?.Info($"搬运{sampleId}样品到离心移栽");
@@ -311,14 +314,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromVibrationToMaterial")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromVibrationToMaterial";
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
                 
@@ -387,14 +391,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromVortexToMaterial")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromVortexToMaterial";
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
 
@@ -493,21 +498,21 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception("冰浴试管已满！ 等待超时");
                         }
-                        _logger?.Debug("GetSampleFromVortexToCold - 等待冰浴空位!");
+                        _logger?.Error("GetSampleFromVortexToCold - 等待冰浴空位!");
                         Thread.Sleep(10000);
 
                         goto attemp;
                     }
 
-
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromVortexToCold")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromVortexToCold";
 
                     _logger.Info($"从涡旋搬运-{ sample.Id}-样品到冰浴-{posNum}-位");
 
@@ -580,14 +585,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromCapperOneToAddSolid")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromCapperOneToAddSolid";
 
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到加固");
@@ -656,14 +662,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromCapperOneToVibration")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromCapperOneToVibration";
 
                     //试管在试管架
                     _logger?.Info($"从拧盖1搬运{sampleId}样品到振荡1");
@@ -765,15 +772,15 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
-
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromVibrationToCold")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromVibrationToCold";
 
 
           
@@ -954,14 +961,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromMaterialToCapperTwo")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromMaterialToCapperTwo";
 
 
                     _logger?.Info($"从试管架取{sample.Id}样品离心管到拧盖2");
@@ -1032,14 +1040,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromTransferToCapperTwo")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromTransferToCapperTwo";
 
 
                     _logger?.Info($"从离心移栽搬运{sampleId}试管到拧盖2");
@@ -1105,14 +1114,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromCapperTwoToMaterial")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromCapperTwoToMaterial";
 
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
@@ -1181,14 +1191,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
-                        if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CarrierOneMethodName != "GetSampleFromCapperOneToMaterial")
                         {
                             throw new OccupyMethodException();
                         }
                     }
-                    GlobalCache.Instance.CarrierOneMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CarrierOneMethodName = "GetSampleFromCapperOneToMaterial";
 
 
                     _logger.Info($"搬运{ sample.Id}样品到试管架");
@@ -1262,6 +1273,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1341,6 +1353,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1419,6 +1432,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1493,6 +1507,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1594,6 +1609,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1778,7 +1794,7 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
-
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1859,6 +1875,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -1933,6 +1950,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2007,6 +2025,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2081,6 +2100,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2158,6 +2178,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2263,7 +2284,7 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
-
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2372,7 +2393,7 @@ namespace Q_Platform.BLL
                         Thread.Sleep(10000);
                         goto attemp;
                     }
-
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2457,6 +2478,7 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2537,6 +2559,7 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2617,6 +2640,7 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2701,6 +2725,7 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2782,6 +2807,7 @@ namespace Q_Platform.BLL
                 }
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2861,6 +2887,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -2938,6 +2965,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -3017,6 +3045,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -3106,6 +3135,7 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CarrierOneMethodName))
                     {
                         if (GlobalCache.Instance.CarrierOneMethodName != MethodBase.GetCurrentMethod().Name)
@@ -3222,7 +3252,7 @@ namespace Q_Platform.BLL
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
 
-            _logger.Debug($"GetSampleFromMaterialToCapperOne-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromMaterialToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3253,7 +3283,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromMaterialToVortex-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromMaterialToVortex-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3283,7 +3313,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromMaterialToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromMaterialToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3313,7 +3343,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromMaterialToVibration-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromMaterialToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetSampleTubeCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3347,7 +3377,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromMaterialToTransfer-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromMaterialToTransfer-{num},clawOpenByte-{clawOpenByte}");
 
             //旋转到指定位置
             var ret1 = func.Invoke(num, gs);
@@ -3398,7 +3428,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromAddSolidToCapperOne-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromAddSolidToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetAddSolidCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3433,7 +3463,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperOneToAddSolid-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperOneToAddSolid-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke() != false;
             if (!result)
@@ -3480,7 +3510,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperOneToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperOneToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -3526,7 +3556,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperOneToVortex-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperOneToVortex-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -3573,7 +3603,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperOneToVibration-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperOneToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -3632,7 +3662,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVortexToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVortexToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result =base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3662,7 +3692,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVortexToCapperOne-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVortexToCapperOne-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3693,7 +3723,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVortexToVibration-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVortexToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result =base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3725,7 +3755,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVortexToTransfer-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVortexToTransfer-{num},clawOpenByte-{clawOpenByte}");
             //取料
             var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
             if (!result)
@@ -3771,7 +3801,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVortexToCold-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVortexToCold-{num},clawOpenByte-{clawOpenByte}");
 
             //取料
             var result = base.GetTubeAsync(GetVortexCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
@@ -3806,7 +3836,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperTwoToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperTwoToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -3852,7 +3882,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperTwoToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperTwoToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             //var result = func1?.Invoke(num) != false;
             //if (!result)
@@ -3917,7 +3947,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperTwoToCold-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperTwoToCold-{num},clawOpenByte-{clawOpenByte}");
 
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
@@ -3964,7 +3994,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromCapperTwoToVibration-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromCapperTwoToVibration-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             //var result = func1?.Invoke(num) != false;
             //if (!result)
@@ -4014,7 +4044,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVibrationToCold-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVibrationToCold-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -4062,7 +4092,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVibrationToVortex-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVibrationToVortex-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -4113,7 +4143,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVibrationToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVibrationToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             var result = func1?.Invoke(num) != false;
             if (!result)
@@ -4161,7 +4191,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromVibrationToTransfer-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromVibrationToTransfer-{num},clawOpenByte-{clawOpenByte}");
             //取料辅助动作
             //var result = func1?.Invoke(num) != false;
             //if (!result)
@@ -4224,7 +4254,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromTransferToMaterial-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromTransferToMaterial-{num},clawOpenByte-{clawOpenByte}");
             //旋转到指定位置
             var result1 = func.Invoke(num,gs);
             if (!result1.GetAwaiter().GetResult())
@@ -4270,7 +4300,7 @@ namespace Q_Platform.BLL
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
 
-            _logger.Debug($"GetSampleFromTransferToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromTransferToCapperTwo-{num},clawOpenByte-{clawOpenByte}");
             while (_globalStatus.IsPause && !_globalStatus.IsStopped)
             {
                 Thread.Sleep(2000);
@@ -4326,7 +4356,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger.Debug($"GetSampleFromColdToTransfer-{num}-{posNum},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromColdToTransfer-{num}-{posNum},clawOpenByte-{clawOpenByte}");
 
             //旋转到指定位置
             var result1 = func.Invoke(num, gs);
@@ -4379,7 +4409,7 @@ namespace Q_Platform.BLL
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
 
-            _logger.Debug($"GetSampleFromColdToVibration-{num},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetSampleFromColdToVibration-{num},clawOpenByte-{clawOpenByte}");
           
             //取料
             var result =  base.GetTubeAsync(GetColdCoordinate(num), clawOpenByte, gs).GetAwaiter().GetResult();
@@ -4643,7 +4673,7 @@ namespace Q_Platform.BLL
                     {   //大管取液位置 小管到大管
                         _posData.PipettingSourcePos[0],
                         _posData.PipettingSourcePos[1],
-                        _posData.PipettingSourcePos[2] -100,
+                        _posData.PipettingSourcePos[2] -70,
                     };
 
             }
@@ -4662,7 +4692,7 @@ namespace Q_Platform.BLL
                 {   //大管取液位置 小管到大管
                     _posData.PipettingSourcePos[0] + 60,
                     _posData.PipettingSourcePos[1],
-                    _posData.PipettingSourcePos[2] -100,
+                    _posData.PipettingSourcePos[2] -70,
                 };
             }
           

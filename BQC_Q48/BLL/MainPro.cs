@@ -17,14 +17,31 @@ namespace Q_Platform.BLL
 {
     public class MainPro : IMainPro
     {
-        Task<bool> _taskHome;
 
-        Task _main;
+        #region Private Variants
 
-        Task _wetBackTask;
+        /// <summary>
+        /// 回零
+        /// </summary>
+        private Task<bool> _taskHome;
 
+        /// <summary>
+        /// 提取
+        /// </summary>
+        private Task _extractTask;
+
+        /// <summary>
+        /// 回湿
+        /// </summary>
+        private Task _wetBackTask;
+
+        /// <summary>
+        /// 任务列表
+        /// </summary>
         private List<Sample> _workList = new List<Sample>();
 
+
+        #endregion
 
         #region Private Members
 
@@ -55,7 +72,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         #region Construtor
 
         public MainPro(ICapperOne capperOne, IVortex vortex, ICapperTwo capperTwo, IVibrationOne vibrationOne, IVibrationTwo vibrationTwo, IAddSolid addSolid, ICarrierOne carrierOne, ICarrierTwo carrierTwo, ICentrifugal centrifugal, ICentrifugalCarrier centrifugalCarrier
@@ -84,7 +100,6 @@ namespace Q_Platform.BLL
             this._logger = new MyLogger(typeof(MainPro));
         }
         #endregion
-
 
         #region Public Methods
 
@@ -306,7 +321,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         #region Protected Methods
 
         /// <summary>
@@ -315,19 +329,23 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         private Task StartExtract()
         {
-            if (_main != null)
+            if (_extractTask != null)
             {
-                if (!_main.IsCompleted)
+                if (!_extractTask.IsCompleted)
                 {
-                    return _main;
+                    return _extractTask;
                 }
             }
-            _main = Task.Run(() =>
+            _extractTask = Task.Run(() =>
             {
                 var extractList = GlobalCache.Instance.ExtractList;
                 //正式程序
                 while (!_globalStatus.IsStopped)
                 {
+                    if (extractList.Count == 0)
+                    {
+                        break;
+                    }
                     if (extractList != null && extractList.Count > 0)
                     {
                         var samplevar = extractList[0];
@@ -338,18 +356,26 @@ namespace Q_Platform.BLL
                             {
                                 extractList.Remove(samplevar);
                             }
+                            if (!result)
+                            {
+                                while (_globalStatus.IsPause && !_globalStatus.IsStopped && !_globalStatus.IsEmgStop)
+                                {
+                                    Thread.Sleep(1000);
+                                }
+                            }
                         }
                     }
                     Thread.Sleep(1000);
-                    if (extractList.Count == 0)
-                    {
-                        break;
-                    }
                 }
             });
-            return _main;
+            return _extractTask;
         }
 
+        /// <summary>
+        /// 溶液及盐包提取
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <returns></returns>
         protected bool Ext(Sample sample)
         {
             //加水提取
@@ -516,7 +542,11 @@ namespace Q_Platform.BLL
 
         //==============================================================================================================//
 
-        //一次离心 
+        /// <summary>
+        /// 离心
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="gs"></param>
         public void Centrifugal(Sample sample, IGlobalStatus gs)
         {
             if (sample.MainStep == 4)
@@ -541,7 +571,11 @@ namespace Q_Platform.BLL
 
         }
 
-        //一次移液  二次移液
+        /// <summary>
+        /// 离心回调
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="gs"></param>
         public void CentrifugalCallBack(Sample sample,IGlobalStatus gs)
         {
             if (sample.MainStep == 8 && !TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.ExtractSupernate2))
@@ -563,6 +597,11 @@ namespace Q_Platform.BLL
             }
         }
 
+        /// <summary>
+        /// 移液回调
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="gs"></param>
         public void PipettingCallBack(Sample sample, IGlobalStatus gs)
         {
             //上一步  移液 净化振荡
@@ -586,7 +625,10 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
+        /// <summary>
+        /// 判断程序是否停止
+        /// </summary>
+        /// <returns></returns>
         private bool StopDone()
         {
             DateTime end = DateTime.Now + TimeSpan.FromSeconds(5);
@@ -597,7 +639,7 @@ namespace Q_Platform.BLL
                     && _centrifugalCarrier.IsPipttorTaskDone          // 移液任务结束
                     && _centrifugal.IsCentrifugalTaskDone             // 离心任务结束
                     && _vibrationOne.IsVibrationTaskDone              // 振荡任务结束
-                    && _main?.IsCompleted != false                     // 提取任务结束
+                    && _extractTask?.IsCompleted != false                     // 提取任务结束
                     && _wetBackTask?.IsCompleted != false)             // 回湿任务结束
                 {
                     return true;

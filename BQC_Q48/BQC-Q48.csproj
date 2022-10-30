@@ -165,6 +165,7 @@
     <Compile Include="DAL\Interface\ITechParamsDataAccess.cs" />
     <Compile Include="DAL\Interface\ISampleDataAccess.cs" />
     <Compile Include="DAL\SampleDataAccess.cs" />
+    <Compile Include="DAL\SampleInfoImportDataAccess.cs" />
     <Compile Include="DAL\TechParamsDataAccess.cs" />
     <Compile Include="DAL\VortexPosDataAccess.cs" />
     <Compile Include="DAL\ConcentrationPosDataAccess.cs" />

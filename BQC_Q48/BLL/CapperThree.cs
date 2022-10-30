@@ -169,31 +169,6 @@ namespace Q_Platform.BLL
                     }
                 }
             }
-        //    //检测是否拆盖成功
-        //    result = CheckUnCapper(gs);
-        //    if (!result)
-        //    {
-        //        return false;
-        //    }
-
-        //s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
-        //    if (!result)
-        //    {
-        //        if (_globalStatus.IsPause)
-        //        {
-        //            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-        //            {
-        //                Thread.Sleep(1000);
-        //            }
-        //            if (!_globalStatus.IsStopped)
-        //            {
-        //                goto s5;
-        //            }
-        //        }
-        //        throw new Exception("Y轴运动出错！");
-        //    }
-
-
             return result;
         }
 
@@ -259,6 +234,10 @@ namespace Q_Platform.BLL
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                             sample.SubStep++;
+                            if (_unCapFalt == true)
+                            {
+                                throw new Exception("拧盖3检测有盖,请确认拆盖成功后继续程序!");
+                            }
                         }
                         else
                         {
@@ -327,6 +306,10 @@ namespace Q_Platform.BLL
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
                         }
                         sample.SubStep++;
+                        if (_unCapFalt == true)
+                        {
+                            throw new Exception("拧盖3检测有盖,请确认拆盖成功后继续程序!");
+                        }
                     }
 
                     //移动到上下料位
@@ -413,7 +396,11 @@ namespace Q_Platform.BLL
                                 throw new Exception($"{sample.Id}样品移液管拆盖 失败！ PurifyStatus-{sample.PurifyStatus}");
                             }
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsPurfyUnCapped);
-                            sample.SubStep++;
+                            sample.SubStep++; 
+                            if (_unCapFalt == true)
+                            {
+                                throw new Exception("拧盖3检测有盖,请确认拆盖成功后继续程序!");
+                            }
                         }
                         else
                         {
@@ -707,7 +694,11 @@ namespace Q_Platform.BLL
                             {
                                 throw new Exception($"从试管架取{sample.Id}净化管 失败！ PurifyStatus-{sample.PurifyStatus}");
                             }
-                            sample.SubStep++;
+                            sample.SubStep++; 
+                            if (_unCapFalt == true)
+                            {
+                                throw new Exception("拧盖3检测有盖,请确认拆盖成功后继续程序!");
+                            }
                         }
                     }
 
@@ -805,7 +796,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         private async Task<bool> AddSolve(double volume, IGlobalStatus gs,byte solve = 0x01)
         {
-            _logger?.Debug($"AddSolve-{solve}-{volume}");
+            //_logger?.Debug($"AddSolve-{solve}-{volume}");
             try
             {
                 //抱夹夹紧

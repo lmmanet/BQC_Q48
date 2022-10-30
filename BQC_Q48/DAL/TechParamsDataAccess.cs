@@ -250,6 +250,7 @@ namespace Q_Platform.DAL
                 tech.ExtractVolume = item.Field<double>("ExtractVolume");
                 tech.ConcentrationTime = item.Field<int>("ConcentrationTime");
                 tech.ConcentrationVel = item.Field<int>("ConcentrationVel");
+                tech.Tech = item.Field<int>("Tech");
                 tech.Createtime = item.Field<DateTime>("Createtime");
                 list.Add(tech);
             }

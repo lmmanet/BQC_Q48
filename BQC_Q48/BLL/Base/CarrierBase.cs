@@ -2,6 +2,8 @@
 using BQJX.Core.Interface;
 using Q_Platform.Common;
 using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -236,7 +238,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
+                //_logger?.Debug($"GetTubeAsync-{clawOpenByte}-{clawCloseByte}");
                 //判断手爪是否抓取物件 在指定打开位置
                s1: var result = await CarrierMoveToSafePos(pos, gs).ConfigureAwait(false);
                 if (!result)
@@ -340,7 +342,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"PutTubeAsync-{clawOpenByte}");
+                //_logger?.Debug($"PutTubeAsync-{clawOpenByte}");
                 //如果手爪打开 判定放料完成
                 if (await _claw.ClawGetchStatus(_clawSlaveId) == 3)
                 {
@@ -404,7 +406,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"GetNeedleAsync");
+                //_logger?.Debug($"GetNeedleAsync");
                 //判断移液器是否有枪头
                 if (_isGotNeedle)
                 {
@@ -520,7 +522,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"PutNeedleAsync");
+                //_logger?.Debug($"PutNeedleAsync");
                 //判断移液器是否有枪头
                 if (!_isGotNeedle)
                 {
@@ -685,7 +687,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"DoPipettingAsync-{volume}");
+                //_logger?.Debug($"DoPipettingAsync-{volume}");
                 ushort[] axes = new ushort[2] { _axisX, _axisY };
                 double[] sourcePosArray = new double[2] { sourcePos[0], sourcePos[1] };
                 double[] targetPosArray = new double[2] { targetPos[0], targetPos[1] };
@@ -1086,7 +1088,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CheckAxisZInSafePos(IGlobalStatus gs)
         {
-            _logger?.Debug($"CheckAxisZInSafePos");
+            //_logger?.Debug($"CheckAxisZInSafePos");
             if (!AxisIsInSafePos(_axisZ1))
             {
                s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ1, 0, _zMoveUpVel, _globalStatus).ConfigureAwait(false);
@@ -1152,7 +1154,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> OpenClaw(byte openPos)
         {
-            _logger?.Debug($"OpenClaw-{openPos}");
+            //_logger?.Debug($"OpenClaw-{openPos}");
             var result = await _claw.SendCommand(_clawSlaveId, openPos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -1190,7 +1192,7 @@ namespace Q_Platform.BLL
         protected async Task<bool> CloseClaw(byte closePos)
         {
             int attemp = 0;
-            _logger?.Debug($"CloseClaw-{closePos}-attemp-{attemp}");
+            //_logger?.Debug($"CloseClaw-{closePos}-attemp-{attemp}");
            s1: var result = await _claw.SendCommand(_clawSlaveId, closePos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -1233,7 +1235,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> SyringHome(IGlobalStatus gs)
         {
-            _logger?.Debug($"SyringHome");
+            //_logger?.Debug($"SyringHome");
             var result = await _motion.GohomeWithCheckDone(_axisP, 21, _globalStatus).ConfigureAwait(false);
             if (!result)
             {
@@ -1250,7 +1252,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CarrierMoveTo(double[] coordinate, Func<bool,int,Task<bool>> func,IGlobalStatus gs)
         {
-            _logger?.Debug($"CarrierMoveTo");
+            //_logger?.Debug($"CarrierMoveTo");
             try
             {
                 double x = coordinate[0];
@@ -1350,7 +1352,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger?.Debug($"CarrierMoveToSafePos");
+                //_logger?.Debug($"CarrierMoveToSafePos");
                 double x = coordinate[0];
                 double y = coordinate[1];
                 ushort[] axisXY = new ushort[2] { _axisX, _axisY };
@@ -1452,7 +1454,7 @@ namespace Q_Platform.BLL
                 var result = status == 2;
                 if (!result)
                 {
-                    _logger?.Debug($"手爪上无物件 - {status}");
+                    _logger?.Warn($"手爪上无物件 - {status}");
                 }
                 if (status != 2)
                 {
@@ -1475,6 +1477,13 @@ namespace Q_Platform.BLL
 
         #endregion
 
+
+        protected string GetCurrentMethodInfo(object caller,[CallerMemberName]string name = "")
+        {
+            MethodInfo mi = caller.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Public);
+            _logger?.Debug($"====== {mi.Name}");
+            return mi.Name;
+        }
    
     }
 }

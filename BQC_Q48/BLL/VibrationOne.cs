@@ -130,7 +130,7 @@ namespace Q_Platform.BLL
 
             _vibrationTask = Task.Run(() =>
             {
-                while (!_globalStatus.IsStopped)
+                s0: while (!_globalStatus.IsStopped)
                 {
                     var list = GlobalCache.Instance.VibrationList;
 
@@ -171,7 +171,11 @@ namespace Q_Platform.BLL
                             }
                             _globalStatus.PauseProgram();
                             _logger?.Warn(ex.Message);
-                            return;
+                            while (!_globalStatus.IsStopped && _globalStatus.IsPause && !_globalStatus.IsEmgStop)
+                            {
+                                Thread.Sleep(1000);
+                            }
+                            goto s0;
                         }
                     }
                     Thread.Sleep(1000);

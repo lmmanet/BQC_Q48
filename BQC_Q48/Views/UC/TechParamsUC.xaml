@@ -76,6 +76,7 @@
                     <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="上清液提取量(ml)：" />
                     <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="浓缩时间(min)：" />
                     <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="浓缩速度(rmp)：" />
+                    <TextBlock Height="40" Margin="20,25,0,0" Foreground="#999999" Text="工艺代码：" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
@@ -99,6 +100,7 @@
                     <TextBox Style="{StaticResource ParamsBox}" Tag="上清液提取量(ml)：" Text="{Binding ExtractVolume, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBox Style="{StaticResource ParamsBox}" Tag="浓缩时间(min)：" Text="{Binding ConcentrationTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBox Style="{StaticResource ParamsBox}" Tag="浓缩速度(rpm)：" Text="{Binding ConcentrationVel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox IsEnabled="False" Style="{StaticResource ParamsBox}" Tag="浓缩速度(rpm)：" Text="{Binding Tech}" />
 
                 </StackPanel>
             </Grid>

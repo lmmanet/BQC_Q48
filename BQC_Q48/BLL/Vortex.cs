@@ -158,7 +158,7 @@ namespace Q_Platform.BLL
         {
             int vel = sample.TechParams.VortexVel[step];
             int time = sample.TechParams.VortexTime[step];
-            try
+            s0: try
             {
 
                 lock (_lockObj)
@@ -246,13 +246,17 @@ namespace Q_Platform.BLL
             }
             catch (Exception ex)
             {
-                if (gs?.IsPause == true)
+                if (gs?.IsPause != true)
                 {
                     _logger?.Info($"样品{sample.Id}振荡-{time}s-{vel}rpm 停止");
                     return false;
                 }
                 _logger?.Warn(ex.Message);
-                return false;
+                while (!_globalStatus.IsStopped && _globalStatus.IsPause && !_globalStatus.IsEmgStop)
+                {
+                    Thread.Sleep(1000);
+                }
+                goto s0;
             }
         }
 

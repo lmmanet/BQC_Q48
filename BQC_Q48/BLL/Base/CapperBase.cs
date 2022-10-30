@@ -52,6 +52,8 @@ namespace Q_Platform.BLL
 
         protected CapperPosData _posData;
 
+        protected bool _unCapFalt;
+
         #endregion
 
         #region Constructors
@@ -84,7 +86,7 @@ namespace Q_Platform.BLL
                 //{
                 //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
                 //}
-                _logger?.Info("拧盖回零");
+                //_logger?.Info("拧盖回零");
                 //手爪打开
                 _io.WriteBit_DO(_claw, true);
 
@@ -293,7 +295,7 @@ namespace Q_Platform.BLL
             try
             {
                // _logger?.Debug($"CapperOn-{torque}-{timeout} haveCapper{_haveCapper}");
-                _logger?.Debug($"CapperOn-{torque}-{timeout}");
+                //_logger?.Debug($"CapperOn-{torque}-{timeout}");
 
                 //判断手爪是否有盖
                 //if (!_haveCapper)
@@ -425,7 +427,7 @@ namespace Q_Platform.BLL
             try
             {
                 //_logger?.Debug($"CapperOff haveCapper{_haveCapper}");
-                _logger?.Debug($"CapperOff haveCapper");
+                //_logger?.Debug($"CapperOff haveCapper");
                 //判断手爪是否有盖
                 //if (_haveCapper)
                 //{
@@ -514,11 +516,7 @@ namespace Q_Platform.BLL
                 }
 
                 //检测是否拆盖成功
-                result = CheckUnCapper(gs);
-                if (!result)
-                {
-                    return false;
-                }
+                CheckUnCapper(gs);
 
             //Y轴移动到上下料位
             s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
@@ -560,7 +558,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void CloseHolding(bool checkSensor = false)
         {
-            _logger?.Debug($"OpenHolding-{checkSensor}");
+            //_logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹夹紧
             var result =  _io.WriteBit_DO(_holding, true);
             if (!result)
@@ -591,7 +589,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void OpenHolding(bool checkSensor = false)
         {
-            _logger?.Debug($"OpenHolding-{checkSensor}");
+            //_logger?.Debug($"OpenHolding-{checkSensor}");
             //抱夹释放
             var result = _io.WriteBit_DO(_holding, false);
             if (!result)
@@ -624,7 +622,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void CloseClaw()
         {
-            _logger?.Debug($"CloseClaw");
+            //_logger?.Debug($"CloseClaw");
             //手爪夹紧
             var result = _io.WriteBit_DO(_claw, false);
             Thread.Sleep(500);
@@ -639,7 +637,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected virtual void OpenClaw()
         {
-            _logger?.Debug($"CloseClaw");
+            //_logger?.Debug($"CloseClaw");
             //手爪松开
             var result = _io.WriteBit_DO(_claw, true);
             Thread.Sleep(500);
@@ -676,20 +674,28 @@ namespace Q_Platform.BLL
             var result = _motion.P2pMoveWithCheckDone(_axisY, GetCapperSensorCoordinate(), _yMoveVel, gs).GetAwaiter().GetResult();
             if (!result)
             {
-                throw new Exception("Y轴运动出错！");
+                _logger?.Warn("CheckUnCapper Y轴运动出错！");
+                _unCapFalt = true;
+                return false;
             }
             if (!_io.ReadBit_DI(_capperSensor))
             {
+                _unCapFalt = false;
                 return true;
             }
-            throw new Exception("检测有盖！");
+            else
+            {
+                _logger?.Warn("检测有盖！");
+                _unCapFalt = true;
+                return false;
+            }
         }
 
         /// <summary>
         /// 获取检测盖子传感器坐标
         /// </summary>
         /// <returns></returns>
-        protected double GetCapperSensorCoordinate()
+        protected virtual double GetCapperSensorCoordinate()
         {
             return _posData.CapperPos + 46;
         }

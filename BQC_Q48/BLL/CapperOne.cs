@@ -487,6 +487,10 @@ namespace Q_Platform.BLL
                         throw new Exception("拆盖 出错");
                     }
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                    if (_unCapFalt == true)
+                    {
+                        throw new Exception("拧盖1检测有盖,请确认拆盖成功后继续程序!");
+                    }
                 }
 
                 //加溶剂A   内部判断是否有盖  需要修改
@@ -573,6 +577,10 @@ namespace Q_Platform.BLL
                         throw new Exception("拆盖 出错");
                     }
                     SampleStatusHelper.SetBitOn(sample, SampleStatus.IsUnCapped);
+                    if (_unCapFalt == true)
+                    {
+                        throw new Exception("拧盖1检测有盖,请确认拆盖成功后继续程序!");
+                    }
                 }
 
                 //加溶剂A   内部判断是否有盖  需要修改
@@ -628,7 +636,7 @@ namespace Q_Platform.BLL
                 {
                     throw new TaskCanceledException($"触发停止");
                 }
-                _logger?.Debug($"AddSolve-{solve}-{volume}");
+                //_logger?.Debug($"AddSolve-{solve}-{volume}");
                 //抱夹夹紧
                 _io.WriteBit_DO(_holding, true);
 

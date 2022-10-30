@@ -66,7 +66,7 @@ namespace Q_Platform.BLL
         {
             try
             {
-                _logger.Debug("Syring GoHome");
+                //_logger.Debug("Syring GoHome");
                 //关闭全部阀口
                 _io.WriteBit_DO(_port1, false);
                 _io.WriteBit_DO(_port2, false);
@@ -106,7 +106,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         public async Task<bool> AddSolve(byte solve, double volume, IGlobalStatus gs)
         {
-            _logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
+            //_logger?.Debug($"AddSolve-{solve}-{volume},step{_step}");
             if (volume <= 10 && !_globalStauts.IsStopped)
             {
                 return await AddSolveSub(solve, volume, null).ConfigureAwait(false);
@@ -225,7 +225,7 @@ namespace Q_Platform.BLL
             //{
             //    throw new TaskCanceledException($"触发停止 gs:{gs.IsCancellationRequested}");
             //}
-            _logger?.Debug($"AddSolveSub-{solve}-{volume},isAddSolve{_isAddSolve},isAbsorb{_isAbsorb}");
+            //_logger?.Debug($"AddSolveSub-{solve}-{volume},isAddSolve{_isAddSolve},isAbsorb{_isAbsorb}");
             //判断是否完成加液,进行吸取空气复位阀
             if (_isAddSolve)
             {

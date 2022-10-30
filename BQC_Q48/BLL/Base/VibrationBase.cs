@@ -132,7 +132,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> StartVibration(int time, double vel, IGlobalStatus gs)
         {
-            _logger?.Debug($"StartVibration-{time}-{vel}");
+            //_logger?.Debug($"StartVibration-{time}-{vel}");
             //释放抱夹气缸
             ResetHolding();
 
@@ -154,14 +154,14 @@ namespace Q_Platform.BLL
                 }
                 if (gs?.IsStopped == true || gs?.IsEmgStop == true)
                 {
-                    _logger?.Debug($"StartVibration-{time}-{vel} 停止");
+                    //_logger?.Debug($"StartVibration-{time}-{vel} 停止");
                     _motion.StopMove(_axisNo); 
                     await GoHome(gs).ConfigureAwait(false);
                     return false;
                 }
                 if (_globalStatus?.IsStopped == true)
                 {
-                    _logger?.Debug($"StartVibration-{time}-{vel} 停止");
+                    //_logger?.Debug($"StartVibration-{time}-{vel} 停止");
                     _motion.StopMove(_axisNo);
                     await GoHome(gs).ConfigureAwait(false);
                     return false;
@@ -186,7 +186,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual void SetHolding(bool checkSensor = true)
         {
-            _logger?.Debug($"SetHolding-{checkSensor},气缸伸出");
+            //_logger?.Debug($"SetHolding-{checkSensor},气缸伸出");
             var result = _io.WriteBit_DO(_holding,true);
             if (!result)
             {
@@ -216,7 +216,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected virtual void ResetHolding(bool checkSensor = false)
         {
-            _logger?.Debug($"ResetHolding-{checkSensor},气缸收回");
+            //_logger?.Debug($"ResetHolding-{checkSensor},气缸收回");
             var result = _io.WriteBit_DO(_holding,false);
             if (!result)
             {

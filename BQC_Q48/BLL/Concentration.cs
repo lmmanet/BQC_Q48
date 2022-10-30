@@ -578,7 +578,7 @@ namespace Q_Platform.BLL
         /// <param name="checkSensor"></param>
         private void Z_Cylinder_Up(bool checkSensor = true)
         {
-            _logger?.Debug($"Z_Cylinder_Up-{checkSensor}");
+            //_logger?.Debug($"Z_Cylinder_Up-{checkSensor}");
             var result = _io.WriteBit_DO(_zCylinderDown, false);
             result = _io.WriteBit_DO(_zCylinderUp, true);
             if (!result)
@@ -611,7 +611,7 @@ namespace Q_Platform.BLL
         /// <param name="checkSensor"></param>
         private void Z_Cylinder_Down(bool checkSensor = true)
         {
-            _logger?.Debug($"Z_Cylinder_Down-{checkSensor}");
+            //_logger?.Debug($"Z_Cylinder_Down-{checkSensor}");
             var result = _io.WriteBit_DO(_zCylinderUp, false);
             result = _io.WriteBit_DO(_zCylinderDown, true);
             if (!result)
@@ -643,7 +643,7 @@ namespace Q_Platform.BLL
         /// </summary>
         private void OpenVaccume()
         {
-            _logger?.Debug($"OpenVaccume");
+            //_logger?.Debug($"OpenVaccume");
             var result = _io.WriteBit_DO(_vaccum1, true);
             if (!result)
             {
@@ -661,7 +661,7 @@ namespace Q_Platform.BLL
         /// </summary>
         private void CloseVaccume()
         {
-            _logger?.Debug($"ClosVaccume");
+            //_logger?.Debug($"ClosVaccume");
             var result = _io.WriteBit_DO(_vaccum1, false);
             if (!result)
             {
@@ -704,7 +704,7 @@ namespace Q_Platform.BLL
         /// </summary>
         private void OpenBlow()
         {
-            _logger?.Debug($"OpenBlow");
+            //_logger?.Debug($"OpenBlow");
             var result = _io.WriteBit_DO(_blow, true);
             if (!result)
             {
@@ -717,7 +717,7 @@ namespace Q_Platform.BLL
         /// </summary>
         private void CloseBlow()
         {
-            _logger?.Debug($"OpenBlow");
+            //_logger?.Debug($"OpenBlow");
             var result = _io.WriteBit_DO(_blow, false);
             if (!result)
             {

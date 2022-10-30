@@ -15,6 +15,7 @@ namespace Q_Platform.BLL
         {
             get
             {
+                
                 if (_instance==null)
                 {
                     _instance = new Cache();

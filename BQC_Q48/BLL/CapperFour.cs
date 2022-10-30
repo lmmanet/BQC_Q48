@@ -77,7 +77,6 @@ namespace Q_Platform.BLL
 
         #endregion
 
-
         #region Public Methods
 
         /// <summary>
@@ -135,31 +134,6 @@ namespace Q_Platform.BLL
                     }
                 }
             }
-        //    //检测是否拆盖成功
-        //    result = CheckUnCapper(gs);
-        //    if (!result)
-        //    {
-        //        return false;
-        //    }
-
-        //s5: result = await _motion.P2pMoveWithCheckDone(_axisY, _posData.PutGetPos, _yMoveVel, gs).ConfigureAwait(false);
-        //    if (!result)
-        //    {
-        //        if (_globalStatus.IsPause)
-        //        {
-        //            while (_globalStatus.IsPause && !_globalStatus.IsStopped)
-        //            {
-        //                Thread.Sleep(1000);
-        //            }
-        //            if (!_globalStatus.IsStopped)
-        //            {
-        //                goto s5;
-        //            }
-        //        }
-        //        throw new Exception("Y轴运动出错！");
-        //    }
-
-
             return result;
         }
 
@@ -488,6 +462,11 @@ namespace Q_Platform.BLL
                             SampleStatusHelper.SetBitOn(sample, SampleStatus.IsSelingUnCapped);
                         }
                         sample.SeilingStep++;
+
+                        if (_unCapFalt == true)
+                        {
+                            throw new Exception("拧盖4检测有盖,请确认拆盖成功后继续程序!");
+                        }
                     }
 
                     if (sample.SeilingStep == 3 && !_globalStatus.IsStopped)
@@ -525,6 +504,14 @@ namespace Q_Platform.BLL
 
         #endregion
 
+        #region Protected Methods
+
+        protected override double GetCapperSensorCoordinate()
+        {
+            return _posData.CapperPos + 48;
+        }
+
+        #endregion
 
         #region Private Methods
 

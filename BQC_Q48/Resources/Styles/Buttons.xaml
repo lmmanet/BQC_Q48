@@ -280,6 +280,7 @@
     </Style>
 
 
+
     <!--  试管  -->
     <Style x:Key="TubeCheckBox" TargetType="{x:Type CheckBox}">
         <Setter Property="Width" Value="40" />

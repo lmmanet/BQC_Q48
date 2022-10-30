@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,6 @@ namespace Q_Platform.BLL
 
         #region Private Members
         private readonly static object _lockObj = new object();
-        private readonly static object _lockCapperTwo = new object();
 
         private readonly IEtherCATMotion _motion;
         private readonly IIoDevice _io;
@@ -58,7 +58,8 @@ namespace Q_Platform.BLL
 
         private ushort _clawId = 2;              //电爪485地址
         private double _stepMoveVel = 80;        //步进电机移动速度
-        private double _sevorMoveVel = 80;       //伺服电机移动速度
+        private double _sevorMoveVel = 150;       //伺服电机移动速度
+        private double _sevorMoveVelHigh = 400;       //伺服电机移动速度
         #endregion
 
         #region Properties
@@ -140,6 +141,7 @@ namespace Q_Platform.BLL
         public async Task<bool> GoHome(IGlobalStatus gs)
         {
             _logger?.Info("离心机搬运回零");
+            GetCurrentMethodInfo(this);
             try
             {
                 //失能夹爪
@@ -175,7 +177,8 @@ namespace Q_Platform.BLL
                 //气缸回零
                 Y_Cylinder_Put();
 
-                if (GlobalCache.Instance.TubeInCentrifugal.Count >0)
+                var list = GlobalCache.Instance.TubeInCentrifugal;
+                if (list.Count >0)
                 {
                     GlobalCache.Instance.TubeInCentrifugal.ForEach(t => _logger?.Warn($"离心机工位-{t}-存在试管"));
                     return false;
@@ -242,14 +245,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetSampleFromColdToCentrifugal")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetSampleFromColdToCentrifugal";
 
                     bool result;
                     //移栽上料
@@ -319,14 +323,15 @@ namespace Q_Platform.BLL
             {
                 lock(_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetSampleFromCentrifugalToMaterial")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetSampleFromCentrifugalToMaterial";
 
                     bool result;
 
@@ -381,14 +386,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetPolishFromMaterialToCentrifugal")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetPolishFromMaterialToCentrifugal";
 
                     bool result;
                     //移栽上料
@@ -441,14 +447,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetPolishFroCentrifugaToShelf")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetPolishFroCentrifugaToShelf";
 
                     bool result;
                     //取出试管
@@ -501,14 +508,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetPurifyFromMaterialToCentrifugal")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetPurifyFromMaterialToCentrifugal";
 
                     bool result;
                     //搬运2从净化管架上料
@@ -562,14 +570,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetPurifyFromCentrifugalToMaterial")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetPurifyFromCentrifugalToMaterial";
 
                     bool result;
                     //取出试管
@@ -623,14 +632,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetBigAndSmallToCentrifugal")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetBigAndSmallToCentrifugal";
 
                     bool result;
 
@@ -753,14 +763,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "GetBigAndSmallToToMarterial")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "GetBigAndSmallToToMarterial";
 
                     bool result;
 
@@ -1649,7 +1660,7 @@ namespace Q_Platform.BLL
 
             _pipttorTask = Task.Run(() =>
             {
-                while (gs?.IsStopped != true)
+               s0: while (gs?.IsStopped != true)
                 {
                     var pDic = GlobalCache.Instance.PipettorDic;
 
@@ -1669,7 +1680,7 @@ namespace Q_Platform.BLL
                             if (TechStatusHelper.BitIsOn(itemSample1.TechParams, TechStatus.ExtractSupernate))
                             {
                                 // 移液大管到净化管
-                                var result = DoPipettingOne(itemSample1, gs).GetAwaiter().GetResult();
+                                var result = DoPipettingOne(itemSample1, gs);
                                 if (!result)
                                 {
                                     throw new Exception("提取50ml离心管上清液出错!");
@@ -1717,13 +1728,17 @@ namespace Q_Platform.BLL
                     }
                     catch (Exception ex)
                     {
-                        if (_globalStatus.IsStopped || _globalStatus.IsPause)
-                        {
-                            return;
-                        }
+                        //if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                        //{
+                        //    return;
+                        //}
                         _globalStatus.PauseProgram();
                         _logger?.Warn(ex.Message);
-                        return;
+                        while (!_globalStatus.IsStopped && _globalStatus.IsPause && !_globalStatus.IsEmgStop)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        goto s0;
                     }
                    
                 }
@@ -1751,9 +1766,9 @@ namespace Q_Platform.BLL
 
             _concentrationTask = Task.Run(() =>
             {
-                try
+            s0: try
                 {
-                    while (GlobalCache.Instance.ConcentrationList.Count > 0 && !_globalStatus.IsStopped)
+                   while (GlobalCache.Instance.ConcentrationList.Count > 0 && !_globalStatus.IsStopped)
                     {
                         var itemSample = GlobalCache.Instance.ConcentrationList[0];
                         bool result;
@@ -1764,90 +1779,87 @@ namespace Q_Platform.BLL
                             var result1 = _capperFour.GetSeilingAndWeight(itemSample, gs);
                            
                             //加入锁 移液过程
-                          s0:  lock (_lockObj) 
+                          s1:  lock (_lockObj)
                             {
+                                GetCurrentMethodInfo(this);
                                 if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                                 {
-                                    if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                                    if (GlobalCache.Instance.CentrifugalCarrierMethodName != "StartConcentration")
                                     {
-                                        goto s0;
+                                        goto s1;
                                     }
                                 }
-                                GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                                GlobalCache.Instance.CentrifugalCarrierMethodName = "StartConcentration";
 
 
                                 //占用拧盖2
-                                lock (_lockCapperTwo)
+                                //搬运已经离心的萃取管到拧盖2 ==》拆盖 ==>到移栽
+                                if (itemSample.MainStep == 11 && !_globalStatus.IsStopped)
                                 {
-                                    //搬运已经离心的萃取管到拧盖2 ==》拆盖 ==>到移栽
-                                    if (itemSample.MainStep == 11 && !_globalStatus.IsStopped)
+                                    result = _capperTwo.GetPolishFromMaterialToTransfer(itemSample, TransferMoveLeftPutGetPos, gs);
+                                    if (!result)
                                     {
-                                        result = _capperTwo.GetPolishFromMaterialToTransfer(itemSample, TransferMoveLeftPutGetPos, gs);
-                                        if (!result)
-                                        {
-                                            throw new Exception("搬运萃取管到移栽失败!");
-                                        }
-                                        itemSample.MainStep++;
+                                        throw new Exception("搬运萃取管到移栽失败!");
                                     }
-
-                                    //移栽移动到右侧
-                                    if (itemSample.MainStep == 12 && !_globalStatus.IsStopped)
-                                    {
-                                        result = TransferMoveRightPipettorPos(gs).GetAwaiter().GetResult();
-                                        if (!result)
-                                        {
-                                            throw new Exception("移栽移动到右侧移液位失败!");
-                                        }
-                                        itemSample.MainStep++;
-                                    }
-                                 
-                                    //判断西林瓶到位
-                                    if (!result1.GetAwaiter().GetResult())
-                                    {
-                                        throw new Exception("搬运西林到称重失败!");
-                                    }
-
-                                    //拧盖4 搬运2开始移液 == >移栽移动到右侧   
-                                    if (itemSample.MainStep == 13 && !_globalStatus.IsStopped)
-                                    {
-                                        result = _carrierTwo.DoPipettingTwo(itemSample, 2, gs);//兽残移液
-                                        if (!result)
-                                        {
-                                            throw new Exception("从萃取管移取上清液失败!");
-                                        }
-                                        itemSample.MainStep++;
-                                    }
-
-                                    //从移栽搬运无盖萃取管到拧盖2
-                                    if (itemSample.MainStep == 14 && !_globalStatus.IsStopped)
-                                    {
-                                        result = _capperTwo.GetPolishFromTransferToCapperTwo(itemSample, TransferMoveLeftPutGetPos, gs);
-                                        if (!result)
-                                        {
-                                            throw new Exception("搬运萃取管到拧盖2失败!");
-                                        }
-                                        itemSample.MainStep++;
-                                    }
-
-                                    //拧盖2装盖
-                                    if (itemSample.MainStep == 15 && !_globalStatus.IsStopped)
-                                    {
-                                        result = _capperTwo.GetPolishFromCapperTwoToMaterial(itemSample, gs);
-                                        if (!result)
-                                        {
-                                            throw new Exception("从拧盖2搬运萃取管到试管架失败!");
-                                        }
-                                        itemSample.MainStep++;
-                                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
-                                    }
-                                  
+                                    itemSample.MainStep++;
                                 }
 
+                                //移栽移动到右侧
+                                if (itemSample.MainStep == 12 && !_globalStatus.IsStopped)
+                                {
+                                    result = TransferMoveRightPipettorPos(gs).GetAwaiter().GetResult();
+                                    if (!result)
+                                    {
+                                        throw new Exception("移栽移动到右侧移液位失败!");
+                                    }
+                                    itemSample.MainStep++;
+                                }
+
+                                //判断西林瓶到位
+                                if (!result1.GetAwaiter().GetResult())
+                                {
+                                    throw new Exception("搬运西林到称重失败!");
+                                }
+
+                                //拧盖4 搬运2开始移液 == >移栽移动到右侧   
+                                if (itemSample.MainStep == 13 && !_globalStatus.IsStopped)
+                                {
+                                    result = _carrierTwo.DoPipettingTwo(itemSample, 2, gs);//兽残移液
+                                    if (!result)
+                                    {
+                                        throw new Exception("从萃取管移取上清液失败!");
+                                    }
+                                    itemSample.MainStep++;
+                                }
+
+                                //从移栽搬运无盖萃取管到拧盖2
+                                if (itemSample.MainStep == 14 && !_globalStatus.IsStopped)
+                                {
+                                    result = _capperTwo.GetPolishFromTransferToCapperTwo(itemSample, TransferMoveLeftPutGetPos, gs);
+                                    if (!result)
+                                    {
+                                        throw new Exception("搬运萃取管到拧盖2失败!");
+                                    }
+                                    itemSample.MainStep++;
+                                }
+
+                                //拧盖2装盖
+                                if (itemSample.MainStep == 15 && !_globalStatus.IsStopped)
+                                {
+                                    result = _capperTwo.GetPolishFromCapperTwoToMaterial(itemSample, gs);
+                                    if (!result)
+                                    {
+                                        throw new Exception("从拧盖2搬运萃取管到试管架失败!");
+                                    }
+                                    itemSample.MainStep++;
+                                    GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
+                                }
                             }
 
                             //移液后的  浓缩步骤
                             if (itemSample.MainStep >= 16 && itemSample.MainStep < 30 && !_globalStatus.IsStopped)
                             {
+                                GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                                 result = _capperFour.DoConcentrationTwo(itemSample, gs);//兽残浓缩
                                 if (!result)
                                 {
@@ -1859,6 +1871,7 @@ namespace Q_Platform.BLL
                             if (itemSample.MainStep == 30)//完成
                             {
                                 //样品和任务从列表移除
+                                GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                                 GlobalCache.Instance.ConcentrationList.Remove(itemSample);
                             }
                         }
@@ -1920,13 +1933,17 @@ namespace Q_Platform.BLL
                 }
                 catch (Exception ex)
                 {
-                    if (_globalStatus.IsStopped || _globalStatus.IsPause)
-                    {
-                        return;
-                    }
+                    //if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                    //{
+                    //    return;
+                    //}
                     _globalStatus.PauseProgram();
-                    _logger?.Warn(ex.Message); 
-                    return;
+                    _logger?.Warn(ex.Message);
+                    while (!_globalStatus.IsStopped && _globalStatus.IsPause && !_globalStatus.IsEmgStop)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                    goto s0;
                 }
         
             });
@@ -1939,7 +1956,7 @@ namespace Q_Platform.BLL
         /// <param name="sample"></param>
         /// <param name="gs"></param>
         /// <returns></returns>
-        private async Task<bool> DoPipettingOne(Sample sample,IGlobalStatus gs)
+        private bool DoPipettingOne(Sample sample,IGlobalStatus gs)
         {
             try
             {
@@ -1956,17 +1973,19 @@ namespace Q_Platform.BLL
                     sample.SubStep++;
                 }
 
-               s0: lock (_lockObj)   //锁定移栽占用部分
+                //拧盖2 回收试管
+                Task<bool> res1 = null;
+            s0: lock (_lockObj)   //锁定移栽占用部分
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "DoPipettingOne")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
-
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "DoPipettingOne";
 
                     //搬运到移栽
                     if (sample.SubStep == 11 && !_globalStatus.IsStopped)
@@ -2016,6 +2035,16 @@ namespace Q_Platform.BLL
                         sample.SubStep++;
                     }
 
+                    //拧盖2 回收试管  移液完成后立即回收
+                    if (sample.SubStep == 15 && !_globalStatus.IsStopped)
+                    {
+                        //拧盖2 回收试管
+                        if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
+                        {
+                            res1 = _capperTwo.GetSampleFromCapperTwoToMaterial(sample, gs); //包括搬运到试管架
+                        }
+                    }
+
                     //搬运净化管到拧盖3
                     if (sample.SubStep == 15 && !_globalStatus.IsStopped)
                     {
@@ -2024,21 +2053,22 @@ namespace Q_Platform.BLL
                         {
                             throw new Exception($"搬运{sample.Id}净化管到拧盖3 失败");
                         }
+
+                        //拧盖2 回收试管   判断完成
+                        if (res1 != null)
+                        {
+                            if (!res1.GetAwaiter().GetResult())
+                            {
+                                throw new Exception($"从拧盖2取{sample.Id}样品管到试管架1 失败");
+                            }
+                        }
                         sample.SubStep++;
                         GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
                     }
+
                 }
 
-                //=============================================================================================//
-                //拧盖2 回收试管
-                Task<bool> res1 = null;
-                if (SampleStatusHelper.BitIsOn(sample, SampleStatus.IsInCapperTwo))
-                {
-                    res1 = _capperTwo.GetSampleFromCapperTwoToMaterial(sample, gs); //包括搬运到试管架
-                }
-               
-                
-                //搬运空试管到拧盖3
+                //从拧盖3 到振荡
                 if (sample.SubStep >= 16 && !_globalStatus.IsStopped && sample.SubStep < 22)  //16 ~22
                 {
                     var result1 = _capperThree.GetSampleFromCapperThreeToVibration(sample, gs);
@@ -2048,16 +2078,6 @@ namespace Q_Platform.BLL
                     }
                     sample.SubStep++;
                 }
-
-                //拧盖2 回收试管   判断完成
-                if (res1 != null)
-                {
-                    if (!await res1)
-                    {
-                        throw new Exception($"从拧盖2取{sample.Id}样品管到试管架1 失败");
-                    }
-                }
-                
 
                 if (sample.SubStep == 23 && !_globalStatus.IsStopped)
                 {
@@ -2092,14 +2112,15 @@ namespace Q_Platform.BLL
             {
                 lock (_lockObj)
                 {
+                    GetCurrentMethodInfo(this);
                     if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
                     {
-                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != MethodBase.GetCurrentMethod().Name)
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "DoPipettingTwo")
                         {
                             goto s0;
                         }
                     }
-                    GlobalCache.Instance.CentrifugalCarrierMethodName = MethodBase.GetCurrentMethod().Name;
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "DoPipettingTwo";
 
 
                     _logger?.Info($"{sample.Id}净化管开始移液-Volume-{sample.TechParams.ExtractVolume}ml");
@@ -2191,6 +2212,108 @@ namespace Q_Platform.BLL
                     }
 
                     throw new Exception("提取酯化上清液步骤非法!");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_globalStatus.IsStopped || _globalStatus.IsPause)
+                {
+                    return false;
+                }
+                _logger?.Warn(ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 从萃取管移液到西林瓶（不可用  浓缩称重与移液前称重互斥）
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="gs"></param>
+        /// <returns></returns>
+        private bool DoPipettingThree(Sample sample,IGlobalStatus gs)
+        {
+        //萃取管到西林瓶
+        s0: try
+            {
+                lock (_lockObj)
+                {
+                    GetCurrentMethodInfo(this);
+                    if (!string.IsNullOrEmpty(GlobalCache.Instance.CentrifugalCarrierMethodName))
+                    {
+                        if (GlobalCache.Instance.CentrifugalCarrierMethodName != "DoPipettingThree")
+                        {
+                            goto s0;
+                        }
+                    }
+                    GlobalCache.Instance.CentrifugalCarrierMethodName = "DoPipettingThree";
+
+
+                    _logger?.Info($"{sample.Id}萃取管开始移液-Volume-{sample.TechParams.ConcentrationVolume}ml");
+                    bool result;
+
+                    //占用拧盖2
+                    //搬运已经离心的萃取管到拧盖2 ==》拆盖 ==>到移栽
+                    if (sample.MainStep == 11 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperTwo.GetPolishFromMaterialToTransfer(sample, TransferMoveLeftPutGetPos, gs);
+                        if (!result)
+                        {
+                            throw new Exception("搬运萃取管到移栽失败!");
+                        }
+                        sample.MainStep++;
+                    }
+
+                    //移栽移动到右侧
+                    if (sample.MainStep == 12 && !_globalStatus.IsStopped)
+                    {
+                        result = TransferMoveRightPipettorPos(gs).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            throw new Exception("移栽移动到右侧移液位失败!");
+                        }
+                        sample.MainStep++;
+                    }
+
+                    //搬运2开始移液 == >移栽移动到右侧   
+                    if (sample.MainStep == 13 && !_globalStatus.IsStopped)
+                    {
+                        result = _carrierTwo.DoPipettingTwo(sample, 2, gs);//兽残移液
+                        if (!result)
+                        {
+                            throw new Exception("从萃取管移取上清液失败!");
+                        }
+                        sample.MainStep++;
+                    }
+
+
+                    //==========================移液完成 加入到浓缩列表===============================//
+
+                    //从移栽搬运无盖萃取管到拧盖2
+                    if (sample.MainStep == 14 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperTwo.GetPolishFromTransferToCapperTwo(sample, TransferMoveLeftPutGetPos, gs);
+                        if (!result)
+                        {
+                            throw new Exception("搬运萃取管到拧盖2失败!");
+                        }
+                        sample.MainStep++;
+                    }
+
+                    //拧盖2装盖
+                    if (sample.MainStep == 15 && !_globalStatus.IsStopped)
+                    {
+                        result = _capperTwo.GetPolishFromCapperTwoToMaterial(sample, gs);
+                        if (!result)
+                        {
+                            throw new Exception("从拧盖2搬运萃取管到试管架失败!");
+                        }
+                        sample.MainStep++;
+                        GlobalCache.Instance.CentrifugalCarrierMethodName = string.Empty;
+                    }
+
+
+                    throw new Exception("提取萃取上清液步骤非法!");
                 }
             }
             catch (Exception ex)
@@ -2458,7 +2581,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> GetTubeAtCentrifugal(ushort pos, Func<ushort, Task<bool>> func, IGlobalStatus gs, byte clawCloseByte = 255, byte clawOpenByte = 0)
         {
-            _logger.Debug($"GetTubeAtCentrifugal-{pos},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetTubeAtCentrifugal-{pos},clawOpenByte-{clawOpenByte}");
             try
             {
                 //判断Z轴是否在原点
@@ -2558,7 +2681,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> PutTubeAtCentrifugal(ushort pos, Func<ushort, Task<bool>> func, IGlobalStatus gs, byte clawOpenByte = 0)
         {
-            _logger.Debug($"PutTubeAtCentrifugal-{pos},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"PutTubeAtCentrifugal-{pos},clawOpenByte-{clawOpenByte}");
             try
             {
                 //判断Z轴是否在原点
@@ -2653,7 +2776,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> GetTubeAtTransfer(double[] pos, byte clawOpenByte, IGlobalStatus gs, byte clawCloseByte = 255)
         {
-            _logger.Debug($"GetTubeAtTransfer-{pos},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"GetTubeAtTransfer-{pos},clawOpenByte-{clawOpenByte}");
             try
             {
                 //判断手爪是否抓取物件 在指定打开位置
@@ -2766,7 +2889,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> PutTubeAtTransfer(double[] pos, byte clawOpenByte, IGlobalStatus gs)
         {
-            _logger.Debug($"PutTubeAtTransfer-{pos},clawOpenByte-{clawOpenByte}");
+            //_logger.Debug($"PutTubeAtTransfer-{pos},clawOpenByte-{clawOpenByte}");
             try
             {
                 //如果手爪打开 判定放料完成
@@ -2879,7 +3002,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected void Y_Cylinder_Get(bool checkSensor = true)
         {
-            _logger?.Debug($"Y_Cylinder_Get-{checkSensor}");
+            //_logger?.Debug($"Y_Cylinder_Get-{checkSensor}");
             var result = _io.WriteBit_DO(_y_Ctr, true);
             if (!result)
             {
@@ -2909,7 +3032,7 @@ namespace Q_Platform.BLL
         /// </summary>
         protected void Y_Cylinder_Put(bool checkSensor = true)
         {
-            _logger?.Debug($"Y_Cylinder_Put-{checkSensor}");
+            //_logger?.Debug($"Y_Cylinder_Put-{checkSensor}");
             var result = _io.WriteBit_DO(_y_Ctr, false);
             if (!result)
             {
@@ -2943,7 +3066,7 @@ namespace Q_Platform.BLL
         {
             if (!AxisIsInSafePos(_axisZ))
             {
-                s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVel, _globalStatus).ConfigureAwait(false);
+                s1: var result = await _motion.P2pMoveWithCheckDone(_axisZ, 0, _sevorMoveVelHigh, _globalStatus).ConfigureAwait(false);
                 if (!result)
                 {
                     if (_globalStatus.IsPause)
@@ -2976,7 +3099,7 @@ namespace Q_Platform.BLL
                 var result = status == 2;
                 if (!result)
                 {
-                    _logger?.Debug($"手爪上无物件 - {status}");
+                    _logger?.Warn($"手爪上无物件 - {status}");
                 }
                 if (status != 2)
                 {
@@ -2996,7 +3119,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> OpenClaw(byte openPos)
         {
-            _logger?.Debug($"OpenClaw-{openPos}");
+            //_logger?.Debug($"OpenClaw-{openPos}");
             var result = await _claw.SendCommand(_clawId, openPos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -3032,7 +3155,7 @@ namespace Q_Platform.BLL
         /// <returns></returns>
         protected async Task<bool> CloseClaw(byte closePos)
         {
-            _logger?.Debug($"CloseClaw-{closePos}");
+            //_logger?.Debug($"CloseClaw-{closePos}");
             var result = await _claw.SendCommand(_clawId, closePos, 255, 255).ConfigureAwait(false);
             if (!result)
             {
@@ -3191,6 +3314,12 @@ namespace Q_Platform.BLL
 
 
 
+        protected string GetCurrentMethodInfo(object caller, [CallerMemberName] string name = "")
+        {
+            MethodInfo mi = caller.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Public|BindingFlags.NonPublic);
+            _logger?.Debug($"====== {mi.Name}");
+            return mi.Name;
+        }
 
 
     }

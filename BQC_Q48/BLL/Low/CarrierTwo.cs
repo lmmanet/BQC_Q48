@@ -622,7 +622,7 @@ namespace Q_Platform.BLL
                                 var weitht = ReadWeight();
                                 if (weitht <= sample.SeilingWeight1 + 0.5 && !sample.ConcentrationFailure)
                                 {
-                                    _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
+                                    //_logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight1} 浓缩后：{weitht}");
                                     //判断是否加标
                                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
@@ -681,7 +681,7 @@ namespace Q_Platform.BLL
                                 var weitht = ReadWeight();
                                 if (weitht <= sample.SeilingWeight2 + 0.5 && !sample.ConcentrationFailure2)
                                 {
-                                    _logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
+                                    //_logger?.Debug($"称台数据 空瓶：{sample.SeilingWeight2} 浓缩后：{weitht}");
                                     //判断是否加标
                                     if (TechStatusHelper.BitIsOn(sample.TechParams, TechStatus.AddMark2) && var != 0)
                                     {
@@ -3441,7 +3441,7 @@ namespace Q_Platform.BLL
         /// <param name="checkSensor"></param>
         private void Z_Cylinder_Up(bool checkSensor = true)
         {
-            _logger?.Debug($"Z_Cylinder_Up-{checkSensor}");
+            //_logger?.Debug($"Z_Cylinder_Up-{checkSensor}");
             var result = _io.WriteBit_DO(_zCylinderCtr, false);
             if (!result)
             {
@@ -3473,7 +3473,7 @@ namespace Q_Platform.BLL
         /// <param name="checkSensor"></param>
         private void Z_Cylinder_Down(bool checkSensor = false)
         {
-            _logger?.Debug($"Z_Cylinder_Down-{checkSensor}");
+            //_logger?.Debug($"Z_Cylinder_Down-{checkSensor}");
             var result = _io.WriteBit_DO(_zCylinderCtr, true);
             if (!result)
             {

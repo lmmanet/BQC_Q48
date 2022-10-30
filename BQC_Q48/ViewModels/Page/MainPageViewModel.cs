@@ -43,8 +43,10 @@ namespace Q_Platform.ViewModels.Page
         /// </summary>
         public ObservableCollection<WorkLog> WorkLogList { get; set; } = new ObservableCollection<WorkLog>();
 
-
-        private double _temperatrue1 = 30;
+        /// <summary>
+        /// 冰浴温度
+        /// </summary>
+        private double _temperatrue1 = 5;
 
         public double Temperatrue1
         {
@@ -60,7 +62,10 @@ namespace Q_Platform.ViewModels.Page
             }
         }
 
-        private double _temperatrue2 = 30;
+        /// <summary>
+        /// 标准品温度
+        /// </summary>
+        private double _temperatrue2 = 20;
 
         public double Temperatrue2
         {
@@ -76,7 +81,10 @@ namespace Q_Platform.ViewModels.Page
             }
         }
 
-        private double _temperatrue3 = 30;
+        /// <summary>
+        /// 小瓶架温度
+        /// </summary>
+        private double _temperatrue3 = 3;
 
         public double Temperatrue3
         {
@@ -166,6 +174,12 @@ namespace Q_Platform.ViewModels.Page
         /// </summary>
         public bool DelectSampleEnable { get; set; } = true;
 
+
+        /// <summary>
+        /// 使能试管架到位检测
+        /// </summary>
+        public bool EnableSensorCheck { get; set; }
+
         #endregion
 
         #region Commands
@@ -211,6 +225,7 @@ namespace Q_Platform.ViewModels.Page
             _globalStatus.MachineStatusChangedEventArgs += () => { RunStatus = _globalStatus.MachineStatus; };
             _service.EmgStopOccuEventArgs += _globalStatus.EmgStop;
             Messenger.Default.Register<SampleModel>(this, "AddSampleModel", AddSampleToList);
+            Messenger.Default.Register<List<SampleModel>>(this, "AddSampleModelList", AddSampleListIn);
             _dataAccess = dataAccess;
             ServiceLocator.Current.GetInstance<AlarmPageViewModel>();//加载一下报警页面
         }
@@ -267,21 +282,17 @@ namespace Q_Platform.ViewModels.Page
 
         private void InitialSys()
         {
+            var result = MessageBox.Show("是否进行清洗加标注射器", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+
+            }
             _mainPro.ClearWorkList();
             _workSampleList = new List<Sample>();
             SampleList = new ObservableCollection<SampleModel>();
              _mainPro.GoHome(() => HomeDoneFlag);
             DelectSampleEnable = true;
             UpdateSampleCount(); //更新样品数量
-            //回零完成判断是否回零成功  并使能启动按钮
-            //if (HomeDoneFlag)
-            //{
-            //    RunBtnEnable = true;
-            //}
-            //else
-            //{
-            //    RunBtnEnable = false;
-            //}
         }
 
         private void ContinuePro()
@@ -439,6 +450,19 @@ namespace Q_Platform.ViewModels.Page
             UpdateSampleCount();
         }
 
+        private void AddSampleListIn(List<SampleModel> list)
+        {
+            foreach (var item in list)
+            {
+                if (SampleList.FirstOrDefault(s => s.Id == item.Id) != null)
+                {
+                    continue;
+                }
+                SampleList.Add(item);
+            }
+            UpdateSampleCount();
+        }
+
         /// <summary>
         /// 更新试管位置状态
         /// </summary>
@@ -485,8 +509,8 @@ namespace Q_Platform.ViewModels.Page
         private void _service_TemperatureChangedEventHandler(double[] value)
         {
             ColdTemperature = value[0];
-            BottleTemperature = value[1];
-            StandardTemperature = value[2];
+            StandardTemperature = value[1];
+            BottleTemperature = value[2];
         }
 
 

@@ -66,7 +66,7 @@
             </Border>
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
-                <ItemsControl ItemsSource="{Binding SampleList}">
+                <ItemsControl AlternationCount="2" ItemsSource="{Binding SampleList}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical" />
@@ -76,7 +76,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="Gray" BorderThickness="0,0,0,1">
-                                <Grid ext:GridHelper.ShowBorder="True">
+                                <Grid x:Name="grid" ext:GridHelper.ShowBorder="True">
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
                                         <RowDefinition />
@@ -129,6 +129,12 @@
 
                                 </Grid>
                             </Border>
+
+                            <DataTemplate.Triggers>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                    <Setter TargetName="grid" Property="Background" Value="#99ffff" />
+                                </Trigger>
+                            </DataTemplate.Triggers>
 
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

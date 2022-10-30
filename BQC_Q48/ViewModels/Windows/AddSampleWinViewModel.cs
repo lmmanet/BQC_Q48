@@ -2,6 +2,8 @@
 using BQJX.Models;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using Microsoft.Win32;
+using Q_Platform.DAL;
 using Q_Platform.ViewModels.Base;
 using Q_Platform.Views.Windows;
 using System;
@@ -17,11 +19,12 @@ namespace Q_Platform.ViewModels.Windows
 {
     public class AddSampleWinViewModel : MyViewModelBase
     {
+        private readonly ITechParamsDataAccess _dataAccess;
 
         #region Properties
         public ObservableCollection<TechParamsModel> TechList { get; set; }
 
-        public SampleModel SampleModel { get; set; }
+        public SampleModel SampleModel { get; set; } = new SampleModel();
 
         public List<SampleModel> SampleList { get; set; }
 
@@ -57,7 +60,7 @@ namespace Q_Platform.ViewModels.Windows
 
         #region Construtors
 
-        public AddSampleWinViewModel()
+        public AddSampleWinViewModel(ITechParamsDataAccess dataAccess)
         {
 
             CancelCommand = new RelayCommand<object>(Cancel);
@@ -65,7 +68,9 @@ namespace Q_Platform.ViewModels.Windows
             DoneCommand = new RelayCommand<object>(Done);
             ImportSampleCommand = new RelayCommand(ImportSample);
             ComboxSelectChangedCommand = new RelayCommand<object>(ComboxSelectChanged);
-            GenerMock();
+            this._dataAccess = dataAccess;
+            //GenerMock();
+            GetTechParamsFromDataBase();
         }
 
 
@@ -84,8 +89,30 @@ namespace Q_Platform.ViewModels.Windows
 
         private void ImportSample()
         {
+            try
+            {
+                string filePath = string.Empty;
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Filter = "配方文件(*.csv)|*.csv;";
+                ofd.ValidateNames = true;
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+                Nullable<bool> result = ofd.ShowDialog();
+                if (result == true)
+                {
+                    filePath = ofd.FileName;
 
-            //throw new NotImplementedException();
+                    List<SampleInfo> listInfo = SampleInfoImportDataAccess.GetSampleInfoFromFile(filePath);
+
+                    //转换成样品模型
+                    SampleList = GenerateSampleModelList(listInfo);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开文件失败！{ex.Message}");
+            }
         }
 
         private void Cancel(object o)
@@ -117,11 +144,27 @@ namespace Q_Platform.ViewModels.Windows
                 return;
             }
 
-            //转换模型
-            var SampleModel = GenerateSampleModel();
+            if (SampleList?.Count >0 == true)
+            {
+                Messenger.Default.Send<List<SampleModel>>(SampleList,"AddSampleModelList");
+            }
+            else
+            {
+                try
+                {
+                    //转换模型
+                    var SampleModel = GenerateSampleModel();
+                    //发送工艺数据到主窗口
+                    Messenger.Default.Send<SampleModel>(SampleModel, "AddSampleModel");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+              
+              
 
-            //发送工艺数据到主窗口
-            Messenger.Default.Send<SampleModel>(SampleModel, "AddSampleModel");
+            }
 
             //关闭当前窗口，释放资源 
             var win = o as AddSampleWin;
@@ -161,13 +204,26 @@ namespace Q_Platform.ViewModels.Windows
         }
 
 
-        private List<SampleModel> GenerateSampleModelList()
+        private List<SampleModel> GenerateSampleModelList(List<SampleInfo> info)
         {
+            List<SampleModel> list = new List<SampleModel>();
+            for (int i = 0; i < info.Count;)
+            {
+                list.Add(new SampleModel()
+                {
+                    Id = (ushort)(i + 1),
+                    SnNum1 = info[i].SnNum,
+                    Name1 = info[i++].Name,
+                    SnNum2 = info[i].SnNum,
+                    Name2 = info[i++].Name,
+                    TechParams = TechParamsModelTransferToTechParams(),
+                    CreateTime = DateTime.Now,
+                    TechName = TechParamsModelSelected.Name,
+                    StartMainStep = GetSampleStartMainStep()
+                }) ;
+            }
 
-
-
-
-            return null;
+            return list;
         }
 
 
@@ -186,7 +242,7 @@ namespace Q_Platform.ViewModels.Windows
                 TechParams = TechParamsModelTransferToTechParams(),
                 CreateTime = DateTime.Now,
                 TechName = TechParamsModelSelected.Name,
-                StartMainStep = GetSampleStartMainStep(),
+                StartMainStep = GetSampleStartMainStep()
             };
         }
 
@@ -195,6 +251,430 @@ namespace Q_Platform.ViewModels.Windows
         /// </summary>
         /// <returns></returns>
         private TechParams TechParamsModelTransferToTechParams()
+        {
+            if (TechParamsModelSelected.Name == "Agilent 多兽药残留")//Agilent 多兽药残留
+            {
+                return new TechParams
+                {
+                    AddWater = TechParamsModelSelected.AddWater,
+                    Solvent_A = TechParamsModelSelected.ACE,    //ACE
+                    Solvent_B = TechParamsModelSelected.Acid,    //乙腈醋酸
+                    Solvent_C = TechParamsModelSelected.Formic,    //甲酸乙腈溶液
+                    WetTime = 0,
+                    AddHomo = new double[3] { TechParamsModelSelected.Homo, 0, 0 },    //均质子
+                    Solid_B = new double[3] { 0, 0, 0 },    //硫酸镁
+                    Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
+                    Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
+                    Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
+                    Solid_F = new double[3] { 0, 0, 0 },    //
+                    VibrationOneTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime,
+                        TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationOneVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel,
+                        TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VibrationTwoTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationTwoVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VortexTime = new int[] { TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime },
+                    VortexVel = new int[] { TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel },
+                    CentrifugalOneTime = new int[] { TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime },
+                    CentrifugalOneVelocity = new int[] { TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel },
+                    ExtractVolume = TechParamsModelSelected.ExtractVolume,
+                    cusuanan = 5,                           //醋酸铵
+                    Extract = 10,                           //全部倒入量
+                    ConcentrationVolume = 2,                //浓缩量
+                    ConcentrationTime = TechParamsModelSelected.ConcentrationTime,                  //
+                    ConcentrationVel = TechParamsModelSelected.ConcentrationVel,
+                    Redissolve = 0.95,                             //乙腈水溶液
+                    Add_Mark_A = 50,                            //加标50uL                           
+                    ExtractSampleVolume = 1,                     //最终样品1ml
+
+                    //Tech = 0x3DFDE1AB,                         //工艺  3DFD E1AB
+                    Tech = TechParamsModelSelected.Tech          //工艺 20221029  修改去掉加均质子
+                };
+            }
+
+            else if (TechParamsModelSelected.Name == "GB23200.113-2018 果蔬")
+            {
+                return new TechParams()
+                {
+                    AddWater = TechParamsModelSelected.AddWater,
+                    Solvent_A = TechParamsModelSelected.ACE,    //ACE
+                    Solvent_B = TechParamsModelSelected.Acid,    //乙腈醋酸
+                    Solvent_C = TechParamsModelSelected.Formic,    //甲酸乙腈溶液
+                    WetTime = 0,
+                    AddHomo = new double[3] { 0, 0, TechParamsModelSelected.Homo },    //均质子
+                    Solid_B = new double[3] { 0, 0, TechParamsModelSelected.MgSO4 },    //硫酸镁
+                    Solid_C = new double[3] { 0, 0, TechParamsModelSelected.NaCl },    //氯化钠
+                    Solid_D = new double[3] { 0, 0, TechParamsModelSelected.Trisodium },    //柠檬酸钠
+                    Solid_E = new double[3] { 0, 0, TechParamsModelSelected.Monosodium },  //氢二钠
+                    Solid_F = new double[3] { 0, 0, 0 },    //
+                    VibrationOneTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime,
+                        TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationOneVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel,
+                        TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VibrationTwoTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationTwoVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VortexTime = new int[] { TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime },
+                    VortexVel = new int[] { TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel },
+                    CentrifugalOneTime = new int[] { TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime },
+                    CentrifugalOneVelocity = new int[] { TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel },
+                    ExtractVolume = TechParamsModelSelected.ExtractVolume,
+                    ConcentrationVolume = 2,
+                    ConcentrationTime = TechParamsModelSelected.ConcentrationTime,
+                    ConcentrationVel = TechParamsModelSelected.ConcentrationVel,
+                    Redissolve = 2,                             //乙酸乙酯
+                    Add_Mark_B = 20,                            //加标20uL
+                    ExtractSampleVolume = 1,                     //最终样品1ml
+                                                                 //移液高度 取液大管148
+                                                                 //吐液小管     71.92
+                                                                 //取液小管   44.5（用不上）
+                                                                 //净化管取液 167
+                                                                 //西林瓶取液  145.5
+                                                                 //移栽大管取液 73.371
+                                                                 //样品小瓶吐液 120
+                                                                 //西林瓶吐液  105.085
+                    //Tech = 0xF03FE00,                       //工艺
+                    Tech = TechParamsModelSelected.Tech                         //工艺
+
+                };
+            }
+
+            else if (TechParamsModelSelected.Name == "GB23200.113-2018 坚果、油料")
+            {
+                return new TechParams()
+                {
+                    AddWater = TechParamsModelSelected.AddWater,
+                    Solvent_A = TechParamsModelSelected.ACE,    //ACE
+                    Solvent_B = TechParamsModelSelected.Acid,    //乙腈醋酸
+                    Solvent_C = TechParamsModelSelected.Formic,    //甲酸乙腈溶液
+                    WetTime = 30,
+                    AddHomo = new double[3] { 0, 0, TechParamsModelSelected.Homo },    //均质子
+                    Solid_B = new double[3] { 0, 0, TechParamsModelSelected.MgSO4 },    //硫酸钠
+                    Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
+                    Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
+                    Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
+                    Solid_F = new double[3] { 0, 0, TechParamsModelSelected.Sodium },    //乙酸钠
+                    VibrationOneTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime,
+                        TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationOneVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel,
+                        TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VibrationTwoTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationTwoVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VortexTime = new int[] { TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime },
+                    VortexVel = new int[] { TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel },
+                    CentrifugalOneTime = new int[] { TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime },
+                    CentrifugalOneVelocity = new int[] { TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel },
+                    ExtractVolume = TechParamsModelSelected.ExtractVolume,
+                    ConcentrationVolume = 2,
+                    ConcentrationTime = TechParamsModelSelected.ConcentrationTime,
+                    ConcentrationVel = TechParamsModelSelected.ConcentrationVel,
+                    Redissolve = 2,                             //乙酸乙酯
+                    Add_Mark_B = 20,                            //加标20uL
+                    ExtractSampleVolume = 1,                     //最终样品1ml
+
+                    //Tech = 0xF03EE19,                         //工艺
+                    Tech = TechParamsModelSelected.Tech                         //工艺
+
+                };
+            }
+
+            else if (TechParamsModelSelected.Name == "GB23200.121-2021 果蔬")
+            {
+                return new TechParams()
+                {
+                    AddWater = TechParamsModelSelected.AddWater,
+                    Solvent_A = TechParamsModelSelected.ACE,    //ACE
+                    Solvent_B = TechParamsModelSelected.Acid,    //乙腈醋酸
+                    Solvent_C = TechParamsModelSelected.Formic,    //甲酸乙腈溶液
+                    WetTime = 30,
+                    AddHomo = new double[3] { 0, TechParamsModelSelected.Homo, 0 },    //均质子
+                    Solid_B = new double[3] { 0, 0, TechParamsModelSelected.MgSO4 },    //硫酸镁
+                    Solid_C = new double[3] { 0, 0, TechParamsModelSelected.NaCl },    //氯化钠
+                    Solid_D = new double[3] { 0, 0, TechParamsModelSelected.Trisodium },    //柠檬酸钠
+                    Solid_E = new double[3] { 0, 0, TechParamsModelSelected.Monosodium },  //氢二钠
+                    Solid_F = new double[3] { 0, 0, 0 },    //
+                    VibrationOneTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime,
+                        TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationOneVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel,
+                        TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VibrationTwoTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationTwoVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VortexTime = new int[] { TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime },
+                    VortexVel = new int[] { TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel },
+                    CentrifugalOneTime = new int[] { TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime },
+                    CentrifugalOneVelocity = new int[] { TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel },
+                    ExtractVolume = TechParamsModelSelected.ExtractVolume,
+                    ConcentrationVolume = 0,
+                    ConcentrationTime = 0,
+                    ConcentrationVel = 0,
+                    Redissolve = 0,                             //乙酸乙酯
+                    Add_Mark_B = 0,                            //加标20uL
+                    ExtractSampleVolume = 1,                     //最终样品1ml
+
+                   // Tech = 0x801F4E0,                         //工艺
+                    Tech = TechParamsModelSelected.Tech                         //工艺
+
+                };
+            }
+
+            else if (TechParamsModelSelected.Name == "GB23200.121-2021 坚果、油料")
+            {
+                return new TechParams()
+                {
+                    AddWater = TechParamsModelSelected.AddWater,
+                    Solvent_A = TechParamsModelSelected.ACE,    //ACE
+                    Solvent_B = TechParamsModelSelected.Acid,    //乙腈醋酸
+                    Solvent_C = TechParamsModelSelected.Formic,    //甲酸乙腈溶液
+                    WetTime = 30,
+                    AddHomo = new double[3] { 0, TechParamsModelSelected.Homo, 0 },    //均质子
+                    Solid_B = new double[3] { 0, 0, TechParamsModelSelected.MgSO4 },    //硫酸镁
+                    Solid_C = new double[3] { 0, 0, 0 },    //氯化钠
+                    Solid_D = new double[3] { 0, 0, 0 },    //柠檬酸钠
+                    Solid_E = new double[3] { 0, 0, 0 },  //氢二钠
+                    Solid_F = new double[3] { 0, 0, TechParamsModelSelected.Sodium },    //
+                    VibrationOneTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime,
+                        TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationOneVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel,
+                        TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VibrationTwoTime = new int[] { TechParamsModelSelected.VibrationTime, TechParamsModelSelected.VibrationTime },
+                    VibrationTwoVel = new int[] { TechParamsModelSelected.VibrationVel, TechParamsModelSelected.VibrationVel },
+                    VortexTime = new int[] { TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime, TechParamsModelSelected.VortexTime },
+                    VortexVel = new int[] { TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel, TechParamsModelSelected.VortexVel },
+                    CentrifugalOneTime = new int[] { TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime, TechParamsModelSelected.CentrifugalTime },
+                    CentrifugalOneVelocity = new int[] { TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel, TechParamsModelSelected.CentrifugalVel },
+                    ExtractVolume = TechParamsModelSelected.ExtractVolume,
+                    ConcentrationVolume = 0,
+                    ConcentrationTime = 0,
+                    ConcentrationVel = 0,
+                    Redissolve = 0,                             //乙酸乙酯
+                    Add_Mark_B = 0,                            //加标20uL
+                    ExtractSampleVolume = 1,                     //最终样品1ml
+
+                    //Tech = 0x801ECF9,                         //工艺
+                    Tech = TechParamsModelSelected.Tech                         //工艺
+
+                };
+            }
+
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 样品起始步骤
+        /// </summary>
+        /// <returns></returns>
+        private int GetSampleStartMainStep()
+        {
+            if (TechParamsModelSelected.Name == "GB23200.113-2018 果蔬")
+            {
+                return 3;
+            }
+
+            if (TechParamsModelSelected.Name == "GB23200.121-2021 果蔬" && TechParamsModelSelected.AddWater == 0)
+            {
+                return 2;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+
+
+        #endregion
+
+        private void GetTechParamsFromDataBase()
+        {
+            TechList = new ObservableCollection<TechParamsModel>();
+
+            var list = _dataAccess.GetTechParamsInfoById(0, 100);
+
+            foreach (var item in list)
+            {
+                var model = new TechParamsModel()
+                {
+                    Name = item.Name,
+                    AddWater =item.AddWater,
+                    ACE = item.ACE,
+                    Acid =item.Acid,
+                    Formic = item.Formic,
+                    Homo = item.Homo,                      //均质子
+                    MgSO4 = item.MgSO4,                     //硫酸镁，硫酸钠
+                    NaCl = item.NaCl,                      //氯化钠
+                    Trisodium = item.Trisodium,                  //柠檬酸钠，二水合物
+                    Monosodium = item.Monosodium,              //氢二钠，盐倍半水
+                    Sodium = item.Sodium,                    //乙酸钠
+                    VortexTime = item.VortexTime,               //涡旋时间
+                    VortexVel = item.VortexVel,              //涡旋速度
+                    VibrationTime = item.VibrationTime,            //振荡时间
+                    VibrationVel = item.VibrationVel,            //振荡速度
+                    CentrifugalTime = item.CentrifugalTime,           //离心时间
+                    CentrifugalVel = item.CentrifugalVel,         //离心速度
+                    ExtractVolume = item.ExtractVolume,             //上清液提取量
+                    ConcentrationTime = item.ConcentrationTime,         //浓缩时间
+                    ConcentrationVel = item.ConcentrationVel,      //浓缩速度
+                    Tech = item.Tech,                            //工艺
+                };
+                TechList.Add(model);
+            }
+        }
+
+
+
+        private void GenerMock()
+        {
+            TechList = new ObservableCollection<TechParamsModel>();
+
+            TechList.Add(new TechParamsModel()
+            {
+                Name = "GB23200.113-2018 果蔬",
+
+                AddWater = 0,                  //纯水
+                ACE = 10,                      //乙腈
+                Acid = 0,                      //醋酸
+                Formic = 0,                    //甲酸
+                Homo = 2,                      //均质子
+                MgSO4 = 4,                     //硫酸镁，硫酸钠
+                NaCl = 1,                      //氯化钠
+                Trisodium = 1,                  //柠檬酸钠，二水合物
+                Monosodium = 0.5,              //氢二钠，盐倍半水
+                Sodium = 0,                    //乙酸钠
+                VortexTime = 60,               //涡旋时间
+                VortexVel = 2000,              //涡旋速度
+                VibrationTime = 60,            //振荡时间
+                VibrationVel = 420,            //振荡速度
+                CentrifugalTime = 5,           //离心时间
+                CentrifugalVel = 4200,         //离心速度
+                ExtractVolume = 6,             //上清液提取量
+                ConcentrationTime = 5,         //浓缩时间
+                ConcentrationVel = 10000,      //浓缩速度
+                Tech = 0xF03EE00,              //工艺
+            });
+
+            TechList.Add(new TechParamsModel()
+            {
+                Name = "GB23200.113-2018 坚果、油料",
+
+                AddWater = 10,                 //纯水
+                ACE = 0,                      //乙腈
+                Acid = 15,                      //醋酸
+                Formic = 0,                    //甲酸
+                Homo = 1,                      //均质子
+                MgSO4 = 0,                     //硫酸镁
+                NaCl = 6,                      //氯化钠 /硫酸钠
+                Trisodium = 0,                  //柠檬酸钠，二水合物
+                Monosodium = 0,              //氢二钠，盐倍半水
+                Sodium = 1.5,                    //乙酸钠
+                VortexTime = 60,               //涡旋时间
+                VortexVel = 2000,              //涡旋速度
+                VibrationTime = 60,            //振荡时间
+                VibrationVel = 420,            //振荡速度
+                CentrifugalTime = 5,           //离心时间
+                CentrifugalVel = 4200,         //离心速度
+                ExtractVolume = 8,             //上清液提取量
+                ConcentrationTime = 5,         //浓缩时间
+                ConcentrationVel = 10000,      //浓缩速度
+                Tech = 0xF03EE19,              //工艺
+            });
+
+            TechList.Add(new TechParamsModel()
+            {
+                Name = "GB23200.121-2021 果蔬",
+
+                AddWater = 0,                  //纯水
+                ACE = 10,                      //乙腈
+                Acid = 0,                      //醋酸
+                Formic = 0,                    //甲酸
+                Homo = 2,                      //均质子
+                MgSO4 = 4,                     //硫酸镁
+                NaCl = 1,                      //氯化钠
+                Trisodium = 1,                  //柠檬酸钠，二水合物
+                Monosodium = 0.5,              //氢二钠，盐倍半水
+                Sodium = 0,                    //乙酸钠
+                VortexTime = 60,               //涡旋时间
+                VortexVel = 2000,              //涡旋速度
+                VibrationTime = 60,            //振荡时间
+                VibrationVel = 420,            //振荡速度
+                CentrifugalTime = 5,           //离心时间
+                CentrifugalVel = 4200,         //离心速度
+                ExtractVolume = 6,             //上清液提取量
+                ConcentrationTime = 5,         //浓缩时间
+                ConcentrationVel = 10000,      //浓缩速度
+                Tech = 0x801ECF9,              //工艺
+            });
+
+            TechList.Add(new TechParamsModel()
+            {
+                Name = "GB23200.121-2021 坚果、油料",
+
+                AddWater = 10,                  //纯水
+                ACE = 15,                      //乙腈
+                Acid = 0,                      //醋酸
+                Formic = 0,                    //甲酸
+                Homo = 2,                      //均质子
+                MgSO4 = 0,                     //硫酸镁
+                NaCl = 6,                      //氯化钠 硫酸钠
+                Trisodium = 0,                  //柠檬酸钠，二水合物
+                Monosodium = 0,              //氢二钠，盐倍半水
+                Sodium = 1.5,                    //乙酸钠
+                VortexTime = 60,               //涡旋时间
+                VortexVel = 2000,              //涡旋速度
+                VibrationTime = 60,            //振荡时间
+                VibrationVel = 420,            //振荡速度
+                CentrifugalTime = 5,           //离心时间
+                CentrifugalVel = 4200,         //离心速度
+                ExtractVolume = 6,             //上清液提取量
+                ConcentrationTime = 5,         //浓缩时间
+                ConcentrationVel = 10000,      //浓缩速度
+                Tech = 0x801ECF9,              //工艺
+            });
+
+            TechList.Add(new TechParamsModel()
+            {
+                Name = "Agilent 多兽药残留",
+
+                AddWater = 1,                  //纯水
+                ACE = 0,                      //乙腈
+                Acid = 0,                      //醋酸
+                Formic = 10,                    //甲酸
+                Homo = 2,                      //均质子
+                MgSO4 = 0,                     //硫酸镁，硫酸钠
+                NaCl = 0,                      //氯化钠
+                Trisodium = 0,                  //柠檬酸钠，二水合物
+                Monosodium = 0,              //氢二钠，盐倍半水
+                Sodium = 0,                    //乙酸钠
+                VortexTime = 120,               //涡旋时间
+                VortexVel = 2000,              //涡旋速度
+                VibrationTime = 120,            //振荡时间
+                VibrationVel = 420,            //振荡速度
+                CentrifugalTime = 5,           //离心时间
+                CentrifugalVel = 4200,         //离心速度
+                ExtractVolume = 5,             //上清液提取量
+                ConcentrationTime = 10,         //浓缩时间
+                ConcentrationVel = 10000,      //浓缩速度
+                //Tech = 0x3EFDE1AB,              //工艺  
+                Tech = 0x3EFDE1A9             //工艺  20221029修改去掉加均质子
+            });
+
+
+            SampleModel = new SampleModel()
+            {
+                Name1 = "大白菜",
+                Name2 = "大葱",
+                SnNum1 = "px566",
+                SnNum2 = "kx203"
+            };
+
+
+        }
+
+
+
+        //备份
+        private TechParams Trans()
         {
             if (TechParamsModelSelected.Name == "Agilent 多兽药残留")
             {
@@ -231,7 +711,8 @@ namespace Q_Platform.ViewModels.Windows
                     Add_Mark_A = 50,                            //加标50uL                           
                     ExtractSampleVolume = 1,                     //最终样品1ml
 
-                    Tech = 0x3DFDE1AB,                         //工艺  3DFD E1AB
+                    //Tech = 0x3DFDE1AB,                         //工艺  3DFD E1AB
+                    Tech = 0x3DFDE1A9                           //工艺 20221029  修改去掉加均质子
                 };
             }
 
@@ -399,184 +880,6 @@ namespace Q_Platform.ViewModels.Windows
                 return null;
             }
         }
-
-        /// <summary>
-        /// 样品起始步骤
-        /// </summary>
-        /// <returns></returns>
-        private int GetSampleStartMainStep()
-        {
-            if (TechParamsModelSelected.Name == "GB23200.113-2018 果蔬")
-            {
-                return 3;
-            }
-
-            if (TechParamsModelSelected.Name == "GB23200.121-2021 果蔬" && TechParamsModelSelected.AddWater == 0)
-            {
-                return 2;
-            }
-            else
-            {
-                return 1;
-            }
-        }
-
-
-
-        #endregion
-
-
-
-
-        private void GenerMock()
-        {
-            TechList = new ObservableCollection<TechParamsModel>();
-
-            TechList.Add(new TechParamsModel()
-            {
-                Name = "GB23200.113-2018 果蔬",
-
-                AddWater = 0,                  //纯水
-                ACE = 10,                      //乙腈
-                Acid = 0,                      //醋酸
-                Formic = 0,                    //甲酸
-                Homo = 2,                      //均质子
-                MgSO4 = 4,                     //硫酸镁，硫酸钠
-                NaCl = 1,                      //氯化钠
-                Trisodium = 1,                  //柠檬酸钠，二水合物
-                Monosodium = 0.5,              //氢二钠，盐倍半水
-                Sodium = 0,                    //乙酸钠
-                VortexTime = 60,               //涡旋时间
-                VortexVel = 2000,              //涡旋速度
-                VibrationTime = 60,            //振荡时间
-                VibrationVel = 420,            //振荡速度
-                CentrifugalTime = 5,           //离心时间
-                CentrifugalVel = 4200,         //离心速度
-                ExtractVolume = 6,             //上清液提取量
-                ConcentrationTime = 5,         //浓缩时间
-                ConcentrationVel = 10000,      //浓缩速度
-                Tech = 0xF03EE00,              //工艺
-            });
-
-            TechList.Add(new TechParamsModel()
-            {
-                Name = "GB23200.113-2018 坚果、油料",
-
-                AddWater = 10,                 //纯水
-                ACE = 0,                      //乙腈
-                Acid = 15,                      //醋酸
-                Formic = 0,                    //甲酸
-                Homo = 1,                      //均质子
-                MgSO4 = 0,                     //硫酸镁
-                NaCl = 6,                      //氯化钠 /硫酸钠
-                Trisodium = 0,                  //柠檬酸钠，二水合物
-                Monosodium = 0,              //氢二钠，盐倍半水
-                Sodium = 1.5,                    //乙酸钠
-                VortexTime = 60,               //涡旋时间
-                VortexVel = 2000,              //涡旋速度
-                VibrationTime = 60,            //振荡时间
-                VibrationVel = 420,            //振荡速度
-                CentrifugalTime = 5,           //离心时间
-                CentrifugalVel = 4200,         //离心速度
-                ExtractVolume = 8,             //上清液提取量
-                ConcentrationTime = 5,         //浓缩时间
-                ConcentrationVel = 10000,      //浓缩速度
-                Tech = 0xF03EE19,              //工艺
-            });
-
-            TechList.Add(new TechParamsModel()
-            {
-                Name = "GB23200.121-2021 果蔬",
-
-                AddWater = 0,                  //纯水
-                ACE = 10,                      //乙腈
-                Acid = 0,                      //醋酸
-                Formic = 0,                    //甲酸
-                Homo = 2,                      //均质子
-                MgSO4 = 4,                     //硫酸镁
-                NaCl = 1,                      //氯化钠
-                Trisodium = 1,                  //柠檬酸钠，二水合物
-                Monosodium = 0.5,              //氢二钠，盐倍半水
-                Sodium = 0,                    //乙酸钠
-                VortexTime = 60,               //涡旋时间
-                VortexVel = 2000,              //涡旋速度
-                VibrationTime = 60,            //振荡时间
-                VibrationVel = 420,            //振荡速度
-                CentrifugalTime = 5,           //离心时间
-                CentrifugalVel = 4200,         //离心速度
-                ExtractVolume = 6,             //上清液提取量
-                ConcentrationTime = 5,         //浓缩时间
-                ConcentrationVel = 10000,      //浓缩速度
-                Tech = 0x801ECF9,              //工艺
-            });
-
-            TechList.Add(new TechParamsModel()
-            {
-                Name = "GB23200.121-2021 坚果、油料",
-
-                AddWater = 10,                  //纯水
-                ACE = 15,                      //乙腈
-                Acid = 0,                      //醋酸
-                Formic = 0,                    //甲酸
-                Homo = 2,                      //均质子
-                MgSO4 = 0,                     //硫酸镁
-                NaCl = 6,                      //氯化钠 硫酸钠
-                Trisodium = 0,                  //柠檬酸钠，二水合物
-                Monosodium = 0,              //氢二钠，盐倍半水
-                Sodium = 1.5,                    //乙酸钠
-                VortexTime = 60,               //涡旋时间
-                VortexVel = 2000,              //涡旋速度
-                VibrationTime = 60,            //振荡时间
-                VibrationVel = 420,            //振荡速度
-                CentrifugalTime = 5,           //离心时间
-                CentrifugalVel = 4200,         //离心速度
-                ExtractVolume = 6,             //上清液提取量
-                ConcentrationTime = 5,         //浓缩时间
-                ConcentrationVel = 10000,      //浓缩速度
-                Tech = 0x801ECF9,              //工艺
-            });
-
-            TechList.Add(new TechParamsModel()
-            {
-                Name = "Agilent 多兽药残留",
-
-                AddWater = 1,                  //纯水
-                ACE = 0,                      //乙腈
-                Acid = 0,                      //醋酸
-                Formic = 10,                    //甲酸
-                Homo = 2,                      //均质子
-                MgSO4 = 0,                     //硫酸镁，硫酸钠
-                NaCl = 0,                      //氯化钠
-                Trisodium = 0,                  //柠檬酸钠，二水合物
-                Monosodium = 0,              //氢二钠，盐倍半水
-                Sodium = 0,                    //乙酸钠
-                VortexTime = 120,               //涡旋时间
-                VortexVel = 2000,              //涡旋速度
-                VibrationTime = 120,            //振荡时间
-                VibrationVel = 420,            //振荡速度
-                CentrifugalTime = 5,           //离心时间
-                CentrifugalVel = 4200,         //离心速度
-                ExtractVolume = 5,             //上清液提取量
-                ConcentrationTime = 10,         //浓缩时间
-                ConcentrationVel = 10000,      //浓缩速度
-                Tech = 0x3EFDE1AB,              //工艺
-            });
-
-
-            SampleModel = new SampleModel()
-            {
-                Name1 = "大白菜",
-                Name2 = "大葱",
-                SnNum1 = "px566",
-                SnNum2 = "kx203"
-            };
-
-
-        }
-
-
-
-
 
     }
 

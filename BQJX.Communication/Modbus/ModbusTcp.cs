@@ -30,12 +30,6 @@ namespace BQJX.Communication.Modbus
 
         #endregion
 
-        #region Properties
-
-        public bool IsDebug { get; set; } = false;
-
-        #endregion
-
         #region Constructors
 
         public ModbusTcp(string ip,int port,ILogger logger)
